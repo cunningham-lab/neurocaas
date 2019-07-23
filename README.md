@@ -2,4 +2,5 @@ Repo to consolidate all lambda function code for the NCAP project. Step 1 toward
 
 *Requires:*
 AWS CLI
+
 AWS SAM CLI
