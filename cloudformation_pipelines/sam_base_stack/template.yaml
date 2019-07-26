@@ -13,14 +13,16 @@ Resources:
     Type: 'AWS::EC2::Instance'
     Properties: 
       IamInstanceProfile: 'ec2-ssm'
-      ImageId: 
-  DetectTextInImage:
+      ImageId: 'ami-0fb68b326354c7629' 
+      InstanceType: 't2.small'
+
+  Route_Data:
     Type: 'AWS::Serverless::Function'
     Properties:
-      Handler: src/app.lambda_handler
+      Handler: monitor_s3.handler
       Runtime: python3.6
-      CodeUri: .
-      Description: Uses Rekognition APIs to detect text in S3 Objects and stores the text and labels in DynamoDB.
+      CodeUri: lambda_code
+      Description: 'Handles event triggers from S3 and sends data to the appropriate EC2 instance. '  
       MemorySize: 512
       Timeout: 30
       Environment:
