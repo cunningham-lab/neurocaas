@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+
+Description: SAM app that uses Rekognition APIs to detect text in S3 Objects and stores labels in DynamoDB.
+Parameters: 
+  Param1:  
+    Type: 'String'
+Resources:
+  DetectTextInImage:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: src/app.lambda_handler
+      Runtime: python3.6
+      CodeUri: .
+      Description: Uses Rekognition APIs to detect text in S3 Objects and stores the text and labels in DynamoDB.
+      MemorySize: 512
+      Timeout: 30
+      Environment:
+        Variables:
+          TABLE_NAME:
+            Ref: ResultsTable
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 's3:GetObject'
+              Resource: 'arn:aws:s3:::*'
+            - Effect: Allow
+              Action:
+                - 'rekognition:DetectText'
+                - 'rekognition:DetectLabels'
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - 'dynamodb:GetItem'
+                - 'dynamodb:PutItem'
+                - 'dynamodb:Scan'
+                - 'dynamodb:UpdateItem'
+              Resource:
+                'Fn::Join':
+                  - ''
+                  - - 'arn:aws:dynamodb:'
+                    - Ref: 'AWS::Region'
+                    - ':'
+                    - Ref: 'AWS::AccountId'
+                    - ':table/'
+                    - Ref: ResultsTable
+      Events:
+        BucketEvent1:
+          Type: S3
+          Properties:
+            Bucket:
+              Ref: SourceImageBucket
+            Events:
+              - 's3:ObjectCreated:*'
+  
+  SourceImageBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref Param1
+
+  ResultsTable:
+    Type: AWS::Serverless::SimpleTable
