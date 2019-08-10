@@ -17,7 +17,6 @@ if __name__ == "__main__":
     print(foldername,keypath)
     ## Only reupload analysis results:
     analysis_results = [os.path.join(dp, f) for dp, dn, fn in os.walk(foldername) for f in fn]
-    print(analysis_results)
     for filename in analysis_results:
         if filename.split('.')[-1] == 'png':
             ## give the file the right key prefix: 
