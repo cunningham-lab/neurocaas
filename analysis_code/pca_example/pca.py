@@ -27,7 +27,7 @@ def plot_data(projected):
     ax.set_xlabel('PC 1')
     ax.set_ylabel('PC 2')
     ax.scatter(projected[:,0],projected[:,1])
-    plt.savefig('Example_fig'+str(datetime.datetime.now())+'.png')
+    plt.savefig('figs/'+'Example_fig'+str(datetime.datetime.now())+'.png')
 
 def main(filename):
     data = joblib.load(filename)
