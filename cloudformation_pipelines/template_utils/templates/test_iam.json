@@ -1,0 +1,42 @@
+{
+    "Outputs": {
+        "AccessKey": {
+            "Description": "Access Key of new user",
+            "Value": {
+                "Ref": "userkey"
+            }
+        },
+        "Password": {
+            "Description": "Default password of new user",
+            "Value": "f73fb43c17977073"
+        },
+        "SecretAccessKey": {
+            "Description": "Secret Key of new user",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkey",
+                    "SecretAccessKey"
+                ]
+            }
+        }
+    },
+    "Resources": {
+        "b": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "f73fb43c17977073",
+                    "PasswordResetRequired": "false"
+                }
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "userkey": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "b"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        }
+    }
+}

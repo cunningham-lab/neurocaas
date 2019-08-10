@@ -1,0 +1,46 @@
+{
+    "PipelineName":"Name of this pipeline",
+    "REGION":"Region of this pipeline",
+    "Lambda":{
+        "CodeUri":"Corresponds to the codeuri lambda function parameter",
+        "Handler":"Corresponds to the handler lambda function parameter",
+        "Launch":"Boolean. True gives instance launch behavior, False gives instance start behavior.",
+        "LambdaConfig":{
+            "AMI":"string of ami id. ",
+            "INSTANCE_TYPE": "instance type to launch",
+            "SECURITY_GROUPS":"Type of instance to launch.",
+            "IAM_ROLE":"iam role with ssm and s3 access",
+            "KEY_NAME":"ssh key to use",
+            "WORKING_DIRECTORY":"~/bin",
+            "COMMAND":"/home/ubuntu/bin/run.sh",
+            "SHUTDOWN_BEHAVIOR":"terminate",
+            "CONFIG":"config.yaml",
+            "MISSING_CONFIG_ERROR":"We need a config file to analyze data.",
+            "EXECUTION_TIMEOUT":"172800",
+            "LOGDIR":"logs",
+            "OUTDIR":"results",
+            "INDIR":"inputs",
+            "LOGFILE":"lambda_log.txt"
+        }
+    },
+    "UXData":{
+    "Affiliates":[
+        {
+            "AffiliateName":"Affiliate's Name here. Must follow S3 bucket name conventions.",
+            "UserNames":"[list of strings describing user names]",
+            "PipelinePath":"Path to processing directory. If processing directory lives at root, can be \"\"",
+            "PipelineDir":"Directory where pipeline should be built",
+            "UserInput":"A Boolean value that indicates whether the input is from the user or from the output folder.",
+            "ContactEmail":"The email that we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"Affiliate's Name here. Must follow S3 bucket name conventions.",
+            "UserNames":"[list of strings describing user names]",
+            "PipelinePath":"Path to processing directory. If processing directory lives at root, can be \"\"",
+            "PipelineDir":"Directory where pipeline should be built",
+            "UserInput":"A Boolean value that indicates whether the input is from the user or from the output folder.",
+            "ContactEmail":"The email we should notify regarding processing status."
+        }
+    ]
+    }
+}
