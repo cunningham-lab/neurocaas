@@ -1,0 +1,26 @@
+{
+    "Records": [
+        {
+            "eventVersion": "2.0", 
+            "eventName": "ObjectCreated:Put", 
+            "eventTime": "1970-01-01T00:00:00.000Z", 
+            "userIdentity": {
+                "principalId": "EXAMPLE"
+            }, 
+            "eventSource": "aws:s3", 
+            "requestParameters": {
+                "sourceIPAddress": "127.0.0.1"
+            }, 
+            "ResourceProperties": {
+                "BucketName": "bucketname",
+                "Path": "",
+                "DirName": "test"
+            },
+            "responseElements": {
+                "x-amz-id-2": "EXAMPLE123/5678abcdefghijklambdaisawesome/mnopqrstuvwxyzABCDEFGH", 
+                "x-amz-request-id": "EXAMPLE123456789"
+            }, 
+            "awsRegion": "us-east-1"
+        }
+    ]
+}
