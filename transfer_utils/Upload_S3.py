@@ -12,7 +12,7 @@ from Interface_S3 import upload
 if __name__ == "__main__":
     foldername = sys.argv[1]
     keypath = sys.argv[2]
-    bucket_name = 'froemkelab.videodata'
+    bucket_name = sys.argv[3] 
     
     print(foldername,keypath)
     ## Only reupload analysis results:
