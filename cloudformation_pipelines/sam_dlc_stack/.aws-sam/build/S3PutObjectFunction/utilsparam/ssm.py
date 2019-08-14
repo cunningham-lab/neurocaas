@@ -23,7 +23,7 @@ def execute_commands_on_linux_instances(commands,
         DocumentName="AWS-RunShellScript", # One of AWS' preconfigured documents
         Parameters={'commands': commands, 
                     "workingDirectory":working_dirs,
-                    "executionTimeout":[os.environ['EXECUTION_TIMEOUT']]},
+                    "executionTimeout":[os.environ['SSM_TIMEOUT']]},
         InstanceIds=instance_ids,
         OutputS3BucketName=log_bucket_name,
         OutputS3KeyPrefix=log_path
