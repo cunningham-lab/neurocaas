@@ -17,7 +17,7 @@ def put_instance_rule(instance_id):
             "source": ["aws.ec2"],
             "detail-type": ["EC2 Instance State-change Notification"],
             "detail":{
-                "state":["running","stopped"],
+                "state":["running","stopped",'shutting-down'],
                 "instance-id":[instance_id]}}
     ep_encoded = json.dumps(event_pattern)
     name = "Monitor"+instance_id

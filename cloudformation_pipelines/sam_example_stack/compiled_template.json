@@ -1,0 +1,538 @@
+{
+    "Outputs": {
+        "AccessKeyian": {
+            "Description": "Access Key of user: ian in group examplegroup2",
+            "Value": {
+                "Ref": "userkeyian"
+            }
+        },
+        "AccessKeyshreya": {
+            "Description": "Access Key of user: shreya in group examplegroup2",
+            "Value": {
+                "Ref": "userkeyshreya"
+            }
+        },
+        "Passwordian": {
+            "Description": "Default password of new user ian in group examplegroup2",
+            "Value": "fb1d783c4ad6f582"
+        },
+        "Passwordshreya": {
+            "Description": "Default password of new user shreya in group examplegroup2",
+            "Value": "5d8a555ad0e5770c"
+        },
+        "SecretAccessKeyian": {
+            "Description": "Secret Key of new user: ian in group examplegroup2",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeyian",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeyshreya": {
+            "Description": "Secret Key of new user: shreya in group examplegroup2",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeyshreya",
+                    "SecretAccessKey"
+                ]
+            }
+        }
+    },
+    "Resources": {
+        "BaseFolderexamplegroup2": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "ctnncap213example",
+                "DirName": "examplegroup2",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "CWPermissions": {
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Ref": "FigLambda"
+                },
+                "Principal": "events.amazonaws.com"
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "CloudWatchBusRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "events.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "CloudwatchBusPolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "CloudwatchBusPolicy": {
+            "Properties": {
+                "Description": {
+                    "Fn::Join": [
+                        " ",
+                        [
+                            "Base Policy for all lambda function roles in",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "events:*",
+                            "Effect": "Allow",
+                            "Resource": "*",
+                            "Sid": "CloudWatchEventsFullAccess"
+                        },
+                        {
+                            "Action": "iam:PassRole",
+                            "Effect": "Allow",
+                            "Resource": "arn:aws:iam::*:role/AWS_Events_Invoke_Targets",
+                            "Sid": "IAMPassRoleForCloudWatchEvents"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::IAM::ManagedPolicy"
+        },
+        "DeleteCustomResource": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "ctnncap213example",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "FigLambda": {
+            "Properties": {
+                "CodeUri": "../lambda_repo",
+                "Description": "Lambda Function logging start/stop for NCAP",
+                "Events": {},
+                "Handler": "log.eventshandler",
+                "MemorySize": 128,
+                "Role": "arn:aws:iam::739988523141:role/lambda_dataflow",
+                "Runtime": "python3.6",
+                "Timeout": 90
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "FignameLogGroup": {
+            "Properties": {
+                "LogGroupName": {
+                    "Fn::Sub": "/aws/lambda/${FigLambda}"
+                }
+            },
+            "Type": "AWS::Logs::LogGroup"
+        },
+        "InFolderexamplegroup2": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderexamplegroup2"
+            ],
+            "Properties": {
+                "BucketName": "ctnncap213example",
+                "DirName": "inputs",
+                "Path": "examplegroup2/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LambdaBaseRole": {
+            "Properties": {
+                "Description": {
+                    "Fn::Join": [
+                        " ",
+                        [
+                            "Base Policy for all lambda function roles in",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "logs:CreateLogGroup",
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": "arn:aws:logs:*:*:*"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::IAM::ManagedPolicy"
+        },
+        "LogFolderexamplegroup2": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderexamplegroup2"
+            ],
+            "Properties": {
+                "BucketName": "ctnncap213example",
+                "DirName": "logs",
+                "Path": "examplegroup2/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "MainLambda": {
+            "Properties": {
+                "CodeUri": "../lambda_repo",
+                "Description": "Main Lambda Function for Serverless",
+                "Environment": {
+                    "Variables": {
+                        "AMI": "ami-045deefcfb062fd2a",
+                        "COMMAND": "ls; cd ../../../../home/ubuntu; bin/run.sh \"{}\" \"{}\" \"{}\"",
+                        "CONFIG": "config.yaml",
+                        "EXECUTION_TIMEOUT": 180,
+                        "IAM_ROLE": "pmd-s3-ssm",
+                        "INDIR": "inputs",
+                        "INSTANCE_TYPE": "p2.xlarge",
+                        "KEY_NAME": "ta_testkey",
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "launch-wizard-34",
+                        "SHUTDOWN_BEHAVIOR": "terminate",
+                        "SSM_TIMEOUT": 172000,
+                        "WORKING_DIRECTORY": "~/bin",
+                        "cwrolearn": {
+                            "Fn::GetAtt": [
+                                "CloudWatchBusRole",
+                                "Arn"
+                            ]
+                        },
+                        "figlambarn": {
+                            "Fn::GetAtt": [
+                                "FigLambda",
+                                "Arn"
+                            ]
+                        },
+                        "figlambid": {
+                            "Ref": "FigLambda"
+                        }
+                    }
+                },
+                "Events": {
+                    "BucketEventexamplegroup2": {
+                        "Properties": {
+                            "Bucket": {
+                                "Ref": "PipelineMainBucket"
+                            },
+                            "Events": [
+                                "s3:ObjectCreated:*"
+                            ],
+                            "Filter": {
+                                "S3Key": {
+                                    "Rules": [
+                                        {
+                                            "Name": "prefix",
+                                            "Value": "examplegroup2/inputs"
+                                        },
+                                        {
+                                            "Name": "suffix",
+                                            "Value": "submit.json"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "Type": "S3"
+                    }
+                },
+                "Handler": "submit_start.handler",
+                "MemorySize": 128,
+                "Role": "arn:aws:iam::739988523141:role/lambda_dataflow",
+                "Runtime": "python3.6",
+                "Timeout": 180
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "OutFolderexamplegroup2": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderexamplegroup2"
+            ],
+            "Properties": {
+                "BucketName": "ctnncap213example",
+                "DirName": "results",
+                "Path": "examplegroup2/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "PipelineMainBucket": {
+            "Properties": {
+                "AccessControl": "Private",
+                "BucketName": "ctnncap213example"
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "S3DelObjectFunction": {
+            "Properties": {
+                "CodeUri": "../lambda_repo",
+                "Description": "Deletes Objects from S3",
+                "Handler": "helper.handler_deldir",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "S3MakePathRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "S3MakePathRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "LambdaBaseRole"
+                    }
+                ],
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "s3:DeleteObject",
+                                        "s3:ListBucket",
+                                        "s3:PutObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "write_s3_policy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "S3PutObjectFunction": {
+            "Properties": {
+                "CodeUri": "../lambda_repo",
+                "Description": "Puts Objects in S3",
+                "Handler": "helper.handler_mkdir",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "S3MakePathRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "UserGroupexamplegroup2": {
+            "Properties": {
+                "GroupName": "examplegroup2group",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "s3:GetBucketLocation",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor0"
+                                },
+                                {
+                                    "Action": "s3:HeadBucket",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor3"
+                                },
+                                {
+                                    "Action": "s3:ListAllMyBuckets",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor1"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringEquals": {
+                                            "s3:delimiter": [
+                                                "/"
+                                            ],
+                                            "s3:prefix": [
+                                                "",
+                                                "examplegroup2/",
+                                                "examplegroup2/inputs",
+                                                "examplegroup2/results",
+                                                "examplegroup2/logs",
+                                                "examplegroup2/inputs/",
+                                                "examplegroup2/results/",
+                                                "examplegroup2/logs/"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::ctnncap213example"
+                                    ],
+                                    "Sid": "ListBucket"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::ctnncap213example/examplegroup2/inputs/*"
+                                    ],
+                                    "Sid": "Inputfolderwrite"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::ctnncap213example/examplegroup2/results/*",
+                                        "arn:aws:s3:::ctnncap213example/examplegroup2/logs/*"
+                                    ],
+                                    "Sid": "Outputfolderwrite"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "examplegroup2policy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Group"
+        },
+        "examplegroup2UserNet": {
+            "Properties": {
+                "GroupName": {
+                    "Ref": "UserGroupexamplegroup2"
+                },
+                "Users": [
+                    {
+                        "Ref": "examplegroup2userian"
+                    },
+                    {
+                        "Ref": "examplegroup2usershreya"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::UserToGroupAddition"
+        },
+        "examplegroup2userian": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "fb1d783c4ad6f582",
+                    "PasswordResetRequired": "false"
+                }
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "examplegroup2usershreya": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "5d8a555ad0e5770c",
+                    "PasswordResetRequired": "false"
+                }
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "userkeyian": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "examplegroup2userian"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeyshreya": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "examplegroup2usershreya"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        }
+    },
+    "Transform": "AWS::Serverless-2016-10-31"
+}

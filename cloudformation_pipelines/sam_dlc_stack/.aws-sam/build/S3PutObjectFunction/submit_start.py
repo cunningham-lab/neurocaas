@@ -14,7 +14,7 @@ except Exception as e:
     stacktrace = json.dumps(traceback.format_exc())
     message = "Exception: " + error + "  Stacktrace: " + stacktrace
     err = {"message": message}
-    print(err,'here')
+    print(err)
 
 
 def respond(err, res=None):
@@ -33,7 +33,7 @@ class Submission_Launch():
 
         # Get Upload Location Information
         self.bucket_name = bucket_name
-        self.path = os.path.join(*key.split('/')[:-1])
+        self.path = os.path.join(*key.split('/')[:-2])
         self.logger = utilsparam.s3.Logger(self.bucket_name, self.path)
         #self.out_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.OUTDIR)
         #self.in_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.INDIR)
@@ -42,6 +42,7 @@ class Submission_Launch():
         submit_config = utilsparam.s3.load_json(bucket_name, key)
         self.instance_type = submit_config['instance_type'] # TODO default option from config
         self.data_filename = submit_config['filename'] # TODO validate extensions & check existence
+
     def acquire_instance(self):
         """ Acquires & Starts New EC2 Instance Of The Requested Type & AMI"""
         self.instance = utilsparam.ec2.launch_new_instance(
@@ -49,20 +50,27 @@ class Submission_Launch():
             ami=os.environ['AMI'],
             logger=self.logger
         )
+
+    def start_instance(self):
         utilsparam.ec2.start_instance_if_stopped(
             instance=self.instance,
             logger=self.logger
         )
+
     def process_inputs(self):
         """ Initiates Processing On Previously Acquired EC2 Instance """
+        print(self.bucket_name,'bucket name')
+        print(self.data_filename,'filename')
+        print(os.environ['OUTDIR'],'outdir')
+        print(os.environ['COMMAND'],'command')
         self.logger.append("Sending command: {}".format(
             os.environ['COMMAND'].format(
-                self.bucket_name, self.data_filename
+                self.bucket_name, self.data_filename, os.environ['OUTDIR']
             )
         ))
         response = utilsparam.ssm.execute_commands_on_linux_instances(
             commands=[os.environ['COMMAND'].format(
-                self.bucket_name, self.data_filename
+                self.bucket_name, self.data_filename, os.environ['OUTDIR']
             )], # TODO: variable outdir as option
             instance_ids=[self.instance.instance_id],
             working_dirs=[os.environ['WORKING_DIRECTORY']],
@@ -137,6 +145,7 @@ class Submission_Start_Stack():
         
     def acquire_instance(self):
         self.instance = utilsparam.ec2.get_instance(self.instance_id,self.logger)
+    def start_instance(self):
         utilsparam.ec2.start_instance_if_stopped(
             instance=self.instance,
             logger=self.logger
@@ -144,14 +153,17 @@ class Submission_Start_Stack():
 
     def process_inputs(self):
         """ Initiates Processing On Previously Acquired EC2 Instance """
+        print(self.bucket_name,'bucket name')
+        print(self.data_filename,'filename')
+        print(os.environ['OUTDIR'],'outdir')
         self.logger.append("Sending command: {}".format(
             os.environ['COMMAND'].format(
-                self.bucket_name, self.data_filename
+                self.bucket_name, self.data_filename, os.environ['OUTDIR']
             )
         ))
         response = utilsparam.ssm.execute_commands_on_linux_instances(
             commands=[os.environ['COMMAND'].format(
-                self.bucket_name, self.data_filename
+                self.bucket_name, self.data_filename, os.environ['OUTDIR']
             )], # TODO: variable outdir as option
             instance_ids=[self.instance.instance_id],
             working_dirs=[os.environ['WORKING_DIRECTORY']],
@@ -173,19 +185,27 @@ def process_upload(bucket_name, key):
     bucket: name of the bucket within which the upload occurred.
     """
     submission = Submission_Launch(bucket_name, key)
+    print("acquiring")
     submission.acquire_instance()
+    print('writing0')
     submission.logger.write()
+    print('setting up monitor')
     submission.put_instance_monitor_rule()
+    print('writing1')
     submission.logger.write()
+    print('starting')
+    submission.start_instance()
+    print('writing2')
+    print('sending')
     submission.process_inputs()
+    print("writing3")
     submission.logger.write()
 
 def handler(event, context):
     """ Handler that get called by lambda whenever an event occurs. """
-    print('event',event)
-    print('context',context)
     for record in event['Records']:
         bucket_name = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
+        print("handler_params",bucket_name,key)
         process_upload(bucket_name, key);
 

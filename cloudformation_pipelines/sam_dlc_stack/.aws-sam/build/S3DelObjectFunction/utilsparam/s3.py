@@ -72,7 +72,7 @@ class Logger():
     def __init__(self, bucket_name, path):
         """ """
         self.bucket = s3_resource.Bucket(bucket_name) 
-        self.path = os.path.join(bucket_name, path, os.environ['LOGDIR'])#mkdir(bucket_name, path, LOGDIR)
+        self.path = os.path.join(path, os.environ['LOGDIR'],'')#mkdir(bucket_name, path, LOGDIR)
         self._logs = []
 
     def append(self, string):

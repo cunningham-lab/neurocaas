@@ -13,13 +13,13 @@ Outputs:
       Ref: userkeyuser22
   Passwordtaiga2:
     Description: Default password of new user taiga2 in group testergroup2
-    Value: 21817cffaf299303
+    Value: 09de8497374553e1
   Passworduser21:
     Description: Default password of new user user21 in group carcealab2
-    Value: 4e10fee13f70c743
+    Value: 7ce0a6fe3ee2e763
   Passworduser22:
     Description: Default password of new user user22 in group carcealab2
-    Value: a96c0d9b46ce906e
+    Value: 1b67915da2f4de5c
   SecretAccessKeytaiga2:
     Description: 'Secret Key of new user: taiga2 in group testergroup2'
     Value:
@@ -201,11 +201,11 @@ Resources:
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
-          AMI: ami-0c2f1b75606210b4f
-          COMMAND: cd ../../../../home/ubuntu; bin/run.sh {} "{}"
+          AMI: ami-045deefcfb062fd2a
+          COMMAND: ls; cd ../../../../home/ubuntu; bin/run.sh "{}" "{}" "{}"
           CONFIG: config.yaml
-          EXECUTION_TIMEOUT: '172800'
-          IAM_ROLE: ec2-ssm
+          EXECUTION_TIMEOUT: 180
+          IAM_ROLE: pmd-s3-ssm
           INDIR: inputs
           INSTANCE_TYPE: p2.xlarge
           KEY_NAME: ta_testkey
@@ -216,6 +216,7 @@ Resources:
           REGION: us-east-1
           SECURITY_GROUPS: launch-wizard-34
           SHUTDOWN_BEHAVIOR: terminate
+          SSM_TIMEOUT: 172000
           WORKING_DIRECTORY: ~/bin
           cwrolearn:
             Fn::GetAtt:
@@ -260,7 +261,7 @@ Resources:
       MemorySize: 128
       Role: arn:aws:iam::739988523141:role/lambda_dataflow
       Runtime: python3.6
-      Timeout: 90
+      Timeout: 180
     Type: AWS::Serverless::Function
   OutFoldercarcealab2:
     DependsOn:
@@ -461,13 +462,13 @@ Resources:
   carcealab2useruser21:
     Properties:
       LoginProfile:
-        Password: 4e10fee13f70c743
+        Password: 7ce0a6fe3ee2e763
         PasswordResetRequired: 'false'
     Type: AWS::IAM::User
   carcealab2useruser22:
     Properties:
       LoginProfile:
-        Password: a96c0d9b46ce906e
+        Password: 1b67915da2f4de5c
         PasswordResetRequired: 'false'
     Type: AWS::IAM::User
   testergroup2UserNet:
@@ -480,7 +481,7 @@ Resources:
   testergroup2usertaiga2:
     Properties:
       LoginProfile:
-        Password: 21817cffaf299303
+        Password: 09de8497374553e1
         PasswordResetRequired: 'false'
     Type: AWS::IAM::User
   userkeytaiga2:
