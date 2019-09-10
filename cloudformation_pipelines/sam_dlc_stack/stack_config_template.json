@@ -6,7 +6,7 @@
         "Handler":"submit_start.handler",
         "Launch":true, 
         "LambdaConfig":{
-            "AMI":"ami-045deefcfb062fd2a",
+            "AMI":"ami-0d544cb6c1d60a08b",
             "INSTANCE_TYPE": "p2.xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS":"launch-wizard-34",

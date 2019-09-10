@@ -5,7 +5,7 @@ Outputs:
       Ref: userkeytaiga
   Passwordtaiga:
     Description: Default password of new user taiga in group paninskilab
-    Value: 8f2460b3702727bf
+    Value: 1c11721cc2570e9f
   SecretAccessKeytaiga:
     Description: 'Secret Key of new user: taiga in group paninskilab'
     Value:
@@ -138,7 +138,7 @@ Resources:
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
-          AMI: ami-017dc37ea72c28a2d
+          AMI: ami-0db5492c69f5a77aa
           COMMAND: ls; cd /home/ubuntu; bin/run.sh "{}" "{}" "{}"
           CONFIG: config.yaml
           EXECUTION_TIMEOUT: 180
@@ -152,7 +152,7 @@ Resources:
           OUTDIR: results
           REGION: us-east-1
           SECURITY_GROUPS: launch-wizard-tcp
-          SHUTDOWN_BEHAVIOR: stop
+          SHUTDOWN_BEHAVIOR: terminate
           SSM_TIMEOUT: 172000
           WORKING_DIRECTORY: ~/bin
           cwrolearn:
@@ -317,7 +317,7 @@ Resources:
   paninskilabusertaiga:
     Properties:
       LoginProfile:
-        Password: 8f2460b3702727bf
+        Password: 1c11721cc2570e9f
         PasswordResetRequired: 'false'
     Type: AWS::IAM::User
   userkeytaiga:
