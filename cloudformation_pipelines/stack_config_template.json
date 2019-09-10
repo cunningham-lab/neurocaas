@@ -4,7 +4,6 @@
     "Lambda":{
         "CodeUri":"Corresponds to the codeuri lambda function parameter",
         "Handler":"Corresponds to the handler lambda function parameter",
-        "Launch":"Boolean. True gives instance launch behavior, False gives instance start behavior.",
         "LambdaConfig":{
             "AMI":"string of ami id. ",
             "INSTANCE_TYPE": "instance type to launch",
@@ -20,6 +19,7 @@
             "LOGDIR":"logs",
             "OUTDIR":"results",
             "INDIR":"inputs",
+            "LAUNCH":"Boolean. True gives instance launch behavior, False gives instance start behavior.",
             "LOGFILE":"lambda_log.txt"
         }
     },
