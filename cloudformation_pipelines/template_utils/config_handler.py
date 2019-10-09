@@ -301,10 +301,12 @@ class NCAPTemplate(object):
             ## Get necessary properties: 
             affiliatename = affiliate["AffiliateName"]
             ## If user input, reads directly from input directory. If other function output, reads from output directory.
+            assert type(affiliate["UserInput"]) == bool, "must provide a json boolean for UserInput"
             if affiliate["UserInput"] == True:
                 readdir = self.config['Lambda']['LambdaConfig']['INDIR'] 
-            else: 
+            elif affiliate["UserInput"] == False: 
                 readdir = self.config['Lambda']['LambdaConfig']['OUTDIR'] 
+
             aff_filter = Filter('Filter'+affiliatename,
                     S3Key = S3Key('S3Key'+affiliatename,
                         Rules= [Rules('PrefixRule'+affiliatename,Name = 'prefix',Value = affiliatename+'/'+readdir),
