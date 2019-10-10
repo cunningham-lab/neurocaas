@@ -5,3 +5,9 @@ Repo to consolidate all lambda function code for the NCAP project. Step 1 toward
 AWS CLI
 
 AWS SAM CLI
+
+Troposphere (python package)
+
+Boto3 (python package)
+
+jq (json parser)
