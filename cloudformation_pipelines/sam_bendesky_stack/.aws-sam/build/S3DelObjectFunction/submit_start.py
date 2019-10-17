@@ -87,45 +87,83 @@ class Submission_Launch():
         targetdata = utilsparam.events.put_instance_target(rulename) 
 
 
-#class Submission_Start():
-#    ## Submission class for the case where the instances are being started.
-#    def __init__(self,bucket_name,key):
-#        # Get Upload Location Information
-#        self.bucket_name = bucket_name
-#        self.path = os.path.join(*key.split('/')[:-1])
-#        print('logging at '+self.path)
-#        self.logger = utilsparam.s3.Logger(self.bucket_name, self.path)
-#        #self.out_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.OUTDIR)
-#        #self.in_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.INDIR)
-#
-#        # Load Content Of Submit File
-#        submit_config = utilsparam.s3.load_json(bucket_name, key)
-#        self.instance_id = submit_config['instance_id'] # TODO default option from config
-#        self.data_filename = submit_config['filename'] # TODO validate extensions & check existence
-#        
-#    def acquire_instance(self):
-#        self.instance = utilsparam.ec2.get_instance(self.instance_id,self.logger)
-#        utilsparam.ec2.start_instance_if_stopped(
-#            instance=self.instance,
-#            logger=self.logger
-#        )
-#
-#    def process_inputs(self):
-#        """ Initiates Processing On Previously Acquired EC2 Instance """
-#        self.logger.append("Sending command: {}".format(
-#            config.COMMAND.format(
-#                self.bucket_name, self.data_filename
-#            )
-#        ))
-#        response = utilsparam.ssm.execute_commands_on_linux_instances(
-#            commands=[config.COMMAND.format(
-#                self.bucket_name, self.data_filename
-#            )], # TODO: variable outdir as option
-#            instance_ids=[self.instance.instance_id],
-#            working_dirs=[config.WORKING_DIRECTORY],
-#            log_bucket_name=self.bucket_name,
-#            log_path=self.logger.path
-#        )
+class Submission_Launch_folder(Submission_Launch):
+    "Generalization to a folder in the bucket"
+    def __init__(self, bucket_name, key):
+        """ """
+
+        # Get Upload Location Information
+        self.bucket_name = bucket_name
+        self.path = os.path.join(*key.split('/')[:-2])
+        self.logger = utilsparam.s3.Logger(self.bucket_name, self.path)
+        #self.out_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.OUTDIR)
+        #self.in_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.INDIR)
+
+        # Load Content Of Submit File 
+        submit_config = utilsparam.s3.load_json(bucket_name, key)
+        self.instance_type = submit_config['instance_type'] # TODO default option from config
+        self.data_name = submit_config['dataname'] # TODO validate extensions & check existence
+        ## Now get the actual paths to relevant data from the foldername: 
+        self.filenames = utilsparam.s3.extract_files(self.bucket_name,self.data_name,ext = None) 
+        assert len(self.filenames) > 0, "we must have data to analyze."
+        
+    def acquire_instance(self):
+        """ Acquires & Starts New EC2 Instances Of The Requested Type & AMI"""
+        instances = []
+        nb_instances = len(self.filenames)
+        for i in range(nb_instances):
+            instance = utilsparam.ec2.launch_new_instance(
+            instance_type=self.instance_type, 
+            ami=os.environ['AMI'],
+            logger=self.logger
+            )
+            instances.append(instance)
+        self.instances = instances
+
+    def start_instance(self):
+        """ Starts new instances if stopped. We write a special loop for this one because we only need a single 60 second pause for all the intances, not one for each in serial"""
+        utilsparam.ec2.start_instances_if_stopped(
+            instances=self.instances,
+            logger=self.logger
+        )
+
+    ## Declare rules to monitor the states of these instances.  
+    def put_instance_monitor_rule(self): 
+        """ For multiple datasets."""
+        for instance in self.instances:
+            self.logger.append('Setting up monitoring on instance '+str(instance))
+            ## First declare a monitoring rule for this instance: 
+            ruledata,rulename = utilsparam.events.put_instance_rule(instance.instance_id)
+            arn = ruledata['RuleArn']
+            ## Now attach it to the given target
+            targetdata = utilsparam.events.put_instance_target(rulename) 
+
+    def process_inputs(self):
+        """ Initiates Processing On Previously Acquired EC2 Instance """
+        print(self.bucket_name,'bucket name')
+        print(self.filenames,'filenames')
+        print(os.environ['OUTDIR'],'outdir')
+        print(os.environ['COMMAND'],'command')
+        ## Should we vectorize the log here? 
+        [self.logger.append("Sending command: {}".format(
+            os.environ['COMMAND'].format(
+                self.bucket_name, filename, os.environ['OUTDIR']
+            )
+        )) for filename in self.filenames]
+        print([os.environ['COMMAND'].format(
+              self.bucket_name, filename, os.environ['OUTDIR']
+              ) for filename in self.filenames],"command send")
+        for f,filename in enumerate(self.filenames):
+            response = utilsparam.ssm.execute_commands_on_linux_instances(
+                commands=[os.environ['COMMAND'].format(
+                    self.bucket_name, filename, os.environ['OUTDIR']
+                    )], # TODO: variable outdir as option
+                instance_ids=[self.instances[f].instance_id],
+                working_dirs=[os.environ['WORKING_DIRECTORY']],
+                log_bucket_name=self.bucket_name,
+                log_path=self.logger.path
+                )
+
 
 class Submission_Start_Stack():
     ## Submission class for the case where the instances are being started.
@@ -145,6 +183,7 @@ class Submission_Start_Stack():
         
     def acquire_instance(self):
         self.instance = utilsparam.ec2.get_instance(self.instance_id,self.logger)
+
     def start_instance(self):
         utilsparam.ec2.start_instance_if_stopped(
             instance=self.instance,
@@ -184,16 +223,24 @@ def process_upload(bucket_name, key):
     key: absolute path to created object within bucket.
     bucket: name of the bucket within which the upload occurred.
     """
-    if os.environ['LAUNCH']:
-        submission = Submission_Launch(bucket_name, key)
-    else:
+    ## Conditionals for different deploy configurations: 
+    ## First check if we are launching a new instance or starting an existing one. 
+    ## NOTE: IN LAMBDA,  JSON BOOLEANS ARE CONVERTED TO STRING
+    if os.environ['LAUNCH'] == 'true':
+        ## Now check how many datasets we have
+        submission = Submission_Launch_folder(bucket_name, key)
+    elif os.environ["Launc"] == 'false':
         submission = Submission_Start_Stack(bucket_name, key)
     print("acquiring")
     submission.acquire_instance()
     print('writing0')
     submission.logger.write()
-    print('setting up monitor')
-    submission.put_instance_monitor_rule()
+    ## NOTE: IN LAMBDA,  JSON BOOLEANS ARE CONVERTED TO STRING
+    if os.environ["MONITOR"] == "true":
+        print('setting up monitor')
+        submission.put_instance_monitor_rule()
+    elif os.environ["MONITOR"] == "false":
+        print("skipping monitor")
     print('writing1')
     submission.logger.write()
     print('starting')

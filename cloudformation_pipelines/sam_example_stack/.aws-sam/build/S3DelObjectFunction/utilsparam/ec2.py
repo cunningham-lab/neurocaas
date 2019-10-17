@@ -27,9 +27,26 @@ def start_instance_if_stopped(instance, logger):
         logger.append("Starting Instance...")
         instance.start()
         instance.wait_until_running()
-        time.sleep(60)  # TODO: test if we really need this
+        time.sleep(60)
         logger.append('Instance started!')
+        
 
+def start_instances_if_stopped(instances, logger):
+    """ Check instance state, start if stopped & wait until ready """
+    for instance in instances: 
+        
+        # Check & Report Status
+        state = instance.state['Name']
+        logger.append("Instance State: {}...".format(state))
+        
+        # If not running, run:
+        if state != 'running':
+            logger.append("Starting Instance...")
+            instance.start()
+            instance.wait_until_running()
+            logger.append('Instance started!')
+    time.sleep(60)
+    logger.append("Instances Initialized")
 
 def launch_new_instance(instance_type, ami, logger):
     """ Script To Launch New Instance From Image """

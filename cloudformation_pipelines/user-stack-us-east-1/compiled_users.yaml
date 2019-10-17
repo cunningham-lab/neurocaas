@@ -1,0 +1,355 @@
+Outputs:
+  AccessKeydk2643:
+    Description: 'Access Key of user: dk2643 in group brunolabncapuser'
+    Value:
+      Ref: userkeydk2643
+  AccessKeydsp:
+    Description: 'Access Key of user: dsp in group peterkagroupncapuser'
+    Value:
+      Ref: userkeydsp
+  AccessKeyioc2104:
+    Description: 'Access Key of user: ioc2104 in group peterkagroupncapuser'
+    Value:
+      Ref: userkeyioc2104
+  AccessKeyrb2604:
+    Description: 'Access Key of user: rb2604 in group brunolabncapuser'
+    Value:
+      Ref: userkeyrb2604
+  AccessKeysb4096:
+    Description: 'Access Key of user: sb4096 in group brunolabncapuser'
+    Value:
+      Ref: userkeysb4096
+  AccessKeysw2277:
+    Description: 'Access Key of user: sw2277 in group wooleylabncapuser'
+    Value:
+      Ref: userkeysw2277
+  AccessKeysz2835:
+    Description: 'Access Key of user: sz2835 in group mannlabncapuser'
+    Value:
+      Ref: userkeysz2835
+  AccessKeyva2371:
+    Description: 'Access Key of user: va2371 in group peterkagroupncapuser'
+    Value:
+      Ref: userkeyva2371
+  Passworddk2643:
+    Description: Default password of new user dk2643 in group brunolabncapuser
+    Value: d2b5cfb316c35114
+  Passworddsp:
+    Description: Default password of new user dsp in group peterkagroupncapuser
+    Value: e7cacfd484388d0e
+  Passwordioc2104:
+    Description: Default password of new user ioc2104 in group peterkagroupncapuser
+    Value: 7bd4846436556579
+  Passwordrb2604:
+    Description: Default password of new user rb2604 in group brunolabncapuser
+    Value: 1fa2dea7e6a11f1b
+  Passwordsb4096:
+    Description: Default password of new user sb4096 in group brunolabncapuser
+    Value: ad8187c3758cb06b
+  Passwordsw2277:
+    Description: Default password of new user sw2277 in group wooleylabncapuser
+    Value: 4a46e4e20b83466e
+  Passwordsz2835:
+    Description: Default password of new user sz2835 in group mannlabncapuser
+    Value: d88715b2af9dbd96
+  Passwordva2371:
+    Description: Default password of new user va2371 in group peterkagroupncapuser
+    Value: 634028a9ba81d076
+  SecretAccessKeydk2643:
+    Description: 'Secret Key of new user: dk2643 in group brunolabncapuser'
+    Value:
+      Fn::GetAtt:
+      - userkeydk2643
+      - SecretAccessKey
+  SecretAccessKeydsp:
+    Description: 'Secret Key of new user: dsp in group peterkagroupncapuser'
+    Value:
+      Fn::GetAtt:
+      - userkeydsp
+      - SecretAccessKey
+  SecretAccessKeyioc2104:
+    Description: 'Secret Key of new user: ioc2104 in group peterkagroupncapuser'
+    Value:
+      Fn::GetAtt:
+      - userkeyioc2104
+      - SecretAccessKey
+  SecretAccessKeyrb2604:
+    Description: 'Secret Key of new user: rb2604 in group brunolabncapuser'
+    Value:
+      Fn::GetAtt:
+      - userkeyrb2604
+      - SecretAccessKey
+  SecretAccessKeysb4096:
+    Description: 'Secret Key of new user: sb4096 in group brunolabncapuser'
+    Value:
+      Fn::GetAtt:
+      - userkeysb4096
+      - SecretAccessKey
+  SecretAccessKeysw2277:
+    Description: 'Secret Key of new user: sw2277 in group wooleylabncapuser'
+    Value:
+      Fn::GetAtt:
+      - userkeysw2277
+      - SecretAccessKey
+  SecretAccessKeysz2835:
+    Description: 'Secret Key of new user: sz2835 in group mannlabncapuser'
+    Value:
+      Fn::GetAtt:
+      - userkeysz2835
+      - SecretAccessKey
+  SecretAccessKeyva2371:
+    Description: 'Secret Key of new user: va2371 in group peterkagroupncapuser'
+    Value:
+      Fn::GetAtt:
+      - userkeyva2371
+      - SecretAccessKey
+Resources:
+  DeleteCustomResourcebrunolabncapuser:
+    DependsOn: PipelineBucketbrunolabncapuser
+    Properties:
+      BucketName: brunolabncapuser
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  DeleteCustomResourcemannlabncapuser:
+    DependsOn: PipelineBucketmannlabncapuser
+    Properties:
+      BucketName: mannlabncapuser
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  DeleteCustomResourcepeterkagroupncapuser:
+    DependsOn: PipelineBucketpeterkagroupncapuser
+    Properties:
+      BucketName: peterkagroupncapuser
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  DeleteCustomResourcewooleylabncapuser:
+    DependsOn: PipelineBucketwooleylabncapuser
+    Properties:
+      BucketName: wooleylabncapuser
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LambdaBaseRole:
+    Properties:
+      Description:
+        Fn::Join:
+        - ' '
+        - - Base Policy for all lambda function roles in
+          - Ref: AWS::StackName
+      PolicyDocument:
+        Statement:
+        - Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Effect: Allow
+          Resource: arn:aws:logs:*:*:*
+        Version: '2012-10-17'
+    Type: AWS::IAM::ManagedPolicy
+  PipelineBucketbrunolabncapuser:
+    Properties:
+      AccessControl: Private
+      BucketName: brunolabncapuser
+    Type: AWS::S3::Bucket
+  PipelineBucketmannlabncapuser:
+    Properties:
+      AccessControl: Private
+      BucketName: mannlabncapuser
+    Type: AWS::S3::Bucket
+  PipelineBucketpeterkagroupncapuser:
+    Properties:
+      AccessControl: Private
+      BucketName: peterkagroupncapuser
+    Type: AWS::S3::Bucket
+  PipelineBucketwooleylabncapuser:
+    Properties:
+      AccessControl: Private
+      BucketName: wooleylabncapuser
+    Type: AWS::S3::Bucket
+  S3DelObjectFunction:
+    Properties:
+      CodeUri: s3://ctnsampackages/c705549306e321403d69c6a41f51d846
+      Description: Deletes Objects from S3
+      Environment:
+        Variables:
+          EXECUTION_TIMEOUT: '172800'
+          IAM_ROLE: iam role with ssm and s3 access
+          INDIR: inputs
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MONITOR: true
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: Type of instance to launch.
+      Handler: helper.handler_deldir
+      Role:
+        Fn::GetAtt:
+        - S3MakePathRole
+        - Arn
+      Runtime: python3.6
+      Timeout: 30
+    Type: AWS::Serverless::Function
+  S3MakePathRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - Ref: LambdaBaseRole
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - s3:DeleteObject
+            - s3:ListBucket
+            - s3:PutObject
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: write_s3_policy
+    Type: AWS::IAM::Role
+  S3PutObjectFunction:
+    Properties:
+      CodeUri: s3://ctnsampackages/8fb059f15983ca3f5511af9ac3b2ae83
+      Description: Puts Objects in S3
+      Environment:
+        Variables:
+          EXECUTION_TIMEOUT: '172800'
+          IAM_ROLE: iam role with ssm and s3 access
+          INDIR: inputs
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MONITOR: true
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: Type of instance to launch.
+      Handler: helper.handler_mkdir
+      Role:
+        Fn::GetAtt:
+        - S3MakePathRole
+        - Arn
+      Runtime: python3.6
+      Timeout: 30
+    Type: AWS::Serverless::Function
+  brunolabncapuseruserdk2643:
+    Properties:
+      LoginProfile:
+        Password: d2b5cfb316c35114
+        PasswordResetRequired: 'false'
+      Path: /brunolabncapuser/
+      UserName: dk2643us-east-1
+    Type: AWS::IAM::User
+  brunolabncapuseruserrb2604:
+    Properties:
+      LoginProfile:
+        Password: 1fa2dea7e6a11f1b
+        PasswordResetRequired: 'false'
+      Path: /brunolabncapuser/
+      UserName: rb2604us-east-1
+    Type: AWS::IAM::User
+  brunolabncapuserusersb4096:
+    Properties:
+      LoginProfile:
+        Password: ad8187c3758cb06b
+        PasswordResetRequired: 'false'
+      Path: /brunolabncapuser/
+      UserName: sb4096us-east-1
+    Type: AWS::IAM::User
+  mannlabncapuserusersz2835:
+    Properties:
+      LoginProfile:
+        Password: d88715b2af9dbd96
+        PasswordResetRequired: 'false'
+      Path: /mannlabncapuser/
+      UserName: sz2835us-east-1
+    Type: AWS::IAM::User
+  peterkagroupncapuseruserdsp:
+    Properties:
+      LoginProfile:
+        Password: e7cacfd484388d0e
+        PasswordResetRequired: 'false'
+      Path: /peterkagroupncapuser/
+      UserName: dspus-east-1
+    Type: AWS::IAM::User
+  peterkagroupncapuseruserioc2104:
+    Properties:
+      LoginProfile:
+        Password: 7bd4846436556579
+        PasswordResetRequired: 'false'
+      Path: /peterkagroupncapuser/
+      UserName: ioc2104us-east-1
+    Type: AWS::IAM::User
+  peterkagroupncapuseruserva2371:
+    Properties:
+      LoginProfile:
+        Password: 634028a9ba81d076
+        PasswordResetRequired: 'false'
+      Path: /peterkagroupncapuser/
+      UserName: va2371us-east-1
+    Type: AWS::IAM::User
+  userkeydk2643:
+    Properties:
+      UserName:
+        Ref: brunolabncapuseruserdk2643
+    Type: AWS::IAM::AccessKey
+  userkeydsp:
+    Properties:
+      UserName:
+        Ref: peterkagroupncapuseruserdsp
+    Type: AWS::IAM::AccessKey
+  userkeyioc2104:
+    Properties:
+      UserName:
+        Ref: peterkagroupncapuseruserioc2104
+    Type: AWS::IAM::AccessKey
+  userkeyrb2604:
+    Properties:
+      UserName:
+        Ref: brunolabncapuseruserrb2604
+    Type: AWS::IAM::AccessKey
+  userkeysb4096:
+    Properties:
+      UserName:
+        Ref: brunolabncapuserusersb4096
+    Type: AWS::IAM::AccessKey
+  userkeysw2277:
+    Properties:
+      UserName:
+        Ref: wooleylabncapuserusersw2277
+    Type: AWS::IAM::AccessKey
+  userkeysz2835:
+    Properties:
+      UserName:
+        Ref: mannlabncapuserusersz2835
+    Type: AWS::IAM::AccessKey
+  userkeyva2371:
+    Properties:
+      UserName:
+        Ref: peterkagroupncapuseruserva2371
+    Type: AWS::IAM::AccessKey
+  wooleylabncapuserusersw2277:
+    Properties:
+      LoginProfile:
+        Password: 4a46e4e20b83466e
+        PasswordResetRequired: 'false'
+      Path: /wooleylabncapuser/
+      UserName: sw2277us-east-1
+    Type: AWS::IAM::User
+Transform: AWS::Serverless-2016-10-31

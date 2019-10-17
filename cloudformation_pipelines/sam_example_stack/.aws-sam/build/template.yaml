@@ -1,31 +1,15 @@
-Outputs:
-  AccessKeyian:
-    Description: 'Access Key of user: ian in group examplegroup2'
-    Value:
-      Ref: userkeyian
-  AccessKeyshreya:
-    Description: 'Access Key of user: shreya in group examplegroup2'
-    Value:
-      Ref: userkeyshreya
-  Passwordian:
-    Description: Default password of new user ian in group examplegroup2
-    Value: fb1d783c4ad6f582
-  Passwordshreya:
-    Description: Default password of new user shreya in group examplegroup2
-    Value: 5d8a555ad0e5770c
-  SecretAccessKeyian:
-    Description: 'Secret Key of new user: ian in group examplegroup2'
-    Value:
-      Fn::GetAtt:
-      - userkeyian
-      - SecretAccessKey
-  SecretAccessKeyshreya:
-    Description: 'Secret Key of new user: shreya in group examplegroup2'
-    Value:
-      Fn::GetAtt:
-      - userkeyshreya
-      - SecretAccessKey
 Resources:
+  BaseFolderbrunolab:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: ctnncap213example
+      DirName: brunolab
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   BaseFolderexamplegroup2:
     DependsOn: PipelineMainBucket
     Properties:
@@ -102,6 +86,19 @@ Resources:
       LogGroupName:
         Fn::Sub: /aws/lambda/${FigLambda}
     Type: AWS::Logs::LogGroup
+  InFolderbrunolab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbrunolab
+    Properties:
+      BucketName: ctnncap213example
+      DirName: inputs
+      Path: brunolab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   InFolderexamplegroup2:
     DependsOn:
     - PipelineMainBucket
@@ -132,6 +129,19 @@ Resources:
           Resource: arn:aws:logs:*:*:*
         Version: '2012-10-17'
     Type: AWS::IAM::ManagedPolicy
+  LogFolderbrunolab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbrunolab
+    Properties:
+      BucketName: ctnncap213example
+      DirName: logs
+      Path: brunolab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   LogFolderexamplegroup2:
     DependsOn:
     - PipelineMainBucket
@@ -159,9 +169,11 @@ Resources:
           INDIR: inputs
           INSTANCE_TYPE: p2.xlarge
           KEY_NAME: ta_testkey
+          LAUNCH: true
           LOGDIR: logs
           LOGFILE: lambda_log.txt
           MISSING_CONFIG_ERROR: We need a config file to analyze data.
+          MONITOR: false
           OUTDIR: results
           REGION: us-east-1
           SECURITY_GROUPS: launch-wizard-34
@@ -179,6 +191,20 @@ Resources:
           figlambid:
             Ref: FigLambda
       Events:
+        BucketEventbrunolab:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: brunolab/inputs
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
         BucketEventexamplegroup2:
           Properties:
             Bucket:
@@ -199,6 +225,19 @@ Resources:
       Runtime: python3.6
       Timeout: 180
     Type: AWS::Serverless::Function
+  OutFolderbrunolab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbrunolab
+    Properties:
+      BucketName: ctnncap213example
+      DirName: results
+      Path: brunolab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   OutFolderexamplegroup2:
     DependsOn:
     - PipelineMainBucket
@@ -221,6 +260,37 @@ Resources:
     Properties:
       CodeUri: S3DelObjectFunction
       Description: Deletes Objects from S3
+      Environment:
+        Variables:
+          AMI: ami-045deefcfb062fd2a
+          COMMAND: ls; cd ../../../../home/ubuntu; bin/run.sh "{}" "{}" "{}"
+          CONFIG: config.yaml
+          EXECUTION_TIMEOUT: 180
+          IAM_ROLE: pmd-s3-ssm
+          INDIR: inputs
+          INSTANCE_TYPE: p2.xlarge
+          KEY_NAME: ta_testkey
+          LAUNCH: true
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MISSING_CONFIG_ERROR: We need a config file to analyze data.
+          MONITOR: false
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: launch-wizard-34
+          SHUTDOWN_BEHAVIOR: terminate
+          SSM_TIMEOUT: 172000
+          WORKING_DIRECTORY: ~/bin
+          cwrolearn:
+            Fn::GetAtt:
+            - CloudWatchBusRole
+            - Arn
+          figlambarn:
+            Fn::GetAtt:
+            - FigLambda
+            - Arn
+          figlambid:
+            Ref: FigLambda
       Handler: helper.handler_deldir
       Role:
         Fn::GetAtt:
@@ -258,6 +328,37 @@ Resources:
     Properties:
       CodeUri: S3PutObjectFunction
       Description: Puts Objects in S3
+      Environment:
+        Variables:
+          AMI: ami-045deefcfb062fd2a
+          COMMAND: ls; cd ../../../../home/ubuntu; bin/run.sh "{}" "{}" "{}"
+          CONFIG: config.yaml
+          EXECUTION_TIMEOUT: 180
+          IAM_ROLE: pmd-s3-ssm
+          INDIR: inputs
+          INSTANCE_TYPE: p2.xlarge
+          KEY_NAME: ta_testkey
+          LAUNCH: true
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MISSING_CONFIG_ERROR: We need a config file to analyze data.
+          MONITOR: false
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: launch-wizard-34
+          SHUTDOWN_BEHAVIOR: terminate
+          SSM_TIMEOUT: 172000
+          WORKING_DIRECTORY: ~/bin
+          cwrolearn:
+            Fn::GetAtt:
+            - CloudWatchBusRole
+            - Arn
+          figlambarn:
+            Fn::GetAtt:
+            - FigLambda
+            - Arn
+          figlambid:
+            Ref: FigLambda
       Handler: helper.handler_mkdir
       Role:
         Fn::GetAtt:
@@ -266,6 +367,60 @@ Resources:
       Runtime: python3.6
       Timeout: 30
     Type: AWS::Serverless::Function
+  UserGroupbrunolab:
+    Properties:
+      GroupName: brunolabgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - brunolab/
+                - brunolab/inputs
+                - brunolab/results
+                - brunolab/logs
+                - brunolab/inputs/
+                - brunolab/results/
+                - brunolab/logs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::ctnncap213example
+            Sid: ListBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::ctnncap213example/brunolab/inputs/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::ctnncap213example/brunolab/results/*
+            - arn:aws:s3:::ctnncap213example/brunolab/logs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: brunolabpolicy
+    Type: AWS::IAM::Group
   UserGroupexamplegroup2:
     Properties:
       GroupName: examplegroup2group
@@ -320,34 +475,19 @@ Resources:
           Version: '2012-10-17'
         PolicyName: examplegroup2policy
     Type: AWS::IAM::Group
+  brunolabUserNet:
+    Properties:
+      GroupName:
+        Ref: UserGroupbrunolab
+      Users:
+      - rb2604us-east-1
+      - sb4096us-east-1
+      - dk2643us-east-1
+    Type: AWS::IAM::UserToGroupAddition
   examplegroup2UserNet:
     Properties:
       GroupName:
         Ref: UserGroupexamplegroup2
-      Users:
-      - Ref: examplegroup2userian
-      - Ref: examplegroup2usershreya
+      Users: []
     Type: AWS::IAM::UserToGroupAddition
-  examplegroup2userian:
-    Properties:
-      LoginProfile:
-        Password: fb1d783c4ad6f582
-        PasswordResetRequired: 'false'
-    Type: AWS::IAM::User
-  examplegroup2usershreya:
-    Properties:
-      LoginProfile:
-        Password: 5d8a555ad0e5770c
-        PasswordResetRequired: 'false'
-    Type: AWS::IAM::User
-  userkeyian:
-    Properties:
-      UserName:
-        Ref: examplegroup2userian
-    Type: AWS::IAM::AccessKey
-  userkeyshreya:
-    Properties:
-      UserName:
-        Ref: examplegroup2usershreya
-    Type: AWS::IAM::AccessKey
 Transform: AWS::Serverless-2016-10-31

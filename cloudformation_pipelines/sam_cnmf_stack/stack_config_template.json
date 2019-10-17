@@ -22,7 +22,8 @@
             "OUTDIR":"results",
             "INDIR":"inputs",
             "LAUNCH":true, 
-            "LOGFILE":"lambda_log.txt"
+            "LOGFILE":"lambda_log.txt",
+            "MONITOR":false 
         }
     },
     "UXData":{

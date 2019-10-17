@@ -39,7 +39,25 @@ def load_json(bucket_name, key):
     file_object = s3_resource.Object(bucket_name, key)
     raw_content = file_object.get()['Body'].read().decode('utf-8')
     json_content = json.loads(raw_content)
+    ## Transfer type 
     return json_content 
+
+def extract_files(bucket_name,prefix,ext = None):
+    """
+    Filters out the actual filenames being used to process data from the prefix that is given. 
+    Inputs:
+    bucket_name (str): the name of the s3 bucket. 
+    prefix (str): the "folder name" that we care about 
+    ext (optional): if provided, will filter filenames to be of the given extension. 
+    """
+    bucket = s3_resource.Bucket(bucket_name)
+    objgen = bucket.objects.filter(Prefix = prefix)
+    if ext is None:
+        file_list = [obj.key for obj in objgen if obj.key[-1] != "/"]
+    else:
+        file_list = [obj.key for obj in objgen if obj.key[-1] != "/" and obj.key.split(".")[-1] == ext]
+
+    return file_list 
 
 class WriteMetric():
     """ Utility Class For Benchmarking performance """

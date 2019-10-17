@@ -1,0 +1,57 @@
+{
+    "PipelineName":"caiman-ncap",
+    "REGION":"us-east-1",
+    "Lambda":{
+        "CodeUri":"lambda_code",
+        "Handler":"submit_start.handler",
+        "LambdaConfig":{
+            "AMI":"ami-0db5492c69f5a77aa",
+            "INSTANCE_TYPE": "m5.16xlarge",
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS":"launch-wizard-tcp",
+            "IAM_ROLE":"pmd-s3-ssm",
+            "KEY_NAME":"ta_testkey",
+            "WORKING_DIRECTORY":"~/bin",
+            "COMMAND":"ls; cd /home/ubuntu; bin/run.sh \"{}\" \"{}\" \"{}\"",
+            "SHUTDOWN_BEHAVIOR":"terminate",
+            "CONFIG":"config.yaml",
+            "MISSING_CONFIG_ERROR":"We need a config file to analyze data.",
+            "EXECUTION_TIMEOUT":180,
+            "SSM_TIMEOUT":172000,
+            "LOGDIR":"logs",
+            "OUTDIR":"results",
+            "INDIR":"inputs",
+            "LAUNCH":true, 
+            "LOGFILE":"lambda_log.txt",
+            "MONITOR":false 
+        }
+    },
+    "UXData":{
+    "Affiliates":[
+        {
+            "AffiliateName":"brunolabCAIMAN",
+            "UserNames":["rb2604","sb4096","dk2643"],
+            "PipelinePath":"",
+            "PipelineDir":"trackingfolder",
+            "UserInput":true,
+            "ContactEmail":"The email we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"peterkagroupCAIMAN",
+            "UserNames":["dsp","va2371","ioc2104"],
+            "PipelinePath":"",
+            "PipelineDir":"trackingfolder",
+            "UserInput":true,
+            "ContactEmail":"The email we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"wooleylabCAIMAN",
+            "UserNames":["sw2277"],
+            "PipelinePath":"",
+            "PipelineDir":"trackingfolder",
+            "UserInput":true,
+            "ContactEmail":"The email we should notify regarding processing status."
+        }
+    ]
+    }
+}

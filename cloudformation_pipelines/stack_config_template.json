@@ -21,7 +21,8 @@
             "OUTDIR":"results",
             "INDIR":"inputs",
             "LAUNCH":"Boolean. True gives instance launch behavior, False gives instance start behavior.",
-            "LOGFILE":"lambda_log.txt"
+            "LOGFILE":"lambda_log.txt",
+            "MONITOR":true
         }
     },
     "UXData":{

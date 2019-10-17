@@ -5,7 +5,7 @@
         "CodeUri":"lambda_code",
         "Handler":"submit_start.handler",
         "LambdaConfig":{
-            "AMI":"ami-01e0ff8e66e115127",
+            "AMI":"ami-0a4f936b0b6fbd219",
             "INSTANCE_TYPE": "p3.2xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS":"launch-wizard-34",
@@ -22,14 +22,15 @@
             "OUTDIR":"results",
             "INDIR":"inputs",
             "LAUNCH":true,
-            "LOGFILE":"lambda_log.txt"
+            "LOGFILE":"lambda_log.txt",
+            "MONITOR":true
         }
     },
     "UXData":{
     "Affiliates":[
         {
             "AffiliateName":"bendeskylab",
-            "UserNames":["3050ferralhogs","aln2128"],
+            "UserNames":["3050ferralhogs","aln2128","nkw2113","cg3161","kh2920","ps3121","ht2513"],
             "PipelinePath":"dlctracking",
             "PipelineDir":"dlcfolder",
             "UserInput":true,

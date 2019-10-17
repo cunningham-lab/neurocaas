@@ -13,13 +13,13 @@ Outputs:
       Ref: userkeyuser2
   Passwordtaiga:
     Description: Default password of new user taiga in group testergroup
-    Value: 74988c232374fb4a
+    Value: a99f35ca51197b8d
   Passworduser1:
     Description: Default password of new user user1 in group carcealab
-    Value: 2daee7cd4c7a5bfb
+    Value: ffee4333c1b631aa
   Passworduser2:
     Description: Default password of new user user2 in group carcealab
-    Value: dce7c36f2a31e4ae
+    Value: c380ce7cb7b68e4e
   SecretAccessKeytaiga:
     Description: 'Secret Key of new user: taiga in group testergroup'
     Value:
@@ -201,8 +201,8 @@ Resources:
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
-          AMI: ami-0bc816a5ffe7efbd0
-          COMMAND: ls; cd ../../../../home/ubuntu; bin/run.sh "{}" "{}" "{}"
+          AMI: ami-0514d6b44a4ed82dc
+          COMMAND: ls; bin/run.sh "{}" "{}" "{}"
           CONFIG: config.yaml
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: pmd-s3-ssm
@@ -218,7 +218,7 @@ Resources:
           SECURITY_GROUPS: launch-wizard-34
           SHUTDOWN_BEHAVIOR: terminate
           SSM_TIMEOUT: 172000
-          WORKING_DIRECTORY: ~/bin
+          WORKING_DIRECTORY: /home/ubuntu
           cwrolearn:
             Fn::GetAtt:
             - CloudWatchBusRole
@@ -463,13 +463,13 @@ Resources:
   carcealabuseruser1:
     Properties:
       LoginProfile:
-        Password: 2daee7cd4c7a5bfb
+        Password: ffee4333c1b631aa
         PasswordResetRequired: 'false'
     Type: AWS::IAM::User
   carcealabuseruser2:
     Properties:
       LoginProfile:
-        Password: dce7c36f2a31e4ae
+        Password: c380ce7cb7b68e4e
         PasswordResetRequired: 'false'
     Type: AWS::IAM::User
   testergroupUserNet:
@@ -482,7 +482,7 @@ Resources:
   testergroupusertaiga:
     Properties:
       LoginProfile:
-        Password: 74988c232374fb4a
+        Password: a99f35ca51197b8d
         PasswordResetRequired: 'false'
     Type: AWS::IAM::User
   userkeytaiga:
