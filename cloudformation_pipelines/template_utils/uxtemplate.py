@@ -96,7 +96,7 @@ class UXTemplate(object):
         assert password == True or accesskey == True; 'Must have some credentials'
         
         ## Now we declare a user, as we need to reference a user to generate access keys. 
-        user = User(self.affiliatename+'user'+str(username))
+        user = User(self.affiliatename+'user'+str(username),UserName = Join("",[username,Ref(AWS_REGION)]))
 
         user_t = self.template.add_resource(user)
 

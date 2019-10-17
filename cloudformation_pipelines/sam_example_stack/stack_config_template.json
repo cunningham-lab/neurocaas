@@ -22,16 +22,22 @@
             "LOGDIR":"logs",
             "OUTDIR":"results",
             "INDIR":"inputs",
-            "LOGFILE":"lambda_log.txt"
+            "LAUNCH":true,
+            "LOGFILE":"lambda_log.txt",
+            "MONITOR":false
         }
     },
     "UXData":{
     "Affiliates":[
         {
             "AffiliateName":"examplegroup2",
-            "UserNames":["ian","shreya"],
-            "PipelinePath":"",
-            "PipelineDir":"trackingfolder",
+            "UserNames":["ian","shreya","dummyuser"],
+            "UserInput":true,
+            "ContactEmail":"The email we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"brunolab",
+            "UserNames":["rb2604","sb4096","dk2643"],
             "UserInput":true,
             "ContactEmail":"The email we should notify regarding processing status."
         }

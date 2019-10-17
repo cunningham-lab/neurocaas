@@ -5,14 +5,14 @@
         "CodeUri":"lambda_code",
         "Handler":"submit_start.handler",
         "LambdaConfig":{
-            "AMI":"ami-0bc816a5ffe7efbd0",
+            "AMI":"ami-0514d6b44a4ed82dc",
             "INSTANCE_TYPE": "p3.2xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS":"launch-wizard-34",
             "IAM_ROLE":"pmd-s3-ssm",
             "KEY_NAME":"ta_testkey",
-            "WORKING_DIRECTORY":"~/bin",
-            "COMMAND":"ls; cd ../../../../home/ubuntu; bin/run.sh \"{}\" \"{}\" \"{}\"",
+            "WORKING_DIRECTORY":"/home/ubuntu",
+            "COMMAND":"ls; bin/run.sh \"{}\" \"{}\" \"{}\"",
             "SHUTDOWN_BEHAVIOR":"terminate",
             "CONFIG":"config.yaml",
             "MISSING_CONFIG_ERROR":"We need a config file to analyze data.",
@@ -22,7 +22,8 @@
             "OUTDIR":"results",
             "INDIR":"inputs",
             "LAUNCH":true,
-            "LOGFILE":"lambda_log.txt"
+            "LOGFILE":"lambda_log.txt",
+            "MONITOR":true
         }
     },
     "UXData":{

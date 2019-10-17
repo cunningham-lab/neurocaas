@@ -12,13 +12,63 @@
                 "Ref": "userkeyaln2128"
             }
         },
+        "AccessKeycg3161": {
+            "Description": "Access Key of user: cg3161 in group bendeskylab",
+            "Value": {
+                "Ref": "userkeycg3161"
+            }
+        },
+        "AccessKeyht2513": {
+            "Description": "Access Key of user: ht2513 in group bendeskylab",
+            "Value": {
+                "Ref": "userkeyht2513"
+            }
+        },
+        "AccessKeykh2920": {
+            "Description": "Access Key of user: kh2920 in group bendeskylab",
+            "Value": {
+                "Ref": "userkeykh2920"
+            }
+        },
+        "AccessKeynkw2113": {
+            "Description": "Access Key of user: nkw2113 in group bendeskylab",
+            "Value": {
+                "Ref": "userkeynkw2113"
+            }
+        },
+        "AccessKeyps3121": {
+            "Description": "Access Key of user: ps3121 in group bendeskylab",
+            "Value": {
+                "Ref": "userkeyps3121"
+            }
+        },
         "Password3050ferralhogs": {
             "Description": "Default password of new user 3050ferralhogs in group bendeskylab",
-            "Value": "9b77193ca6c302be"
+            "Value": "b8e58f89912ac193"
         },
         "Passwordaln2128": {
             "Description": "Default password of new user aln2128 in group bendeskylab",
-            "Value": "cc38019ae570fc07"
+            "Value": "5102d843f11c8d6a"
+        },
+        "Passwordcg3161": {
+            "Description": "Default password of new user cg3161 in group bendeskylab",
+            "Value": "3e8654938d33a669"
+        },
+        "Passwordht2513": {
+            "Description": "Default password of new user ht2513 in group bendeskylab",
+            "Value": "ce1e51a454950aeb"
+        },
+        "Passwordkh2920": {
+            "Description": "Default password of new user kh2920 in group bendeskylab",
+            "Value": "98fc2a2134a31b4f"
+        },
+        "Passwordnkw2113": {
+            "Description": "Default password of new user nkw2113 in group bendeskylab",
+            "Value": "0c9f750372fbadab"
+        },
+        "Passwordps3121": {
+            "Description": "Default password of new user ps3121 in group bendeskylab",
+            "Value": "2ea22ad4e6d2b98d"
         },
         "SecretAccessKey3050ferralhogs": {
             "Description": "Secret Key of new user: 3050ferralhogs in group bendeskylab",
@@ -34,6 +84,51 @@
             "Value": {
                 "Fn::GetAtt": [
                     "userkeyaln2128",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeycg3161": {
+            "Description": "Secret Key of new user: cg3161 in group bendeskylab",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeycg3161",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeyht2513": {
+            "Description": "Secret Key of new user: ht2513 in group bendeskylab",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeyht2513",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeykh2920": {
+            "Description": "Secret Key of new user: kh2920 in group bendeskylab",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeykh2920",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeynkw2113": {
+            "Description": "Secret Key of new user: nkw2113 in group bendeskylab",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeynkw2113",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeyps3121": {
+            "Description": "Secret Key of new user: ps3121 in group bendeskylab",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeyps3121",
                     "SecretAccessKey"
                 ]
             }
@@ -230,7 +325,7 @@
                 "Description": "Main Lambda Function for Serverless",
                 "Environment": {
                     "Variables": {
-                        "AMI": "ami-01e0ff8e66e115127",
+                        "AMI": "ami-0a4f936b0b6fbd219",
                         "COMMAND": "ls; cd ../../../../home/ubuntu; bin/run.sh \"{}\" \"{}\" \"{}\"",
                         "CONFIG": "config.yaml",
                         "EXECUTION_TIMEOUT": 180,
@@ -242,6 +337,7 @@
                         "LOGDIR": "logs",
                         "LOGFILE": "lambda_log.txt",
                         "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+                        "MONITOR": true,
                         "OUTDIR": "results",
                         "REGION": "us-east-1",
                         "SECURITY_GROUPS": "launch-wizard-34",
@@ -329,6 +425,44 @@
             "Properties": {
                 "CodeUri": "../lambda_repo",
                 "Description": "Deletes Objects from S3",
+                "Environment": {
+                    "Variables": {
+                        "AMI": "ami-0a4f936b0b6fbd219",
+                        "COMMAND": "ls; cd ../../../../home/ubuntu; bin/run.sh \"{}\" \"{}\" \"{}\"",
+                        "CONFIG": "config.yaml",
+                        "EXECUTION_TIMEOUT": 180,
+                        "IAM_ROLE": "pmd-s3-ssm",
+                        "INDIR": "inputs",
+                        "INSTANCE_TYPE": "p3.2xlarge",
+                        "KEY_NAME": "ta_testkey",
+                        "LAUNCH": true,
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "launch-wizard-34",
+                        "SHUTDOWN_BEHAVIOR": "terminate",
+                        "SSM_TIMEOUT": 172000,
+                        "WORKING_DIRECTORY": "~/bin",
+                        "cwrolearn": {
+                            "Fn::GetAtt": [
+                                "CloudWatchBusRole",
+                                "Arn"
+                            ]
+                        },
+                        "figlambarn": {
+                            "Fn::GetAtt": [
+                                "FigLambda",
+                                "Arn"
+                            ]
+                        },
+                        "figlambid": {
+                            "Ref": "FigLambda"
+                        }
+                    }
+                },
                 "Handler": "helper.handler_deldir",
                 "Role": {
                     "Fn::GetAtt": [
@@ -390,6 +524,44 @@
             "Properties": {
                 "CodeUri": "../lambda_repo",
                 "Description": "Puts Objects in S3",
+                "Environment": {
+                    "Variables": {
+                        "AMI": "ami-0a4f936b0b6fbd219",
+                        "COMMAND": "ls; cd ../../../../home/ubuntu; bin/run.sh \"{}\" \"{}\" \"{}\"",
+                        "CONFIG": "config.yaml",
+                        "EXECUTION_TIMEOUT": 180,
+                        "IAM_ROLE": "pmd-s3-ssm",
+                        "INDIR": "inputs",
+                        "INSTANCE_TYPE": "p3.2xlarge",
+                        "KEY_NAME": "ta_testkey",
+                        "LAUNCH": true,
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "launch-wizard-34",
+                        "SHUTDOWN_BEHAVIOR": "terminate",
+                        "SSM_TIMEOUT": 172000,
+                        "WORKING_DIRECTORY": "~/bin",
+                        "cwrolearn": {
+                            "Fn::GetAtt": [
+                                "CloudWatchBusRole",
+                                "Arn"
+                            ]
+                        },
+                        "figlambarn": {
+                            "Fn::GetAtt": [
+                                "FigLambda",
+                                "Arn"
+                            ]
+                        },
+                        "figlambid": {
+                            "Ref": "FigLambda"
+                        }
+                    }
+                },
                 "Handler": "helper.handler_mkdir",
                 "Role": {
                     "Fn::GetAtt": [
@@ -495,6 +667,21 @@
                     },
                     {
                         "Ref": "bendeskylabuseraln2128"
+                    },
+                    {
+                        "Ref": "bendeskylabusernkw2113"
+                    },
+                    {
+                        "Ref": "bendeskylabusercg3161"
+                    },
+                    {
+                        "Ref": "bendeskylabuserkh2920"
+                    },
+                    {
+                        "Ref": "bendeskylabuserps3121"
+                    },
+                    {
+                        "Ref": "bendeskylabuserht2513"
                     }
                 ]
             },
@@ -503,7 +690,7 @@
         "bendeskylabuser3050ferralhogs": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "9b77193ca6c302be",
+                    "Password": "b8e58f89912ac193",
                     "PasswordResetRequired": "false"
                 }
             },
@@ -512,7 +699,52 @@
         "bendeskylabuseraln2128": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "cc38019ae570fc07",
+                    "Password": "5102d843f11c8d6a",
+                    "PasswordResetRequired": "false"
+                }
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "bendeskylabusercg3161": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "3e8654938d33a669",
+                    "PasswordResetRequired": "false"
+                }
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "bendeskylabuserht2513": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "ce1e51a454950aeb",
+                    "PasswordResetRequired": "false"
+                }
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "bendeskylabuserkh2920": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "98fc2a2134a31b4f",
+                    "PasswordResetRequired": "false"
+                }
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "bendeskylabusernkw2113": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "0c9f750372fbadab",
+                    "PasswordResetRequired": "false"
+                }
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "bendeskylabuserps3121": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "2ea22ad4e6d2b98d",
                     "PasswordResetRequired": "false"
                 }
             },
@@ -530,6 +762,46 @@
             "Properties": {
                 "UserName": {
                     "Ref": "bendeskylabuseraln2128"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeycg3161": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "bendeskylabusercg3161"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeyht2513": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "bendeskylabuserht2513"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeykh2920": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "bendeskylabuserkh2920"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeynkw2113": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "bendeskylabusernkw2113"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeyps3121": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "bendeskylabuserps3121"
                 }
             },
             "Type": "AWS::IAM::AccessKey"

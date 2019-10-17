@@ -90,11 +90,15 @@ class NCAPTemplate(object):
                 Policies = [write_policy])
         mkdirrole_attached = template.add_resource(mkdirrole)
 
+        ## Get the lambda config parameters for initialization of the custom resource delete function [needs the region]
+        lambdaconfig = self.config['Lambda']['LambdaConfig']
+
         ## Now we need to write a lambda function that actually does the work:  
         mkfunction = Function("S3PutObjectFunction",
                               CodeUri="../lambda_repo",
                               Description= "Puts Objects in S3",
                               Handler="helper.handler_mkdir",
+                              Environment = Environment(Variables=lambdaconfig),
                               Role=GetAtt(mkdirrole_attached,"Arn"),
                               Runtime="python3.6",
                               Timeout=30)
@@ -103,6 +107,7 @@ class NCAPTemplate(object):
                                CodeUri="../lambda_repo",
                                Description= "Deletes Objects from S3",
                                Handler="helper.handler_deldir",
+                               Environment = Environment(Variables=lambdaconfig),
                                Role=GetAtt(mkdirrole_attached,"Arn"),
                                Runtime="python3.6",
                                Timeout=30)
@@ -262,7 +267,7 @@ class NCAPTemplate(object):
         assert password == True or accesskey == True, 'Must have some credentials'
         
         ## Now we declare a user, as we need to reference a user to generate access keys. 
-        user = User(affiliatename+'user'+str(username))
+        user = User(affiliatename+'user'+str(username),UserName=UserName)
 
         user_t = self.template.add_resource(user)
 

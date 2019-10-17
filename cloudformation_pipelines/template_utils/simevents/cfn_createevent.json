@@ -6,8 +6,8 @@
   "ResourceType": "Custom::TestResource",
   "LogicalResourceId": "MyTestResource",
   "ResourceProperties": {
-    "StackName": "MyStack",
-    "BucketName": "bucketname",
+    "StackName": "teststack0",
+    "BucketName": "ncapctnteststack",
     "Path": "",
     "DirName": "test/"
   }
