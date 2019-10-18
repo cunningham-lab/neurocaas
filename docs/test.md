@@ -37,8 +37,15 @@ path (str): the path to the directory for a given pipeline.
 
 
 Example Usage:
+```python
 devenv = DevAMI("../../sam_example_stack/") ## Declare in reference to a particular NCAP pipeline
-devenv.
+devenv.launch_ami() ## function 1 referenced above
+### Do some development on the remote instance
+devenv.submit_job("/path/to/submit/file") ## function 2 referenced above
+### Monitor the remote instance to make sure that everything is running as expected, outputs are returned
+devenv.create_devami("new_ami") ## function 3 referenced above
+devenv.terminate_devinstance() ## clean up after done developing
+```
 
 ### get_instance_state
 ```python
