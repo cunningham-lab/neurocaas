@@ -88,9 +88,10 @@ class Submission_Launch():
 
 
 class Submission_Launch_folder(Submission_Launch):
-    "Generalization to a folder in the bucket"
+    """
+    Generalization of Submission_Launch to a folder. Will launch a separate instance for each file in the bucket. Can be used to replace Submission_Launch whole-hog, as giving the path to the file will still work with this implementation.     
+    """
     def __init__(self, bucket_name, key):
-        """ """
 
         # Get Upload Location Information
         self.bucket_name = bucket_name
@@ -163,8 +164,107 @@ class Submission_Launch_folder(Submission_Launch):
                 log_bucket_name=self.bucket_name,
                 log_path=self.logger.path
                 )
+            
+class Submission_Launch_full(Submission_Launch_folder):
+    """
+    Final generalization of the Submission_Launch object to work with folders and actively take a configuration file to be passed from the submit file, as opposed to being hacked in from the instance end without interactivity.   
+    
+    """
+    def __init__(self, bucket_name, key):
 
+        # Get Upload Location Information
+        self.bucket_name = bucket_name
+        self.path = os.path.join(*key.split('/')[:-2])
+        self.logger = utilsparam.s3.Logger(self.bucket_name, self.path)
+        #self.out_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.OUTDIR)
+        #self.in_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.INDIR)
 
+        # Load Content Of Submit File 
+        submit_file = utilsparam.s3.load_json(bucket_name, key)
+        ## Check what instance we should use. 
+        try:
+            self.instance_type = submit_file['instance_type'] # TODO default option from config
+        except KeyError as ke: 
+            msg = "Instance type {} does not exist, using default from config file".format(ke)
+            print(msg)
+            ## Log this message.
+            self.logger.append(msg)
+            self.logger.write()
+
+        ## These next two check that the submit file is correctly formatted
+        ## Check that we have a dataname field:
+        submit_errmsg = "Submit file does not contain field {}, needed to analyze data."
+        try: 
+            self.data_name = submit_file['dataname'] # TODO validate extensions & check existence
+        except KeyError as ke:
+
+            print(submit_errmsg.format(ke))
+            ## Write to logger
+            self.logger.append(submit_errmsg.format(ke))
+            self.logger.write()
+            ## Now raise an exception to halt processing, because this is a catastrophic error.  
+            raise ValueError("Missing data name to analyze")
+
+        try:
+            self.config_name = submit_file["configname"] ## TODO
+        except KeyError as ke:
+            print(submit_errmsg.format(ke))
+            ## Write to logger
+            self.logger.append(submit_errmsg.format(ke))
+            self.logger.write()
+            ## Now raise an exception to halt processing, because this is a catastrophic error.  
+            raise ValueError(os.environ["MISSING_CONFIG_ERROR"])
+
+        ## Check that we have the actual data in the bucket.  
+        exists_errmsg = "S3 Bucket does not contain {}"
+        if not utilsparam.s3.exists(self.bucket_name,self.data_name): 
+            msg = exists_errmsg.format(self.data_name)
+            self.logger.append(msg)
+            self.logger.write()
+            raise ValueError("dataname given does not exist in bucket.")
+        elif not utilsparam.s3.exists(self.bucket_name,self.config_name): 
+            msg = exists_errmsg.format(self.config_name)
+            self.logger.append(msg)
+            self.logger.write()
+            raise ValueError("configname given does not exist in bucket.")
+
+        ## Now get the actual paths to relevant data from the foldername: 
+        self.filenames = utilsparam.s3.extract_files(self.bucket_name,self.data_name,ext = None) 
+        assert len(self.filenames) > 0, "we must have data to analyze."
+
+    def process_inputs(self):
+        """ Initiates Processing On Previously Acquired EC2 Instance. This version requires that you include a config (fourth) argument """
+        print(self.bucket_name,'bucket name')
+        print(self.filenames,'filenames')
+        print(os.environ['OUTDIR'],'outdir')
+        print(os.environ['COMMAND'],'command')
+        try: 
+            os.environ['COMMAND'].format("a","b","c","d")
+        except IndexError as ie:
+            msg = "not enough arguments in the COMMAND argument."
+            self.logger.append(msg)
+            self.logger.write()
+            raise ValueError("Not the correct format for arguments.")
+
+        ## Should we vectorize the log here? 
+        [self.logger.append("Sending command: {}".format(
+            os.environ['COMMAND'].format(
+                self.bucket_name, filename, os.environ['OUTDIR'], self.config_name
+            )
+        )) for filename in self.filenames]
+        print([os.environ['COMMAND'].format(
+              self.bucket_name, filename, os.environ['OUTDIR'], self.config_name
+              ) for filename in self.filenames],"command send")
+        for f,filename in enumerate(self.filenames):
+            response = utilsparam.ssm.execute_commands_on_linux_instances(
+                commands=[os.environ['COMMAND'].format(
+                    self.bucket_name, filename, os.environ['OUTDIR'], self.config_name
+                    )], # TODO: variable outdir as option
+                instance_ids=[self.instances[f].instance_id],
+                working_dirs=[os.environ['WORKING_DIRECTORY']],
+                log_bucket_name=self.bucket_name,
+                log_path=self.logger.path
+                )
 class Submission_Start_Stack():
     ## Submission class for the case where the instances are being started.
     def __init__(self,bucket_name,key):
@@ -259,3 +359,47 @@ def handler(event, context):
         print("handler_params",bucket_name,key)
         process_upload(bucket_name, key);
 
+
+def process_upload_full(bucket_name, key):
+    """ 
+    Updated version that can handle config files. 
+    Inputs:
+    key: absolute path to created object within bucket.
+    bucket: name of the bucket within which the upload occurred.
+    """
+    ## Conditionals for different deploy configurations: 
+    ## First check if we are launching a new instance or starting an existing one. 
+    ## NOTE: IN LAMBDA,  JSON BOOLEANS ARE CONVERTED TO STRING
+    if os.environ['LAUNCH'] == 'true':
+        ## Now check how many datasets we have
+        submission = Submission_Launch_full(bucket_name, key)
+    elif os.environ["LAUNCH"] == 'false':
+        raise NotImplementedError("This option not available for configs. ")
+    print("acquiring")
+    submission.acquire_instance()
+    print('writing0')
+    submission.logger.write()
+    ## NOTE: IN LAMBDA,  JSON BOOLEANS ARE CONVERTED TO STRING
+    if os.environ["MONITOR"] == "true":
+        print('setting up monitor')
+        submission.put_instance_monitor_rule()
+    elif os.environ["MONITOR"] == "false":
+        print("skipping monitor")
+    print('writing1')
+    submission.logger.write()
+    print('starting')
+    submission.start_instance()
+    print('writing2')
+    print('sending')
+    submission.process_inputs()
+    print("writing3")
+    submission.logger.write()
+
+def handler_full(event, context):
+    """ Handler that get called by lambda whenever an event occurs. Updated version that can handle config files. """
+    for record in event['Records']:
+        bucket_name = record['s3']['bucket']['name']
+        key = record['s3']['object']['key']
+        print("handler_params",bucket_name,key)
+        print(event,context)
+        process_upload_full(bucket_name, key);
