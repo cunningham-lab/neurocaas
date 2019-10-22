@@ -33,6 +33,11 @@ def ls(bucket, path):
         objname.key for objname in bucket.objects.filter(Prefix=path)
     ]
 
+def exists(bucket_name, path):
+    """ checks if there is any data under the given (Prefix) path for the given bucket. """
+    bucket = s3_resource.Bucket(bucket_name)
+    objlist = [objname.key for objname in bucket.objects.filter(Prefix=path)]
+    return len(objlist) >0
 
 def load_json(bucket_name, key):
     """ """
