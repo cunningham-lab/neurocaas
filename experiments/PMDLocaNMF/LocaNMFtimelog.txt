@@ -1,0 +1,7 @@
+xlabel	Upload	Compute
+1 vid Local	0	2160
+1 vid NCAP	0	738.0
+3 vids Local	0	8940
+3 vids NCAP	0	1153.0
+5 vids Local	0	16306.8
+5 vids NCAP	0	1153.0
