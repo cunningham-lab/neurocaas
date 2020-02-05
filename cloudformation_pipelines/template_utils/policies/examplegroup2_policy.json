@@ -24,7 +24,7 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::ctnncap213example"
+        "arn:aws:s3:::ctnfrontendexample2"
       ],
       "Condition": {
         "StringEquals": {
@@ -45,6 +45,23 @@
       }
     },
     {
+      "Sid": "ListSubBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::ctnfrontendexample2"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "examplegroup2/inputs/*",
+            "examplegroup2/results/*",
+            "examplegroup2/logs/*"
+          ]
+        }
+      }
+    },
+    {
       "Sid": "Inputfolderwrite",
       "Effect": "Allow",
       "Action": [
@@ -52,7 +69,7 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::ctnncap213example/examplegroup2/inputs/*"
+        "arn:aws:s3:::ctnfrontendexample2/examplegroup2/inputs/*"
       ]
     },
     {
@@ -63,8 +80,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::ctnncap213example/examplegroup2/results/*",
-        "arn:aws:s3:::ctnncap213example/examplegroup2/logs/*"
+        "arn:aws:s3:::ctnfrontendexample2/examplegroup2/results/*",
+        "arn:aws:s3:::ctnfrontendexample2/examplegroup2/logs/*"
       ]
     }
   ]

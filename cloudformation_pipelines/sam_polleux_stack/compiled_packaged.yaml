@@ -1,17 +1,3 @@
-Outputs:
-  AccessKeyav2686:
-    Description: 'Access Key of user: av2686 in group polleuxlab'
-    Value:
-      Ref: userkeyav2686
-  Passwordav2686:
-    Description: Default password of new user av2686 in group polleuxlab
-    Value: aacd27f7a93be3df
-  SecretAccessKeyav2686:
-    Description: 'Secret Key of new user: av2686 in group polleuxlab'
-    Value:
-      Fn::GetAtt:
-      - userkeyav2686
-      - SecretAccessKey
 Resources:
   BaseFolderpolleuxlab:
     DependsOn: PipelineMainBucket
@@ -75,7 +61,7 @@ Resources:
     Type: AWS::CloudFormation::CustomResource
   FigLambda:
     Properties:
-      CodeUri: s3://ctnsampackages/f61d52d78085656acc56f5746783f495
+      CodeUri: s3://ctnsampackages/088661cf10518ae012bd25293a47d8e6
       Description: Lambda Function logging start/stop for NCAP
       Events: {}
       Handler: log.eventshandler
@@ -134,13 +120,15 @@ Resources:
     Type: AWS::CloudFormation::CustomResource
   MainLambda:
     Properties:
-      CodeUri: s3://ctnsampackages/4898c96d15371b7d21e1b0b4355303f0
+      CodeUri: s3://ctnsampackages/2b63d3da690ba224d0e55b970a4e75fe
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
-          AMI: ami-0c3efdd422e1bf114
-          COMMAND: ls; cd ../../../../home/ubuntu; bin/run.sh "{}" "{}" "{}"
+          AMI: ami-0dfb22545b1d19dcd
+          COMMAND: ls; cd /home/ubuntu; ncap_remote/run.sh "{}" "{}" "{}" "{}"; .
+            ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
+          DEPLOY_LIMIT: 20
           EXECUTION_TIMEOUT: 720
           IAM_ROLE: pmd-s3-ssm
           INDIR: inputs
@@ -182,7 +170,7 @@ Resources:
                 - Name: suffix
                   Value: submit.json
           Type: S3
-      Handler: submit_start.handler
+      Handler: submit_start.handler_log
       MemorySize: 128
       Role: arn:aws:iam::739988523141:role/lambda_dataflow
       Runtime: python3.6
@@ -208,13 +196,15 @@ Resources:
     Type: AWS::S3::Bucket
   S3DelObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/ed99f42943ca21bab58a9acda2259f0e
+      CodeUri: s3://ctnsampackages/5830c56c02032e03f657c22a9fefbb88
       Description: Deletes Objects from S3
       Environment:
         Variables:
-          AMI: ami-0c3efdd422e1bf114
-          COMMAND: ls; cd ../../../../home/ubuntu; bin/run.sh "{}" "{}" "{}"
+          AMI: ami-0dfb22545b1d19dcd
+          COMMAND: ls; cd /home/ubuntu; ncap_remote/run.sh "{}" "{}" "{}" "{}"; .
+            ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
+          DEPLOY_LIMIT: 20
           EXECUTION_TIMEOUT: 720
           IAM_ROLE: pmd-s3-ssm
           INDIR: inputs
@@ -276,13 +266,15 @@ Resources:
     Type: AWS::IAM::Role
   S3PutObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/ed99f42943ca21bab58a9acda2259f0e
+      CodeUri: s3://ctnsampackages/78216fcbf5816e0768b57e761d223019
       Description: Puts Objects in S3
       Environment:
         Variables:
-          AMI: ami-0c3efdd422e1bf114
-          COMMAND: ls; cd ../../../../home/ubuntu; bin/run.sh "{}" "{}" "{}"
+          AMI: ami-0dfb22545b1d19dcd
+          COMMAND: ls; cd /home/ubuntu; ncap_remote/run.sh "{}" "{}" "{}" "{}"; .
+            ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
+          DEPLOY_LIMIT: 20
           EXECUTION_TIMEOUT: 720
           IAM_ROLE: pmd-s3-ssm
           INDIR: inputs
@@ -353,6 +345,17 @@ Resources:
             Resource:
             - arn:aws:s3:::polleuxmonitored
             Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - polleuxlab/inputs/*
+                - polleuxlab/results/*
+                - polleuxlab/logs/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::polleuxmonitored
+            Sid: ListSubBucket
           - Action:
             - s3:PutObject
             - s3:DeleteObject
@@ -376,17 +379,6 @@ Resources:
       GroupName:
         Ref: UserGrouppolleuxlab
       Users:
-      - Ref: polleuxlabuserav2686
+      - av2686us-east-1
     Type: AWS::IAM::UserToGroupAddition
-  polleuxlabuserav2686:
-    Properties:
-      LoginProfile:
-        Password: aacd27f7a93be3df
-        PasswordResetRequired: 'false'
-    Type: AWS::IAM::User
-  userkeyav2686:
-    Properties:
-      UserName:
-        Ref: polleuxlabuserav2686
-    Type: AWS::IAM::AccessKey
 Transform: AWS::Serverless-2016-10-31

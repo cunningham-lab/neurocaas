@@ -24,7 +24,7 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::cnmfmonitored1"
+        "arn:aws:s3:::locanmf-figure"
       ],
       "Condition": {
         "StringEquals": {
@@ -45,6 +45,23 @@
       }
     },
     {
+      "Sid": "ListSubBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::locanmf-figure"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "paninskilab/inputs/*",
+            "paninskilab/results/*",
+            "paninskilab/logs/*"
+          ]
+        }
+      }
+    },
+    {
       "Sid": "Inputfolderwrite",
       "Effect": "Allow",
       "Action": [
@@ -52,7 +69,7 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::cnmfmonitored1/paninskilab/inputs/*"
+        "arn:aws:s3:::locanmf-figure/paninskilab/inputs/*"
       ]
     },
     {
@@ -63,8 +80,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::cnmfmonitored1/paninskilab/results/*",
-        "arn:aws:s3:::cnmfmonitored1/paninskilab/logs/*"
+        "arn:aws:s3:::locanmf-figure/paninskilab/results/*",
+        "arn:aws:s3:::locanmf-figure/paninskilab/logs/*"
       ]
     }
   ]

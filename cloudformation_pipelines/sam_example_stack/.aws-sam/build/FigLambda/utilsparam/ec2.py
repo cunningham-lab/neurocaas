@@ -63,3 +63,14 @@ def launch_new_instance(instance_type, ami, logger):
     )
     logger.append("New instance {} created!".format(instances[0]))
     return instances[0]
+
+def count_active_instances(instance_type):
+    """
+    Counts how many active [including transition in and out] isntances there are of a certain type. 
+    Inputs:
+    instance_type (str): string specifying instance type
+    Outputs: 
+    (int): integer giving number of instances currently active. 
+    """
+    instances = ec2_resource.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running','pending','stopping','shutting-down']},{'Name':'instance-type',"Values":[instance_type]}])
+    return len([i for i in instances])

@@ -1,0 +1,47 @@
+{
+    "PipelineName":"ncapexamplepipeline",
+    "REGION":"region of service for users",
+    "Lambda":{
+        "CodeUri":"Codebase for \ncap Compute",
+        "Handler":"Module for \ncap Compute",
+        "Launch":"Whether or not to launch new pipelines. ", 
+        "LambdaConfig":{  
+            "AMI":"AMI id of the developer-configured instance",
+            "INSTANCE_TYPE": "virtualized hardware instance id. ",
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS":"network configuration",
+            "IAM_ROLE":"permissions to launch new immutable analysis environments",
+            "KEY_NAME":"permissions to access immutable analysis environments",
+            "WORKING_DIRECTORY":"immutable analysis environment code",
+            "COMMAND":"code to run to initiate processing",
+            "SHUTDOWN_BEHAVIOR":"destroy immutable analysis environment after processing terminates",
+            "CONFIG":"location of additional configuration parameters",
+            "MISSING_CONFIG_ERROR":"We need a config file to analyze data.",
+            "EXECUTION_TIMEOUT":"Additional parameters for \ncap Compute",
+            "SSM_TIMEOUT":"Additional parameters for \ncap Compute",
+            "LOGDIR":"Parameters for \ncap interface",
+            "OUTDIR":"Parameters for \ncap interface",
+            "INDIR":"Parameters for \ncap interface",
+            "LAUNCH":"Launching new pipelines",
+            "LOGFILE":"Logging location for diagnostic information",
+            "DEPLOY_LIMIT":"Maximum number of concurrent instances to deploy",
+            "MONITOR":"Enable or disable detailed monitoring"
+        }
+    },
+    "UXData":{
+    "Affiliates":[
+        {
+            "AffiliateName":"examplegroup1",
+            "UserNames":["ian","shreya","dummyuser"],
+            "UserInput":true,
+            "ContactEmail":"The email we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"examplegroup2",
+            "UserNames":["liam","john"],
+            "UserInput":true,
+            "ContactEmail":"The email we should notify regarding processing status."
+        }
+    ]
+    }
+}

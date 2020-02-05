@@ -45,6 +45,23 @@
       }
     },
     {
+      "Sid": "ListSubBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::caiman-ncap"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "wooleylabCAIMAN/inputs/*",
+            "wooleylabCAIMAN/results/*",
+            "wooleylabCAIMAN/logs/*"
+          ]
+        }
+      }
+    },
+    {
       "Sid": "Inputfolderwrite",
       "Effect": "Allow",
       "Action": [

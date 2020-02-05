@@ -31,7 +31,7 @@ def start_instance_if_stopped(instance, logger):
 
 
 def launch_new_instance(instance_type, ami, logger):
-    """ Script To Launch New Instance From Image """
+    """ Function To Launch New Instance From Image """
     logger.append("Acquiring new {} instance from {} ...".format(instance_type, ami))
     instances = ec2_resource.create_instances(
         ImageId=ami,
