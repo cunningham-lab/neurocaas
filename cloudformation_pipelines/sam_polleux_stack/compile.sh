@@ -1,4 +1,6 @@
 #!/bin/bash 
+source ../scripts/deploy/errorcheck.sh 
+errorhandle
 source activate sam
 
 ## Get the directory name: 
@@ -10,7 +12,7 @@ PIPENAME=$(echo "$PIPESTR" | tr -d '"')
 
 cd ../template_utils
 echo $PIPENAME $PIPESTR
-python config_handler.py $PIPEDIR/stack_config_template.json #../sam_polleux_stack/stack_config_template.json
+python config_handler_new.py $PIPEDIR/stack_config_template.json #../sam_polleux_stack/stack_config_template.json
 
 cd $PIPEDIR
 

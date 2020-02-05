@@ -2,17 +2,17 @@
     "PipelineName":"bendeskymonitored",
     "REGION":"us-east-1",
     "Lambda":{
-        "CodeUri":"lambda_code",
-        "Handler":"submit_start.handler",
+        "CodeUri":"../lambda_repo",
+        "Handler":"submit_start.handler_log",
         "LambdaConfig":{
-            "AMI":"ami-0a4f936b0b6fbd219",
+            "AMI":"ami-098952f040fbafbf5",
             "INSTANCE_TYPE": "p3.2xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS":"launch-wizard-34",
             "IAM_ROLE":"pmd-s3-ssm",
             "KEY_NAME":"ta_testkey",
-            "WORKING_DIRECTORY":"~/bin",
-            "COMMAND":"ls; cd ../../../../home/ubuntu; bin/run.sh \"{}\" \"{}\" \"{}\"",
+            "WORKING_DIRECTORY":"/home/ubuntu",
+            "COMMAND":"ls; cd /home/ubuntu; ncap_remote/run.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
             "SHUTDOWN_BEHAVIOR":"terminate",
             "CONFIG":"config.yaml",
             "MISSING_CONFIG_ERROR":"We need a config file to analyze data.",
@@ -23,6 +23,7 @@
             "INDIR":"inputs",
             "LAUNCH":true,
             "LOGFILE":"lambda_log.txt",
+            "DEPLOY_LIMIT":20,
             "MONITOR":true
         }
     },
@@ -30,7 +31,7 @@
     "Affiliates":[
         {
             "AffiliateName":"bendeskylab",
-            "UserNames":["3050ferralhogs","aln2128","nkw2113","cg3161","kh2920","ps3121","ht2513"],
+            "UserNames":["fh3050"],
             "PipelinePath":"dlctracking",
             "PipelineDir":"dlcfolder",
             "UserInput":true,

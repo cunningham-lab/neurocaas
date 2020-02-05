@@ -125,9 +125,9 @@ class PipelineTemplate(NCAPTemplate):
         lambdaconfig['cwrolearn'] = GetAtt(self.cwrole,'Arn')
         ## Now add to a lambda function: 
         function = Function('MainLambda',
-                CodeUri = '../lambda_repo',
+                CodeUri = self.config['Lambda']["CodeUri"],##'../lambda_repo',
                 Runtime = 'python3.6',
-                Handler = 'submit_start.handler',
+                Handler = self.config['Lambda']["Handler"],##'submit_start.handler',
                 Description = 'Main Lambda Function for Serverless',
                 MemorySize = 128,
                 Timeout = self.config["Lambda"]['LambdaConfig']["EXECUTION_TIMEOUT"],

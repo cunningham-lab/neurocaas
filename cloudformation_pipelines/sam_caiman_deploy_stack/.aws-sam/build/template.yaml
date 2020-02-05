@@ -198,9 +198,11 @@ Resources:
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
-          AMI: ami-0db5492c69f5a77aa
-          COMMAND: ls; cd /home/ubuntu; bin/run.sh "{}" "{}" "{}"
+          AMI: ami-01dc867df8c05aa5a
+          COMMAND: ls; cd /home/ubuntu; ncap_remote/run_main.sh "{}" "{}" "{}" "{}";
+            . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
+          DEPLOY_LIMIT: 100
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: pmd-s3-ssm
           INDIR: inputs
@@ -270,7 +272,7 @@ Resources:
                 - Name: suffix
                   Value: submit.json
           Type: S3
-      Handler: submit_start.handler
+      Handler: submit_start.handler_log_dev
       MemorySize: 128
       Role: arn:aws:iam::739988523141:role/lambda_dataflow
       Runtime: python3.6
@@ -326,9 +328,11 @@ Resources:
       Description: Deletes Objects from S3
       Environment:
         Variables:
-          AMI: ami-0db5492c69f5a77aa
-          COMMAND: ls; cd /home/ubuntu; bin/run.sh "{}" "{}" "{}"
+          AMI: ami-01dc867df8c05aa5a
+          COMMAND: ls; cd /home/ubuntu; ncap_remote/run_main.sh "{}" "{}" "{}" "{}";
+            . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
+          DEPLOY_LIMIT: 100
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: pmd-s3-ssm
           INDIR: inputs
@@ -394,9 +398,11 @@ Resources:
       Description: Puts Objects in S3
       Environment:
         Variables:
-          AMI: ami-0db5492c69f5a77aa
-          COMMAND: ls; cd /home/ubuntu; bin/run.sh "{}" "{}" "{}"
+          AMI: ami-01dc867df8c05aa5a
+          COMMAND: ls; cd /home/ubuntu; ncap_remote/run_main.sh "{}" "{}" "{}" "{}";
+            . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
+          DEPLOY_LIMIT: 100
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: pmd-s3-ssm
           INDIR: inputs
@@ -467,6 +473,17 @@ Resources:
             Resource:
             - arn:aws:s3:::caiman-ncap
             Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - brunolabCAIMAN/inputs/*
+                - brunolabCAIMAN/results/*
+                - brunolabCAIMAN/logs/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::caiman-ncap
+            Sid: ListSubBucket
           - Action:
             - s3:PutObject
             - s3:DeleteObject
@@ -521,6 +538,17 @@ Resources:
             Resource:
             - arn:aws:s3:::caiman-ncap
             Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - peterkagroupCAIMAN/inputs/*
+                - peterkagroupCAIMAN/results/*
+                - peterkagroupCAIMAN/logs/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::caiman-ncap
+            Sid: ListSubBucket
           - Action:
             - s3:PutObject
             - s3:DeleteObject
@@ -575,6 +603,17 @@ Resources:
             Resource:
             - arn:aws:s3:::caiman-ncap
             Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - wooleylabCAIMAN/inputs/*
+                - wooleylabCAIMAN/results/*
+                - wooleylabCAIMAN/logs/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::caiman-ncap
+            Sid: ListSubBucket
           - Action:
             - s3:PutObject
             - s3:DeleteObject

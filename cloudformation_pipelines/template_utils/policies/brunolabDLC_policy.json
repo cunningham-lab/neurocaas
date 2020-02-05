@@ -45,6 +45,23 @@
       }
     },
     {
+      "Sid": "ListSubBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "brunolabDLC/inputs/*",
+            "brunolabDLC/results/*",
+            "brunolabDLC/logs/*"
+          ]
+        }
+      }
+    },
+    {
       "Sid": "Inputfolderwrite",
       "Effect": "Allow",
       "Action": [

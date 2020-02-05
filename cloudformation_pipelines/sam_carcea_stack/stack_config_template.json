@@ -2,17 +2,17 @@
     "PipelineName":"carceamonitored",
     "REGION":"us-east-1",
     "Lambda":{
-        "CodeUri":"lambda_code",
-        "Handler":"submit_start.handler",
+        "CodeUri":"../lambda_repo",
+        "Handler":"submit_start.handler_full",
         "LambdaConfig":{
-            "AMI":"ami-0514d6b44a4ed82dc",
+            "AMI":"FIX THIS WITH OUTPUT",
             "INSTANCE_TYPE": "p3.2xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS":"launch-wizard-34",
             "IAM_ROLE":"pmd-s3-ssm",
             "KEY_NAME":"ta_testkey",
             "WORKING_DIRECTORY":"/home/ubuntu",
-            "COMMAND":"ls; bin/run.sh \"{}\" \"{}\" \"{}\"",
+            "COMMAND":"ls; bin/run.sh \"{}\" \"{}\" \"{}\" \"{}\"; sudo poweroff",
             "SHUTDOWN_BEHAVIOR":"terminate",
             "CONFIG":"config.yaml",
             "MISSING_CONFIG_ERROR":"We need a config file to analyze data.",
@@ -23,24 +23,17 @@
             "INDIR":"inputs",
             "LAUNCH":true,
             "LOGFILE":"lambda_log.txt",
-            "MONITOR":true
+            "DEPLOY_LIMIT":100,
+            "MONITOR":false
         }
     },
     "UXData":{
     "Affiliates":[
         {
             "AffiliateName":"carcealab",
-            "UserNames":["user1","user2"],
+            "UserNames":["ioanacarcea","zahraadahman"],
             "PipelinePath":"",
             "PipelineDir":"cohousingfolder",
-            "UserInput":true,
-            "ContactEmail":"The email we should notify regarding processing status."
-        },
-        {
-            "AffiliateName":"testergroup",
-            "UserNames":["taiga"],
-            "PipelinePath":"",
-            "PipelineDir":"trackingfolder",
             "UserInput":true,
             "ContactEmail":"The email we should notify regarding processing status."
         }

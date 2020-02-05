@@ -242,8 +242,9 @@
                 "Environment": {
                     "Variables": {
                         "AMI": "ami-045deefcfb062fd2a",
-                        "COMMAND": "ls; cd ../../../../home/ubuntu; bin/run.sh \"{}\" \"{}\" \"{}\"",
+                        "COMMAND": "ls; cd ../../../../home/ubuntu; bin/run.sh \"{}\" \"{}\" \"{}\" \"{}\"",
                         "CONFIG": "config.yaml",
+                        "DEPLOY_LIMIT": 100,
                         "EXECUTION_TIMEOUT": 180,
                         "IAM_ROLE": "pmd-s3-ssm",
                         "INDIR": "inputs",
@@ -329,7 +330,7 @@
                         "Type": "S3"
                     }
                 },
-                "Handler": "submit_start.handler",
+                "Handler": "submit_start.handler_log",
                 "MemorySize": 128,
                 "Role": "arn:aws:iam::739988523141:role/lambda_dataflow",
                 "Runtime": "python3.6",
@@ -387,8 +388,9 @@
                 "Environment": {
                     "Variables": {
                         "AMI": "ami-045deefcfb062fd2a",
-                        "COMMAND": "ls; cd ../../../../home/ubuntu; bin/run.sh \"{}\" \"{}\" \"{}\"",
+                        "COMMAND": "ls; cd ../../../../home/ubuntu; bin/run.sh \"{}\" \"{}\" \"{}\" \"{}\"",
                         "CONFIG": "config.yaml",
+                        "DEPLOY_LIMIT": 100,
                         "EXECUTION_TIMEOUT": 180,
                         "IAM_ROLE": "pmd-s3-ssm",
                         "INDIR": "inputs",
@@ -486,8 +488,9 @@
                 "Environment": {
                     "Variables": {
                         "AMI": "ami-045deefcfb062fd2a",
-                        "COMMAND": "ls; cd ../../../../home/ubuntu; bin/run.sh \"{}\" \"{}\" \"{}\"",
+                        "COMMAND": "ls; cd ../../../../home/ubuntu; bin/run.sh \"{}\" \"{}\" \"{}\" \"{}\"",
                         "CONFIG": "config.yaml",
+                        "DEPLOY_LIMIT": 100,
                         "EXECUTION_TIMEOUT": 180,
                         "IAM_ROLE": "pmd-s3-ssm",
                         "INDIR": "inputs",
@@ -584,6 +587,23 @@
                                     "Sid": "ListBucket"
                                 },
                                 {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringLike": {
+                                            "s3:prefix": [
+                                                "brunolab/inputs/*",
+                                                "brunolab/results/*",
+                                                "brunolab/logs/*"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::ctnncap213example"
+                                    ],
+                                    "Sid": "ListSubBucket"
+                                },
+                                {
                                     "Action": [
                                         "s3:PutObject",
                                         "s3:DeleteObject"
@@ -664,6 +684,23 @@
                                         "arn:aws:s3:::ctnncap213example"
                                     ],
                                     "Sid": "ListBucket"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringLike": {
+                                            "s3:prefix": [
+                                                "examplegroup2/inputs/*",
+                                                "examplegroup2/results/*",
+                                                "examplegroup2/logs/*"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::ctnncap213example"
+                                    ],
+                                    "Sid": "ListSubBucket"
                                 },
                                 {
                                     "Action": [

@@ -223,8 +223,19 @@ class NCAPTemplate(object):
                 affiliatename+'/'+logdir,
                 affiliatename+'/'+indir+'/',
                 affiliatename+'/'+outdir+'/',
-                affiliatename+'/'+logdir+'/'
+                affiliatename+'/'+logdir+'/',
             ],'s3:delimiter':['/']}}})
+        ## Give LIST permissions within all subdirectories too. 
+        obj["Statement"].append({
+            'Sid': "ListSubBucket",
+            'Effect': 'Allow',
+            'Action': 's3:ListBucket',
+            'Resource': ['arn:aws:s3:::'+bucketname],
+            'Condition':{'StringLike':{'s3:prefix':[
+                affiliatename+'/'+indir+'/*',
+                affiliatename+'/'+outdir+'/*',
+                affiliatename+'/'+logdir+'/*'
+            ]}}})
         ## Give PUT, and DELETE permissions for the input subdirectory: 
         obj["Statement"].append({
             'Sid': 'Inputfolderwrite',
@@ -267,7 +278,7 @@ class NCAPTemplate(object):
         assert password == True or accesskey == True, 'Must have some credentials'
         
         ## Now we declare a user, as we need to reference a user to generate access keys. 
-        user = User(affiliatename+'user'+str(username),UserName=UserName)
+        user = User(affiliatename+'user'+str(username),UserName=username)
 
         user_t = self.template.add_resource(user)
 

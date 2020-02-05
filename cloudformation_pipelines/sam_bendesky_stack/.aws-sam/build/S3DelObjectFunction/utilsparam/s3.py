@@ -33,6 +33,11 @@ def ls(bucket, path):
         objname.key for objname in bucket.objects.filter(Prefix=path)
     ]
 
+def exists(bucket_name, path):
+    """ checks if there is any data under the given (Prefix) path for the given bucket. """
+    bucket = s3_resource.Bucket(bucket_name)
+    objlist = [objname.key for objname in bucket.objects.filter(Prefix=path)]
+    return len(objlist) >0
 
 def load_json(bucket_name, key):
     """ """
@@ -106,6 +111,65 @@ class Logger():
             Key=os.path.join(self.path, os.environ['LOGFILE']),
             Body=encoded_text
         )
+
+class JobLogger(Logger):
+    """
+    Updated utility class to write logs in format amenable to figure updating. 
+    """
+    def __init__(self,bucket_name,path):
+        self.bucket = s3_resource.Bucket(bucket_name) 
+        self.path = os.path.join(path, os.environ['LOGDIR'],"certificate.txt")#mkdir(bucket_name, path, LOGDIR)
+        ## Declare the object you will write to: 
+        self.writeobj = s3_resource.Object(bucket_name,self.path)
+        self._logs = []
+        self._datasets = {}
+        self._config = {}
+        self._struct = {"logs":"no logs","datasets":"data not loaded","config":"config not loaded"}
+
+    def append_lambdalog(self,string):
+        """
+        Unambiguously named wrapper for append. 
+        Inputs: 
+        string: the string to append to the lambda log. 
+        """
+        self.append(string)
+
+    def initialize_datasets(self,dataset,instanceid,commandid):
+        """
+        Initialize datasets by assigning to each a dictionary specifying instance data will be run on, command id, status, job description, reason, most recent output. 
+        Inputs:
+        dataset: the path to the data *file* analyzed by the instance. 
+        instanceid (str): the string specifying what instance we will run analysis on. 
+        commandid (str): the string specifying what the command id corresonding to this instance is. 
+        """
+        template_dict = {"status":"INITIALIZING","reason":"NONE","stdout":"not given yet","stderr":"not given yet","instance":instanceid,"command":commandid}
+        ##TODO: check that these instances and commands exist. 
+        self._datasets[dataset] = template_dict
+
+    def assign_config(self,configpath):
+        """
+        Configuration assignment. Includes version of config file .
+        Inputs: 
+        configpath (str): path to config file
+        """
+        self._config['name'] = configpath # TODO Turn on versioning for user buckets so we can trace configs. 
+
+    def update(self):
+        """
+        Updates the struct object. 
+        """
+        self._struct['logs'] = self._logs
+        self._struct['datasets'] = self._datasets
+        self._struct['config'] = self._config
+
+    def write(self):
+        """ 
+        Updates the struct object, and writes the resulting dictionary.  
+        """
+        self.update()
+        self.writeobj.put(Body = (bytes(json.dumps(self._struct).encode("UTF-8"))))
+        
+
 
 #def check_for_config(upload, config):
 #    """ """

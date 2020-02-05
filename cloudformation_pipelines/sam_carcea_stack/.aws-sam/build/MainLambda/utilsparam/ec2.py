@@ -27,9 +27,26 @@ def start_instance_if_stopped(instance, logger):
         logger.append("Starting Instance...")
         instance.start()
         instance.wait_until_running()
-        time.sleep(60)  # TODO: test if we really need this
+        time.sleep(60)
         logger.append('Instance started!')
+        
 
+def start_instances_if_stopped(instances, logger):
+    """ Check instance state, start if stopped & wait until ready """
+    for instance in instances: 
+        
+        # Check & Report Status
+        state = instance.state['Name']
+        logger.append("Instance State: {}...".format(state))
+        
+        # If not running, run:
+        if state != 'running':
+            logger.append("Starting Instance...")
+            instance.start()
+            instance.wait_until_running()
+            logger.append('Instance started!')
+    time.sleep(60)
+    logger.append("Instances Initialized")
 
 def launch_new_instance(instance_type, ami, logger):
     """ Script To Launch New Instance From Image """
@@ -46,3 +63,14 @@ def launch_new_instance(instance_type, ami, logger):
     )
     logger.append("New instance {} created!".format(instances[0]))
     return instances[0]
+
+def count_active_instances(instance_type):
+    """
+    Counts how many active [including transition in and out] isntances there are of a certain type. 
+    Inputs:
+    instance_type (str): string specifying instance type
+    Outputs: 
+    (int): integer giving number of instances currently active. 
+    """
+    instances = ec2_resource.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running','pending','stopping','shutting-down']},{'Name':'instance-type',"Values":[instance_type]}])
+    return len([i for i in instances])
