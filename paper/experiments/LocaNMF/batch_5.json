@@ -1,0 +1,15 @@
+{
+"Pipeline":"loca-timing-1",
+"Date":"11/30/19",
+"Description":"First experiment to test timing of LocaNMF. First half of a pipeline that processes wide field data using LocaNMF, then passes the results to LocaNMF. This timing tests five dataset.",
+"InstanceType":"p3.2xlarge",
+"InstanceIDs":["i-09a54a68272a5dcea","i-0ed9681f340a30e21","i-010fe77f742962df3","i-046d66a2e8bd76478","i-08b98aa233580c360"],
+"InstanceAMI":"ami-04ebe747c2e33038c",
+"DatasetKeys":["mSM30_10-Oct-2017","mSM30_12-Oct-2017","mSM34_01-Dec-2017","mSM34_02-Dec-2017","mSM36_05-Dec-2017"],
+"DatasetSizes":[3.9,3.8,5.3,5.4,4.4],
+"ResultSizes":[0.4898,0.5096,0.4577,0.4256,0.4033],
+"UploadTime":0,
+"InstanceComputeTimes":[["23:05:27","23:17:45"],["23:31:09","23:44:15"],["23:36:11","23:55:24"],["23:39:11","23:56:30"],["23:40:33","23:53:10"]],
+"LambdaComputeTimes":[78900],
+"LambdaMemory":128
+}
