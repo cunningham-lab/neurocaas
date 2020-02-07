@@ -1,0 +1,75 @@
+{
+    "UXData":{
+    "Affiliates":[
+        {
+            "AffiliateName":"ctnncapdev",
+            "UserNames":["ta2507"],
+            "Pipelines":["dlc","caiman"],
+            "PipelineDir":["dlc","caiman"],
+            "ContactEmail":"The email that we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"brunolabncapuser",
+            "UserNames":["rb2604","sb4096","dk2643"],
+            "Pipelines":["dlc","caiman"],
+            "PipelineDir":["dlc","caiman"],
+            "ContactEmail":"The email that we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"mannlabncapuser",
+            "UserNames":["sz2835"],
+            "Pipelines":["dlc"],
+            "PipelineDir":["dlc"],
+            "ContactEmail":"The email we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"bendeskylabncapuser",
+            "UserNames":["fh3050","nkw2113","aln2128","cg3161","kh2920","ps3121","ht2513"],
+            "Pipelines":["dlc"],
+            "PipelineDir":["dlc"],
+            "ContactEmail":"The email we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"peterkagroupncapuser",
+            "UserNames":["dsp","va2371","ioc2104"],
+            "Pipelines":["caiman"],
+            "PipelineDir":["caiman"],
+            "ContactEmail":"The email we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"carcealabncapuser",
+            "UserNames":["ioanacarcea","zahraadahman"],
+            "Pipelines":["dlccarcea"],
+            "PipelineDir":["dlccarcea"],
+            "ContactEmail":"The email we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"polleuxlabncapuser",
+            "UserNames":["av2686"],
+            "Pipelines":["dlcpolleux"],
+            "PipelineDir":["dlcpolleux"],
+            "ContactEmail":"The email we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"wooleylabncapuser",
+            "UserNames":["sw2277"],
+            "Pipelines":["caiman"],
+            "PipelineDir":["caiman"],
+            "ContactEmail":"The email we should notify regarding processing status."
+        }
+    ]
+    },
+    "Lambda":{
+        "LambdaConfig":{
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS":"Type of instance to launch.",
+            "IAM_ROLE":"iam role with ssm and s3 access",
+            "EXECUTION_TIMEOUT":"172800",
+            "LOGDIR":"logs",
+            "OUTDIR":"results",
+            "INDIR":"inputs",
+            "LOGFILE":"lambda_log.txt",
+            "MONITOR":true
+        }
+    }
+}
