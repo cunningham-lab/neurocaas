@@ -77,61 +77,61 @@ Outputs:
       Ref: userkeyzahraadahman
   Passwordaln2128:
     Description: Default password of new user aln2128 in group bendeskylabncapuser
-    Value: 4c1da9a9831859a8
+    Value: 99ce77959ec962a0
   Passwordav2686:
     Description: Default password of new user av2686 in group polleuxlabncapuser
-    Value: f52e9cab7f423e1d
+    Value: 68c0178135aa3d44
   Passwordcg3161:
     Description: Default password of new user cg3161 in group bendeskylabncapuser
-    Value: 3b37d22512847520
+    Value: 32d3f32527fb7945
   Passworddk2643:
     Description: Default password of new user dk2643 in group brunolabncapuser
-    Value: 06a51e82b195393e
+    Value: ae6d7574df712504
   Passworddsp:
     Description: Default password of new user dsp in group peterkagroupncapuser
-    Value: 1cb2bf3ccdbf4d41
+    Value: 42d8f9fa4958e2e8
   Passwordfh3050:
     Description: Default password of new user fh3050 in group bendeskylabncapuser
-    Value: abdd43c52cab4eb6
+    Value: af159c0ebfe68f90
   Passwordht2513:
     Description: Default password of new user ht2513 in group bendeskylabncapuser
-    Value: 5629fd6583e3b3f3
+    Value: a29255a284aa826f
   Passwordioanacarcea:
     Description: Default password of new user ioanacarcea in group carcealabncapuser
-    Value: c45bf381eb93a829
+    Value: 64a4ea90d4f97542
   Passwordioc2104:
     Description: Default password of new user ioc2104 in group peterkagroupncapuser
-    Value: 6b7b401c94c739eb
+    Value: fb5948374cfb2ce3
   Passwordkh2920:
     Description: Default password of new user kh2920 in group bendeskylabncapuser
-    Value: 25de3aa67e7b0f34
+    Value: 1c6e16f5732dac17
   Passwordnkw2113:
     Description: Default password of new user nkw2113 in group bendeskylabncapuser
-    Value: bed93a015b13e997
+    Value: c428eb6d604be803
   Passwordps3121:
     Description: Default password of new user ps3121 in group bendeskylabncapuser
-    Value: 9f346680d821955f
+    Value: 6f0e80e179590c08
   Passwordrb2604:
     Description: Default password of new user rb2604 in group brunolabncapuser
-    Value: 04ab580be4b5c46d
+    Value: f533c2107b473ec7
   Passwordsb4096:
     Description: Default password of new user sb4096 in group brunolabncapuser
-    Value: 8242fd275f2421c5
+    Value: d5b69486ae36e3f2
   Passwordsw2277:
     Description: Default password of new user sw2277 in group wooleylabncapuser
-    Value: c5ecc029d973740c
+    Value: a8b419864525e5d0
   Passwordsz2835:
     Description: Default password of new user sz2835 in group mannlabncapuser
-    Value: ab5abf5e3b020dac
+    Value: 2689722124ee7ce2
   Passwordta2507:
     Description: Default password of new user ta2507 in group ctnncapdev
-    Value: b5b0802145c25e58
+    Value: 9fbea6ba3d97c4a5
   Passwordva2371:
     Description: Default password of new user va2371 in group peterkagroupncapuser
-    Value: b31c544ecf2c458d
+    Value: c6035903731ea039
   Passwordzahraadahman:
     Description: Default password of new user zahraadahman in group carcealabncapuser
-    Value: 77dde1f43c169003
+    Value: 70853788b99c5677
   SecretAccessKeyaln2128:
     Description: 'Secret Key of new user: aln2128 in group bendeskylabncapuser'
     Value:
@@ -378,7 +378,7 @@ Resources:
     Type: AWS::S3::Bucket
   S3DelObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/173bf4c4f8721918e37569639033f415
+      CodeUri: s3://ctnsampackages/7acfee27b9aa6fb0c4ca77edd01c24b7
       Description: Deletes Objects from S3
       Environment:
         Variables:
@@ -426,7 +426,7 @@ Resources:
     Type: AWS::IAM::Role
   S3PutObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/173bf4c4f8721918e37569639033f415
+      CodeUri: s3://ctnsampackages/7acfee27b9aa6fb0c4ca77edd01c24b7
       Description: Puts Objects in S3
       Environment:
         Variables:
@@ -450,7 +450,7 @@ Resources:
   bendeskylabncapuseruseraln2128:
     Properties:
       LoginProfile:
-        Password: 4c1da9a9831859a8
+        Password: 99ce77959ec962a0
         PasswordResetRequired: 'false'
       Path: /bendeskylabncapuser/
       UserName: aln2128us-east-1
@@ -458,7 +458,7 @@ Resources:
   bendeskylabncapuserusercg3161:
     Properties:
       LoginProfile:
-        Password: 3b37d22512847520
+        Password: 32d3f32527fb7945
         PasswordResetRequired: 'false'
       Path: /bendeskylabncapuser/
       UserName: cg3161us-east-1
@@ -466,7 +466,7 @@ Resources:
   bendeskylabncapuseruserfh3050:
     Properties:
       LoginProfile:
-        Password: abdd43c52cab4eb6
+        Password: af159c0ebfe68f90
         PasswordResetRequired: 'false'
       Path: /bendeskylabncapuser/
       UserName: fh3050us-east-1
@@ -474,7 +474,7 @@ Resources:
   bendeskylabncapuseruserht2513:
     Properties:
       LoginProfile:
-        Password: 5629fd6583e3b3f3
+        Password: a29255a284aa826f
         PasswordResetRequired: 'false'
       Path: /bendeskylabncapuser/
       UserName: ht2513us-east-1
@@ -482,7 +482,7 @@ Resources:
   bendeskylabncapuseruserkh2920:
     Properties:
       LoginProfile:
-        Password: 25de3aa67e7b0f34
+        Password: 1c6e16f5732dac17
         PasswordResetRequired: 'false'
       Path: /bendeskylabncapuser/
       UserName: kh2920us-east-1
@@ -490,7 +490,7 @@ Resources:
   bendeskylabncapuserusernkw2113:
     Properties:
       LoginProfile:
-        Password: bed93a015b13e997
+        Password: c428eb6d604be803
         PasswordResetRequired: 'false'
       Path: /bendeskylabncapuser/
       UserName: nkw2113us-east-1
@@ -498,7 +498,7 @@ Resources:
   bendeskylabncapuseruserps3121:
     Properties:
       LoginProfile:
-        Password: 9f346680d821955f
+        Password: 6f0e80e179590c08
         PasswordResetRequired: 'false'
       Path: /bendeskylabncapuser/
       UserName: ps3121us-east-1
@@ -506,7 +506,7 @@ Resources:
   brunolabncapuseruserdk2643:
     Properties:
       LoginProfile:
-        Password: 06a51e82b195393e
+        Password: ae6d7574df712504
         PasswordResetRequired: 'false'
       Path: /brunolabncapuser/
       UserName: dk2643us-east-1
@@ -514,7 +514,7 @@ Resources:
   brunolabncapuseruserrb2604:
     Properties:
       LoginProfile:
-        Password: 04ab580be4b5c46d
+        Password: f533c2107b473ec7
         PasswordResetRequired: 'false'
       Path: /brunolabncapuser/
       UserName: rb2604us-east-1
@@ -522,7 +522,7 @@ Resources:
   brunolabncapuserusersb4096:
     Properties:
       LoginProfile:
-        Password: 8242fd275f2421c5
+        Password: d5b69486ae36e3f2
         PasswordResetRequired: 'false'
       Path: /brunolabncapuser/
       UserName: sb4096us-east-1
@@ -530,7 +530,7 @@ Resources:
   carcealabncapuseruserioanacarcea:
     Properties:
       LoginProfile:
-        Password: c45bf381eb93a829
+        Password: 64a4ea90d4f97542
         PasswordResetRequired: 'false'
       Path: /carcealabncapuser/
       UserName: ioanacarceaus-east-1
@@ -538,7 +538,7 @@ Resources:
   carcealabncapuseruserzahraadahman:
     Properties:
       LoginProfile:
-        Password: 77dde1f43c169003
+        Password: 70853788b99c5677
         PasswordResetRequired: 'false'
       Path: /carcealabncapuser/
       UserName: zahraadahmanus-east-1
@@ -546,7 +546,7 @@ Resources:
   ctnncapdevuserta2507:
     Properties:
       LoginProfile:
-        Password: b5b0802145c25e58
+        Password: 9fbea6ba3d97c4a5
         PasswordResetRequired: 'false'
       Path: /ctnncapdev/
       UserName: ta2507us-east-1
@@ -554,7 +554,7 @@ Resources:
   mannlabncapuserusersz2835:
     Properties:
       LoginProfile:
-        Password: ab5abf5e3b020dac
+        Password: 2689722124ee7ce2
         PasswordResetRequired: 'false'
       Path: /mannlabncapuser/
       UserName: sz2835us-east-1
@@ -562,7 +562,7 @@ Resources:
   peterkagroupncapuseruserdsp:
     Properties:
       LoginProfile:
-        Password: 1cb2bf3ccdbf4d41
+        Password: 42d8f9fa4958e2e8
         PasswordResetRequired: 'false'
       Path: /peterkagroupncapuser/
       UserName: dspus-east-1
@@ -570,7 +570,7 @@ Resources:
   peterkagroupncapuseruserioc2104:
     Properties:
       LoginProfile:
-        Password: 6b7b401c94c739eb
+        Password: fb5948374cfb2ce3
         PasswordResetRequired: 'false'
       Path: /peterkagroupncapuser/
       UserName: ioc2104us-east-1
@@ -578,7 +578,7 @@ Resources:
   peterkagroupncapuseruserva2371:
     Properties:
       LoginProfile:
-        Password: b31c544ecf2c458d
+        Password: c6035903731ea039
         PasswordResetRequired: 'false'
       Path: /peterkagroupncapuser/
       UserName: va2371us-east-1
@@ -586,7 +586,7 @@ Resources:
   polleuxlabncapuseruserav2686:
     Properties:
       LoginProfile:
-        Password: f52e9cab7f423e1d
+        Password: 68c0178135aa3d44
         PasswordResetRequired: 'false'
       Path: /polleuxlabncapuser/
       UserName: av2686us-east-1
@@ -689,7 +689,7 @@ Resources:
   wooleylabncapuserusersw2277:
     Properties:
       LoginProfile:
-        Password: c5ecc029d973740c
+        Password: a8b419864525e5d0
         PasswordResetRequired: 'false'
       Path: /wooleylabncapuser/
       UserName: sw2277us-east-1
