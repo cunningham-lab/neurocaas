@@ -47,6 +47,14 @@
             "ContactEmail":"The email we should notify regarding processing status."
         },
         {
+            "AffiliateName":"bendeskylabDLC",
+            "UserNames":["ps3121"],
+            "PipelinePath":"",
+            "PipelineDir":"trackingfolder",
+            "UserInput":true,
+            "ContactEmail":"The email we should notify regarding processing status."
+        },
+        {
             "AffiliateName":"sawtelllabDLC",
             "UserNames":["aw3057","raw2163","hxh2001","qz2311"],
             "PipelinePath":"",

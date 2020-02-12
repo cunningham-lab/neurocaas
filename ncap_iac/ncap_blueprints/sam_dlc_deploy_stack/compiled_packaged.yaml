@@ -1,4 +1,15 @@
 Resources:
+  BaseFolderbendeskylabDLC:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: dlc-ncap
+      DirName: bendeskylabDLC
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   BaseFolderbrunolabDLC:
     DependsOn: PipelineMainBucket
     Properties:
@@ -105,7 +116,7 @@ Resources:
     Type: AWS::CloudFormation::CustomResource
   FigLambda:
     Properties:
-      CodeUri: s3://ctnsampackages/50fdfcb82582aa4316aba35556d707c6
+      CodeUri: s3://ctnsampackages/2567cfe8f9fc3ab569b5047978b68f63
       Description: Lambda Function logging start/stop for NCAP
       Events: {}
       Handler: log.eventshandler
@@ -119,6 +130,19 @@ Resources:
       LogGroupName:
         Fn::Sub: /aws/lambda/${FigLambda}
     Type: AWS::Logs::LogGroup
+  InFolderbendeskylabDLC:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbendeskylabDLC
+    Properties:
+      BucketName: dlc-ncap
+      DirName: inputs
+      Path: bendeskylabDLC/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   InFolderbrunolabDLC:
     DependsOn:
     - PipelineMainBucket
@@ -201,6 +225,19 @@ Resources:
           Resource: arn:aws:logs:*:*:*
         Version: '2012-10-17'
     Type: AWS::IAM::ManagedPolicy
+  LogFolderbendeskylabDLC:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbendeskylabDLC
+    Properties:
+      BucketName: dlc-ncap
+      DirName: logs
+      Path: bendeskylabDLC/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   LogFolderbrunolabDLC:
     DependsOn:
     - PipelineMainBucket
@@ -268,7 +305,7 @@ Resources:
     Type: AWS::CloudFormation::CustomResource
   MainLambda:
     Properties:
-      CodeUri: s3://ctnsampackages/fcf6d63af36a38325b15dbd371a6c21a
+      CodeUri: s3://ctnsampackages/cc6713a9c1b3072050901144e6c6caf7
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
@@ -304,6 +341,20 @@ Resources:
           figlambid:
             Ref: FigLambda
       Events:
+        BucketEventbendeskylabDLC:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: bendeskylabDLC/inputs
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
         BucketEventbrunolabDLC:
           Properties:
             Bucket:
@@ -380,6 +431,19 @@ Resources:
       Runtime: python3.6
       Timeout: 180
     Type: AWS::Serverless::Function
+  OutFolderbendeskylabDLC:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbendeskylabDLC
+    Properties:
+      BucketName: dlc-ncap
+      DirName: results
+      Path: bendeskylabDLC/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   OutFolderbrunolabDLC:
     DependsOn:
     - PipelineMainBucket
@@ -452,7 +516,7 @@ Resources:
     Type: AWS::S3::Bucket
   S3DelObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/e361bf58fde05fab10e5001b730a216d
+      CodeUri: s3://ctnsampackages/e2a0982cf45c72e2be2e86ae03c54009
       Description: Deletes Objects from S3
       Environment:
         Variables:
@@ -522,7 +586,7 @@ Resources:
     Type: AWS::IAM::Role
   S3PutObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/7058eb89756d6220f637713fc978e9ac
+      CodeUri: s3://ctnsampackages/d2b2637923b40c42107b81f51420c270
       Description: Puts Objects in S3
       Environment:
         Variables:
@@ -565,6 +629,71 @@ Resources:
       Runtime: python3.6
       Timeout: 30
     Type: AWS::Serverless::Function
+  UserGroupbendeskylabDLC:
+    Properties:
+      GroupName: bendeskylabDLCgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - bendeskylabDLC/
+                - bendeskylabDLC/inputs
+                - bendeskylabDLC/results
+                - bendeskylabDLC/logs
+                - bendeskylabDLC/inputs/
+                - bendeskylabDLC/results/
+                - bendeskylabDLC/logs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - bendeskylabDLC/inputs/*
+                - bendeskylabDLC/results/*
+                - bendeskylabDLC/logs/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap/bendeskylabDLC/inputs/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap/bendeskylabDLC/results/*
+            - arn:aws:s3:::dlc-ncap/bendeskylabDLC/logs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: bendeskylabDLCpolicy
+    Type: AWS::IAM::Group
   UserGroupbrunolabDLC:
     Properties:
       GroupName: brunolabDLCgroup
@@ -890,6 +1019,13 @@ Resources:
           Version: '2012-10-17'
         PolicyName: sawtelllabDLCpolicy
     Type: AWS::IAM::Group
+  bendeskylabDLCUserNet:
+    Properties:
+      GroupName:
+        Ref: UserGroupbendeskylabDLC
+      Users:
+      - ps3121us-east-1
+    Type: AWS::IAM::UserToGroupAddition
   brunolabDLCUserNet:
     Properties:
       GroupName:
