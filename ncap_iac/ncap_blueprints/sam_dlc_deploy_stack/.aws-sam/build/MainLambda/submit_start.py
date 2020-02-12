@@ -25,6 +25,229 @@ def respond(err, res=None):
         "headers": {"Content-Type": "application/json"},
     }
 
+## Latest development version for sam_test_stack [2/11]. 
+## Gets acquire, start, monitor. 
+class Submission_Launch_log_test(Submission_Launch_full):
+    """
+    Object for ncap upload handling where inputs can come from specific user buckets. We then need to partition and replicate output between the user input bucket and the submit bucket. Input and submit buckets are structured as follows:  
+    Input Bucket:
+    - some structure 
+      -inputs
+        +data
+        +configs
+      -results
+        -job folder
+          +results
+          +per-dataset logs
+          +per-job certificate
+
+    Submit Bucket: 
+    - group name
+      -inputs
+        +submit.json files referencing the input bucket. 
+      -results
+        +per-job certificate 
+        +internal ec2 logs. 
+    """
+    def __init__(self,bucket_name,key,time):
+        #### Declare basic parameters: 
+        # Get Upload Location Information
+        self.bucket_name = bucket_name
+
+        ## Important paths: 
+        ## Get directory above the input directory where the job was submitted. 
+        self.path = re.findall('.+?(?=/'+os.environ["INDIR"]+')',key)[0] 
+        ## The other important directory is the actual base directory of the input bucket itself. 
+
+        ## Now add in the time parameter: 
+        self.time = time
+
+        #### Set up basic logging so we can get a trace when errors happen.   
+        ## We will index by the submit file name prefix if it exists: 
+        submit_search = re.findall('.+?(?=/submit.json)',os.path.basename(key))
+        try:
+            submit_name = submit_search[0]
+        except IndexError as e:
+            ## If the filename is just "submit.json, we just don't append anything to the job name. "
+            submit_name = ""
+        ## Now we're going to get the path to the results directory in the submit folder: 
+        self.jobname = "job"+submit_name+self.time
+        jobpath = os.path.join(self.path,os.environ['OUTDIR'],self.jobname)
+        self.jobpath_submit = jobpath
+        ## And create a corresponding directory in the submit area. 
+        create_jobdir  = utilsparam.s3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
+        ## a logger for the submit area.  
+        self.submitlogger = utilsparam.s3.JobLogger(self.bucket_name, self.jobpath_submit)
+
+        #### Parse submit file 
+        submit_file = utilsparam.s3.load_json(bucket_name, key)
+        
+        ## These next three fields check that the submit file is correctly formatted
+        ## Check that we have a dataname field:
+        submit_errmsg = "INPUT ERROR: Submit file does not contain field {}, needed to analyze data."
+        try: 
+            self.input_bucket_name = submit_file["bucketname"]
+            ## KEY: Now set up logging in the input folder too: 
+            self.inputlogger = utilsparam.s3.JobLogger(self.input_bucket_name,os.path.join(os.environ['OUTDIR'],self.jobname))
+        except KeyError as ke:
+
+            print(submit_errmsg.format(ke))
+            ## Write to logger
+            self.submitlogger.append(submit_errmsg.format(ke))
+            self.submitlogger.write()
+            ## Now raise an exception to halt processing, because this is a catastrophic error.  
+            raise ValueError("Missing bucket name where data is located.")
+
+        try: 
+            self.data_name = submit_file['dataname'] # TODO validate extensions 
+        except KeyError as ke:
+
+            print(submit_errmsg.format(ke))
+            ## Write to logger
+            self.submitlogger.append(submit_errmsg.format(ke))
+            self.submitlogger.write()
+            self.inputlogger.append(submit_errmsg.format(ke))
+            self.inputlogger.write()
+            ## Now raise an exception to halt processing, because this is a catastrophic error.  
+            raise ValueError("Missing data name to analyze")
+
+        try:
+            self.config_name = submit_file["configname"] 
+            self.submitlogger.assign_config(self.config_name)
+        except KeyError as ke:
+            print(submit_errmsg.format(ke))
+            ## Write to logger
+            self.submitlogger.append(submit_errmsg.format(ke))
+            self.submitlogger.write()
+            self.inputlogger.append(submit_errmsg.format(ke))
+            self.inputlogger.write()
+            ## Now raise an exception to halt processing, because this is a catastrophic error.  
+            raise ValueError(os.environ["MISSING_CONFIG_ERROR"])
+
+        ## Check that we have the actual data in the bucket.  
+        exists_errmsg = "INPUT ERROR: S3 Bucket does not contain {}"
+        if not utilsparam.s3.exists(self.input_bucket_name,self.data_name): 
+            msg = exists_errmsg.format(self.data_name)
+            self.submitlogger.append(msg)
+            self.submitlogger.write()
+            self.inputlogger.append(msg)
+            self.inputlogger.write()
+            raise ValueError("dataname given does not exist in bucket.")
+        elif not utilsparam.s3.exists(self.input_bucket_name,self.config_name): 
+            msg = exists_errmsg.format(self.config_name)
+            self.submitlogger.append(msg)
+            self.submitlogger.write()
+            self.inputlogger.append(msg)
+            self.inputlogger.write()
+            raise ValueError("configname given does not exist in bucket.")
+
+        ## Check what instance we should use. 
+        try:
+            self.instance_type = submit_file['instance_type'] 
+        except KeyError as ke: 
+            msg = "Instance type {} does not exist, using default from config file".format(ke)
+            self.instance_type = os.environ["INSTANCE_TYPE"]
+            ## Log this message.
+            self.submitlogger.append(msg)
+            self.submitlogger.write()
+            self.inputlogger.append(msg)
+            self.inputlogger.write()
+        ###########################
+
+        ## Now get the actual paths to relevant data from the foldername: 
+
+        self.filenames = utilsparam.s3.extract_files(self.input_bucket_name,self.data_name,ext = None) 
+        assert len(self.filenames) > 0, "we must have data to analyze."
+
+    def acquire_instance(self):
+        """ Acquires & Starts New EC2 Instances Of The Requested Type & AMI"""
+        instances = []
+        nb_instances = len(self.filenames)
+
+        ## Check how many instances are running. 
+        active = utilsparam.ec2.count_active_instances(self.instance_type)
+        ## Ensure that we have enough bandwidth to support this request:
+        if active +nb_instances < int(os.environ['DEPLOY_LIMIT']):
+            pass
+        else:
+            self.submitlogger.append("RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NCAP administrator.")
+            self.inputlogger.append("RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NCAP administrator.")
+        
+        for i in range(nb_instances):
+            instance = utilsparam.ec2.launch_new_instance(
+            instance_type=self.instance_type, 
+            ami=os.environ['AMI'],
+            logger=self.inputlogger
+            )
+            instances.append(instance)
+        self.instances = instances
+
+    def start_instance(self):
+        """ Starts new instances if stopped. We write a special loop for this one because we only need a single 60 second pause for all the intances, not one for each in serial"""
+        utilsparam.ec2.start_instances_if_stopped(
+            instances=self.instances,
+            logger=self.inputlogger
+        )
+
+    ## Declare rules to monitor the states of these instances.  
+    def put_instance_monitor_rule(self): 
+        """ For multiple datasets."""
+        for instance in self.instances:
+            self.submitlogger.append('Setting up monitoring on instance '+str(instance))
+            self.inputlogger.append('Setting up monitoring on instance '+str(instance))
+            ## First declare a monitoring rule for this instance: 
+            ruledata,rulename = utilsparam.events.put_instance_rule(instance.instance_id)
+            arn = ruledata['RuleArn']
+            ## Now attach it to the given target
+            targetdata = utilsparam.events.put_instance_target(rulename) 
+
+    def process_inputs(self):
+        """ Initiates Processing On Previously Acquired EC2 Instance. This version requires that you include a config (fourth) argument """
+        print(self.input_bucket_name,'bucket name')
+        print(self.filenames,'filenames')
+        print(os.environ['OUTDIR'],'outdir')
+        print(os.environ['COMMAND'],'command')
+        try: 
+            os.environ['COMMAND'].format("a","b","c","d")
+        except IndexError as ie:
+            msg = "not enough arguments in the COMMAND argument."
+            self.submitlogger.append(msg)
+            self.submitlogger.write()
+            self.inputlogger.append(msg)
+            self.inputlogger.write()
+            raise ValueError("Not the correct format for arguments.")
+
+        ## Should we vectorize the log here? 
+        outpath_full = os.path.join(os.environ['OUTDIR'],self.jobname)
+        [self.submitlogger.append("Sending command: {}".format(
+            os.environ['COMMAND'].format(
+                self.input_bucket_name, filename, outpath_full, self.config_name
+            )
+        )) for filename in self.filenames]
+        [self.inputlogger.append("Sending command: {}".format(
+            os.environ['COMMAND'].format(
+                self.input_bucket_name, filename, outpath_full, self.config_name
+            )
+        )) for filename in self.filenames]
+
+        print([os.environ['COMMAND'].format(
+              self.input_bucket_name, filename, outpath_full, self.config_name
+              ) for filename in self.filenames],"command sent")
+
+        for f,filename in enumerate(self.filenames):
+            response = utilsparam.ssm.execute_commands_on_linux_instances(
+                commands=[os.environ['COMMAND'].format(
+                    self.input_bucket_name, filename, outpath_full, self.config_name
+                    )], # TODO: variable outdir as option
+                instance_ids=[self.instances[f].instance_id],
+                working_dirs=[os.environ['WORKING_DIRECTORY']],
+                log_bucket_name=self.input_bucket_name,
+                log_path=os.path.join(self.jobpath_submit,'internal_ec2_logs')
+                )
+            #self.submitlogger.initialize_datasets_dev(filename,self.instances[f].instance_id,response["Command"]["CommandId"])
+            self.inputlogger.initialize_datasets_dev(filename,self.instances[f].instance_id,response["Command"]["CommandId"])
+
+
 ## Version to launch an instance
 class Submission_Launch():
     """ Collection of data for a single request to process a dataset """
@@ -126,6 +349,7 @@ class Submission_Launch_folder(Submission_Launch):
             self.logger.write()
             ## Now raise an exception to halt processing, because this is a catastrophic error.  
             raise ValueError("Missing data name to analyze")
+        
     def acquire_instance(self):
         """ Acquires & Starts New EC2 Instances Of The Requested Type & AMI"""
         instances = []
@@ -192,7 +416,8 @@ class Submission_Launch_folder(Submission_Launch):
                 log_bucket_name=self.bucket_name,
                 log_path=self.logger.path
                 )
-            
+      
+## Gets aquire, start and monitor. 
 class Submission_Launch_full(Submission_Launch_folder):
     """
     Final generalization of the Submission_Launch object to work with folders and actively take a configuration file to be passed from the submit file, as opposed to being hacked in from the instance end without interactivity.   
@@ -294,7 +519,7 @@ class Submission_Launch_full(Submission_Launch_folder):
                 log_bucket_name=self.bucket_name,
                 log_path=self.logger.path
                 )
-
+## Gets aquire, start, monitor
 class Submission_Launch_log(Submission_Launch_full):
     """
     Latest modification (10/26) to submit framework: instead of dumping straight into the results pile, puts results into a subfolder indexed by the job submission time. 
@@ -419,6 +644,7 @@ class Submission_Launch_log(Submission_Launch_full):
                 )
             self.logger.initialize_datasets(filename,self.instances[f].instance_id,response["Command"]["CommandId"])
 
+## Gets acquire, start, monitor. 
 class Submission_Launch_log_dev(Submission_Launch_full):
     """
     Latest modification (11/1) to submit framework: spawn individual log files for each dataset. . 

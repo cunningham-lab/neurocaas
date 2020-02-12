@@ -49,7 +49,7 @@ class PipelineTemplate(NCAPTemplate):
         ## Four steps here: 
         ## 1. Customize a user policy for this particular pipeline. 
         ## 2. Generate a user group with that policy. 
-        ## 3. Generate users with credentials. 
+        ## 3. Attach users with credentials. 
         ## 4. Add users to group.  
         ## A method that customizes the json policy (see attached) to the particular affiliation name. 
         ## 1 and 2

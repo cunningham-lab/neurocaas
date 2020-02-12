@@ -1,4 +1,15 @@
 Resources:
+  BaseFolderbendeskylabDLC:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: dlc-ncap
+      DirName: bendeskylabDLC
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   BaseFolderbrunolabDLC:
     DependsOn: PipelineMainBucket
     Properties:
@@ -119,6 +130,19 @@ Resources:
       LogGroupName:
         Fn::Sub: /aws/lambda/${FigLambda}
     Type: AWS::Logs::LogGroup
+  InFolderbendeskylabDLC:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbendeskylabDLC
+    Properties:
+      BucketName: dlc-ncap
+      DirName: inputs
+      Path: bendeskylabDLC/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   InFolderbrunolabDLC:
     DependsOn:
     - PipelineMainBucket
@@ -201,6 +225,19 @@ Resources:
           Resource: arn:aws:logs:*:*:*
         Version: '2012-10-17'
     Type: AWS::IAM::ManagedPolicy
+  LogFolderbendeskylabDLC:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbendeskylabDLC
+    Properties:
+      BucketName: dlc-ncap
+      DirName: logs
+      Path: bendeskylabDLC/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   LogFolderbrunolabDLC:
     DependsOn:
     - PipelineMainBucket
@@ -304,6 +341,20 @@ Resources:
           figlambid:
             Ref: FigLambda
       Events:
+        BucketEventbendeskylabDLC:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: bendeskylabDLC/inputs
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
         BucketEventbrunolabDLC:
           Properties:
             Bucket:
@@ -380,6 +431,19 @@ Resources:
       Runtime: python3.6
       Timeout: 180
     Type: AWS::Serverless::Function
+  OutFolderbendeskylabDLC:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbendeskylabDLC
+    Properties:
+      BucketName: dlc-ncap
+      DirName: results
+      Path: bendeskylabDLC/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   OutFolderbrunolabDLC:
     DependsOn:
     - PipelineMainBucket
@@ -565,6 +629,71 @@ Resources:
       Runtime: python3.6
       Timeout: 30
     Type: AWS::Serverless::Function
+  UserGroupbendeskylabDLC:
+    Properties:
+      GroupName: bendeskylabDLCgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - bendeskylabDLC/
+                - bendeskylabDLC/inputs
+                - bendeskylabDLC/results
+                - bendeskylabDLC/logs
+                - bendeskylabDLC/inputs/
+                - bendeskylabDLC/results/
+                - bendeskylabDLC/logs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - bendeskylabDLC/inputs/*
+                - bendeskylabDLC/results/*
+                - bendeskylabDLC/logs/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap/bendeskylabDLC/inputs/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap/bendeskylabDLC/results/*
+            - arn:aws:s3:::dlc-ncap/bendeskylabDLC/logs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: bendeskylabDLCpolicy
+    Type: AWS::IAM::Group
   UserGroupbrunolabDLC:
     Properties:
       GroupName: brunolabDLCgroup
@@ -890,6 +1019,13 @@ Resources:
           Version: '2012-10-17'
         PolicyName: sawtelllabDLCpolicy
     Type: AWS::IAM::Group
+  bendeskylabDLCUserNet:
+    Properties:
+      GroupName:
+        Ref: UserGroupbendeskylabDLC
+      Users:
+      - ps3121us-east-1
+    Type: AWS::IAM::UserToGroupAddition
   brunolabDLCUserNet:
     Properties:
       GroupName:
