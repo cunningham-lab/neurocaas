@@ -1,0 +1,50 @@
+{
+    "PipelineName":"dlcmonitored1",
+    "REGION":"us-east-1",
+    "Lambda":{
+        "CodeUri":"lambda_code",
+        "Handler":"submit_start.handler",
+        "Launch":true, 
+        "LambdaConfig":{
+            "AMI":"ami-0d544cb6c1d60a08b",
+            "INSTANCE_TYPE": "p2.xlarge",
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS":"launch-wizard-34",
+            "IAM_ROLE":"pmd-s3-ssm",
+            "KEY_NAME":"ta_testkey",
+            "WORKING_DIRECTORY":"/home/ubuntu",
+            "COMMAND":"bin/run.sh \"{}\" \"{}\" \"{}\"",
+            "SHUTDOWN_BEHAVIOR":"terminate",
+            "CONFIG":"config.yaml",
+            "MISSING_CONFIG_ERROR":"We need a config file to analyze data.",
+            "EXECUTION_TIMEOUT":180,
+            "SSM_TIMEOUT":172000,
+            "LOGDIR":"logs",
+            "OUTDIR":"results",
+            "INDIR":"inputs",
+            "LAUNCH":true,
+            "LOGFILE":"lambda_log.txt",
+            "MONITOR":false
+        }
+    },
+    "UXData":{
+    "Affiliates":[
+        {
+            "AffiliateName":"carcealab2",
+            "UserNames":["user21","user22"],
+            "PipelinePath":"",
+            "PipelineDir":"trackingfolder",
+            "UserInput":true,
+            "ContactEmail":"The email we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"testergroup2",
+            "UserNames":["taiga2"],
+            "PipelinePath":"",
+            "PipelineDir":"trackingfolder",
+            "UserInput":true,
+            "ContactEmail":"The email we should notify regarding processing status."
+        }
+    ]
+    }
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "2.2",
+  "description": "Simple test document using the aws:runShellScript plugin.",
+  "parameters": {
+    "salutation": {
+      "type": "String",
+      "description": "(Optional) This is an optional parameter that will be displayed in the output of the command if specified.",
+	  "default": "HelloWorld"
+    }
+  },
+  "mainSteps": [
+    {
+      "action": "aws:runShellScript",
+      "name": "DisplaySalutation",
+      "inputs": {
+        "timeoutSeconds": 60,
+        "runCommand": [
+          "echo {{ salutation }}; cd /home/ec2-user/; mkdir {{ salutation }}"
+        ]
+      }
+    }
+  ]
+}

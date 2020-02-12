@@ -1,0 +1,47 @@
+{
+    "PipelineName":"ctnncap213example",
+    "REGION":"us-east-1",
+    "Lambda":{
+        "CodeUri":"../lambda_repo",
+        "Handler":"submit_start.handler_log",
+        "Launch":true, 
+        "LambdaConfig":{
+            "AMI":"ami-045deefcfb062fd2a",
+            "INSTANCE_TYPE": "p2.xlarge",
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS":"launch-wizard-34",
+            "IAM_ROLE":"pmd-s3-ssm",
+            "KEY_NAME":"ta_testkey",
+            "WORKING_DIRECTORY":"~/bin",
+            "COMMAND":"ls; cd ../../../../home/ubuntu; bin/run.sh \"{}\" \"{}\" \"{}\" \"{}\"",
+            "SHUTDOWN_BEHAVIOR":"terminate",
+            "CONFIG":"config.yaml",
+            "MISSING_CONFIG_ERROR":"We need a config file to analyze data.",
+            "EXECUTION_TIMEOUT":180,
+            "SSM_TIMEOUT":172000,
+            "LOGDIR":"logs",
+            "OUTDIR":"results",
+            "INDIR":"inputs",
+            "LAUNCH":true,
+            "LOGFILE":"lambda_log.txt",
+            "DEPLOY_LIMIT":100,
+            "MONITOR":false
+        }
+    },
+    "UXData":{
+    "Affiliates":[
+        {
+            "AffiliateName":"examplegroup2",
+            "UserNames":["ian","shreya","dummyuser"],
+            "UserInput":true,
+            "ContactEmail":"The email we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"brunolab",
+            "UserNames":["rb2604","sb4096","dk2643"],
+            "UserInput":true,
+            "ContactEmail":"The email we should notify regarding processing status."
+        }
+    ]
+    }
+}
