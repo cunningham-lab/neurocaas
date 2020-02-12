@@ -1,0 +1,17 @@
+{
+    "MainLambda":{
+        "AMI": "ami-0887103890d4198a1",
+        "REGION": "us-east-1",
+        "INSTANCE_TYPE": "t2.micro",
+        "SECURITY_GROUPS": "launch-wizard-33",
+        "IAM_ROLE": "pmd-s3-ssm",
+        "KEY_NAME": "ta_testkey",
+        "WORKING_DIRECTORY":"~/bin",
+        "COMMAND":"cd /home/ec2-user; bin/run.sh \"{}\" \"{}\" \"{}\" \"{}\"",
+        "SHUTDOWN_BEHAVIOR": "terminate",
+        "CONFIG": "config.yaml",
+        "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+        "EXECUTION_TIMEOUT": 360 
+
+    }
+}

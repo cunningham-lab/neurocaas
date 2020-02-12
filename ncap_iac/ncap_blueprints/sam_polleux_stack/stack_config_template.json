@@ -1,0 +1,42 @@
+{
+    "PipelineName":"polleuxmonitored",
+    "REGION":"us-east-1",
+    "Lambda":{
+        "CodeUri":"../lambda_repo",
+        "Handler":"submit_start.handler_log",
+        "LambdaConfig":{
+            "AMI":"ami-0dfb22545b1d19dcd",
+            "INSTANCE_TYPE": "p3.2xlarge",
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS":"launch-wizard-34",
+            "IAM_ROLE":"pmd-s3-ssm",
+            "KEY_NAME":"ta_testkey",
+            "WORKING_DIRECTORY":"~/bin",
+            "COMMAND":"ls; cd /home/ubuntu; ncap_remote/run.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
+            "SHUTDOWN_BEHAVIOR":"terminate",
+            "CONFIG":"config.yaml",
+            "MISSING_CONFIG_ERROR":"We need a config file to analyze data.",
+            "EXECUTION_TIMEOUT":720,
+            "SSM_TIMEOUT":172000,
+            "LOGDIR":"logs",
+            "OUTDIR":"results",
+            "INDIR":"inputs",
+            "LAUNCH":true,
+            "LOGFILE":"lambda_log.txt",
+            "DEPLOY_LIMIT":100,
+            "MONITOR":false
+        }
+    },
+    "UXData":{
+    "Affiliates":[
+        {
+            "AffiliateName":"polleuxlab",
+            "UserNames":["av2686"],
+            "PipelinePath":"dlctracking",
+            "PipelineDir":"dlcfolder",
+            "UserInput":true,
+            "ContactEmail":"The email we should notify regarding processing status."
+        }
+    ]
+    }
+}
