@@ -116,79 +116,79 @@
         },
         "Passwordaln2128": {
             "Description": "Default password of new user aln2128 in group bendeskylabncapuser",
-            "Value": "5dde5ac26db1c1d5"
+            "Value": "99ce77959ec962a0"
         },
         "Passwordav2686": {
             "Description": "Default password of new user av2686 in group polleuxlabncapuser",
-            "Value": "eb82bd8c4401105f"
+            "Value": "68c0178135aa3d44"
         },
         "Passwordcg3161": {
             "Description": "Default password of new user cg3161 in group bendeskylabncapuser",
-            "Value": "d4bf25aa47e515a5"
+            "Value": "32d3f32527fb7945"
         },
         "Passworddk2643": {
             "Description": "Default password of new user dk2643 in group brunolabncapuser",
-            "Value": "36e86b95392fc2f7"
+            "Value": "ae6d7574df712504"
         },
         "Passworddsp": {
             "Description": "Default password of new user dsp in group peterkagroupncapuser",
-            "Value": "f932c6663169dd7a"
+            "Value": "42d8f9fa4958e2e8"
         },
         "Passwordfh3050": {
             "Description": "Default password of new user fh3050 in group bendeskylabncapuser",
-            "Value": "5cc672a9c608a1a9"
+            "Value": "af159c0ebfe68f90"
         },
         "Passwordht2513": {
             "Description": "Default password of new user ht2513 in group bendeskylabncapuser",
-            "Value": "3e42b291e4baf4bf"
+            "Value": "a29255a284aa826f"
         },
         "Passwordioanacarcea": {
             "Description": "Default password of new user ioanacarcea in group carcealabncapuser",
-            "Value": "c92b5c246babfa59"
+            "Value": "64a4ea90d4f97542"
         },
         "Passwordioc2104": {
             "Description": "Default password of new user ioc2104 in group peterkagroupncapuser",
-            "Value": "10bbc2615204f22b"
+            "Value": "fb5948374cfb2ce3"
         },
         "Passwordkh2920": {
             "Description": "Default password of new user kh2920 in group bendeskylabncapuser",
-            "Value": "51e4c2165f6cc9c5"
+            "Value": "1c6e16f5732dac17"
         },
         "Passwordnkw2113": {
             "Description": "Default password of new user nkw2113 in group bendeskylabncapuser",
-            "Value": "0db268260019f70c"
+            "Value": "c428eb6d604be803"
         },
         "Passwordps3121": {
             "Description": "Default password of new user ps3121 in group bendeskylabncapuser",
-            "Value": "b15b9c6674d19a75"
+            "Value": "6f0e80e179590c08"
         },
         "Passwordrb2604": {
             "Description": "Default password of new user rb2604 in group brunolabncapuser",
-            "Value": "e702763230b6bfca"
+            "Value": "f533c2107b473ec7"
         },
         "Passwordsb4096": {
             "Description": "Default password of new user sb4096 in group brunolabncapuser",
-            "Value": "a2e8340c677ffb2b"
+            "Value": "d5b69486ae36e3f2"
         },
         "Passwordsw2277": {
             "Description": "Default password of new user sw2277 in group wooleylabncapuser",
-            "Value": "3bff6172fb19e514"
+            "Value": "a8b419864525e5d0"
         },
         "Passwordsz2835": {
             "Description": "Default password of new user sz2835 in group mannlabncapuser",
-            "Value": "cc3904201018f85a"
+            "Value": "2689722124ee7ce2"
         },
         "Passwordta2507": {
             "Description": "Default password of new user ta2507 in group ctnncapdev",
-            "Value": "eb5e57bdbd56dfd8"
+            "Value": "9fbea6ba3d97c4a5"
         },
         "Passwordva2371": {
             "Description": "Default password of new user va2371 in group peterkagroupncapuser",
-            "Value": "f3c6fbd2a79d4d81"
+            "Value": "c6035903731ea039"
         },
         "Passwordzahraadahman": {
             "Description": "Default password of new user zahraadahman in group carcealabncapuser",
-            "Value": "dee1e0df547c17ef"
+            "Value": "70853788b99c5677"
         },
         "SecretAccessKeyaln2128": {
             "Description": "Secret Key of new user: aln2128 in group bendeskylabncapuser",
@@ -555,7 +555,7 @@
         },
         "S3DelObjectFunction": {
             "Properties": {
-                "CodeUri": "../lambda_repo",
+                "CodeUri": "../../ncap_blueprints/lambda_repo",
                 "Description": "Deletes Objects from S3",
                 "Environment": {
                     "Variables": {
@@ -629,7 +629,7 @@
         },
         "S3PutObjectFunction": {
             "Properties": {
-                "CodeUri": "../lambda_repo",
+                "CodeUri": "../../ncap_blueprints/lambda_repo",
                 "Description": "Puts Objects in S3",
                 "Environment": {
                     "Variables": {
@@ -659,7 +659,7 @@
         "bendeskylabncapuseruseraln2128": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "5dde5ac26db1c1d5",
+                    "Password": "99ce77959ec962a0",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/bendeskylabncapuser/",
@@ -670,7 +670,7 @@
         "bendeskylabncapuserusercg3161": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "d4bf25aa47e515a5",
+                    "Password": "32d3f32527fb7945",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/bendeskylabncapuser/",
@@ -681,7 +681,7 @@
         "bendeskylabncapuseruserfh3050": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "5cc672a9c608a1a9",
+                    "Password": "af159c0ebfe68f90",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/bendeskylabncapuser/",
@@ -692,7 +692,7 @@
         "bendeskylabncapuseruserht2513": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "3e42b291e4baf4bf",
+                    "Password": "a29255a284aa826f",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/bendeskylabncapuser/",
@@ -703,7 +703,7 @@
         "bendeskylabncapuseruserkh2920": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "51e4c2165f6cc9c5",
+                    "Password": "1c6e16f5732dac17",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/bendeskylabncapuser/",
@@ -714,7 +714,7 @@
         "bendeskylabncapuserusernkw2113": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "0db268260019f70c",
+                    "Password": "c428eb6d604be803",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/bendeskylabncapuser/",
@@ -725,7 +725,7 @@
         "bendeskylabncapuseruserps3121": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "b15b9c6674d19a75",
+                    "Password": "6f0e80e179590c08",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/bendeskylabncapuser/",
@@ -736,7 +736,7 @@
         "brunolabncapuseruserdk2643": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "36e86b95392fc2f7",
+                    "Password": "ae6d7574df712504",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/brunolabncapuser/",
@@ -747,7 +747,7 @@
         "brunolabncapuseruserrb2604": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "e702763230b6bfca",
+                    "Password": "f533c2107b473ec7",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/brunolabncapuser/",
@@ -758,7 +758,7 @@
         "brunolabncapuserusersb4096": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "a2e8340c677ffb2b",
+                    "Password": "d5b69486ae36e3f2",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/brunolabncapuser/",
@@ -769,7 +769,7 @@
         "carcealabncapuseruserioanacarcea": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "c92b5c246babfa59",
+                    "Password": "64a4ea90d4f97542",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/carcealabncapuser/",
@@ -780,7 +780,7 @@
         "carcealabncapuseruserzahraadahman": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "dee1e0df547c17ef",
+                    "Password": "70853788b99c5677",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/carcealabncapuser/",
@@ -791,7 +791,7 @@
         "ctnncapdevuserta2507": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "eb5e57bdbd56dfd8",
+                    "Password": "9fbea6ba3d97c4a5",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/ctnncapdev/",
@@ -802,7 +802,7 @@
         "mannlabncapuserusersz2835": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "cc3904201018f85a",
+                    "Password": "2689722124ee7ce2",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/mannlabncapuser/",
@@ -813,7 +813,7 @@
         "peterkagroupncapuseruserdsp": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "f932c6663169dd7a",
+                    "Password": "42d8f9fa4958e2e8",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/peterkagroupncapuser/",
@@ -824,7 +824,7 @@
         "peterkagroupncapuseruserioc2104": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "10bbc2615204f22b",
+                    "Password": "fb5948374cfb2ce3",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/peterkagroupncapuser/",
@@ -835,7 +835,7 @@
         "peterkagroupncapuseruserva2371": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "f3c6fbd2a79d4d81",
+                    "Password": "c6035903731ea039",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/peterkagroupncapuser/",
@@ -846,7 +846,7 @@
         "polleuxlabncapuseruserav2686": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "eb82bd8c4401105f",
+                    "Password": "68c0178135aa3d44",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/polleuxlabncapuser/",
@@ -1009,7 +1009,7 @@
         "wooleylabncapuserusersw2277": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "3bff6172fb19e514",
+                    "Password": "a8b419864525e5d0",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/wooleylabncapuser/",

@@ -12,7 +12,7 @@ source activate sam
 ## Get the path to the directory where user data is stored: 
 [ "$#" == 1 ] || { echo "ERROR: input is template name to be created"; exit; }
 ## Check the name is valid. 
-python checkpath.py "$1"
+python "$scriptdir"/checkpath.py "$1"
 
 #Now make a directory: 
 cd "$ncaprootdir"/user_profiles
