@@ -1512,7 +1512,9 @@
                     "Ref": "UserGroupbendeskylabDLC"
                 },
                 "Users": [
-                    "ps3121us-east-1"
+                    "ps3121us-east-1",
+                    "aln2128us-east-1",
+                    "fh3050us-east-1"
                 ]
             },
             "Type": "AWS::IAM::UserToGroupAddition"

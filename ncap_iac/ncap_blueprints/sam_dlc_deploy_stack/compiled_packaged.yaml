@@ -116,7 +116,7 @@ Resources:
     Type: AWS::CloudFormation::CustomResource
   FigLambda:
     Properties:
-      CodeUri: s3://ctnsampackages/2567cfe8f9fc3ab569b5047978b68f63
+      CodeUri: s3://ctnsampackages/11af192f87d78921ab667bd0e9d78dc2
       Description: Lambda Function logging start/stop for NCAP
       Events: {}
       Handler: log.eventshandler
@@ -305,7 +305,7 @@ Resources:
     Type: AWS::CloudFormation::CustomResource
   MainLambda:
     Properties:
-      CodeUri: s3://ctnsampackages/cc6713a9c1b3072050901144e6c6caf7
+      CodeUri: s3://ctnsampackages/c8eb5efa3f06cf4156df480df892c905
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
@@ -516,7 +516,7 @@ Resources:
     Type: AWS::S3::Bucket
   S3DelObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/e2a0982cf45c72e2be2e86ae03c54009
+      CodeUri: s3://ctnsampackages/c8eb5efa3f06cf4156df480df892c905
       Description: Deletes Objects from S3
       Environment:
         Variables:
@@ -586,7 +586,7 @@ Resources:
     Type: AWS::IAM::Role
   S3PutObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/d2b2637923b40c42107b81f51420c270
+      CodeUri: s3://ctnsampackages/102c4534a9d3debb95bbb93e5bacbcac
       Description: Puts Objects in S3
       Environment:
         Variables:
@@ -1025,6 +1025,8 @@ Resources:
         Ref: UserGroupbendeskylabDLC
       Users:
       - ps3121us-east-1
+      - aln2128us-east-1
+      - fh3050us-east-1
     Type: AWS::IAM::UserToGroupAddition
   brunolabDLCUserNet:
     Properties:
