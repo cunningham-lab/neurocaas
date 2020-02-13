@@ -19,7 +19,7 @@ sam build -t compiled_template.json -m ../lambda_repo/requirements.txt
 
 ## Test main lambda function
 
-sam local invoke S3PutObjectFunction --event ../template_utils/simevents/cfn_createevent.json -n ../template_utils/simevents/cfn_funcs_env_vars.json
+sam local invoke S3PutObjectFunction --event ../template_utils/simevents/cfn_createevent.json -n ../template_utils/simevents/cfn_funcs_env_vars.json --debug
 
 
 

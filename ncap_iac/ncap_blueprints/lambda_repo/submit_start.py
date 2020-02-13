@@ -27,7 +27,7 @@ def respond(err, res=None):
 
 ## Latest development version for sam_test_stack [2/11]. 
 ## Gets acquire, start, monitor. 
-class Submission_Launch_log_test(Submission_Launch_full):
+class Submission_Launch_log_test():
     """
     Object for ncap upload handling where inputs can come from specific user buckets. We then need to partition and replicate output between the user input bucket and the submit bucket. Input and submit buckets are structured as follows:  
     Input Bucket:

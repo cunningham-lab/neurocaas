@@ -1,5 +1,5 @@
 #!/bin/bash 
-## Script to test delete lambda. 
+## Script to test main lambda. 
 source activate sam
 
 ## Get the directory name: 
