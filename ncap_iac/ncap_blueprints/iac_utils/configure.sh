@@ -15,6 +15,7 @@ source activate sam
 #python $scriptdir/checkpath.py "$1"
 
 #Now make a directory: 
+echo $scriptdir, $ncaprootdir
 cd "$ncaprootdir"/ncap_blueprints
 mkdir "$1"
 cp stack_config_template_newexample.json "$ncaprootdir"/ncap_blueprints/"$1"/stack_config_template.json 
