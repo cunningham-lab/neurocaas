@@ -33,7 +33,7 @@ versint=$(echo $version | tr -d '"')
 if [ "$versint" == "null" ] 
 then 
     echo "latest version"
-    python config_handler_new.py $PIPEDIR/stack_config_template.json 
+    python postprocess_lambda.py $PIPEDIR/stack_config_template.json 
 elif [ "$versint" -eq 1 ]
 then
     echo "version 1"
@@ -46,4 +46,8 @@ fi
 ## We need to navigate to the pipeline directory because we have a relative path in our compilation code. 
 cd $PIPEDIR
 
-sam build -t compiled_template.json -m "$ncaprootdir"/ncap_blueprints/lambda_repo/requirements.txt
+sam build -t compiled_template.json -m "$ncaprootdir"/ncap_blueprints/lambda_repo/requirements_epi.txt
+
+sam package --s3-bucket ctnsampackages --output-template-file compiled_packaged.yaml
+
+sam deploy --template-file compiled_packaged.yaml --stack-name $PIPENAME --capabilities CAPABILITY_NAMED_IAM
