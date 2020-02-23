@@ -3,12 +3,12 @@
     "REGION":"us-east-1",
     "Lambda":{
         "CodeUri":"../lambda_repo",
-        "Handler":"submit_start.handler_log_dev",
+        "Handler":"submit_start.handler_log_demo",
         "PostCodeUri":"../lambda_repo",
         "PostHandler":"postprocess.epipostprocess",
         "Launch":true, 
         "LambdaConfig":{
-            "AMI":"ami-0d487f3da835f1c18",
+            "AMI":"ami-095c97b6fa0a7aa78",
             "INSTANCE_TYPE": "m5.xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS":"launch-wizard-34",

@@ -26,6 +26,21 @@ def mkdir(bucket, path, dirname):
         s3_client.put_object(Bucket=bucket, Key=new_path)
     return new_path
 
+def mkdir_reset(bucketname, path, dirname):
+    """ Makes new directory path in bucket, if exists, wipes and recreates.
+    :param bucketname: s3 bucket object within which directory is being created
+    :param path: string local path where directory is to be created
+    :param dirname: string name of directory to be created
+    :return: path to new directory
+    """
+    new_path = os.path.join(path, dirname, '')
+    try:
+        s3_client.head_object(Bucket=bucketname, Key=new_path)
+        s3_resource.Bucket(bucketname).objects.filter(Prefix=new_path).delete()
+        s3_client.put_object(Bucket=bucketname, Key=new_path)
+    except ClientError:
+        s3_client.put_object(Bucket=bucketname, Key=new_path)
+    return new_path
 
 def ls(bucket, path):
     """ Get all objects with bucket as strings"""
