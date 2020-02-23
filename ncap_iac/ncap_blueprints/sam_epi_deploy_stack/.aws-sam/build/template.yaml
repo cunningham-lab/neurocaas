@@ -170,7 +170,7 @@ Resources:
                 - Name: suffix
                   Value: submit.json
           Type: S3
-      Handler: submit_start.handler_log_dev
+      Handler: submit_start.handler_log_demo
       MemorySize: 128
       Role: arn:aws:iam::739988523141:role/lambda_dataflow
       Runtime: python3.6
