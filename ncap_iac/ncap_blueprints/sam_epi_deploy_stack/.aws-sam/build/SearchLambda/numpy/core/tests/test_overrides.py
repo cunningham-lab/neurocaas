@@ -2,19 +2,20 @@ from __future__ import division, absolute_import, print_function
 
 import inspect
 import sys
+from unittest import mock
 
 import numpy as np
 from numpy.testing import (
     assert_, assert_equal, assert_raises, assert_raises_regex)
 from numpy.core.overrides import (
     _get_implementing_args, array_function_dispatch,
-    verify_matching_signatures, ENABLE_ARRAY_FUNCTION)
-from numpy.core.numeric import pickle
+    verify_matching_signatures, ARRAY_FUNCTION_ENABLED)
+from numpy.compat import pickle
 import pytest
 
 
 requires_array_function = pytest.mark.skipif(
-    not ENABLE_ARRAY_FUNCTION,
+    not ARRAY_FUNCTION_ENABLED,
     reason="__array_function__ dispatch not enabled.")
 
 
@@ -35,7 +36,6 @@ def dispatched_two_arg(array1, array2):
     return 'original'
 
 
-@requires_array_function
 class TestGetImplementingArgs(object):
 
     def test_ndarray(self):
@@ -147,9 +147,9 @@ class TestGetImplementingArgs(object):
             _get_implementing_args(relevant_args)
 
 
-@requires_array_function
 class TestNDArrayArrayFunction(object):
 
+    @requires_array_function
     def test_method(self):
 
         class Other(object):
@@ -198,11 +198,13 @@ class TestNDArrayArrayFunction(object):
         assert_equal(result, expected.view(OverrideSub))
 
     def test_no_wrapper(self):
+        # This shouldn't happen unless a user intentionally calls
+        # __array_function__ with invalid arguments, but check that we raise
+        # an appropriate error all the same.
         array = np.array(1)
-        func = dispatched_one_arg.__wrapped__
-        with assert_raises_regex(AttributeError, '__wrapped__'):
-            array.__array_function__(func=func,
-                                     types=(np.ndarray,),
+        func = lambda x: x
+        with assert_raises_regex(AttributeError, '_implementation'):
+            array.__array_function__(func=func, types=(np.ndarray,),
                                      args=(array,), kwargs={})
 
 
@@ -376,7 +378,6 @@ class TestNumPyFunctions(object):
         assert_equal(np.fft.fft.__module__, 'numpy.fft')
         assert_equal(np.linalg.solve.__module__, 'numpy.linalg')
 
-    @pytest.mark.skipif(sys.version_info[0] < 3, reason="Python 3 only")
     def test_inspect_sum(self):
         signature = inspect.signature(np.sum)
         assert_('axis' in signature.parameters)
@@ -390,3 +391,39 @@ class TestNumPyFunctions(object):
             return 'yes'
 
         assert_equal(np.sum(MyArray()), 'yes')
+
+    @requires_array_function
+    def test_sum_on_mock_array(self):
+
+        # We need a proxy for mocks because __array_function__ is only looked
+        # up in the class dict
+        class ArrayProxy:
+            def __init__(self, value):
+                self.value = value
+            def __array_function__(self, *args, **kwargs):
+                return self.value.__array_function__(*args, **kwargs)
+            def __array__(self, *args, **kwargs):
+                return self.value.__array__(*args, **kwargs)
+
+        proxy = ArrayProxy(mock.Mock(spec=ArrayProxy))
+        proxy.value.__array_function__.return_value = 1
+        result = np.sum(proxy)
+        assert_equal(result, 1)
+        proxy.value.__array_function__.assert_called_once_with(
+            np.sum, (ArrayProxy,), (proxy,), {})
+        proxy.value.__array__.assert_not_called()
+
+    @requires_array_function
+    def test_sum_forwarding_implementation(self):
+
+        class MyArray(np.ndarray):
+
+            def sum(self, axis, out):
+                return 'summed'
+
+            def __array_function__(self, func, types, args, kwargs):
+                return super().__array_function__(func, types, args, kwargs)
+
+        # note: the internal implementation of np.sum() calls the .sum() method
+        array = np.array(1).view(MyArray)
+        assert_equal(np.sum(array), 'summed')

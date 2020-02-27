@@ -8,6 +8,7 @@ from numpy.testing import (
     assert_array_almost_equal, assert_raises, assert_allclose,
     assert_array_max_ulp, assert_raises_regex, suppress_warnings,
     )
+import pytest
 
 
 class TestHistogram(object):
@@ -554,15 +555,11 @@ class TestHistogramOptimBinNums(object):
             return a / (a + b)
 
         ll = [[nbins_ratio(seed, size) for size in np.geomspace(start=10, stop=100, num=4).round().astype(int)]
-              for seed in range(256)]
+              for seed in range(10)]
 
         # the average difference between the two methods decreases as the dataset size increases.
-        assert_almost_equal(abs(np.mean(ll, axis=0) - 0.5),
-                            [0.1065248,
-                             0.0968844,
-                             0.0331818,
-                             0.0178057],
-                            decimal=3)
+        avg = abs(np.mean(ll, axis=0) - 0.5)
+        assert_almost_equal(avg, [0.15, 0.09, 0.08, 0.03], decimal=2)
 
     def test_simple_range(self):
         """
@@ -594,6 +591,16 @@ class TestHistogramOptimBinNums(object):
                 msg = "For the {0} estimator".format(estimator)
                 msg += " with datasize of {0}".format(testlen)
                 assert_equal(len(a), numbins, err_msg=msg)
+
+    @pytest.mark.parametrize("bins", ['auto', 'fd', 'doane', 'scott',
+                                      'stone', 'rice', 'sturges'])
+    def test_signed_integer_data(self, bins):
+        # Regression test for gh-14379.
+        a = np.array([-2, 0, 127], dtype=np.int8)
+        hist, edges = np.histogram(a, bins=bins)
+        hist32, edges32 = np.histogram(a.astype(np.int32), bins=bins)
+        assert_array_equal(hist, hist32)
+        assert_array_equal(edges, edges32)
 
     def test_simple_weighted(self):
         """
@@ -802,7 +809,7 @@ class TestHistogramdd(object):
         hist, edges = histogramdd((y, x), bins=(y_edges, x_edges))
         assert_equal(hist, relative_areas)
 
-        # resulting histogram should be uniform, since counts and areas are propotional
+        # resulting histogram should be uniform, since counts and areas are proportional
         hist, edges = histogramdd((y, x), bins=(y_edges, x_edges), density=True)
         assert_equal(hist, 1 / (8*8))
 

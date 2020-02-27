@@ -8,7 +8,7 @@
         "PostHandler":"postprocess.epipostprocess",
         "Launch":true, 
         "LambdaConfig":{
-            "AMI":"ami-095c97b6fa0a7aa78",
+            "AMI":"ami-07b90d36fb4860629",
             "INSTANCE_TYPE": "m5.xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS":"launch-wizard-34",

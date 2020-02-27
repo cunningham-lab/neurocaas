@@ -124,7 +124,7 @@ Resources:
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
-          AMI: ami-0d487f3da835f1c18
+          AMI: ami-07b90d36fb4860629
           COMMAND: ls; cd ../../../../home/ubuntu; ncap_remote/run_epi.sh "{}" "{}"
             "{}" "{}"; . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
@@ -200,7 +200,7 @@ Resources:
       Description: Deletes Objects from S3
       Environment:
         Variables:
-          AMI: ami-0d487f3da835f1c18
+          AMI: ami-07b90d36fb4860629
           COMMAND: ls; cd ../../../../home/ubuntu; ncap_remote/run_epi.sh "{}" "{}"
             "{}" "{}"; . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
@@ -270,7 +270,7 @@ Resources:
       Description: Puts Objects in S3
       Environment:
         Variables:
-          AMI: ami-0d487f3da835f1c18
+          AMI: ami-07b90d36fb4860629
           COMMAND: ls; cd ../../../../home/ubuntu; ncap_remote/run_epi.sh "{}" "{}"
             "{}" "{}"; . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
@@ -315,7 +315,7 @@ Resources:
       Description: Postprocessing Lambda Function for Serverless
       Environment:
         Variables:
-          AMI: ami-0d487f3da835f1c18
+          AMI: ami-07b90d36fb4860629
           COMMAND: ls; cd ../../../../home/ubuntu; ncap_remote/run_epi.sh "{}" "{}"
             "{}" "{}"; . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml

@@ -796,7 +796,9 @@ class Submission_Launch_log_demo(Submission_Launch_full):
         ## Reset this directory
         create_jobdir  = utilsparam.s3.mkdir_reset(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
         
-        self.logger = utilsparam.s3.JobLogger(self.bucket_name, self.jobpath)
+        self.logger = utilsparam.s3.JobLogger_demo(self.bucket_name, self.jobpath)
+        self.logger.append("Initializing EPI analysis: Parameter search for 2D LDS.")
+        self.logger.write()
         #self.out_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.OUTDIR)
         #self.in_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.INDIR)
 
@@ -808,9 +810,9 @@ class Submission_Launch_log_demo(Submission_Launch_full):
         except KeyError as ke: 
             msg = "Using default instance type {} from config file".format(os.environ["INSTANCE_TYPE"])
             self.instance_type = os.environ["INSTANCE_TYPE"]
-            ## Log this message.
-            self.logger.append(msg)
-            self.logger.write()
+            ## Log this message.- not crucial for logging. 
+            #self.logger.append(msg)
+            #self.logger.write()
 
         ## These next two check that the submit file is correctly formatted
         ## Check that we have a dataname field:
@@ -837,7 +839,7 @@ class Submission_Launch_log_demo(Submission_Launch_full):
             ## Now raise an exception to halt processing, because this is a catastrophic error.  
             raise ValueError(os.environ["MISSING_CONFIG_ERROR"])
 
-        self.logger.append("Valid EPI analysis request detected with dataset {}, config file {}".format(self.data_name,self.config_name))
+        self.logger.append("EPI analysis request detected with dataset {}, config file {}. Reading EPI blueprint.".format(self.data_name,self.config_name))
         self.logger.write()
 
         ## Check that we have the actual data in the bucket.  
@@ -877,17 +879,19 @@ class Submission_Launch_log_demo(Submission_Launch_full):
             instance = utilsparam.ec2.launch_new_instance(
             instance_type=self.instance_type, 
             ami=os.environ['AMI'],
-            logger=self.logger
+            logger= []# self.logger
             )
             instances.append(instance)
+        self.logger.append("Setting up {} EPI infrastructures from blueprint, please wait...".format(nb_instances))
         self.instances = instances
 
     def start_instance(self):
         """ Starts new instances if stopped. We write a special loop for this one because we only need a single 60 second pause for all the intances, not one for each in serial. Specialized certificate messages. """
         utilsparam.ec2.start_instances_if_stopped(
             instances=self.instances,
-            logger=self.logger
+            logger=[]#self.logger
         )
+        self.logger.append("Created {} EPI infrastructures with 4 cpus, 16 GB memory ".format(len(self.filenames)))
 
     def process_inputs(self):
         """ Initiates Processing On Previously Acquired EC2 Instance. This version requires that you include a config (fourth) argument """
@@ -906,11 +910,18 @@ class Submission_Launch_log_demo(Submission_Launch_full):
 
         ## Should we vectorize the log here? 
         outpath_full = os.path.join(os.environ['OUTDIR'],self.jobname)
-        [self.logger.append("Starting analysis: {}".format(
-            os.environ['COMMAND'].format(
-                self.bucket_name, filename, outpath_full, self.config_name
-            )
-        )) for filename in self.filenames]
+
+        #[self.logger.append("Starting analysis with parameter set {}, dataset {}".format(
+        #    f+1,
+        #    filename
+        #    )
+        #) for f,filename in enumerate(self.filenames)]
+        #[self.logger.append("Starting analysis with parameter set {}: {}".format(
+        #    f+1,
+        #    os.environ['COMMAND'].format(
+        #        self.bucket_name, filename, outpath_full, self.config_name
+        #    )
+        #)) for f,filename in enumerate(self.filenames)]
         print([os.environ['COMMAND'].format(
               self.bucket_name, filename, outpath_full, self.config_name
               ) for filename in self.filenames],"command send")
@@ -925,6 +936,9 @@ class Submission_Launch_log_demo(Submission_Launch_full):
                 log_path=os.path.join(self.jobpath,'internal_ec2_logs')
                 )
             self.logger.initialize_datasets_dev(filename,self.instances[f].instance_id,response["Command"]["CommandId"])
+            self.logger.append("Starting analysis {} with parameter set {}".format(f+1,os.path.basename(filename)))
+            self.logger.write()
+        self.logger.append("All jobs submitted. Processing...")
 
 class Submission_Start_Stack():
     ## Submission class for the case where the instances are being started.
@@ -1171,9 +1185,11 @@ def process_upload_log_demo(bucket_name, key,time):
     print('starting')
     submission.start_instance()
     print('writing2')
+    submission.logger.write()
     print('sending')
     submission.process_inputs()
     print("writing3")
+    submission.logger.write()
 
     submission.logger.write()
 ## New 2/11: for disjoint data and upload buckets. 
