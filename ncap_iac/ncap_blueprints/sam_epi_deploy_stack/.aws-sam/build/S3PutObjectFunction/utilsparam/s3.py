@@ -205,6 +205,90 @@ class JobLogger(Logger):
         self.writeobj.put(Body = (bytes(json.dumps(self._struct).encode("UTF-8"))))
         
 
+class JobLogger_demo(Logger):
+    """
+    Updated utility class to write logs in format amenable to figure updating. Updated for cosyne EPI demo to write only clean logs to s3 certificate.txt  
+    """
+    def __init__(self,bucket_name,path):
+        self.bucket = s3_resource.Bucket(bucket_name) 
+        self.bucket_name = bucket_name
+        self.path = os.path.join(path, os.environ['LOGDIR'],"certificate.txt")#mkdir(bucket_name, path, LOGDIR)
+        ## Stupid, fix this TODO
+        self.basepath = path
+        ## Declare the object you will write to: 
+        self.writeobj = s3_resource.Object(bucket_name,self.path)
+        self._logs = []
+        self._datasets = {}
+        self._config = {}
+        self._struct = {"logs":"no logs","datasets":"data not loaded","config":"config not loaded"}
+
+    def append_lambdalog(self,string):
+        """
+        Unambiguously named wrapper for append. 
+        Inputs: 
+        string: the string to append to the lambda log. 
+        """
+        self.append(string)
+
+    def initialize_datasets_dev(self,dataset,instanceid,commandid):
+        """
+        Initialize datasets by assigning to each a dictionary specifying instance data will be run on, command id, status, job description, reason, most recent output. 
+        Inputs:
+        dataset: the path to the data *file* analyzed by the instance. 
+        instanceid (str): the string specifying what instance we will run analysis on. 
+        commandid (str): the string specifying what the command id corresonding to this instance is. 
+        """
+        template_dict = {"status":"INITIALIZING","reason":"NONE","stdout":"not given yet","stderr":"not given yet","input":dataset,"instance":instanceid,"command":commandid}
+        ##TODO: check that these instances and commands exist. 
+        self._datasets[dataset] = template_dict
+        dataset_basename = os.path.basename(dataset)
+        datapath = os.path.join(self.basepath, os.environ['LOGDIR'],"DATASET_NAME:"+dataset_basename+"_STATUS.txt")#mkdir(bucket_name, path, LOGDIR)
+        dataobj = s3_resource.Object(self.bucket_name,datapath)
+        dataobj.put(Body = (bytes(json.dumps(template_dict).encode("UTF-8"))))
+
+    def initialize_datasets(self,dataset,instanceid,commandid):
+        """
+        Initialize datasets by assigning to each a dictionary specifying instance data will be run on, command id, status, job description, reason, most recent output. 
+        Inputs:
+        dataset: the path to the data *file* analyzed by the instance. 
+        instanceid (str): the string specifying what instance we will run analysis on. 
+        commandid (str): the string specifying what the command id corresonding to this instance is. 
+        """
+        template_dict = {"status":"INITIALIZING","reason":"NONE","stdout":"not given yet","stderr":"not given yet","instance":instanceid,"command":commandid}
+        ##TODO: check that these instances and commands exist. 
+        self._datasets[dataset] = template_dict
+        ## Additionally (later substitute), write these datasets to their own objects.`
+
+    def assign_config(self,configpath):
+        """
+        Configuration assignment. Includes version of config file .
+        Inputs: 
+        configpath (str): path to config file
+        """
+        self._config['name'] = configpath # TODO Turn on versioning for user buckets so we can trace configs. 
+
+    def update(self):
+        """
+        Updates the struct object. 
+        """
+        self._struct['logs'] = self._logs
+        self._struct['datasets'] = self._datasets
+        self._struct['config'] = self._config
+
+    def append(self, string):
+        """ """
+        self._logs.append(
+            str(datetime.datetime.now())[:-4] + ": " + string 
+        )
+
+    def write(self):
+        """ 
+        Updates the struct object, and writes the resulting dictionary.  
+        """
+        self.update()
+        encoded_text = "\n".join(self._logs).encode("utf-8")
+        #self.writeobj.put(Body = (bytes(json.dumps("\n".join(self._logs)).encode("UTF-8"))))
+        self.writeobj.put(Body = encoded_text)
 
 #def check_for_config(upload, config):
 #    """ """
