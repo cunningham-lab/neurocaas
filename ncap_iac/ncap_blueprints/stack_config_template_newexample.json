@@ -1,9 +1,11 @@
 {
     "PipelineName":"ctnncap213example",
     "REGION":"us-east-1",
+    "ID":"git commit id of current pipeline",
+    "ParentID":"git commit id of parent pipeline",
     "Lambda":{
-        "CodeUri":"../../lambda_repo",
-        "Handler":"submit_start.handler_log",
+        "CodeUri":"../lambda_repo",
+        "Handler":"submit_start.handler_log_dev",
         "Launch":true, 
         "LambdaConfig":{
             "AMI":"ami-045deefcfb062fd2a",
