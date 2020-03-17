@@ -1,1 +1,41 @@
-{"PipelineName": "ncapctnteststack", "REGION": "us-east-1", "Lambda": {"CodeUri": "../lambda_repo", "Handler": "submit_start.handler", "Launch": true, "LambdaConfig": {"AMI": "ami-0c31c77e67f442e16", "INSTANCE_TYPE": "t2.micro", "REGION": "us-east-1", "SECURITY_GROUPS": "launch-wizard-34", "IAM_ROLE": "pmd-s3-ssm", "KEY_NAME": "ta_testkey", "WORKING_DIRECTORY": "~/home/ec2-user", "COMMAND": "ls; cd home/ec2-user/; bin/run.sh \"{}\" \"{}\" \"{}\"", "SHUTDOWN_BEHAVIOR": "terminate", "CONFIG": "config.yaml", "MISSING_CONFIG_ERROR": "We need a config file to analyze data.", "EXECUTION_TIMEOUT": 180, "LOGDIR": "logs", "OUTDIR": "results", "INDIR": "inputs", "LOGFILE": "lambda_log.txt"}}, "UXData": {"Affiliates": [{"AffiliateName": "debuggers", "UserNames": ["taiga"], "PipelinePath": "", "PipelineDir": "trackingfolder", "UserInput": true, "ContactEmail": "The email we should notify regarding processing status."}]}}
+{
+    "PipelineName": "ncapctnteststack",
+    "REGION": "us-east-1",
+    "Lambda": {
+        "CodeUri": "../lambda_repo",
+        "Handler": "submit_start.handler",
+        "Launch": true,
+        "LambdaConfig": {
+            "AMI": "ami-0ba1dd402cf026788",
+            "INSTANCE_TYPE": "t2.micro",
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS": "launch-wizard-34",
+            "IAM_ROLE": "pmd-s3-ssm",
+            "KEY_NAME": "ta_testkey",
+            "WORKING_DIRECTORY": "~/home/ec2-user",
+            "COMMAND": "ls; cd home/ec2-user/; bin/run.sh \"{}\" \"{}\" \"{}\"",
+            "SHUTDOWN_BEHAVIOR": "terminate",
+            "CONFIG": "config.yaml",
+            "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+            "EXECUTION_TIMEOUT": 180,
+            "LOGDIR": "logs",
+            "OUTDIR": "results",
+            "INDIR": "inputs",
+            "LOGFILE": "lambda_log.txt"
+        }
+    },
+    "UXData": {
+        "Affiliates": [
+            {
+                "AffiliateName": "debuggers",
+                "UserNames": [
+                    "taiga"
+                ],
+                "PipelinePath": "",
+                "PipelineDir": "trackingfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
+            }
+        ]
+    }
+}
