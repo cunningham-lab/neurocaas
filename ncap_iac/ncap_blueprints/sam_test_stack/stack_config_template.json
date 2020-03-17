@@ -6,7 +6,7 @@
         "Handler": "submit_start.handler",
         "Launch": true,
         "LambdaConfig": {
-            "AMI": "ami-0ba1dd402cf026788",
+            "AMI": "ami-0c31c77e67f442e16",
             "INSTANCE_TYPE": "t2.micro",
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "launch-wizard-34",
