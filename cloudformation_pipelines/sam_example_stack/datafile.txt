@@ -1,3 +1,0 @@
-"""
-Lots of data here.
-"""

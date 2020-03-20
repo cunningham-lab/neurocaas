@@ -1,0 +1,26 @@
+{
+    "UXData":{
+    "Affiliates":[
+        {
+            "AffiliateName":"cunninghamlab",
+            "UserNames":["jpccosyne","srbcosyne","tacosyne"],
+            "Pipelines":["epi-ncap"],
+            "PipelineDir":["Directory where pipeline should be built"],
+            "ContactEmail":"The email that we should notify regarding processing status."
+        }
+    ]
+    },
+    "Lambda":{
+        "LambdaConfig":{
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS":"Type of instance to launch.",
+            "IAM_ROLE":"iam role with ssm and s3 access",
+            "EXECUTION_TIMEOUT":"172800",
+            "LOGDIR":"logs",
+            "OUTDIR":"results",
+            "INDIR":"inputs",
+            "LOGFILE":"lambda_log.txt",
+            "MONITOR":true
+        }
+    }
+}

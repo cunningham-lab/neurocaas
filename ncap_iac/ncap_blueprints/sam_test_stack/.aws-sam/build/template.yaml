@@ -150,6 +150,9 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
+          versionid: '4831dc2c7748aa8928f4dd5a396b4988d01c9422
+
+            '
       Events:
         BucketEventdebuggers:
           Properties:
@@ -221,6 +224,9 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
+          versionid: '4831dc2c7748aa8928f4dd5a396b4988d01c9422
+
+            '
       Handler: helper.handler_deldir
       Role:
         Fn::GetAtt:
@@ -286,6 +292,9 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
+          versionid: '4831dc2c7748aa8928f4dd5a396b4988d01c9422
+
+            '
       Handler: helper.handler_mkdir
       Role:
         Fn::GetAtt:

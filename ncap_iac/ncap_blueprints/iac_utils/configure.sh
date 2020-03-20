@@ -20,5 +20,6 @@ cd "$ncaprootdir"/ncap_blueprints
 mkdir "$1"
 cp stack_config_template_newexample.json "$ncaprootdir"/ncap_blueprints/"$1"/stack_config_template.json 
 
-
-
+git add "$ncaprootdir"/ncap_blueprints/"$1"/ 
+git commit -m "automatic commit: deployed pipeline '$1'" 
+git push

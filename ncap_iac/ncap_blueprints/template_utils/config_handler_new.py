@@ -8,6 +8,7 @@ from troposphere.cloudformation import CustomResource
 from lambda_policies import lambda_basepolicy,lambda_writeS3
 import sys
 import json 
+import subprocess
 import secrets
 import os
 import boto3
@@ -118,11 +119,13 @@ class PipelineTemplate(NCAPTemplate):
                                           'Filter':aff_filter}}
         ## We're going to add in all of the lambda configuration items to the runtime environment.
         lambdaconfig = self.config['Lambda']['LambdaConfig']
-        #lambdaconfig ={}
         ### Most of the config can be done through the config file, but we will pass certain elements from the template. 
         lambdaconfig['figlambid'] = Ref(self.figurelamb) 
         lambdaconfig['figlambarn'] = GetAtt(self.figurelamb,'Arn')
         lambdaconfig['cwrolearn'] = GetAtt(self.cwrole,'Arn')
+
+        ## Additionally, we're going to add in the git commit version. 
+        lambdaconfig['versionid'] = subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8") 
         ## Now add to a lambda function: 
         function = Function('MainLambda',
                 CodeUri = self.config['Lambda']["CodeUri"],##'../lambda_repo',

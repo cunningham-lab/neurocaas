@@ -1,5 +1,0 @@
-{
-	"param_dict":"peterkagroupCAIMAN/inputs/example_template/pickled_dict",
-	"cnn":"peterkagroupCAIMAN/inputs/example_template/cnn_model_online.h5",
-	"metadata":"peterkagroupCAIMAN/inputs/training-002/training-002.xml"
-}

@@ -24,7 +24,7 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::dlc-ncap"
+        "arn:aws:s3:::yass-ncap"
       ],
       "Condition": {
         "StringEquals": {
@@ -49,7 +49,7 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::dlc-ncap"
+        "arn:aws:s3:::yass-ncap"
       ],
       "Condition": {
         "StringLike": {
@@ -69,7 +69,7 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::dlc-ncap/ctnncapdevDLC/inputs/*"
+        "arn:aws:s3:::yass-ncap/ctnncapdevDLC/inputs/*"
       ]
     },
     {
@@ -80,8 +80,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::dlc-ncap/ctnncapdevDLC/results/*",
-        "arn:aws:s3:::dlc-ncap/ctnncapdevDLC/logs/*"
+        "arn:aws:s3:::yass-ncap/ctnncapdevDLC/results/*",
+        "arn:aws:s3:::yass-ncap/ctnncapdevDLC/logs/*"
       ]
     }
   ]
