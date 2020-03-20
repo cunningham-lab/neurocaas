@@ -143,7 +143,7 @@ class PipelineTemplate(NCAPTemplate):
     def add_figure_lambda(self):
         ## Now add to a lambda function: 
         function = Function('FigLambda',
-                CodeUri = '../lambda_repo',
+                CodeUri = '../../protocols', ## assume we are running from the stack config template location.
                 Runtime = 'python3.6',
                 Handler = 'log.eventshandler',
                 Description = 'Lambda Function logging start/stop for NCAP',
