@@ -16,7 +16,7 @@ Structure:
 
 *Requires:*
 
-AWS CLI
+AWS CLI (configured with AWS Account)
 
 AWS SAM CLI
 
