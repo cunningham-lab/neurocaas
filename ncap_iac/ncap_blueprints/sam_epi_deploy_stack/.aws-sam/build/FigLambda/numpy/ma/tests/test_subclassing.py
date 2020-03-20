@@ -66,11 +66,11 @@ class MSubArray(SubArray, MaskedArray):
         _data.info = subarr.info
         return _data
 
-    @property
-    def _series(self):
+    def _get_series(self):
         _view = self.view(MaskedArray)
         _view._sharedmask = False
         return _view
+    _series = property(fget=_get_series)
 
 msubarray = MSubArray
 

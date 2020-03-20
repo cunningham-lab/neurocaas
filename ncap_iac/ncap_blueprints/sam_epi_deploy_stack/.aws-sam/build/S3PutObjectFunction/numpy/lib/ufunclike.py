@@ -8,9 +8,7 @@ from __future__ import division, absolute_import, print_function
 __all__ = ['fix', 'isneginf', 'isposinf']
 
 import numpy.core.numeric as nx
-from numpy.core.overrides import (
-    array_function_dispatch, ARRAY_FUNCTION_ENABLED,
-)
+from numpy.core.overrides import array_function_dispatch, ENABLE_ARRAY_FUNCTION
 import warnings
 import functools
 
@@ -45,7 +43,7 @@ def _fix_out_named_y(f):
     Allow the out argument to be passed as the name `y` (deprecated)
 
     This decorator should only be used if _deprecate_out_named_y is used on
-    a corresponding dispatcher function.
+    a corresponding dispatcher fucntion.
     """
     @functools.wraps(f)
     def func(x, out=None, **kwargs):
@@ -57,14 +55,8 @@ def _fix_out_named_y(f):
     return func
 
 
-def _fix_and_maybe_deprecate_out_named_y(f):
-    """
-    Use the appropriate decorator, depending upon if dispatching is being used.
-    """
-    if ARRAY_FUNCTION_ENABLED:
-        return _fix_out_named_y(f)
-    else:
-        return _deprecate_out_named_y(f)
+if not ENABLE_ARRAY_FUNCTION:
+    _fix_out_named_y = _deprecate_out_named_y
 
 
 @_deprecate_out_named_y
@@ -73,7 +65,7 @@ def _dispatcher(x, out=None):
 
 
 @array_function_dispatch(_dispatcher, verify=False, module='numpy')
-@_fix_and_maybe_deprecate_out_named_y
+@_fix_out_named_y
 def fix(x, out=None):
     """
     Round to nearest integer towards zero.
@@ -120,7 +112,7 @@ def fix(x, out=None):
 
 
 @array_function_dispatch(_dispatcher, verify=False, module='numpy')
-@_fix_and_maybe_deprecate_out_named_y
+@_fix_out_named_y
 def isposinf(x, out=None):
     """
     Test element-wise for positive infinity, return result as bool array.
@@ -162,11 +154,11 @@ def isposinf(x, out=None):
     Examples
     --------
     >>> np.isposinf(np.PINF)
-    True
+    array(True, dtype=bool)
     >>> np.isposinf(np.inf)
-    True
+    array(True, dtype=bool)
     >>> np.isposinf(np.NINF)
-    False
+    array(False, dtype=bool)
     >>> np.isposinf([-np.inf, 0., np.inf])
     array([False, False,  True])
 
@@ -189,7 +181,7 @@ def isposinf(x, out=None):
 
 
 @array_function_dispatch(_dispatcher, verify=False, module='numpy')
-@_fix_and_maybe_deprecate_out_named_y
+@_fix_out_named_y
 def isneginf(x, out=None):
     """
     Test element-wise for negative infinity, return result as bool array.
@@ -232,11 +224,11 @@ def isneginf(x, out=None):
     Examples
     --------
     >>> np.isneginf(np.NINF)
-    True
+    array(True, dtype=bool)
     >>> np.isneginf(np.inf)
-    False
+    array(False, dtype=bool)
     >>> np.isneginf(np.PINF)
-    False
+    array(False, dtype=bool)
     >>> np.isneginf([-np.inf, 0., np.inf])
     array([ True, False, False])
 

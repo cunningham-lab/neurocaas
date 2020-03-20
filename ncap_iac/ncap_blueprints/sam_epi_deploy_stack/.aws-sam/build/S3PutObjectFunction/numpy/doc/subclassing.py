@@ -118,8 +118,7 @@ For example, consider the following Python code:
       def __new__(cls, *args):
           print('Cls in __new__:', cls)
           print('Args in __new__:', args)
-          # The `object` type __new__ method takes a single argument.
-          return object.__new__(cls)
+          return object.__new__(cls, *args)
 
       def __init__(self, *args):
           print('type(self) in __init__:', type(self))

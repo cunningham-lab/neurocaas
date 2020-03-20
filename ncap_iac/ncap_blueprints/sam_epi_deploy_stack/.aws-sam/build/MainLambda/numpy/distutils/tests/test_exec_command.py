@@ -6,7 +6,7 @@ from tempfile import TemporaryFile
 
 from numpy.distutils import exec_command
 from numpy.distutils.exec_command import get_pythonexe
-from numpy.testing import tempdir, assert_, assert_warns
+from numpy.testing import tempdir, assert_
 
 # In python 3 stdout, stderr are text (unicode compliant) devices, so to
 # emulate them import StringIO from the io module.
@@ -71,31 +71,27 @@ def test_exec_command_stdout():
     # Test posix version:
     with redirect_stdout(StringIO()):
         with redirect_stderr(TemporaryFile()):
-            with assert_warns(DeprecationWarning):
-                exec_command.exec_command("cd '.'")
+            exec_command.exec_command("cd '.'")
 
     if os.name == 'posix':
         # Test general (non-posix) version:
         with emulate_nonposix():
             with redirect_stdout(StringIO()):
                 with redirect_stderr(TemporaryFile()):
-                    with assert_warns(DeprecationWarning):
-                        exec_command.exec_command("cd '.'")
+                    exec_command.exec_command("cd '.'")
 
 def test_exec_command_stderr():
     # Test posix version:
     with redirect_stdout(TemporaryFile(mode='w+')):
         with redirect_stderr(StringIO()):
-            with assert_warns(DeprecationWarning):
-                exec_command.exec_command("cd '.'")
+            exec_command.exec_command("cd '.'")
 
     if os.name == 'posix':
         # Test general (non-posix) version:
         with emulate_nonposix():
             with redirect_stdout(TemporaryFile()):
                 with redirect_stderr(StringIO()):
-                    with assert_warns(DeprecationWarning):
-                        exec_command.exec_command("cd '.'")
+                    exec_command.exec_command("cd '.'")
 
 
 class TestExecCommand(object):
@@ -209,12 +205,11 @@ class TestExecCommand(object):
     def test_basic(self):
         with redirect_stdout(StringIO()):
             with redirect_stderr(StringIO()):
-                with assert_warns(DeprecationWarning):
-                    if os.name == "posix":
-                        self.check_posix(use_tee=0)
-                        self.check_posix(use_tee=1)
-                    elif os.name == "nt":
-                        self.check_nt(use_tee=0)
-                        self.check_nt(use_tee=1)
-                    self.check_execute_in(use_tee=0)
-                    self.check_execute_in(use_tee=1)
+                if os.name == "posix":
+                    self.check_posix(use_tee=0)
+                    self.check_posix(use_tee=1)
+                elif os.name == "nt":
+                    self.check_nt(use_tee=0)
+                    self.check_nt(use_tee=1)
+                self.check_execute_in(use_tee=0)
+                self.check_execute_in(use_tee=1)

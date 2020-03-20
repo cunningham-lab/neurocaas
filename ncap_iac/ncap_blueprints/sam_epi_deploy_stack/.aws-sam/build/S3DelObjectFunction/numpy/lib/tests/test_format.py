@@ -287,7 +287,6 @@ from io import BytesIO
 import numpy as np
 from numpy.testing import (
     assert_, assert_array_equal, assert_raises, assert_raises_regex,
-    assert_warns
     )
 from numpy.lib import format
 
@@ -939,57 +938,3 @@ def test_empty_npz():
     fname = os.path.join(tempdir, "nothing.npz")
     np.savez(fname)
     np.load(fname)
-
-
-def test_unicode_field_names():
-    # gh-7391
-    arr = np.array([
-        (1, 3),
-        (1, 2),
-        (1, 3),
-        (1, 2)
-    ], dtype=[
-        ('int', int),
-        (u'\N{CJK UNIFIED IDEOGRAPH-6574}\N{CJK UNIFIED IDEOGRAPH-5F62}', int)
-    ])
-    fname = os.path.join(tempdir, "unicode.npy")
-    with open(fname, 'wb') as f:
-        format.write_array(f, arr, version=(3, 0))
-    with open(fname, 'rb') as f:
-        arr2 = format.read_array(f)
-    assert_array_equal(arr, arr2)
-
-    # notifies the user that 3.0 is selected
-    with open(fname, 'wb') as f:
-        with assert_warns(UserWarning):
-            format.write_array(f, arr, version=None)
-
-
-@pytest.mark.parametrize('dt, fail', [
-    (np.dtype({'names': ['a', 'b'], 'formats':  [float, np.dtype('S3',
-                 metadata={'some': 'stuff'})]}), True),
-    (np.dtype(int, metadata={'some': 'stuff'}), False),
-    (np.dtype([('subarray', (int, (2,)))], metadata={'some': 'stuff'}), False),
-    # recursive: metadata on the field of a dtype
-    (np.dtype({'names': ['a', 'b'], 'formats': [
-        float, np.dtype({'names': ['c'], 'formats': [np.dtype(int, metadata={})]})
-    ]}), False)
-    ])
-def test_metadata_dtype(dt, fail):
-    # gh-14142
-    arr = np.ones(10, dtype=dt)
-    buf = BytesIO()
-    with assert_warns(UserWarning):
-        np.save(buf, arr)
-    buf.seek(0)
-    if fail:
-        with assert_raises(ValueError):
-            np.load(buf)
-    else:
-        arr2 = np.load(buf)
-        # BUG: assert_array_equal does not check metadata
-        from numpy.lib.format import _has_metadata
-        assert_array_equal(arr, arr2)
-        assert _has_metadata(arr.dtype)
-        assert not _has_metadata(arr2.dtype)
-

@@ -20,9 +20,8 @@ from numpy.linalg.linalg import _multi_dot_matrix_chain_order
 from numpy.testing import (
     assert_, assert_equal, assert_raises, assert_array_equal,
     assert_almost_equal, assert_allclose, suppress_warnings,
-    assert_raises_regex, HAS_LAPACK64,
+    assert_raises_regex,
     )
-from numpy.testing._private.utils import requires_memory
 
 
 def consistent_subclass(out, in_):
@@ -634,9 +633,18 @@ class TestEig(EigCases):
         assert_(isinstance(a, np.ndarray))
 
 
-class SVDBaseTests(object):
-    hermitian = False
+class SVDCases(LinalgSquareTestCase, LinalgGeneralizedSquareTestCase):
 
+    def do(self, a, b, tags):
+        u, s, vt = linalg.svd(a, 0)
+        assert_allclose(a, dot_generalized(np.asarray(u) * np.asarray(s)[..., None, :],
+                                           np.asarray(vt)),
+                        rtol=get_rtol(u.dtype))
+        assert_(consistent_subclass(u, a))
+        assert_(consistent_subclass(vt, a))
+
+
+class TestSVD(SVDCases):
     @pytest.mark.parametrize('dtype', [single, double, csingle, cdouble])
     def test_types(self, dtype):
         x = np.array([[1, 0.5], [0.5, 1]], dtype=dtype)
@@ -644,50 +652,22 @@ class SVDBaseTests(object):
         assert_equal(u.dtype, dtype)
         assert_equal(s.dtype, get_real_dtype(dtype))
         assert_equal(vh.dtype, dtype)
-        s = linalg.svd(x, compute_uv=False, hermitian=self.hermitian)
+        s = linalg.svd(x, compute_uv=False)
         assert_equal(s.dtype, get_real_dtype(dtype))
 
-
-class SVDCases(LinalgSquareTestCase, LinalgGeneralizedSquareTestCase):
-
-    def do(self, a, b, tags):
-        u, s, vt = linalg.svd(a, False)
-        assert_allclose(a, dot_generalized(np.asarray(u) * np.asarray(s)[..., None, :],
-                                           np.asarray(vt)),
-                        rtol=get_rtol(u.dtype))
-        assert_(consistent_subclass(u, a))
-        assert_(consistent_subclass(vt, a))
-
-
-class TestSVD(SVDCases, SVDBaseTests):
     def test_empty_identity(self):
         """ Empty input should put an identity matrix in u or vh """
         x = np.empty((4, 0))
-        u, s, vh = linalg.svd(x, compute_uv=True, hermitian=self.hermitian)
+        u, s, vh = linalg.svd(x, compute_uv=True)
         assert_equal(u.shape, (4, 4))
         assert_equal(vh.shape, (0, 0))
         assert_equal(u, np.eye(4))
 
         x = np.empty((0, 4))
-        u, s, vh = linalg.svd(x, compute_uv=True, hermitian=self.hermitian)
+        u, s, vh = linalg.svd(x, compute_uv=True)
         assert_equal(u.shape, (0, 0))
         assert_equal(vh.shape, (4, 4))
         assert_equal(vh, np.eye(4))
-
-
-class SVDHermitianCases(HermitianTestCase, HermitianGeneralizedTestCase):
-
-    def do(self, a, b, tags):
-        u, s, vt = linalg.svd(a, False, hermitian=True)
-        assert_allclose(a, dot_generalized(np.asarray(u) * np.asarray(s)[..., None, :],
-                                           np.asarray(vt)),
-                        rtol=get_rtol(u.dtype))
-        assert_(consistent_subclass(u, a))
-        assert_(consistent_subclass(vt, a))
-
-
-class TestSVDHermitian(SVDHermitianCases, SVDBaseTests):
-    hermitian = True
 
 
 class CondCases(LinalgSquareTestCase, LinalgGeneralizedSquareTestCase):
@@ -817,20 +797,6 @@ class TestPinv(PinvCases):
     pass
 
 
-class PinvHermitianCases(HermitianTestCase, HermitianGeneralizedTestCase):
-
-    def do(self, a, b, tags):
-        a_ginv = linalg.pinv(a, hermitian=True)
-        # `a @ a_ginv == I` does not hold if a is singular
-        dot = dot_generalized
-        assert_almost_equal(dot(dot(a, a_ginv), a), a, single_decimal=5, double_decimal=11)
-        assert_(consistent_subclass(a_ginv, a))
-
-
-class TestPinvHermitian(PinvHermitianCases):
-    pass
-
-
 class DetCases(LinalgSquareTestCase, LinalgGeneralizedSquareTestCase):
 
     def do(self, a, b, tags):
@@ -898,7 +864,7 @@ class LstsqCases(LinalgSquareTestCase, LinalgNonsquareTestCase):
     def do(self, a, b, tags):
         arr = np.asarray(a)
         m, n = arr.shape
-        u, s, vt = linalg.svd(a, False)
+        u, s, vt = linalg.svd(a, 0)
         x, residuals, rank, sv = linalg.lstsq(a, b, rcond=-1)
         if m == 0:
             assert_((x == 0).all())
@@ -1996,51 +1962,3 @@ class TestTensorinv(object):
         ainv = linalg.tensorinv(a, ind=1)
         b = np.ones(24)
         assert_allclose(np.tensordot(ainv, b, 1), np.linalg.tensorsolve(a, b))
-
-
-def test_unsupported_commontype():
-    # linalg gracefully handles unsupported type
-    arr = np.array([[1, -2], [2, 5]], dtype='float16')
-    with assert_raises_regex(TypeError, "unsupported in linalg"):
-        linalg.cholesky(arr)
-
-
-@pytest.mark.slow
-@pytest.mark.xfail(not HAS_LAPACK64, run=False,
-                   reason="Numpy not compiled with 64-bit BLAS/LAPACK")
-@requires_memory(free_bytes=16e9)
-def test_blas64_dot():
-    n = 2**32
-    a = np.zeros([1, n], dtype=np.float32)
-    b = np.ones([1, 1], dtype=np.float32)
-    a[0,-1] = 1
-    c = np.dot(b, a)
-    assert_equal(c[0,-1], 1)
-
-
-@pytest.mark.xfail(not HAS_LAPACK64,
-                   reason="Numpy not compiled with 64-bit BLAS/LAPACK")
-def test_blas64_geqrf_lwork_smoketest():
-    # Smoke test LAPACK geqrf lwork call with 64-bit integers
-    dtype = np.float64
-    lapack_routine = np.linalg.lapack_lite.dgeqrf
-
-    m = 2**32 + 1
-    n = 2**32 + 1
-    lda = m
-
-    # Dummy arrays, not referenced by the lapack routine, so don't
-    # need to be of the right size
-    a = np.zeros([1, 1], dtype=dtype)
-    work = np.zeros([1], dtype=dtype)
-    tau = np.zeros([1], dtype=dtype)
-
-    # Size query
-    results = lapack_routine(m, n, a, lda, tau, work, -1, 0)
-    assert_equal(results['info'], 0)
-    assert_equal(results['m'], m)
-    assert_equal(results['n'], m)
-
-    # Should result to an integer of a reasonable size
-    lwork = int(work.item())
-    assert_(2**32 < lwork < 2**42)
