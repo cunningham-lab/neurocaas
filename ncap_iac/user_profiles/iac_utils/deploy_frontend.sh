@@ -19,21 +19,19 @@ PIPENAME=$(basename "$PIPEDIR")
 
 ## Give the path to the root directory for ncap (we like absolute paths) 
 
-cd $ncaprootdir/ncap_blueprints/template_utils
+cd $ncaprootdir/utils
 python user_maker_frontend.py "$PIPEDIR"/user_config_template.json 
 
 cd "$PIPEDIR"
 
-echo $PIPENAME, pipename
-
-sam build -t compiled_users.json -m $ncaprootdir/ncap_blueprints/lambda_repo/requirements.txt
+sam build -t compiled_users.json -m $ncaprootdir/protocols/requirements.txt
 
 sam package --s3-bucket ctnsampackages --output-template-file compiled_users.yaml
 
 sam deploy --template-file compiled_users.yaml --stack-name $PIPENAME --capabilities CAPABILITY_NAMED_IAM
 
 ## Added February 4th:
-cd $ncaprootdir/ncap_blueprints/template_utils
+cd $ncaprootdir/utils
 python export_credentials.py $PIPEDIR 
 
 ########
