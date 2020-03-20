@@ -160,7 +160,7 @@ def lag2poly(c):
     --------
     >>> from numpy.polynomial.laguerre import lag2poly
     >>> lag2poly([ 23., -63.,  58., -18.])
-    array([0., 1., 2., 3.])
+    array([ 0.,  1.,  2.,  3.])
 
     """
     from .polynomial import polyadd, polysub, polymulx
@@ -269,20 +269,35 @@ def lagfromroots(roots):
 
     See Also
     --------
-    polyfromroots, legfromroots, chebfromroots, hermfromroots, hermefromroots
+    polyfromroots, legfromroots, chebfromroots, hermfromroots,
+    hermefromroots.
 
     Examples
     --------
     >>> from numpy.polynomial.laguerre import lagfromroots, lagval
     >>> coef = lagfromroots((-1, 0, 1))
     >>> lagval((-1, 0, 1), coef)
-    array([0.,  0.,  0.])
+    array([ 0.,  0.,  0.])
     >>> coef = lagfromroots((-1j, 1j))
     >>> lagval((-1j, 1j), coef)
-    array([0.+0.j, 0.+0.j])
+    array([ 0.+0.j,  0.+0.j])
 
     """
-    return pu._fromroots(lagline, lagmul, roots)
+    if len(roots) == 0:
+        return np.ones(1)
+    else:
+        [roots] = pu.as_series([roots], trim=False)
+        roots.sort()
+        p = [lagline(-r, 1) for r in roots]
+        n = len(p)
+        while n > 1:
+            m, r = divmod(n, 2)
+            tmp = [lagmul(p[i], p[i+m]) for i in range(m)]
+            if r:
+                tmp[0] = lagmul(tmp[0], p[-1])
+            p = tmp
+            n = m
+        return p[0]
 
 
 def lagadd(c1, c2):
@@ -319,11 +334,19 @@ def lagadd(c1, c2):
     --------
     >>> from numpy.polynomial.laguerre import lagadd
     >>> lagadd([1, 2, 3], [1, 2, 3, 4])
-    array([2.,  4.,  6.,  4.])
+    array([ 2.,  4.,  6.,  4.])
 
 
     """
-    return pu._add(c1, c2)
+    # c1, c2 are trimmed copies
+    [c1, c2] = pu.as_series([c1, c2])
+    if len(c1) > len(c2):
+        c1[:c2.size] += c2
+        ret = c1
+    else:
+        c2[:c1.size] += c1
+        ret = c2
+    return pu.trimseq(ret)
 
 
 def lagsub(c1, c2):
@@ -360,10 +383,19 @@ def lagsub(c1, c2):
     --------
     >>> from numpy.polynomial.laguerre import lagsub
     >>> lagsub([1, 2, 3, 4], [1, 2, 3])
-    array([0.,  0.,  0.,  4.])
+    array([ 0.,  0.,  0.,  4.])
 
     """
-    return pu._sub(c1, c2)
+    # c1, c2 are trimmed copies
+    [c1, c2] = pu.as_series([c1, c2])
+    if len(c1) > len(c2):
+        c1[:c2.size] -= c2
+        ret = c1
+    else:
+        c2 = -c2
+        c2[:c1.size] += c1
+        ret = c2
+    return pu.trimseq(ret)
 
 
 def lagmulx(c):
@@ -401,7 +433,7 @@ def lagmulx(c):
     --------
     >>> from numpy.polynomial.laguerre import lagmulx
     >>> lagmulx([1, 2, 3])
-    array([-1.,  -1.,  11.,  -9.])
+    array([ -1.,  -1.,  11.,  -9.])
 
     """
     # c is a trimmed copy
@@ -524,12 +556,31 @@ def lagdiv(c1, c2):
     --------
     >>> from numpy.polynomial.laguerre import lagdiv
     >>> lagdiv([  8., -13.,  38., -51.,  36.], [0, 1, 2])
-    (array([1., 2., 3.]), array([0.]))
+    (array([ 1.,  2.,  3.]), array([ 0.]))
     >>> lagdiv([  9., -12.,  38., -51.,  36.], [0, 1, 2])
-    (array([1., 2., 3.]), array([1., 1.]))
+    (array([ 1.,  2.,  3.]), array([ 1.,  1.]))
 
     """
-    return pu._div(lagmul, c1, c2)
+    # c1, c2 are trimmed copies
+    [c1, c2] = pu.as_series([c1, c2])
+    if c2[-1] == 0:
+        raise ZeroDivisionError()
+
+    lc1 = len(c1)
+    lc2 = len(c2)
+    if lc1 < lc2:
+        return c1[:1]*0, c1
+    elif lc2 == 1:
+        return c1/c2[-1], c1[:1]*0
+    else:
+        quo = np.empty(lc1 - lc2 + 1, dtype=c1.dtype)
+        rem = c1
+        for i in range(lc1 - lc2, - 1, -1):
+            p = lagmul([0]*i + [1], c2)
+            q = rem[-1]/p[-1]
+            rem = rem[:-1] - q*p[:-1]
+            quo[i] = q
+        return quo, pu.trimseq(rem)
 
 
 def lagpow(c, pow, maxpower=16):
@@ -566,7 +617,24 @@ def lagpow(c, pow, maxpower=16):
     array([ 14., -16.,  56., -72.,  54.])
 
     """
-    return pu._pow(lagmul, c, pow, maxpower)
+    # c is a trimmed copy
+    [c] = pu.as_series([c])
+    power = int(pow)
+    if power != pow or power < 0:
+        raise ValueError("Power must be a non-negative integer.")
+    elif maxpower is not None and power > maxpower:
+        raise ValueError("Power is too large")
+    elif power == 0:
+        return np.array([1], dtype=c.dtype)
+    elif power == 1:
+        return c
+    else:
+        # This can be made more efficient by using powers of two
+        # in the usual way.
+        prd = c
+        for i in range(2, power + 1):
+            prd = lagmul(prd, c)
+        return prd
 
 
 def lagder(c, m=1, scl=1, axis=0):
@@ -619,19 +687,22 @@ def lagder(c, m=1, scl=1, axis=0):
     --------
     >>> from numpy.polynomial.laguerre import lagder
     >>> lagder([ 1.,  1.,  1., -3.])
-    array([1.,  2.,  3.])
+    array([ 1.,  2.,  3.])
     >>> lagder([ 1.,  0.,  0., -4.,  3.], m=2)
-    array([1.,  2.,  3.])
+    array([ 1.,  2.,  3.])
 
     """
-    c = np.array(c, ndmin=1, copy=True)
+    c = np.array(c, ndmin=1, copy=1)
     if c.dtype.char in '?bBhHiIlLqQpP':
         c = c.astype(np.double)
+    cnt, iaxis = [int(t) for t in [m, axis]]
 
-    cnt = pu._deprecate_as_int(m, "the order of derivation")
-    iaxis = pu._deprecate_as_int(axis, "the axis")
+    if cnt != m:
+        raise ValueError("The order of derivation must be integer")
     if cnt < 0:
         raise ValueError("The order of derivation must be non-negative")
+    if iaxis != axis:
+        raise ValueError("The axis must be integer")
     iaxis = normalize_axis_index(iaxis, c.ndim)
 
     if cnt == 0:
@@ -734,18 +805,20 @@ def lagint(c, m=1, k=[], lbnd=0, scl=1, axis=0):
     >>> lagint([1,2,3], k=1)
     array([ 2.,  1.,  1., -3.])
     >>> lagint([1,2,3], lbnd=-1)
-    array([11.5,  1. ,  1. , -3. ])
+    array([ 11.5,   1. ,   1. ,  -3. ])
     >>> lagint([1,2], m=2, k=[1,2], lbnd=-1)
-    array([ 11.16666667,  -5.        ,  -3.        ,   2.        ]) # may vary
+    array([ 11.16666667,  -5.        ,  -3.        ,   2.        ])
 
     """
-    c = np.array(c, ndmin=1, copy=True)
+    c = np.array(c, ndmin=1, copy=1)
     if c.dtype.char in '?bBhHiIlLqQpP':
         c = c.astype(np.double)
     if not np.iterable(k):
         k = [k]
-    cnt = pu._deprecate_as_int(m, "the order of integration")
-    iaxis = pu._deprecate_as_int(axis, "the axis")
+    cnt, iaxis = [int(t) for t in [m, axis]]
+
+    if cnt != m:
+        raise ValueError("The order of integration must be integer")
     if cnt < 0:
         raise ValueError("The order of integration must be non-negative")
     if len(k) > cnt:
@@ -754,6 +827,8 @@ def lagint(c, m=1, k=[], lbnd=0, scl=1, axis=0):
         raise ValueError("lbnd must be a scalar.")
     if np.ndim(scl) != 0:
         raise ValueError("scl must be a scalar.")
+    if iaxis != axis:
+        raise ValueError("The axis must be integer")
     iaxis = normalize_axis_index(iaxis, c.ndim)
 
     if cnt == 0:
@@ -848,7 +923,7 @@ def lagval(x, c, tensor=True):
            [-4.5, -2. ]])
 
     """
-    c = np.array(c, ndmin=1, copy=False)
+    c = np.array(c, ndmin=1, copy=0)
     if c.dtype.char in '?bBhHiIlLqQpP':
         c = c.astype(np.double)
     if isinstance(x, (tuple, list)):
@@ -920,7 +995,14 @@ def lagval2d(x, y, c):
     .. versionadded:: 1.7.0
 
     """
-    return pu._valnd(lagval, c, x, y)
+    try:
+        x, y = np.array((x, y), copy=0)
+    except Exception:
+        raise ValueError('x, y are incompatible')
+
+    c = lagval(x, c)
+    c = lagval(y, c, tensor=False)
+    return c
 
 
 def laggrid2d(x, y, c):
@@ -973,7 +1055,9 @@ def laggrid2d(x, y, c):
     .. versionadded:: 1.7.0
 
     """
-    return pu._gridnd(lagval, c, x, y)
+    c = lagval(x, c)
+    c = lagval(y, c)
+    return c
 
 
 def lagval3d(x, y, z, c):
@@ -1024,7 +1108,15 @@ def lagval3d(x, y, z, c):
     .. versionadded:: 1.7.0
 
     """
-    return pu._valnd(lagval, c, x, y, z)
+    try:
+        x, y, z = np.array((x, y, z), copy=0)
+    except Exception:
+        raise ValueError('x, y, z are incompatible')
+
+    c = lagval(x, c)
+    c = lagval(y, c, tensor=False)
+    c = lagval(z, c, tensor=False)
+    return c
 
 
 def laggrid3d(x, y, z, c):
@@ -1080,7 +1172,10 @@ def laggrid3d(x, y, z, c):
     .. versionadded:: 1.7.0
 
     """
-    return pu._gridnd(lagval, c, x, y, z)
+    c = lagval(x, c)
+    c = lagval(y, c)
+    c = lagval(z, c)
+    return c
 
 
 def lagvander(x, deg):
@@ -1127,11 +1222,13 @@ def lagvander(x, deg):
            [ 1.        , -1.        , -1.        , -0.33333333]])
 
     """
-    ideg = pu._deprecate_as_int(deg, "deg")
+    ideg = int(deg)
+    if ideg != deg:
+        raise ValueError("deg must be integer")
     if ideg < 0:
         raise ValueError("deg must be non-negative")
 
-    x = np.array(x, copy=False, ndmin=1) + 0.0
+    x = np.array(x, copy=0, ndmin=1) + 0.0
     dims = (ideg + 1,) + x.shape
     dtyp = x.dtype
     v = np.empty(dims, dtype=dtyp)
@@ -1185,7 +1282,7 @@ def lagvander2d(x, y, deg):
 
     See Also
     --------
-    lagvander, lagvander3d, lagval2d, lagval3d
+    lagvander, lagvander3d. lagval2d, lagval3d
 
     Notes
     -----
@@ -1193,7 +1290,17 @@ def lagvander2d(x, y, deg):
     .. versionadded:: 1.7.0
 
     """
-    return pu._vander_nd_flat((lagvander, lagvander), (x, y), deg)
+    ideg = [int(d) for d in deg]
+    is_valid = [id == d and id >= 0 for id, d in zip(ideg, deg)]
+    if is_valid != [1, 1]:
+        raise ValueError("degrees must be non-negative integers")
+    degx, degy = ideg
+    x, y = np.array((x, y), copy=0) + 0.0
+
+    vx = lagvander(x, degx)
+    vy = lagvander(y, degy)
+    v = vx[..., None]*vy[..., None,:]
+    return v.reshape(v.shape[:-2] + (-1,))
 
 
 def lagvander3d(x, y, z, deg):
@@ -1239,7 +1346,7 @@ def lagvander3d(x, y, z, deg):
 
     See Also
     --------
-    lagvander, lagvander3d, lagval2d, lagval3d
+    lagvander, lagvander3d. lagval2d, lagval3d
 
     Notes
     -----
@@ -1247,7 +1354,18 @@ def lagvander3d(x, y, z, deg):
     .. versionadded:: 1.7.0
 
     """
-    return pu._vander_nd_flat((lagvander, lagvander, lagvander), (x, y, z), deg)
+    ideg = [int(d) for d in deg]
+    is_valid = [id == d and id >= 0 for id, d in zip(ideg, deg)]
+    if is_valid != [1, 1, 1]:
+        raise ValueError("degrees must be non-negative integers")
+    degx, degy, degz = ideg
+    x, y, z = np.array((x, y, z), copy=0) + 0.0
+
+    vx = lagvander(x, degx)
+    vy = lagvander(y, degy)
+    vz = lagvander(z, degz)
+    v = vx[..., None, None]*vy[..., None,:, None]*vz[..., None, None,:]
+    return v.reshape(v.shape[:-3] + (-1,))
 
 
 def lagfit(x, y, deg, rcond=None, full=False, w=None):
@@ -1318,7 +1436,7 @@ def lagfit(x, y, deg, rcond=None, full=False, w=None):
         warnings can be turned off by
 
         >>> import warnings
-        >>> warnings.simplefilter('ignore', np.RankWarning)
+        >>> warnings.simplefilter('ignore', RankWarning)
 
     See Also
     --------
@@ -1371,10 +1489,84 @@ def lagfit(x, y, deg, rcond=None, full=False, w=None):
     >>> err = np.random.randn(len(x))/10
     >>> y = lagval(x, [1, 2, 3]) + err
     >>> lagfit(x, y, 2)
-    array([ 0.96971004,  2.00193749,  3.00288744]) # may vary
+    array([ 0.96971004,  2.00193749,  3.00288744])
 
     """
-    return pu._fit(lagvander, x, y, deg, rcond, full, w)
+    x = np.asarray(x) + 0.0
+    y = np.asarray(y) + 0.0
+    deg = np.asarray(deg)
+
+    # check arguments.
+    if deg.ndim > 1 or deg.dtype.kind not in 'iu' or deg.size == 0:
+        raise TypeError("deg must be an int or non-empty 1-D array of int")
+    if deg.min() < 0:
+        raise ValueError("expected deg >= 0")
+    if x.ndim != 1:
+        raise TypeError("expected 1D vector for x")
+    if x.size == 0:
+        raise TypeError("expected non-empty vector for x")
+    if y.ndim < 1 or y.ndim > 2:
+        raise TypeError("expected 1D or 2D array for y")
+    if len(x) != len(y):
+        raise TypeError("expected x and y to have same length")
+
+    if deg.ndim == 0:
+        lmax = deg
+        order = lmax + 1
+        van = lagvander(x, lmax)
+    else:
+        deg = np.sort(deg)
+        lmax = deg[-1]
+        order = len(deg)
+        van = lagvander(x, lmax)[:, deg]
+
+    # set up the least squares matrices in transposed form
+    lhs = van.T
+    rhs = y.T
+    if w is not None:
+        w = np.asarray(w) + 0.0
+        if w.ndim != 1:
+            raise TypeError("expected 1D vector for w")
+        if len(x) != len(w):
+            raise TypeError("expected x and w to have same length")
+        # apply weights. Don't use inplace operations as they
+        # can cause problems with NA.
+        lhs = lhs * w
+        rhs = rhs * w
+
+    # set rcond
+    if rcond is None:
+        rcond = len(x)*np.finfo(x.dtype).eps
+
+    # Determine the norms of the design matrix columns.
+    if issubclass(lhs.dtype.type, np.complexfloating):
+        scl = np.sqrt((np.square(lhs.real) + np.square(lhs.imag)).sum(1))
+    else:
+        scl = np.sqrt(np.square(lhs).sum(1))
+    scl[scl == 0] = 1
+
+    # Solve the least squares problem.
+    c, resids, rank, s = la.lstsq(lhs.T/scl, rhs.T, rcond)
+    c = (c.T/scl).T
+
+    # Expand c to include non-fitted coefficients which are set to zero
+    if deg.ndim > 0:
+        if c.ndim == 2:
+            cc = np.zeros((lmax+1, c.shape[1]), dtype=c.dtype)
+        else:
+            cc = np.zeros(lmax+1, dtype=c.dtype)
+        cc[deg] = c
+        c = cc
+
+    # warn on rank reduction
+    if rank != order and not full:
+        msg = "The fit may be poorly conditioned"
+        warnings.warn(msg, pu.RankWarning, stacklevel=2)
+
+    if full:
+        return c, [resids, rank, s, rcond]
+    else:
+        return c
 
 
 def lagcompanion(c):
@@ -1464,7 +1656,7 @@ def lagroots(c):
     >>> coef
     array([  2.,  -8.,  12.,  -6.])
     >>> lagroots(coef)
-    array([-4.4408921e-16,  1.0000000e+00,  2.0000000e+00])
+    array([ -4.44089210e-16,   1.00000000e+00,   2.00000000e+00])
 
     """
     # c is a trimmed copy
@@ -1474,8 +1666,7 @@ def lagroots(c):
     if len(c) == 2:
         return np.array([1 + c[0]/c[1]])
 
-    # rotated companion matrix reduces error
-    m = lagcompanion(c)[::-1,::-1]
+    m = lagcompanion(c)
     r = la.eigvals(m)
     r.sort()
     return r
@@ -1517,9 +1708,9 @@ def laggauss(deg):
     the right value when integrating 1.
 
     """
-    ideg = pu._deprecate_as_int(deg, "deg")
-    if ideg <= 0:
-        raise ValueError("deg must be a positive integer")
+    ideg = int(deg)
+    if ideg != deg or ideg < 1:
+        raise ValueError("deg must be a non-negative integer")
 
     # first approximation of roots. We use the fact that the companion
     # matrix is symmetric in this case in order to obtain better zeros.

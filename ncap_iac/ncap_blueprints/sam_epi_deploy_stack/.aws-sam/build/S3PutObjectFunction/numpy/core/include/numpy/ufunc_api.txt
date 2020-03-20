@@ -16,8 +16,7 @@ NumPy Ufunc C-API
   int
   PyUFunc_RegisterLoopForType(PyUFuncObject *ufunc, int
                               usertype, PyUFuncGenericFunction
-                              function, const int *arg_types, void
-                              *data)
+                              function, int *arg_types, void *data)
 
 
 ::
@@ -219,7 +218,7 @@ owns a new reference to errobj.
   int
   PyUFunc_ReplaceLoopBySignature(PyUFuncObject
                                  *func, PyUFuncGenericFunction
-                                 newfunc, const int
+                                 newfunc, int
                                  *signature, PyUFuncGenericFunction
                                  *oldfunc)
 
@@ -330,8 +329,8 @@ Returns 0 on success, -1 (with exception raised) on validation failure.
                                                  nin, int nout, int
                                                  identity, const char
                                                  *name, const char
-                                                 *doc, const int
-                                                 unused, const char
+                                                 *doc, int unused, const
+                                                 char
                                                  *signature, PyObject
                                                  *identity_value)
 

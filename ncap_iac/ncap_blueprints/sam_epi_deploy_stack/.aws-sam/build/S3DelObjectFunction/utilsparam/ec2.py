@@ -46,7 +46,7 @@ def start_instances_if_stopped(instances, logger):
             instance.wait_until_running()
             logger.append('Instance started!')
     time.sleep(60)
-    logger.append("All Instances Initialized")
+    logger.append("Instances Initialized")
 
 def launch_new_instance(instance_type, ami, logger):
     """ Script To Launch New Instance From Image """

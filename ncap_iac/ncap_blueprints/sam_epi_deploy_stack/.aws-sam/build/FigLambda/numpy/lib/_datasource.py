@@ -20,18 +20,17 @@ gzip, bz2 and xz are supported.
 Example::
 
     >>> # Create a DataSource, use os.curdir (default) for local storage.
-    >>> from numpy import DataSource
-    >>> ds = DataSource()
+    >>> ds = datasource.DataSource()
     >>>
     >>> # Open a remote file.
     >>> # DataSource downloads the file, stores it locally in:
     >>> #     './www.google.com/index.html'
     >>> # opens the file and returns a file object.
-    >>> fp = ds.open('http://www.google.com/') # doctest: +SKIP
+    >>> fp = ds.open('http://www.google.com/index.html')
     >>>
     >>> # Use the file as you normally would
-    >>> fp.read() # doctest: +SKIP
-    >>> fp.close() # doctest: +SKIP
+    >>> fp.read()
+    >>> fp.close()
 
 """
 from __future__ import division, absolute_import, print_function
@@ -41,7 +40,6 @@ import sys
 import warnings
 import shutil
 import io
-from contextlib import closing
 
 from numpy.core.overrides import set_module
 
@@ -158,7 +156,6 @@ class _FileOpeners(object):
 
     Examples
     --------
-    >>> import gzip
     >>> np.lib._datasource._file_openers.keys()
     [None, '.bz2', '.gz', '.xz', '.lzma']
     >>> np.lib._datasource._file_openers['.gz'] is gzip.open
@@ -293,7 +290,7 @@ class DataSource(object):
     URLs require a scheme string (``http://``) to be used, without it they
     will fail::
 
-        >>> repos = np.DataSource()
+        >>> repos = DataSource()
         >>> repos.exists('www.google.com/index.html')
         False
         >>> repos.exists('http://www.google.com/index.html')
@@ -305,17 +302,17 @@ class DataSource(object):
     --------
     ::
 
-        >>> ds = np.DataSource('/home/guido')
-        >>> urlname = 'http://www.google.com/'
-        >>> gfile = ds.open('http://www.google.com/')
+        >>> ds = DataSource('/home/guido')
+        >>> urlname = 'http://www.google.com/index.html'
+        >>> gfile = ds.open('http://www.google.com/index.html')  # remote file
         >>> ds.abspath(urlname)
-        '/home/guido/www.google.com/index.html'
+        '/home/guido/www.google.com/site/index.html'
 
-        >>> ds = np.DataSource(None)  # use with temporary file
+        >>> ds = DataSource(None)  # use with temporary file
         >>> ds.open('/home/guido/foobar.txt')
         <open file '/home/guido.foobar.txt', mode 'r' at 0x91d4430>
         >>> ds.abspath('/home/guido/foobar.txt')
-        '/tmp/.../home/guido/foobar.txt'
+        '/tmp/tmpy4pgsP/home/guido/foobar.txt'
 
     """
 
@@ -415,9 +412,13 @@ class DataSource(object):
         # TODO: Doesn't handle compressed files!
         if self._isurl(path):
             try:
-                with closing(urlopen(path)) as openedurl:
-                    with _open(upath, 'wb') as f:
-                        shutil.copyfileobj(openedurl, f)
+                openedurl = urlopen(path)
+                f = _open(upath, 'wb')
+                try:
+                    shutil.copyfileobj(openedurl, f)
+                finally:
+                    f.close()
+                    openedurl.close()
             except URLError:
                 raise URLError("URL not found: %s" % path)
         else:

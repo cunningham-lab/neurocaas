@@ -121,7 +121,7 @@ def has_nested_fields(ndtype):
 
     """
     for name in ndtype.names or ():
-        if ndtype[name].names is not None:
+        if ndtype[name].names:
             return True
     return False
 
@@ -146,17 +146,11 @@ def flatten_dtype(ndtype, flatten_base=False):
     >>> dt = np.dtype([('name', 'S4'), ('x', float), ('y', float),
     ...                ('block', int, (2, 3))])
     >>> np.lib._iotools.flatten_dtype(dt)
-    [dtype('S4'), dtype('float64'), dtype('float64'), dtype('int64')]
+    [dtype('|S4'), dtype('float64'), dtype('float64'), dtype('int32')]
     >>> np.lib._iotools.flatten_dtype(dt, flatten_base=True)
-    [dtype('S4'),
-     dtype('float64'),
-     dtype('float64'),
-     dtype('int64'),
-     dtype('int64'),
-     dtype('int64'),
-     dtype('int64'),
-     dtype('int64'),
-     dtype('int64')]
+    [dtype('|S4'), dtype('float64'), dtype('float64'), dtype('int32'),
+     dtype('int32'), dtype('int32'), dtype('int32'), dtype('int32'),
+     dtype('int32')]
 
     """
     names = ndtype.names
@@ -315,13 +309,13 @@ class NameValidator(object):
     --------
     >>> validator = np.lib._iotools.NameValidator()
     >>> validator(['file', 'field2', 'with space', 'CaSe'])
-    ('file_', 'field2', 'with_space', 'CaSe')
+    ['file_', 'field2', 'with_space', 'CaSe']
 
     >>> validator = np.lib._iotools.NameValidator(excludelist=['excl'],
-    ...                                           deletechars='q',
-    ...                                           case_sensitive=False)
+                                                  deletechars='q',
+                                                  case_sensitive='False')
     >>> validator(['excl', 'field2', 'no_q', 'with space', 'CaSe'])
-    ('EXCL', 'FIELD2', 'NO_Q', 'WITH_SPACE', 'CASE')
+    ['excl_', 'field2', 'no_', 'with_space', 'case']
 
     """
     #
@@ -605,7 +599,7 @@ class StringConverter(object):
     --------
     >>> import dateutil.parser
     >>> import datetime
-    >>> dateparser = dateutil.parser.parse
+    >>> dateparser = datetustil.parser.parse
     >>> defaultdate = datetime.date(2000, 1, 1)
     >>> StringConverter.upgrade_mapper(dateparser, default=defaultdate)
         """
@@ -931,27 +925,28 @@ def easy_dtype(ndtype, names=None, defaultfmt="f%i", **validationargs):
         names = validate(names, nbfields=nbfields, defaultfmt=defaultfmt)
         ndtype = np.dtype(dict(formats=ndtype, names=names))
     else:
+        nbtypes = len(ndtype)
         # Explicit names
         if names is not None:
             validate = NameValidator(**validationargs)
             if isinstance(names, basestring):
                 names = names.split(",")
             # Simple dtype: repeat to match the nb of names
-            if ndtype.names is None:
+            if nbtypes == 0:
                 formats = tuple([ndtype.type] * len(names))
                 names = validate(names, defaultfmt=defaultfmt)
                 ndtype = np.dtype(list(zip(names, formats)))
             # Structured dtype: just validate the names as needed
             else:
-                ndtype.names = validate(names, nbfields=len(ndtype.names),
+                ndtype.names = validate(names, nbfields=nbtypes,
                                         defaultfmt=defaultfmt)
         # No implicit names
-        elif ndtype.names is not None:
+        elif (nbtypes > 0):
             validate = NameValidator(**validationargs)
             # Default initial names : should we change the format ?
-            if ((ndtype.names == tuple("f%i" % i for i in range(len(ndtype.names)))) and
+            if ((ndtype.names == tuple("f%i" % i for i in range(nbtypes))) and
                     (defaultfmt != "f%i")):
-                ndtype.names = validate([''] * len(ndtype.names), defaultfmt=defaultfmt)
+                ndtype.names = validate([''] * nbtypes, defaultfmt=defaultfmt)
             # Explicit initial names : just validate
             else:
                 ndtype.names = validate(ndtype.names, defaultfmt=defaultfmt)

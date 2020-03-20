@@ -29,7 +29,7 @@ from numpy.compat import asbytes, long
 import numpy
 
 __all__ = [
-    'equal', 'not_equal', 'greater_equal', 'less_equal',
+    'chararray', 'equal', 'not_equal', 'greater_equal', 'less_equal',
     'greater', 'less', 'str_len', 'add', 'multiply', 'mod', 'capitalize',
     'center', 'count', 'decode', 'encode', 'endswith', 'expandtabs',
     'find', 'index', 'isalnum', 'isalpha', 'isdigit', 'islower', 'isspace',
@@ -82,7 +82,7 @@ def _clean_args(*args):
 
     Many of the Python string operations that have optional arguments
     do not use 'None' to indicate a default value.  In these cases,
-    we need to remove all None arguments, and those following them.
+    we need to remove all `None` arguments, and those following them.
     """
     newargs = []
     for chk in args:
@@ -498,7 +498,8 @@ def count(a, sub, start=0, end=None):
     --------
     >>> c = np.array(['aAaAaA', '  aA  ', 'abBABba'])
     >>> c
-    array(['aAaAaA', '  aA  ', 'abBABba'], dtype='<U7')
+    array(['aAaAaA', '  aA  ', 'abBABba'],
+        dtype='|S7')
     >>> np.char.count(c, 'A')
     array([3, 1, 1])
     >>> np.char.count(c, 'aA')
@@ -551,7 +552,8 @@ def decode(a, encoding=None, errors=None):
     --------
     >>> c = np.array(['aAaAaA', '  aA  ', 'abBABba'])
     >>> c
-    array(['aAaAaA', '  aA  ', 'abBABba'], dtype='<U7')
+    array(['aAaAaA', '  aA  ', 'abBABba'],
+        dtype='|S7')
     >>> np.char.encode(c, encoding='cp037')
     array(['\\x81\\xc1\\x81\\xc1\\x81\\xc1', '@@\\x81\\xc1@@',
         '\\x81\\x82\\xc2\\xc1\\xc2\\x82\\x81'],
@@ -635,7 +637,8 @@ def endswith(a, suffix, start=0, end=None):
     >>> s[0] = 'foo'
     >>> s[1] = 'bar'
     >>> s
-    array(['foo', 'bar'], dtype='<U3')
+    array(['foo', 'bar'],
+        dtype='|S3')
     >>> np.char.endswith(s, 'ar')
     array([False,  True])
     >>> np.char.endswith(s, 'a', start=1, end=2)
@@ -1033,9 +1036,11 @@ def lower(a):
     Examples
     --------
     >>> c = np.array(['A1B C', '1BCA', 'BCA1']); c
-    array(['A1B C', '1BCA', 'BCA1'], dtype='<U5')
+    array(['A1B C', '1BCA', 'BCA1'],
+          dtype='|S5')
     >>> np.char.lower(c)
-    array(['a1b c', '1bca', 'bca1'], dtype='<U5')
+    array(['a1b c', '1bca', 'bca1'],
+          dtype='|S5')
 
     """
     a_arr = numpy.asarray(a)
@@ -1079,20 +1084,23 @@ def lstrip(a, chars=None):
     --------
     >>> c = np.array(['aAaAaA', '  aA  ', 'abBABba'])
     >>> c
-    array(['aAaAaA', '  aA  ', 'abBABba'], dtype='<U7')
+    array(['aAaAaA', '  aA  ', 'abBABba'],
+        dtype='|S7')
 
     The 'a' variable is unstripped from c[1] because whitespace leading.
 
     >>> np.char.lstrip(c, 'a')
-    array(['AaAaA', '  aA  ', 'bBABba'], dtype='<U7')
+    array(['AaAaA', '  aA  ', 'bBABba'],
+        dtype='|S7')
 
 
     >>> np.char.lstrip(c, 'A') # leaves c unchanged
-    array(['aAaAaA', '  aA  ', 'abBABba'], dtype='<U7')
+    array(['aAaAaA', '  aA  ', 'abBABba'],
+        dtype='|S7')
     >>> (np.char.lstrip(c, ' ') == np.char.lstrip(c, '')).all()
-    ... # XXX: is this a regression? This used to return True
+    ... # XXX: is this a regression? this line now returns False
     ... # np.char.lstrip(c,'') does not modify c at all.
-    False
+    True
     >>> (np.char.lstrip(c, ' ') == np.char.lstrip(c, None)).all()
     True
 
@@ -1333,7 +1341,7 @@ def rsplit(a, sep=None, maxsplit=None):
     a : array_like of str or unicode
 
     sep : str or unicode, optional
-        If `sep` is not specified or None, any whitespace string
+        If `sep` is not specified or `None`, any whitespace string
         is a separator.
     maxsplit : int, optional
         If `maxsplit` is given, at most `maxsplit` splits are done,
@@ -1392,10 +1400,10 @@ def rstrip(a, chars=None):
     >>> c = np.array(['aAaAaA', 'abBABba'], dtype='S7'); c
     array(['aAaAaA', 'abBABba'],
         dtype='|S7')
-    >>> np.char.rstrip(c, b'a')
+    >>> np.char.rstrip(c, 'a')
     array(['aAaAaA', 'abBABb'],
         dtype='|S7')
-    >>> np.char.rstrip(c, b'A')
+    >>> np.char.rstrip(c, 'A')
     array(['aAaAa', 'abBABba'],
         dtype='|S7')
 
@@ -1417,7 +1425,7 @@ def split(a, sep=None, maxsplit=None):
     a : array_like of str or unicode
 
     sep : str or unicode, optional
-       If `sep` is not specified or None, any whitespace string is a
+       If `sep` is not specified or `None`, any whitespace string is a
        separator.
 
     maxsplit : int, optional
@@ -1541,13 +1549,17 @@ def strip(a, chars=None):
     --------
     >>> c = np.array(['aAaAaA', '  aA  ', 'abBABba'])
     >>> c
-    array(['aAaAaA', '  aA  ', 'abBABba'], dtype='<U7')
+    array(['aAaAaA', '  aA  ', 'abBABba'],
+        dtype='|S7')
     >>> np.char.strip(c)
-    array(['aAaAaA', 'aA', 'abBABba'], dtype='<U7')
+    array(['aAaAaA', 'aA', 'abBABba'],
+        dtype='|S7')
     >>> np.char.strip(c, 'a') # 'a' unstripped from c[1] because whitespace leads
-    array(['AaAaA', '  aA  ', 'bBABb'], dtype='<U7')
+    array(['AaAaA', '  aA  ', 'bBABb'],
+        dtype='|S7')
     >>> np.char.strip(c, 'A') # 'A' unstripped from c[1] because (unprinted) ws trails
-    array(['aAaAa', '  aA  ', 'abBABba'], dtype='<U7')
+    array(['aAaAa', '  aA  ', 'abBABba'],
+        dtype='|S7')
 
     """
     a_arr = numpy.asarray(a)
@@ -1699,9 +1711,11 @@ def upper(a):
     Examples
     --------
     >>> c = np.array(['a1b c', '1bca', 'bca1']); c
-    array(['a1b c', '1bca', 'bca1'], dtype='<U5')
+    array(['a1b c', '1bca', 'bca1'],
+        dtype='|S5')
     >>> np.char.upper(c)
-    array(['A1B C', '1BCA', 'BCA1'], dtype='<U5')
+    array(['A1B C', '1BCA', 'BCA1'],
+        dtype='|S5')
 
     """
     a_arr = numpy.asarray(a)
@@ -1840,7 +1854,7 @@ class chararray(ndarray):
     This constructor creates the array, using `buffer` (with `offset`
     and `strides`) if it is not ``None``. If `buffer` is ``None``, then
     constructs a new array with `strides` in "C order", unless both
-    ``len(shape) >= 2`` and ``order='F'``, in which case `strides`
+    ``len(shape) >= 2`` and ``order='Fortran'``, in which case `strides`
     is in "Fortran order".
 
     Methods
@@ -1936,16 +1950,18 @@ class chararray(ndarray):
     >>> charar = np.chararray((3, 3))
     >>> charar[:] = 'a'
     >>> charar
-    chararray([[b'a', b'a', b'a'],
-               [b'a', b'a', b'a'],
-               [b'a', b'a', b'a']], dtype='|S1')
+    chararray([['a', 'a', 'a'],
+           ['a', 'a', 'a'],
+           ['a', 'a', 'a']],
+          dtype='|S1')
 
     >>> charar = np.chararray(charar.shape, itemsize=5)
     >>> charar[:] = 'abc'
     >>> charar
-    chararray([[b'abc', b'abc', b'abc'],
-               [b'abc', b'abc', b'abc'],
-               [b'abc', b'abc', b'abc']], dtype='|S5')
+    chararray([['abc', 'abc', 'abc'],
+           ['abc', 'abc', 'abc'],
+           ['abc', 'abc', 'abc']],
+          dtype='|S5')
 
     """
     def __new__(subtype, shape, itemsize=1, unicode=False, buffer=None,
@@ -2124,7 +2140,7 @@ class chararray(ndarray):
     def __rmod__(self, other):
         return NotImplemented
 
-    def argsort(self, axis=-1, kind=None, order=None):
+    def argsort(self, axis=-1, kind='quicksort', order=None):
         """
         Return the indices that sort the array lexicographically.
 
@@ -2659,7 +2675,7 @@ def array(obj, itemsize=None, copy=True, unicode=None, order=None):
     unicode : bool, optional
         When true, the resulting `chararray` can contain Unicode
         characters, when false only 8-bit characters.  If unicode is
-        None and `obj` is one of the following:
+        `None` and `obj` is one of the following:
 
           - a `chararray`,
           - an ndarray of type `str` or `unicode`
@@ -2799,7 +2815,7 @@ def asarray(obj, itemsize=None, unicode=None, order=None):
     unicode : bool, optional
         When true, the resulting `chararray` can contain Unicode
         characters, when false only 8-bit characters.  If unicode is
-        None and `obj` is one of the following:
+        `None` and `obj` is one of the following:
 
           - a `chararray`,
           - an ndarray of type `str` or 'unicode`

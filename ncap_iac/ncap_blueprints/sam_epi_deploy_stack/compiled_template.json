@@ -99,7 +99,7 @@
         },
         "FigLambda": {
             "Properties": {
-                "CodeUri": "../lambda_repo",
+                "CodeUri": "../../protocols",
                 "Description": "Lambda Function logging start/stop for NCAP",
                 "Events": {},
                 "Handler": "log.eventshandler",
@@ -186,7 +186,7 @@
         },
         "MainLambda": {
             "Properties": {
-                "CodeUri": "../lambda_repo",
+                "CodeUri": "../../protocols",
                 "Description": "Main Lambda Function for Serverless",
                 "Environment": {
                     "Variables": {
@@ -289,7 +289,7 @@
         },
         "S3DelObjectFunction": {
             "Properties": {
-                "CodeUri": "../lambda_repo",
+                "CodeUri": "../../protocols",
                 "Description": "Deletes Objects from S3",
                 "Environment": {
                     "Variables": {
@@ -389,7 +389,7 @@
         },
         "S3PutObjectFunction": {
             "Properties": {
-                "CodeUri": "../lambda_repo",
+                "CodeUri": "../../protocols",
                 "Description": "Puts Objects in S3",
                 "Environment": {
                     "Variables": {
@@ -444,7 +444,7 @@
         },
         "SearchLambda": {
             "Properties": {
-                "CodeUri": "../lambda_repo",
+                "CodeUri": "../../protocols",
                 "Description": "Postprocessing Lambda Function for Serverless",
                 "Environment": {
                     "Variables": {

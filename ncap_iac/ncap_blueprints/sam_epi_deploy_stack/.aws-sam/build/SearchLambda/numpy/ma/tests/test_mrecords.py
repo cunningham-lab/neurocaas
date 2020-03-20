@@ -23,7 +23,7 @@ from numpy.ma.testutils import (
     assert_, assert_equal,
     assert_equal_records,
     )
-from numpy.compat import pickle
+from numpy.core.numeric import pickle
 
 
 class TestMRecords(object):

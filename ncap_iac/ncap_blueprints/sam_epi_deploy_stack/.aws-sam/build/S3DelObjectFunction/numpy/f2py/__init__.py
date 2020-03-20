@@ -109,7 +109,6 @@ def compile(source,
             output = ''
         else:
             status = 0
-            output = output.decode()
         if verbose:
             print(output)
     finally:

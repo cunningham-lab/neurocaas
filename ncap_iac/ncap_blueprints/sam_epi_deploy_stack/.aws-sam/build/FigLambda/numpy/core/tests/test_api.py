@@ -3,10 +3,8 @@ from __future__ import division, absolute_import, print_function
 import sys
 
 import numpy as np
-import pytest
 from numpy.testing import (
-     assert_, assert_equal, assert_array_equal, assert_raises, assert_warns,
-     HAS_REFCOUNT
+     assert_, assert_equal, assert_array_equal, assert_raises, HAS_REFCOUNT
     )
 
 # Switch between new behaviour when NPY_RELAXED_STRIDES_CHECKING is set.
@@ -290,14 +288,6 @@ def test_array_astype():
 
     a = np.array(1000, dtype='i4')
     assert_raises(TypeError, a.astype, 'U1', casting='safe')
-
-@pytest.mark.parametrize("t",
-    np.sctypes['uint'] + np.sctypes['int'] + np.sctypes['float']
-)
-def test_array_astype_warning(t):
-    # test ComplexWarning when casting from complex to float or int
-    a = np.array(10, dtype=np.complex_)
-    assert_warns(np.ComplexWarning, a.astype, t)
 
 def test_copyto_fromscalar():
     a = np.arange(6, dtype='f4').reshape(2, 3)

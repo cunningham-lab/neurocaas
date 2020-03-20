@@ -28,14 +28,20 @@ def subst_vars(target, source, d):
     """Substitute any occurrence of @foo@ by d['foo'] from source file into
     target."""
     var = re.compile('@([a-zA-Z_]+)@')
-    with open(source, 'r') as fs:
-        with open(target, 'w') as ft:
+    fs = open(source, 'r')
+    try:
+        ft = open(target, 'w')
+        try:
             for l in fs:
                 m = var.search(l)
                 if m:
                     ft.write(l.replace('@%s@' % m.group(1), d[m.group(1)]))
                 else:
                     ft.write(l)
+        finally:
+            ft.close()
+    finally:
+        fs.close()
 
 class build_src(build_ext.build_ext):
 
@@ -53,12 +59,9 @@ class build_src(build_ext.build_ext):
         ('inplace', 'i',
          "ignore build-lib and put compiled extensions into the source " +
          "directory alongside your pure Python modules"),
-        ('verbose-cfg', None,
-         "change logging level from WARN to INFO which will show all " +
-         "compiler output")
         ]
 
-    boolean_options = ['force', 'inplace', 'verbose-cfg']
+    boolean_options = ['force', 'inplace']
 
     help_options = []
 
@@ -79,7 +82,6 @@ class build_src(build_ext.build_ext):
         self.swig_opts = None
         self.swig_cpp = None
         self.swig = None
-        self.verbose_cfg = None
 
     def finalize_options(self):
         self.set_undefined_options('build',
@@ -94,7 +96,7 @@ class build_src(build_ext.build_ext):
         self.data_files = self.distribution.data_files or []
 
         if self.build_src is None:
-            plat_specifier = ".{}-{}.{}".format(get_platform(), *sys.version_info[:2])
+            plat_specifier = ".%s-%s" % (get_platform(), sys.version[0:3])
             self.build_src = os.path.join(self.build_base, 'src'+plat_specifier)
 
         # py_modules_dict is used in build_py.find_package_modules
@@ -366,16 +368,9 @@ class build_src(build_ext.build_ext):
             #    incl_dirs = extension.include_dirs
             #if self.build_src not in incl_dirs:
             #    incl_dirs.append(self.build_src)
-            build_dir = os.path.join(*([self.build_src]
+            build_dir = os.path.join(*([self.build_src]\
                                        +name.split('.')[:-1]))
         self.mkpath(build_dir)
-
-        if self.verbose_cfg:
-            new_level = log.INFO
-        else:
-            new_level = log.WARN
-        old_level = log.set_threshold(new_level)
-
         for func in func_sources:
             source = func(extension, build_dir)
             if not source:
@@ -386,7 +381,7 @@ class build_src(build_ext.build_ext):
             else:
                 log.info("  adding '%s' to sources." % (source,))
                 new_sources.append(source)
-        log.set_threshold(old_level)
+
         return new_sources
 
     def filter_py_files(self, sources):
@@ -430,8 +425,9 @@ class build_src(build_ext.build_ext):
                     else:
                         log.info("conv_template:> %s" % (target_file))
                         outstr = process_c_file(source)
-                    with open(target_file, 'w') as fid:
-                        fid.write(outstr)
+                    fid = open(target_file, 'w')
+                    fid.write(outstr)
+                    fid.close()
                 if _header_ext_match(target_file):
                     d = os.path.dirname(target_file)
                     if d not in include_dirs:
@@ -551,7 +547,7 @@ class build_src(build_ext.build_ext):
             if is_sequence(extension):
                 name = extension[0]
             else: name = extension.name
-            target_dir = os.path.join(*([self.build_src]
+            target_dir = os.path.join(*([self.build_src]\
                                         +name.split('.')[:-1]))
             target_file = os.path.join(target_dir, ext_name + 'module.c')
             new_sources.append(target_file)
@@ -727,23 +723,25 @@ _has_c_header = re.compile(r'-[*]-\s*c\s*-[*]-', re.I).search
 _has_cpp_header = re.compile(r'-[*]-\s*c[+][+]\s*-[*]-', re.I).search
 
 def get_swig_target(source):
-    with open(source, 'r') as f:
-        result = None
-        line = f.readline()
-        if _has_cpp_header(line):
-            result = 'c++'
-        if _has_c_header(line):
-            result = 'c'
+    f = open(source, 'r')
+    result = None
+    line = f.readline()
+    if _has_cpp_header(line):
+        result = 'c++'
+    if _has_c_header(line):
+        result = 'c'
+    f.close()
     return result
 
 def get_swig_modulename(source):
-    with open(source, 'r') as f:
-        name = None
-        for line in f:
-            m = _swig_module_name_match(line)
-            if m:
-                name = m.group('name')
-                break
+    f = open(source, 'r')
+    name = None
+    for line in f:
+        m = _swig_module_name_match(line)
+        if m:
+            name = m.group('name')
+            break
+    f.close()
     return name
 
 def _find_swig_target(target_dir, name):
@@ -762,14 +760,15 @@ _f2py_user_module_name_match = re.compile(r'\s*python\s*module\s*(?P<name>[\w_]*
 
 def get_f2py_modulename(source):
     name = None
-    with open(source) as f:
-        for line in f:
-            m = _f2py_module_name_match(line)
-            if m:
-                if _f2py_user_module_name_match(line): # skip *__user__* names
-                    continue
-                name = m.group('name')
-                break
+    f = open(source)
+    for line in f:
+        m = _f2py_module_name_match(line)
+        if m:
+            if _f2py_user_module_name_match(line): # skip *__user__* names
+                continue
+            name = m.group('name')
+            break
+    f.close()
     return name
 
 ##########################################
