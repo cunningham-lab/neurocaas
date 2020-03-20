@@ -19,4 +19,4 @@ PIPEDIR=$(get_abs_filename "$1")
 cd $PIPEDIR
 
 ## Test main lambda function
-sam local invoke MainLambda --event ../template_utils/simevents/s3_putevent.json -n ../template_utils/simevents/main_func_env_vars.json 
+sam local invoke MainLambda --event ../../utils/simevents/s3_putevent.json -n ../../utils/simevents/main_func_env_vars.json 
