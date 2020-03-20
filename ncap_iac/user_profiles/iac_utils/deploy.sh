@@ -24,7 +24,7 @@ python user_maker.py "$PIPEDIR"/user_config_template.json
 
 cd "$PIPEDIR"
 
-sam build -t compiled_users.json -m $ncaprootdir/ncap_blueprints/lambda_repo/requirements.txt
+sam build -t compiled_users.json -m $ncaprootdir/protocols/requirements.txt
 
 sam package --s3-bucket ctnsampackages --output-template-file compiled_users.yaml
 
