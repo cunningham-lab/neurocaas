@@ -68,47 +68,47 @@
         },
         "Passwordawl2145": {
             "Description": "Default password of new user awl2145 in group neurotheoryworkshopadditionalusers",
-            "Value": "4170624b664b2a78"
+            "Value": "c8c6b6f1e38944ce"
         },
         "Passwordcm3746": {
             "Description": "Default password of new user cm3746 in group neurotheoryworkshopadditionalusers",
-            "Value": "738c4975a570f393"
+            "Value": "aba6d20233b9c54c"
         },
         "Passwordfs2545": {
             "Description": "Default password of new user fs2545 in group neurotheoryworkshopadditionalusers",
-            "Value": "62cf21e575d1acd0"
+            "Value": "39a3a1ef00059a58"
         },
         "Passwordjeremforest": {
             "Description": "Default password of new user jeremforest in group neurotheoryworkshopadditionalusers",
-            "Value": "81d4abcf925a332d"
+            "Value": "d558ed7a52c45a66"
         },
         "Passwordmd3681": {
             "Description": "Default password of new user md3681 in group neurotheoryworkshopadditionalusers",
-            "Value": "3f85db81f8987ff8"
+            "Value": "42efbf51bad9ff83"
         },
         "Passwordmwhiteway": {
             "Description": "Default password of new user mwhiteway in group neurotheoryworkshopadditionalusers",
-            "Value": "8c69ba35d3f83fcb"
+            "Value": "eb368db810ee0c0f"
         },
         "Passwordrachelaswanson": {
             "Description": "Default password of new user rachelaswanson in group neurotheoryworkshopadditionalusers",
-            "Value": "f78ad2558c45bd3f"
+            "Value": "9d8c62f42882b0c7"
         },
         "Passwordre2365": {
             "Description": "Default password of new user re2365 in group neurotheoryworkshopadditionalusers",
-            "Value": "0e696264068bce10"
+            "Value": "fe136491df29a63d"
         },
         "Passwordrn2446": {
             "Description": "Default password of new user rn2446 in group neurotheoryworkshopadditionalusers",
-            "Value": "427395684d372836"
+            "Value": "ac34546afe194205"
         },
         "Passwordwx2203": {
             "Description": "Default password of new user wx2203 in group neurotheoryworkshopadditionalusers",
-            "Value": "be6f61ec7628ec7a"
+            "Value": "ad7e824fd563c9b2"
         },
         "Passwordwy2303": {
             "Description": "Default password of new user wy2303 in group neurotheoryworkshopadditionalusers",
-            "Value": "5344c79aedeaea67"
+            "Value": "af09610fc978613c"
         },
         "SecretAccessKeyawl2145": {
             "Description": "Secret Key of new user: awl2145 in group neurotheoryworkshopadditionalusers",
@@ -263,7 +263,7 @@
         },
         "S3DelObjectFunction": {
             "Properties": {
-                "CodeUri": "../../ncap_blueprints/lambda_repo",
+                "CodeUri": "../../protocols",
                 "Description": "Deletes Objects from S3",
                 "Environment": {
                     "Variables": {
@@ -337,7 +337,7 @@
         },
         "S3PutObjectFunction": {
             "Properties": {
-                "CodeUri": "../../ncap_blueprints/lambda_repo",
+                "CodeUri": "../../protocols",
                 "Description": "Puts Objects in S3",
                 "Environment": {
                     "Variables": {
@@ -367,7 +367,7 @@
         "neurotheoryworkshopadditionalusersuserawl2145": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "4170624b664b2a78",
+                    "Password": "c8c6b6f1e38944ce",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/neurotheoryworkshopadditionalusers/",
@@ -378,7 +378,7 @@
         "neurotheoryworkshopadditionalusersusercm3746": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "738c4975a570f393",
+                    "Password": "aba6d20233b9c54c",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/neurotheoryworkshopadditionalusers/",
@@ -389,7 +389,7 @@
         "neurotheoryworkshopadditionalusersuserfs2545": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "62cf21e575d1acd0",
+                    "Password": "39a3a1ef00059a58",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/neurotheoryworkshopadditionalusers/",
@@ -400,7 +400,7 @@
         "neurotheoryworkshopadditionalusersuserjeremforest": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "81d4abcf925a332d",
+                    "Password": "d558ed7a52c45a66",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/neurotheoryworkshopadditionalusers/",
@@ -411,7 +411,7 @@
         "neurotheoryworkshopadditionalusersusermd3681": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "3f85db81f8987ff8",
+                    "Password": "42efbf51bad9ff83",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/neurotheoryworkshopadditionalusers/",
@@ -422,7 +422,7 @@
         "neurotheoryworkshopadditionalusersusermwhiteway": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "8c69ba35d3f83fcb",
+                    "Password": "eb368db810ee0c0f",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/neurotheoryworkshopadditionalusers/",
@@ -433,7 +433,7 @@
         "neurotheoryworkshopadditionalusersuserrachelaswanson": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "f78ad2558c45bd3f",
+                    "Password": "9d8c62f42882b0c7",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/neurotheoryworkshopadditionalusers/",
@@ -444,7 +444,7 @@
         "neurotheoryworkshopadditionalusersuserre2365": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "0e696264068bce10",
+                    "Password": "fe136491df29a63d",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/neurotheoryworkshopadditionalusers/",
@@ -455,7 +455,7 @@
         "neurotheoryworkshopadditionalusersuserrn2446": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "427395684d372836",
+                    "Password": "ac34546afe194205",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/neurotheoryworkshopadditionalusers/",
@@ -466,7 +466,7 @@
         "neurotheoryworkshopadditionalusersuserwx2203": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "be6f61ec7628ec7a",
+                    "Password": "ad7e824fd563c9b2",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/neurotheoryworkshopadditionalusers/",
@@ -477,7 +477,7 @@
         "neurotheoryworkshopadditionalusersuserwy2303": {
             "Properties": {
                 "LoginProfile": {
-                    "Password": "5344c79aedeaea67",
+                    "Password": "af09610fc978613c",
                     "PasswordResetRequired": "false"
                 },
                 "Path": "/neurotheoryworkshopadditionalusers/",

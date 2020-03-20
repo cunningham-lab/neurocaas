@@ -9,10 +9,10 @@ Outputs:
       Ref: userkeytafrontenddev2
   Passwordtafrontenddev1:
     Description: Default password of new user tafrontenddev1 in group frontendtestgroup1
-    Value: 2d21cb663f07bef3
+    Value: 979a0d1f9dac926e
   Passwordtafrontenddev2:
     Description: Default password of new user tafrontenddev2 in group frontendtestgroup2
-    Value: ff212832b9c9f8a6
+    Value: 81808b3df1156ef6
   SecretAccessKeytafrontenddev1:
     Description: 'Secret Key of new user: tafrontenddev1 in group frontendtestgroup1'
     Value:
@@ -63,7 +63,7 @@ Resources:
     Type: AWS::IAM::ManagedPolicy
   S3DelObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/e037bdd35508d8bcb56afcd55e50905f
+      CodeUri: s3://ctnsampackages/def49f1c33e89e14463d94384001da25
       Description: Deletes Objects from S3
       Environment:
         Variables:
@@ -111,7 +111,7 @@ Resources:
     Type: AWS::IAM::Role
   S3PutObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/85dc2f4401510307e34c065a3830b921
+      CodeUri: s3://ctnsampackages/1293390d9ffe6324dfb002e8da4fe0d8
       Description: Puts Objects in S3
       Environment:
         Variables:
@@ -516,7 +516,7 @@ Resources:
   frontendtestgroup1usertafrontenddev1:
     Properties:
       LoginProfile:
-        Password: 2d21cb663f07bef3
+        Password: 979a0d1f9dac926e
         PasswordResetRequired: 'false'
       Path: /frontendtestgroup1/
       UserName: tafrontenddev1us-east-1
@@ -531,7 +531,7 @@ Resources:
   frontendtestgroup2usertafrontenddev2:
     Properties:
       LoginProfile:
-        Password: ff212832b9c9f8a6
+        Password: 81808b3df1156ef6
         PasswordResetRequired: 'false'
       Path: /frontendtestgroup2/
       UserName: tafrontenddev2us-east-1
