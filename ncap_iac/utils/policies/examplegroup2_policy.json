@@ -1,0 +1,88 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": "s3:GetBucketLocation",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor3",
+      "Effect": "Allow",
+      "Action": "s3:HeadBucket",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor1",
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ListBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::ctnfrontendexample2"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "s3:prefix": [
+            "",
+            "examplegroup2/",
+            "examplegroup2/inputs",
+            "examplegroup2/results",
+            "examplegroup2/logs",
+            "examplegroup2/inputs/",
+            "examplegroup2/results/",
+            "examplegroup2/logs/"
+          ],
+          "s3:delimiter": [
+            "/"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ListSubBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::ctnfrontendexample2"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "examplegroup2/inputs/*",
+            "examplegroup2/results/*",
+            "examplegroup2/logs/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "Inputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::ctnfrontendexample2/examplegroup2/inputs/*"
+      ]
+    },
+    {
+      "Sid": "Outputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::ctnfrontendexample2/examplegroup2/results/*",
+        "arn:aws:s3:::ctnfrontendexample2/examplegroup2/logs/*"
+      ]
+    }
+  ]
+}
