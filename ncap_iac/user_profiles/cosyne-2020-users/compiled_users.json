@@ -1,0 +1,274 @@
+{
+    "Outputs": {
+        "AccessKeyjpccosyne": {
+            "Description": "Access Key of user: jpccosyne in group cunninghamlab",
+            "Value": {
+                "Ref": "userkeyjpccosyne"
+            }
+        },
+        "AccessKeysrbcosyne": {
+            "Description": "Access Key of user: srbcosyne in group cunninghamlab",
+            "Value": {
+                "Ref": "userkeysrbcosyne"
+            }
+        },
+        "AccessKeytacosyne": {
+            "Description": "Access Key of user: tacosyne in group cunninghamlab",
+            "Value": {
+                "Ref": "userkeytacosyne"
+            }
+        },
+        "Passwordjpccosyne": {
+            "Description": "Default password of new user jpccosyne in group cunninghamlab",
+            "Value": "5041b9ddc08b9b67"
+        },
+        "Passwordsrbcosyne": {
+            "Description": "Default password of new user srbcosyne in group cunninghamlab",
+            "Value": "541a81ea105daecb"
+        },
+        "Passwordtacosyne": {
+            "Description": "Default password of new user tacosyne in group cunninghamlab",
+            "Value": "3f6ccf7f7fe2a3f6"
+        },
+        "SecretAccessKeyjpccosyne": {
+            "Description": "Secret Key of new user: jpccosyne in group cunninghamlab",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeyjpccosyne",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeysrbcosyne": {
+            "Description": "Secret Key of new user: srbcosyne in group cunninghamlab",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeysrbcosyne",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeytacosyne": {
+            "Description": "Secret Key of new user: tacosyne in group cunninghamlab",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeytacosyne",
+                    "SecretAccessKey"
+                ]
+            }
+        }
+    },
+    "Resources": {
+        "DeleteCustomResourcecunninghamlab": {
+            "DependsOn": "PipelineBucketcunninghamlab",
+            "Properties": {
+                "BucketName": "cunninghamlab",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LambdaBaseRole": {
+            "Properties": {
+                "Description": {
+                    "Fn::Join": [
+                        " ",
+                        [
+                            "Base Policy for all lambda function roles in",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "logs:CreateLogGroup",
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": "arn:aws:logs:*:*:*"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::IAM::ManagedPolicy"
+        },
+        "PipelineBucketcunninghamlab": {
+            "Properties": {
+                "AccessControl": "Private",
+                "BucketName": "cunninghamlab"
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "S3DelObjectFunction": {
+            "Properties": {
+                "CodeUri": "../../ncap_blueprints/lambda_repo",
+                "Description": "Deletes Objects from S3",
+                "Environment": {
+                    "Variables": {
+                        "EXECUTION_TIMEOUT": "172800",
+                        "IAM_ROLE": "iam role with ssm and s3 access",
+                        "INDIR": "inputs",
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "Type of instance to launch."
+                    }
+                },
+                "Handler": "helper.handler_deldir",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "S3MakePathRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "S3MakePathRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "LambdaBaseRole"
+                    }
+                ],
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "s3:DeleteObject",
+                                        "s3:ListBucket",
+                                        "s3:PutObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "write_s3_policy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "S3PutObjectFunction": {
+            "Properties": {
+                "CodeUri": "../../ncap_blueprints/lambda_repo",
+                "Description": "Puts Objects in S3",
+                "Environment": {
+                    "Variables": {
+                        "EXECUTION_TIMEOUT": "172800",
+                        "IAM_ROLE": "iam role with ssm and s3 access",
+                        "INDIR": "inputs",
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "Type of instance to launch."
+                    }
+                },
+                "Handler": "helper.handler_mkdir",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "S3MakePathRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "cunninghamlabuserjpccosyne": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "5041b9ddc08b9b67",
+                    "PasswordResetRequired": "false"
+                },
+                "Path": "/cunninghamlab/",
+                "UserName": "jpccosyneus-east-1"
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "cunninghamlabusersrbcosyne": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "541a81ea105daecb",
+                    "PasswordResetRequired": "false"
+                },
+                "Path": "/cunninghamlab/",
+                "UserName": "srbcosyneus-east-1"
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "cunninghamlabusertacosyne": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "3f6ccf7f7fe2a3f6",
+                    "PasswordResetRequired": "false"
+                },
+                "Path": "/cunninghamlab/",
+                "UserName": "tacosyneus-east-1"
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "userkeyjpccosyne": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "cunninghamlabuserjpccosyne"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeysrbcosyne": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "cunninghamlabusersrbcosyne"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeytacosyne": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "cunninghamlabusertacosyne"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        }
+    },
+    "Transform": "AWS::Serverless-2016-10-31"
+}

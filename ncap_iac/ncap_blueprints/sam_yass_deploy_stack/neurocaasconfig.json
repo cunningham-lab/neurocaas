@@ -1,0 +1,6 @@
+{
+    "config":"ctnncapdevYASS/inputs/10chan/config.yaml",
+    "geom":"ctnncapdevYASS/inputs/10chan/geom.txt",
+    "latest":false,
+    "datasize":3
+}
