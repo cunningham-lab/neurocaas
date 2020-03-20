@@ -1,0 +1,144 @@
+{
+    "Outputs": {
+        "AccessKey0": {
+            "Description": "Access Key of user: customgroupnew",
+            "Value": {
+                "Ref": "userkey0"
+            }
+        },
+        "AccessKey1": {
+            "Description": "Access Key of user: customgroupnew",
+            "Value": {
+                "Ref": "userkey1"
+            }
+        },
+        "Password0": {
+            "Description": "Default password of new user",
+            "Value": "a256dcdf83c041d0"
+        },
+        "Password1": {
+            "Description": "Default password of new user",
+            "Value": "555cb1ac567173b3"
+        },
+        "SecretAccessKey0": {
+            "Description": "Secret Key of new user: customgroupnew",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkey0",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKey1": {
+            "Description": "Secret Key of new user: customgroupnew",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkey1",
+                    "SecretAccessKey"
+                ]
+            }
+        }
+    },
+    "Resources": {
+        "UserBucketcustomgroupnew": {
+            "Properties": {
+                "AccessControl": "Private",
+                "BucketName": "customgroupnew"
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "UserGroupcustomgroupnew": {
+            "Properties": {
+                "GroupName": "customgroupnewgroup",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "s3:GetBucketLocation",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor0"
+                                },
+                                {
+                                    "Action": "s3:HeadBucket",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor3"
+                                },
+                                {
+                                    "Action": "s3:ListAllMyBuckets",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor1"
+                                },
+                                {
+                                    "Action": "s3:*",
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::customgroupnew/*",
+                                        "arn:aws:s3:::customgroupnew"
+                                    ],
+                                    "Sid": "VisualEditor2"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "customgroupnewpolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Group"
+        },
+        "Users": {
+            "Properties": {
+                "GroupName": {
+                    "Ref": "UserGroupcustomgroupnew"
+                },
+                "Users": [
+                    {
+                        "Ref": "customgroupnewuser0"
+                    },
+                    {
+                        "Ref": "customgroupnewuser1"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::UserToGroupAddition"
+        },
+        "customgroupnewuser0": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "a256dcdf83c041d0",
+                    "PasswordResetRequired": "false"
+                }
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "customgroupnewuser1": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "555cb1ac567173b3",
+                    "PasswordResetRequired": "false"
+                }
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "userkey0": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "customgroupnewuser0"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkey1": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "customgroupnewuser1"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        }
+    }
+}

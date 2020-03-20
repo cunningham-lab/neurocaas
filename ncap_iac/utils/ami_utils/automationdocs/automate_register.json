@@ -1,0 +1,72 @@
+{
+  "description": "Creates a new Amazon Machine Image (AMI) from an Amazon EC2 instance",
+  "schemaVersion": "0.3",
+  "assumeRole": "{{ AutomationAssumeRole }}",
+  "parameters": {
+    "InstanceId": {
+      "type": "String",
+      "description": "(Required) The ID of the Amazon EC2 instance."
+    },
+    "NoReboot": {
+      "type": "Boolean",
+      "description": "(Optional) Do not reboot the instance before creating the image.",
+      "default": false
+    },
+    "AutomationAssumeRole": {
+      "type": "String",
+      "description": "(Optional) The ARN of the role that allows Automation to perform the actions on your behalf. ",
+      "default": ""
+    },
+    "VolumeId": {
+      "type": "String",
+      "description": "(Required) The ID of the volume."
+    },
+    "VolumeDescription": {
+      "type": "String",
+      "description": "Optional A description for the snapshot",
+      "default": ""
+    }
+  },
+  "mainSteps": [
+    {
+      "name": "basicactionRunCommand",
+      "action":"aws:runCommand",
+      "inputs":{
+        "DocumentName":"DisplaySalutationTest",
+        "InstanceIds": ["{{ InstanceId }}"]
+      }
+    },
+    {
+      "name": "createSnapshot",
+      "action": "aws:executeAwsApi",
+      "inputs":{
+        "Service":"ec2",
+        "Api":"CreateSnapshot",
+        "VolumeId": "{{ VolumeId }}",
+        "Description": "{{ VolumeDescription }}"
+      },
+      "outputs":[
+        {
+          "Name": "Payload",  
+          "Selector":"SnapshotId",
+          "Type":"String"
+        }
+      ]
+    },
+    {
+      "name": "verifySnapshot",
+      "action": "aws:waitForAwsResourceProperty",
+      "timeoutSeconds": 600,
+      "inputs":{
+        "Service":"ec2",
+        "Api":"DescribeSnapshots",
+        "SnapshotIds": ["{{createSnapshot.Payload}}"],
+        "PropertySelector": "Snapshots[0].State",
+        "DesiredValues":["completed"]
+      }
+    }
+  ],
+  "outputs": [
+    "createSnapshot.Payload"
+  ]
+}
