@@ -2,7 +2,7 @@
     "PipelineName": "ncapctnteststack",
     "REGION": "us-east-1",
     "Lambda": {
-        "CodeUri": "../lambda_repo",
+        "CodeUri": "../../protocols",
         "Handler": "submit_start.handler",
         "Launch": true,
         "LambdaConfig": {

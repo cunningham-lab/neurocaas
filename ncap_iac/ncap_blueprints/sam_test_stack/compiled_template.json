@@ -99,7 +99,7 @@
         },
         "FigLambda": {
             "Properties": {
-                "CodeUri": "../lambda_repo",
+                "CodeUri": "../../protocols",
                 "Description": "Lambda Function logging start/stop for NCAP",
                 "Events": {},
                 "Handler": "log.eventshandler",
@@ -186,7 +186,7 @@
         },
         "MainLambda": {
             "Properties": {
-                "CodeUri": "../lambda_repo",
+                "CodeUri": "../../protocols",
                 "Description": "Main Lambda Function for Serverless",
                 "Environment": {
                     "Variables": {
@@ -221,7 +221,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "4831dc2c7748aa8928f4dd5a396b4988d01c9422\n"
+                        "versionid": "12e2c814b6ccb95d51dd241a7fde8b3db92c196a\n"
                     }
                 },
                 "Events": {
@@ -286,7 +286,7 @@
         },
         "S3DelObjectFunction": {
             "Properties": {
-                "CodeUri": "../lambda_repo",
+                "CodeUri": "../../protocols",
                 "Description": "Deletes Objects from S3",
                 "Environment": {
                     "Variables": {
@@ -321,7 +321,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "4831dc2c7748aa8928f4dd5a396b4988d01c9422\n"
+                        "versionid": "12e2c814b6ccb95d51dd241a7fde8b3db92c196a\n"
                     }
                 },
                 "Handler": "helper.handler_deldir",
@@ -383,7 +383,7 @@
         },
         "S3PutObjectFunction": {
             "Properties": {
-                "CodeUri": "../lambda_repo",
+                "CodeUri": "../../protocols",
                 "Description": "Puts Objects in S3",
                 "Environment": {
                     "Variables": {
@@ -418,7 +418,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "4831dc2c7748aa8928f4dd5a396b4988d01c9422\n"
+                        "versionid": "12e2c814b6ccb95d51dd241a7fde8b3db92c196a\n"
                     }
                 },
                 "Handler": "helper.handler_mkdir",
