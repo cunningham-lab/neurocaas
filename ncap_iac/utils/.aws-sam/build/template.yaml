@@ -1,0 +1,155 @@
+Outputs:
+  AccessKey0:
+    Description: 'Access Key of user: dummy4'
+    Value:
+      Ref: userkey0
+  AccessKey1:
+    Description: 'Access Key of user: dummy5'
+    Value:
+      Ref: userkey1
+  Password0:
+    Description: Default password of new user dummy4
+    Value: f92598f14a41e3e1
+  Password1:
+    Description: Default password of new user dummy5
+    Value: 3f0b5f39489fc29a
+  SecretAccessKey0:
+    Description: 'Secret Key of new user: dummy4'
+    Value:
+      Fn::GetAtt:
+      - userkey0
+      - SecretAccessKey
+  SecretAccessKey1:
+    Description: 'Secret Key of new user: dummy5'
+    Value:
+      Fn::GetAtt:
+      - userkey1
+      - SecretAccessKey
+Resources:
+  LambdaBaseRole:
+    Properties:
+      Description:
+        Fn::Join:
+        - ' '
+        - - Base Policy for all lambda function roles in
+          - Ref: AWS::StackName
+      PolicyDocument:
+        Statement:
+        - Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Effect: Allow
+          Resource: arn:aws:logs:*:*:*
+        Version: '2012-10-17'
+    Type: AWS::IAM::ManagedPolicy
+  S3MakePathRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - Ref: LambdaBaseRole
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - s3:DeleteObject
+            - s3:ListBucket
+            - s3:PutObject
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: write_s3_policy
+    Type: AWS::IAM::Role
+  S3PutObject:
+    Properties:
+      BucketName: testfullpipeline
+      DirName: datafolder
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  S3PutObjectFunction:
+    Properties:
+      CodeUri: S3PutObjectFunction
+      Description: Puts Objects in S3
+      Handler: helper.handler_mkdir
+      Role:
+        Fn::GetAtt:
+        - S3MakePathRole
+        - Arn
+      Runtime: python3.6
+      Timeout: 30
+    Type: AWS::Serverless::Function
+  UserBuckettestfullpipeline:
+    Properties:
+      AccessControl: Private
+      BucketName: testfullpipeline
+    Type: AWS::S3::Bucket
+  UserGrouptestfullpipeline:
+    Properties:
+      GroupName: testfullpipelinegroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::testfullpipeline/*
+            - arn:aws:s3:::testfullpipeline
+            Sid: VisualEditor2
+          Version: '2012-10-17'
+        PolicyName: testfullpipelinepolicy
+    Type: AWS::IAM::Group
+  Users:
+    Properties:
+      GroupName:
+        Ref: UserGrouptestfullpipeline
+      Users:
+      - Ref: testfullpipelineuserdummy4
+      - Ref: testfullpipelineuserdummy5
+    Type: AWS::IAM::UserToGroupAddition
+  testfullpipelineuserdummy4:
+    Properties:
+      LoginProfile:
+        Password: f92598f14a41e3e1
+        PasswordResetRequired: 'false'
+    Type: AWS::IAM::User
+  testfullpipelineuserdummy5:
+    Properties:
+      LoginProfile:
+        Password: 3f0b5f39489fc29a
+        PasswordResetRequired: 'false'
+    Type: AWS::IAM::User
+  userkey0:
+    Properties:
+      UserName:
+        Ref: testfullpipelineuserdummy4
+    Type: AWS::IAM::AccessKey
+  userkey1:
+    Properties:
+      UserName:
+        Ref: testfullpipelineuserdummy5
+    Type: AWS::IAM::AccessKey
+Transform: AWS::Serverless-2016-10-31
