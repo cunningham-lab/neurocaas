@@ -83,7 +83,7 @@ class UserTemplateFrontend():
         ## Now we need to write a lambda function that actually does the work:  
         ##TODO: Replace the paths for codeuri below once you move the actual code. 
         mkfunction = Function("S3PutObjectFunction",
-                              CodeUri="../../ncap_blueprints/lambda_repo",
+                              CodeUri="../../protocols",
                               Description= "Puts Objects in S3",
                               Handler="helper.handler_mkdir",
                               Environment = Environment(Variables=lambdaconfig),
@@ -92,7 +92,7 @@ class UserTemplateFrontend():
                               Timeout=30)
         mkfunction_attached = template.add_resource(mkfunction)
         delfunction = Function("S3DelObjectFunction",
-                              CodeUri="../../ncap_blueprints/lambda_repo",
+                              CodeUri="../../protocols",
                               Description= "Deletes Objects from S3",
                               Handler="helper.handler_deldir",
                               Environment = Environment(Variables=lambdaconfig),

@@ -2,9 +2,9 @@
     "PipelineName":"epi-ncap-copy",
     "REGION":"us-east-1",
     "Lambda":{
-        "CodeUri":"../lambda_repo",
+        "CodeUri":"../../protocols",
         "Handler":"submit_start.handler_log_demo",
-        "PostCodeUri":"../lambda_repo",
+        "PostCodeUri":"../../protocols",
         "PostHandler":"postprocess.epipostprocess",
         "Launch":true, 
         "LambdaConfig":{
