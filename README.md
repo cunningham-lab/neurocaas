@@ -2,10 +2,10 @@ Main repository for the NeuroCaaS project, providing a neuroscience analysis pla
 
 This repository hosts all of the Code that makes up our IaC approach, with structure as described in the paper [Link]
 Structure: 
-*paper
-*media
-*experiments
-*ncap\_iac
+* paper
+* media
+* experiments
+* ncap\_iac
     * ncap blueprints
     * user profiles
     * protocols 
