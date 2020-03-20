@@ -95,7 +95,7 @@ class NCAPTemplate(object):
 
         ## Now we need to write a lambda function that actually does the work:  
         mkfunction = Function("S3PutObjectFunction",
-                              CodeUri="../lambda_repo",
+                              CodeUri="../protocols",
                               Description= "Puts Objects in S3",
                               Handler="helper.handler_mkdir",
                               Environment = Environment(Variables=lambdaconfig),
@@ -104,7 +104,7 @@ class NCAPTemplate(object):
                               Timeout=30)
         mkfunction_attached = template.add_resource(mkfunction)
         delfunction = Function("S3DelObjectFunction",
-                               CodeUri="../lambda_repo",
+                               CodeUri="../protocols",
                                Description= "Deletes Objects from S3",
                                Handler="helper.handler_deldir",
                                Environment = Environment(Variables=lambdaconfig),
@@ -342,7 +342,7 @@ class NCAPTemplate(object):
         lambdaconfig['cwrolearn'] = GetAtt(self.cwrole,'Arn')
         ## Now add to a lambda function: 
         function = Function('MainLambda',
-                CodeUri = '../lambda_repo',
+                CodeUri = '../protocols',
                 Runtime = 'python3.6',
                 Handler = 'submit_start.handler',
                 Description = 'Main Lambda Function for Serverless',
@@ -359,7 +359,7 @@ class NCAPTemplate(object):
     def add_figure_lambda(self):
         ## Now add to a lambda function: 
         function = Function('FigLambda',
-                CodeUri = '../lambda_repo',
+                CodeUri = '../protocols',
                 Runtime = 'python3.6',
                 Handler = 'log.eventshandler',
                 Description = 'Lambda Function logging start/stop for NCAP',
