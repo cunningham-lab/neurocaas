@@ -25,7 +25,7 @@ python "$scriptdir"/checkpath.py "$PIPENAME"
 
 ## Give the path to the root directory for ncap (we like absolute paths) 
 
-cd $ncaprootdir/ncap_blueprints/template_utils
+cd $ncaprootdir/utils
 ## Run different deployment scripts based on version:
 version=$(jq ".PipelineVersion" "$PIPEDIR"/stack_config_template.json ) 
 versint=$(echo $version | tr -d '"')
@@ -45,7 +45,7 @@ fi
 ## We need to navigate to the pipeline directory because we have a relative path in our compilation code. 
 cd $PIPEDIR
 
-sam build -t compiled_template.json -m "$ncaprootdir"/ncap_blueprints/lambda_repo/requirements.txt
+sam build -t compiled_template.json -m "$ncaprootdir"/protocols/requirements.txt
 
 sam package --s3-bucket ctnsampackages --output-template-file compiled_packaged.yaml
 
