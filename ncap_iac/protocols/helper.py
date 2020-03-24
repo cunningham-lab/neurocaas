@@ -20,6 +20,7 @@ def handler_mkdir(event,context):
     ## Get properties: 
     try:
         if event['RequestType'] == 'Create':
+            print(event['RequestType'])
             props = event['ResourceProperties']
             ## Get individual properties: 
             bucket = props['BucketName']
