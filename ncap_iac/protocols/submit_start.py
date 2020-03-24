@@ -815,7 +815,7 @@ class Submission_Launch_log_demo(Submission_Launch_full):
         create_jobdir  = utilsparam.s3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
         
         print(self.path,'path')
-        self.logger = utilsparam.s3.JobLogger(self.bucket_name, self.jobpath)
+        self.logger = utilsparam.s3.JobLogger_demo(self.bucket_name, self.jobpath)
         ## Check what instance we should use. 
         try:
             self.instance_type = submit_file['instance_type'] # TODO default option from config
