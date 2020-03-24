@@ -27,11 +27,13 @@ python "$scriptdir"/checkpath.py "$PIPENAME"
 
 cd $ncaprootdir/utils
 stage=$(jq ".STAGE" "$PIPEDIR"/stack_config_template.json ) 
-if [ "$stage" == "develop" ] 
+stagestr=$(echo $stage | tr -d '"')
+echo $stagestr
+if [ "$stagestr" == "develop" ] 
 then 
     echo "development version."
     python dev_builder.py $PIPEDIR/stack_config_template.json 
-elif [ "$stage" == "deploy" ]
+elif [ "$stagestr" == "deploy" ]
 then
     echo "deployment version."
     python deploy_builder.py $PIPEDIR/stack_config_template.json 
