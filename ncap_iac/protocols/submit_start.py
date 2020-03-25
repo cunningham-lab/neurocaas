@@ -25,10 +25,10 @@ def respond(err, res=None):
         "headers": {"Content-Type": "application/json"},
     }
 
-## Lambda code for developmemtn. 
+## Lambda code for developmemt. 
 class Submission_Launch_log_demo():
     """
-    Specific lambda for purposes of demo. 
+    Specific lambda for purposes of development.  
     """
     def __init__(self,bucket_name,key,time):
         ## Initialize as before:
