@@ -2,6 +2,7 @@ import os
 import json 
 import traceback 
 import utils.s3
+#from utils import s3 as utilss3
 
 ## Function to take output of cloudwatch events and write to figure file. 
 

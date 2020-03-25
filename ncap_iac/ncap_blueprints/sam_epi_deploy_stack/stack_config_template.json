@@ -1,6 +1,7 @@
 {
     "PipelineName":"epi-ncap",
     "REGION":"us-east-1",
+    "STAGE":"develop",
     "Lambda":{
         "CodeUri":"../../protocols",
         "Handler":"submit_start.handler_log_demo",
