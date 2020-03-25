@@ -1,0 +1,8 @@
+{
+"instance-id":"id",
+"databucket":"bucket that data lives in.",
+"datapath":"path to the data inside this bucket.",
+"jobpath":"path to the results directory given",
+"start":null,
+"end":null
+}
