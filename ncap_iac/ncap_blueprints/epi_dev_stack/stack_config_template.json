@@ -2,6 +2,7 @@
     "PipelineName":"epi-ncap-stable",
     "REGION":"us-east-1",
     "STAGE":"develop",
+    "MAXCOST":100,
     "Lambda":{
         "CodeUri":"../../protocols",
         "Handler":"submit_start.handler_log_demo",
