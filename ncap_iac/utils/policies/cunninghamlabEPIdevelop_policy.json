@@ -1,0 +1,96 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": "s3:GetBucketLocation",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor3",
+      "Effect": "Allow",
+      "Action": "s3:HeadBucket",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor1",
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ListBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::epi-ncap-stable"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "s3:prefix": [
+            "",
+            "cunninghamlabEPIdevelop/",
+            "cunninghamlabEPIdevelop/inputs",
+            "cunninghamlabEPIdevelop/results",
+            "cunninghamlabEPIdevelop/logs",
+            "cunninghamlabEPIdevelop/submissions",
+            "cunninghamlabEPIdevelop/configs",
+            "cunninghamlabEPIdevelop/inputs/",
+            "cunninghamlabEPIdevelop/results/",
+            "cunninghamlabEPIdevelop/logs/",
+            "cunninghamlabEPIdevelop/submissions/",
+            "cunninghamlabEPIdevelop/configs/"
+          ],
+          "s3:delimiter": [
+            "/"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ListSubBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::epi-ncap-stable"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "cunninghamlabEPIdevelop/inputs/*",
+            "cunninghamlabEPIdevelop/results/*",
+            "cunninghamlabEPIdevelop/configs/*",
+            "cunninghamlabEPIdevelop/submissions/*",
+            "cunninghamlabEPIdevelop/logs/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "Inputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::epi-ncap-stable/cunninghamlabEPIdevelop/inputs/*",
+        "arn:aws:s3:::epi-ncap-stable/cunninghamlabEPIdevelop/configs/*",
+        "arn:aws:s3:::epi-ncap-stable/cunninghamlabEPIdevelop/submissions/*"
+      ]
+    },
+    {
+      "Sid": "Outputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::epi-ncap-stable/cunninghamlabEPIdevelop/results/*",
+        "arn:aws:s3:::epi-ncap-stable/cunninghamlabEPIdevelop/configs/*"
+      ]
+    }
+  ]
+}

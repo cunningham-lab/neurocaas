@@ -8536,12 +8536,10 @@ class NDFrame(PandasObject, SelectionMixin, indexing.IndexingMixin):
         )
 
         if method is not None:
-            left = self._ensure_type(
-                left.fillna(method=method, axis=fill_axis, limit=limit)
-            )
-            right = self._ensure_type(
-                right.fillna(method=method, axis=fill_axis, limit=limit)
-            )
+            _left = left.fillna(method=method, axis=fill_axis, limit=limit)
+            assert _left is not None  # needed for mypy
+            left = _left
+            right = right.fillna(method=method, axis=fill_axis, limit=limit)
 
         # if DatetimeIndex have different tz, convert to UTC
         if is_datetime64tz_dtype(left.index):
@@ -10081,9 +10079,9 @@ class NDFrame(PandasObject, SelectionMixin, indexing.IndexingMixin):
         if fill_method is None:
             data = self
         else:
-            data = self._ensure_type(
-                self.fillna(method=fill_method, axis=axis, limit=limit)
-            )
+            _data = self.fillna(method=fill_method, axis=axis, limit=limit)
+            assert _data is not None  # needed for mypy
+            data = _data
 
         rs = data.div(data.shift(periods=periods, freq=freq, axis=axis, **kwargs)) - 1
         if freq is not None:

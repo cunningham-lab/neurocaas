@@ -145,46 +145,7 @@ class NCAPTemplate(object):
         self.add_affiliate_usernet(affiliatedict)
 
     def add_affiliate_folder(self,affiliatename):
-        ## Declare depends on resources: 
-        bucketname = 'PipelineMainBucket'
-        basefoldername = 'BaseFolder'+affiliatename
-        infoldername = 'InFolder'+affiliatename
-        outfoldername = 'OutFolder'+affiliatename
-        logfoldername = 'LogFolder'+affiliatename
-
-        ## Retrieve lambda function and role: 
-        ## We will declare three custom resources per affiliate: 
-        basemake = CustomResource(basefoldername,
-                                  ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
-                                  BucketName = self.config['PipelineName'],
-                                  Path = "",
-                                  DirName = affiliatename,
-                                  DependsOn = bucketname)
-        basefolder = self.template.add_resource(basemake)
-        ## Now an input folder:
-        inmake = CustomResource(infoldername,
-                                  ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
-                                  BucketName = self.config['PipelineName'],
-                                  Path = affiliatename+'/',
-                                  DirName = self.config['Lambda']['LambdaConfig']['INDIR'],
-                                  DependsOn = [bucketname,basefoldername])
-        infolder = self.template.add_resource(inmake)
-        ## Likewise an output folder:
-        outmake = CustomResource(outfoldername,
-                                  ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
-                                  BucketName = self.config['PipelineName'],
-                                  Path = affiliatename+'/',
-                                  DirName = self.config['Lambda']['LambdaConfig']['OUTDIR'],
-                                  DependsOn = [bucketname,basefoldername])
-        outfolder = self.template.add_resource(outmake)
-        ## Likewise a log folder
-        logmake = CustomResource(logfoldername,
-                                  ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
-                                  BucketName = self.config['PipelineName'],
-                                  Path = affiliatename+'/',
-                                  DirName = self.config['Lambda']['LambdaConfig']['LOGDIR'],
-                                  DependsOn = [bucketname,basefoldername])
-        logfolder = self.template.add_resource(logmake)
+        raise NotImplementedError
 
     def add_affiliate_usernet(self,affiliatedict):
         ## Four steps here: 
@@ -318,7 +279,7 @@ class NCAPTemplate(object):
             ## If user input, reads directly from input directory. If other function output, reads from output directory.
             assert type(affiliate["UserInput"]) == bool, "must provide a json boolean for UserInput"
             if affiliate["UserInput"] == True:
-                readdir = self.config['Lambda']['LambdaConfig']['INDIR'] 
+                readdir = self.config['Lambda']['LambdaConfig']['SUBMITDIR'] 
             elif affiliate["UserInput"] == False: 
                 readdir = self.config['Lambda']['LambdaConfig']['OUTDIR'] 
 

@@ -60,39 +60,34 @@ def check_csvs(bucket,jobpath):
     all_logs = [i.key for i in bucket.objects.filter(Prefix=os.path.join(jobpath,prefix_string)) if i.key.endswith("opt_data.csv")]
     return all_logs
 
-#def update_logs(bucket,jobpath,all_logs):
-#    """
-#    Takes the list of existing csv logs, and updates the certificate.txt fiile found in the logs directory. 
-#    inputs:
-#    bucket: (boto3 obj): an s3 boto3 resource object declaring the bucket this comes from. 
-#    jobpath: (string): a string giving the s3 path to the job folder we care about. 
-#    all_logs: (list): a list of the strings giving the path to each opt_data.csv that has been generated thus far. 
-#    """
-#    ## TODO: for right now, we're going to hardcode in the mapping from random seeds to parameter values. 
-#    mapping_dict = {
-#            "D4_C3_L2_U21_rs1":1,
-#            "D4_C3_L1_U23_rs1":2,
-#            "D4_C3_L1_U18_rs1":3,
-#            "D4_C3_L1_U24_rs1":4,
-#            "D4_C3_L2_U24_rs1":5,
-#            "D4_C3_L1_U19_rs1":6,
-#            "D4_C3_L2_U10_rs1":7,
-#            "D4_C3_L2_U14_rs1":8,
-#            "D4_C3_L1_U22_rs1":9,
-#            "D4_C3_L2_U23_rs1":10,
-#            } 
-#
-#    ## Now get the certificate: 
-#    certificatepath = os.path.join(jobpath,"logs","certificate.txt")
-#    certificate = bucket.Object(certificatepath)
-#    certificatefile = certificate.get()["Body"].read().decode('utf-8')
-#    certificatelist = certificatefile.split("\n")
-#
-#    ## Now get the status messages that relate to individual analyses:  
-#    for line in certificatelist: 
-#        dataset_val = re.findall('^Starting analysis ([0-9]+) with parameter set$', line)
-#        print(line,dataset_val,"dasf")
-        
+def update_logs(bucket,jobpath,all_logs):
+    """
+    Takes the list of existing csv logs, and updates the certificate.txt fiile found in the logs directory. 
+    inputs:
+    bucket: (boto3 obj): an s3 boto3 resource object declaring the bucket this comes from. 
+    jobpath: (string): a string giving the s3 path to the job folder we care about. 
+    all_logs: (list): a list of the strings giving the path to each opt_data.csv that has been generated thus far. 
+    """
+    ## TODO: for right now, we're going to hardcode in the mapping from random seeds to parameter values. 
+    mapping_dict = {
+            "D4_C3_L2_U21_rs1":1,
+            "D4_C3_L1_U23_rs1":2,
+            "D4_C3_L1_U18_rs1":3,
+            "D4_C3_L1_U24_rs1":4,
+            "D4_C3_L2_U24_rs1":5,
+            "D4_C3_L1_U19_rs1":6,
+            "D4_C3_L2_U10_rs1":7,
+            "D4_C3_L2_U14_rs1":8,
+            "D4_C3_L1_U22_rs1":9,
+            "D4_C3_L2_U23_rs1":10,
+            } 
+
+    ## Now get the certificate: 
+    certificatepath = os.path.join(jobpath,"logs","certificate.txt")
+    certificate = bucket.Object(certificatepath)
+    certificatefile = certificate.get()["Body"].read().decode('utf-8')
+    print(certificatefile)
+    print(certificatefile.split('\n'))
 
 
 ## Now a function to get the data from each folder: 
@@ -172,7 +167,7 @@ def epipostprocess(event, context):
     results_existing = check_csvs(bucket,jobpath_corrected)
 
     ## Now read and modify the certificate file to reflect the number of datasets that have completed processing!  
-    #update_logs(bucket,jobpath_corrected,results_existing)
+    update_logs(bucket,jobpath_corrected,results_existing)
     
 
     ## We have two conditions we care about: 

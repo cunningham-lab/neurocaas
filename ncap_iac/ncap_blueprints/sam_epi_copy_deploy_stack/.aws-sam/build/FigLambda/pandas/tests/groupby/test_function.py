@@ -17,6 +17,7 @@ from pandas import (
     NaT,
     Series,
     Timestamp,
+    _is_numpy_dev,
     date_range,
     isna,
 )
@@ -685,6 +686,11 @@ def test_numpy_compat(func):
         getattr(g, func)(foo=1)
 
 
+@pytest.mark.xfail(
+    _is_numpy_dev,
+    reason="https://github.com/pandas-dev/pandas/issues/31992",
+    strict=False,
+)
 def test_cummin_cummax():
     # GH 15048
     num_types = [np.int32, np.int64, np.float32, np.float64]
@@ -966,6 +972,7 @@ def test_frame_describe_unstacked_format():
 @pytest.mark.parametrize("dropna", [False, True])
 def test_series_groupby_nunique(n, m, sort, dropna):
     def check_nunique(df, keys, as_index=True):
+        original_df = df.copy()
         gr = df.groupby(keys, as_index=as_index, sort=sort)
         left = gr["julie"].nunique(dropna=dropna)
 
@@ -975,6 +982,7 @@ def test_series_groupby_nunique(n, m, sort, dropna):
             right = right.reset_index(drop=True)
 
         tm.assert_series_equal(left, right, check_names=False)
+        tm.assert_frame_equal(df, original_df)
 
     days = date_range("2015-08-23", periods=10)
 
@@ -1555,3 +1563,34 @@ def test_groupby_mean_no_overflow():
         }
     )
     assert df.groupby("user")["connections"].mean()["A"] == 3689348814740003840
+
+
+@pytest.mark.parametrize(
+    "values",
+    [
+        {
+            "a": [1, 1, 1, 2, 2, 2, 3, 3, 3],
+            "b": [1, pd.NA, 2, 1, pd.NA, 2, 1, pd.NA, 2],
+        },
+        {"a": [1, 1, 2, 2, 3, 3], "b": [1, 2, 1, 2, 1, 2]},
+    ],
+)
+@pytest.mark.parametrize("function", ["mean", "median", "var"])
+def test_apply_to_nullable_integer_returns_float(values, function):
+    # https://github.com/pandas-dev/pandas/issues/32219
+    output = 0.5 if function == "var" else 1.5
+    arr = np.array([output] * 3, dtype=float)
+    idx = pd.Index([1, 2, 3], dtype=object, name="a")
+    expected = pd.DataFrame({"b": arr}, index=idx)
+
+    groups = pd.DataFrame(values, dtype="Int64").groupby("a")
+
+    result = getattr(groups, function)()
+    tm.assert_frame_equal(result, expected)
+
+    result = groups.agg(function)
+    tm.assert_frame_equal(result, expected)
+
+    result = groups.agg([function])
+    expected.columns = MultiIndex.from_tuples([("b", function)])
+    tm.assert_frame_equal(result, expected)

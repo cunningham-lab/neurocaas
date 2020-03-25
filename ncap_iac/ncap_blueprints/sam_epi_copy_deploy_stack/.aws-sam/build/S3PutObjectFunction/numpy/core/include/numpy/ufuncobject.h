@@ -120,11 +120,7 @@ typedef struct _tagPyUFuncObject {
          */
         int nin, nout, nargs;
 
-        /*
-         * Identity for reduction, any of PyUFunc_One, PyUFunc_Zero
-         * PyUFunc_MinusOne, PyUFunc_None, PyUFunc_ReorderableNone,
-         * PyUFunc_IdentityValue.
-         */
+        /* Identity for reduction, either PyUFunc_One or PyUFunc_Zero */
         int identity;
 
         /* Array of one-dimensional core loops */
@@ -305,7 +301,7 @@ typedef struct _tagPyUFuncObject {
  */
 #define PyUFunc_ReorderableNone -2
 /*
- * UFunc unit is an identity_value, and the order of operations can be reordered
+ * UFunc unit is in identity_value, and the order of operations can be reordered
  * This case allows reduction with multiple axes at once.
  */
 #define PyUFunc_IdentityValue -3
@@ -340,6 +336,14 @@ typedef struct _loop1d_info {
 
 #define UFUNC_PYVALS_NAME "UFUNC_PYVALS"
 
+#define UFUNC_CHECK_ERROR(arg) \
+        do {if ((((arg)->obj & UFUNC_OBJ_NEEDS_API) && PyErr_Occurred()) || \
+            ((arg)->errormask && \
+             PyUFunc_checkfperr((arg)->errormask, \
+                                (arg)->errobj, \
+                                &(arg)->first))) \
+                goto fail;} while (0)
+
 /*
  * THESE MACROS ARE DEPRECATED.
  * Use npy_set_floatstatus_* in the npymath library.
@@ -349,6 +353,10 @@ typedef struct _loop1d_info {
 #define UFUNC_FPE_UNDERFLOW     NPY_FPE_UNDERFLOW
 #define UFUNC_FPE_INVALID       NPY_FPE_INVALID
 
+#define UFUNC_CHECK_STATUS(ret) \
+    { \
+       ret = npy_clear_floatstatus(); \
+    }
 #define generate_divbyzero_error() npy_set_floatstatus_divbyzero()
 #define generate_overflow_error() npy_set_floatstatus_overflow()
 

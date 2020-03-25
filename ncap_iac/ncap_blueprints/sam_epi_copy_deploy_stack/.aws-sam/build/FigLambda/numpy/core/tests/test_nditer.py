@@ -1864,7 +1864,7 @@ def test_iter_buffered_cast_structured_type():
     # make sure multi-field struct type -> simple doesn't work
     sdt = [('a', 'f4'), ('b', 'i8'), ('d', 'O')]
     a = np.array([(5.5, 7, 'test'), (8, 10, 11)], dtype=sdt)
-    assert_raises(TypeError, lambda: (
+    assert_raises(ValueError, lambda: (
         nditer(a, ['buffered', 'refs_ok'], ['readonly'],
                casting='unsafe',
                op_dtypes='i4')))
@@ -2104,7 +2104,7 @@ def test_iter_buffering_string():
     assert_equal(i[0], b'abc')
     assert_equal(i[0].dtype, np.dtype('S6'))
 
-    a = np.array(['abc', 'a', 'abcd'], dtype=np.unicode_)
+    a = np.array(['abc', 'a', 'abcd'], dtype=np.unicode)
     assert_equal(a.dtype, np.dtype('U4'))
     assert_raises(TypeError, nditer, a, ['buffered'], ['readonly'],
                     op_dtypes='U2')
@@ -2292,7 +2292,7 @@ class TestIterNested(object):
         assert_equal(vals, [[0, 1, 2], [3, 4, 5]])
         vals = None
 
-        # writebackifcopy - using context manager
+        # writebackifcopy - using conext manager
         a = arange(6, dtype='f4').reshape(2, 3)
         i, j = np.nested_iters(a, [[0], [1]],
                             op_flags=['readwrite', 'updateifcopy'],

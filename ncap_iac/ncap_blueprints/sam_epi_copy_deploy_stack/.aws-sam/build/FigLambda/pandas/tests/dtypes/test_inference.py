@@ -568,6 +568,13 @@ class TestInference:
 
         tm.assert_extension_array_equal(result, exp)
 
+    def test_maybe_convert_objects_bool_nan(self):
+        # GH32146
+        ind = pd.Index([True, False, np.nan], dtype=object)
+        exp = np.array([True, False, np.nan], dtype=object)
+        out = lib.maybe_convert_objects(ind.values, safe=1)
+        tm.assert_numpy_array_equal(out, exp)
+
     def test_mixed_dtypes_remain_object_array(self):
         # GH14956
         array = np.array([datetime(2015, 1, 1, tzinfo=pytz.utc), 1], dtype=object)
@@ -1199,6 +1206,24 @@ class TestTypeInference:
 
         inferred = lib.infer_dtype(pd.Series(idx), skipna=False)
         assert inferred == "interval"
+
+    @pytest.mark.parametrize("klass", [pd.array, pd.Series])
+    @pytest.mark.parametrize("skipna", [True, False])
+    @pytest.mark.parametrize("data", [["a", "b", "c"], ["a", "b", pd.NA]])
+    def test_string_dtype(self, data, skipna, klass):
+        # StringArray
+        val = klass(data, dtype="string")
+        inferred = lib.infer_dtype(val, skipna=skipna)
+        assert inferred == "string"
+
+    @pytest.mark.parametrize("klass", [pd.array, pd.Series])
+    @pytest.mark.parametrize("skipna", [True, False])
+    @pytest.mark.parametrize("data", [[True, False, True], [True, False, pd.NA]])
+    def test_boolean_dtype(self, data, skipna, klass):
+        # BooleanArray
+        val = klass(data, dtype="boolean")
+        inferred = lib.infer_dtype(val, skipna=skipna)
+        assert inferred == "boolean"
 
 
 class TestNumberScalar:

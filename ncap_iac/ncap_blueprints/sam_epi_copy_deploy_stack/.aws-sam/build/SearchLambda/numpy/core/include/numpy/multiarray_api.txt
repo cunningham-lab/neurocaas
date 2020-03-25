@@ -242,19 +242,18 @@ Returns NULL if un-successful.
 ::
 
   PyObject *
-  PyArray_FromDims(int NPY_UNUSED(nd) , int *NPY_UNUSED(d) , int
-                   NPY_UNUSED(type) )
+  PyArray_FromDims(int nd, int *d, int type)
 
-Deprecated, use PyArray_SimpleNew instead.
+Construct an empty array from dimensions and typenum
 
 ::
 
   PyObject *
-  PyArray_FromDimsAndDataAndDescr(int NPY_UNUSED(nd) , int
-                                  *NPY_UNUSED(d) , PyArray_Descr
-                                  *descr, char *NPY_UNUSED(data) )
+  PyArray_FromDimsAndDataAndDescr(int nd, int *d, PyArray_Descr
+                                  *descr, char *data)
 
-Deprecated, use PyArray_NewFromDescr instead.
+Like FromDimsAndData but uses the Descr structure instead of typecode
+as input.
 
 ::
 
@@ -295,8 +294,9 @@ so it can be used like PyArray_EnsureArray(some_function(...))
 Given a ``FILE *`` pointer ``fp``, and a ``PyArray_Descr``, return an
 array corresponding to the data encoded in that file.
 
-The reference to `dtype` is stolen (it is possible that the passed in
-dtype is not held on to).
+If the dtype is NULL, the default array type is used (double).
+If non-null, the reference is stolen and if dtype->subarray is true dtype
+will be decrefed even on success.
 
 The number of elements to read is given as ``num``; if it is < 0, then
 then as many as possible are read.
@@ -388,7 +388,7 @@ steals reference to dtype, must not be NULL
 
   PyObject *
   PyArray_Resize(PyArrayObject *self, PyArray_Dims *newshape, int
-                 refcheck, NPY_ORDER NPY_UNUSED(order) )
+                 refcheck, NPY_ORDER order)
 
 Resize (reallocate data).  Only works if nothing else is referencing this
 array and it is contiguous.  If refcheck is 0, then the reference count is
@@ -491,9 +491,9 @@ Update Several Flags at once.
 ::
 
   PyObject *
-  PyArray_New(PyTypeObject *subtype, int nd, npy_intp const *dims, int
-              type_num, npy_intp const *strides, void *data, int
-              itemsize, int flags, PyObject *obj)
+  PyArray_New(PyTypeObject *subtype, int nd, npy_intp *dims, int
+              type_num, npy_intp *strides, void *data, int itemsize, int
+              flags, PyObject *obj)
 
 Generic new array creation routine.
 
@@ -501,8 +501,8 @@ Generic new array creation routine.
 
   PyObject *
   PyArray_NewFromDescr(PyTypeObject *subtype, PyArray_Descr *descr, int
-                       nd, npy_intp const *dims, npy_intp const
-                       *strides, void *data, int flags, PyObject *obj)
+                       nd, npy_intp *dims, npy_intp *strides, void
+                       *data, int flags, PyObject *obj)
 
 Generic new array creation routine.
 
@@ -538,7 +538,7 @@ Get Iterator.
 
 ::
 
-  PyObject*
+  PyObject *
   PyArray_MultiIterNew(int n, ... )
 
 Get MultiIterator,
@@ -1044,28 +1044,28 @@ Returns a contiguous array
 ::
 
   npy_intp
-  PyArray_MultiplyList(npy_intp const *l1, int n)
+  PyArray_MultiplyList(npy_intp *l1, int n)
 
 Multiply a List
 
 ::
 
   int
-  PyArray_MultiplyIntList(int const *l1, int n)
+  PyArray_MultiplyIntList(int *l1, int n)
 
 Multiply a List of ints
 
 ::
 
   void *
-  PyArray_GetPtr(PyArrayObject *obj, npy_intp const*ind)
+  PyArray_GetPtr(PyArrayObject *obj, npy_intp*ind)
 
 Produce a pointer into array
 
 ::
 
   int
-  PyArray_CompareLists(npy_intp const *l1, npy_intp const *l2, int n)
+  PyArray_CompareLists(npy_intp *l1, npy_intp *l2, int n)
 
 Compare Lists
 
@@ -1081,17 +1081,15 @@ steals a reference to typedescr -- can be NULL
 ::
 
   int
-  PyArray_As1D(PyObject **NPY_UNUSED(op) , char **NPY_UNUSED(ptr) , int
-               *NPY_UNUSED(d1) , int NPY_UNUSED(typecode) )
+  PyArray_As1D(PyObject **op, char **ptr, int *d1, int typecode)
 
 Convert to a 1D C-array
 
 ::
 
   int
-  PyArray_As2D(PyObject **NPY_UNUSED(op) , char ***NPY_UNUSED(ptr) , int
-               *NPY_UNUSED(d1) , int *NPY_UNUSED(d2) , int
-               NPY_UNUSED(typecode) )
+  PyArray_As2D(PyObject **op, char ***ptr, int *d1, int *d2, int
+               typecode)
 
 Convert to a 2D C-array
 
@@ -1275,7 +1273,7 @@ equivalent (same basic kind and same itemsize).
 ::
 
   PyObject *
-  PyArray_Zeros(int nd, npy_intp const *dims, PyArray_Descr *type, int
+  PyArray_Zeros(int nd, npy_intp *dims, PyArray_Descr *type, int
                 is_f_order)
 
 Zeros
@@ -1287,13 +1285,13 @@ accepts NULL type
 ::
 
   PyObject *
-  PyArray_Empty(int nd, npy_intp const *dims, PyArray_Descr *type, int
+  PyArray_Empty(int nd, npy_intp *dims, PyArray_Descr *type, int
                 is_f_order)
 
 Empty
 
 accepts NULL type
-steals a reference to type
+steals referenct to type
 
 ::
 
@@ -1484,17 +1482,17 @@ Multiply a List of Non-negative numbers with over-flow detection.
 ::
 
   int
-  PyArray_CompareString(const char *s1, const char *s2, size_t len)
+  PyArray_CompareString(char *s1, char *s2, size_t len)
 
 
 ::
 
-  PyObject*
+  PyObject *
   PyArray_MultiIterFromObjects(PyObject **mps, int n, int nadd, ... )
 
 Get MultiIterator from array of Python objects and any additional
 
-PyObject **mps - array of PyObjects
+PyObject **mps -- array of PyObjects
 int n - number of PyObjects in the array
 int nadd - number of additional arrays to include in the iterator.
 
@@ -1526,7 +1524,7 @@ correlate(a2, a1), and conjugate the second argument for complex inputs
 ::
 
   PyObject*
-  PyArray_NeighborhoodIterNew(PyArrayIterObject *x, const npy_intp
+  PyArray_NeighborhoodIterNew(PyArrayIterObject *x, npy_intp
                               *bounds, int mode, PyArrayObject*fill)
 
 A Neighborhood Iterator object.
@@ -1534,7 +1532,7 @@ A Neighborhood Iterator object.
 ::
 
   void
-  PyArray_SetDatetimeParseFunction(PyObject *NPY_UNUSED(op) )
+  PyArray_SetDatetimeParseFunction(PyObject *op)
 
 This function is scheduled to be removed
 
@@ -1543,9 +1541,8 @@ TO BE REMOVED - NOT USED INTERNALLY.
 ::
 
   void
-  PyArray_DatetimeToDatetimeStruct(npy_datetime NPY_UNUSED(val)
-                                   , NPY_DATETIMEUNIT NPY_UNUSED(fr)
-                                   , npy_datetimestruct *result)
+  PyArray_DatetimeToDatetimeStruct(npy_datetime val, NPY_DATETIMEUNIT
+                                   fr, npy_datetimestruct *result)
 
 Fill the datetime struct from the value and resolution unit.
 
@@ -1554,9 +1551,8 @@ TO BE REMOVED - NOT USED INTERNALLY.
 ::
 
   void
-  PyArray_TimedeltaToTimedeltaStruct(npy_timedelta NPY_UNUSED(val)
-                                     , NPY_DATETIMEUNIT NPY_UNUSED(fr)
-                                     , npy_timedeltastruct *result)
+  PyArray_TimedeltaToTimedeltaStruct(npy_timedelta val, NPY_DATETIMEUNIT
+                                     fr, npy_timedeltastruct *result)
 
 Fill the timedelta struct from the timedelta value and resolution unit.
 
@@ -1565,8 +1561,8 @@ TO BE REMOVED - NOT USED INTERNALLY.
 ::
 
   npy_datetime
-  PyArray_DatetimeStructToDatetime(NPY_DATETIMEUNIT NPY_UNUSED(fr)
-                                   , npy_datetimestruct *NPY_UNUSED(d) )
+  PyArray_DatetimeStructToDatetime(NPY_DATETIMEUNIT
+                                   fr, npy_datetimestruct *d)
 
 Create a datetime value from a filled datetime struct and resolution unit.
 
@@ -1575,9 +1571,8 @@ TO BE REMOVED - NOT USED INTERNALLY.
 ::
 
   npy_datetime
-  PyArray_TimedeltaStructToTimedelta(NPY_DATETIMEUNIT NPY_UNUSED(fr)
-                                     , npy_timedeltastruct
-                                     *NPY_UNUSED(d) )
+  PyArray_TimedeltaStructToTimedelta(NPY_DATETIMEUNIT
+                                     fr, npy_timedeltastruct *d)
 
 Create a timdelta value from a filled timedelta struct and resolution unit.
 
@@ -1805,7 +1800,7 @@ the GIL.
 ::
 
   int
-  NpyIter_GotoMultiIndex(NpyIter *iter, npy_intp const *multi_index)
+  NpyIter_GotoMultiIndex(NpyIter *iter, npy_intp *multi_index)
 
 Sets the iterator to the specified multi-index, which must have the
 correct number of entries for 'ndim'.  It is only valid
@@ -2282,7 +2277,7 @@ Returns 0 on success, -1 on failure.
 ::
 
   void
-  PyArray_CreateSortedStridePerm(int ndim, npy_intp const
+  PyArray_CreateSortedStridePerm(int ndim, npy_intp
                                  *strides, npy_stride_sort_item
                                  *out_strideperm)
 
@@ -2295,7 +2290,7 @@ For example, the stride array (4, -2, 12) becomes
 ::
 
   void
-  PyArray_RemoveAxesInPlace(PyArrayObject *arr, const npy_bool *flags)
+  PyArray_RemoveAxesInPlace(PyArrayObject *arr, npy_bool *flags)
 
 
 Removes the axes flagged as True from the array,

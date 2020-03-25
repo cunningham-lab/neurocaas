@@ -69,8 +69,19 @@ class Submission_Launch_log_test():
         except IndexError as e:
             ## If the filename is just "submit.json, we just don't append anything to the job name. "
             submit_name = ""
+        #### Parse submit file 
+        submit_file = utilsparam.s3.load_json(bucket_name, key)
+        
+        ## These next three fields check that the submit file is correctly formatted
+        try: 
+            self.timestamp = submit_file["timestamp"]
+            ## KEY: Now set up logging in the input folder too: 
+        except KeyError as ke:
+            ## Now raise an exception to halt processing, because this is a catastrophic error.  
+            raise ValueError("Missing timestamp when data was uploaded.")
+
         ## Now we're going to get the path to the results directory in the submit folder: 
-        self.jobname = "job"+submit_name+self.time
+        self.jobname = "job_{}_{}_{}".format(submit_name,bucket_name,self.timestamp)
         jobpath = os.path.join(self.path,os.environ['OUTDIR'],self.jobname)
         self.jobpath_submit = jobpath
         ## And create a corresponding directory in the submit area. 
@@ -78,10 +89,7 @@ class Submission_Launch_log_test():
         ## a logger for the submit area.  
         self.submitlogger = utilsparam.s3.JobLogger(self.bucket_name, self.jobpath_submit)
 
-        #### Parse submit file 
-        submit_file = utilsparam.s3.load_json(bucket_name, key)
-        
-        ## These next three fields check that the submit file is correctly formatted
+
         ## Check that we have a dataname field:
         submit_errmsg = "INPUT ERROR: Submit file does not contain field {}, needed to analyze data."
         try: 
@@ -789,30 +797,25 @@ class Submission_Launch_log_demo(Submission_Launch_full):
             ## If the filename is just "submit.json, we just don't append anything to the job name. "
             submit_name = ""
             
-
-        # Load Content Of Submit File 
+        #### Parse submit file 
         submit_file = utilsparam.s3.load_json(bucket_name, key)
+        
+        ## These next three fields check that the submit file is correctly formatted
+        try: 
+            self.timestamp = submit_file["timestamp"]
+            ## KEY: Now set up logging in the input folder too: 
+        except KeyError as ke:
+            ## Now raise an exception to halt processing, because this is a catastrophic error.  
+            raise ValueError("Missing timestamp when data was uploaded.")
 
-        ## Check what the time is:
-        try:
-            self.time = submit_file['timestamp'] 
-        except KeyError as ke: 
-            raise ValueError("Missing timestamp to analyze")
-
-        ## After having loaded, and gotten a timestamp, we can generate the job name. Now we're going to get the path to the results directory: 
-        #self.jobname = "job"+submit_name+self.bucket_name+self.time
-        self.jobname = "_".join(["job",submit_name,self.bucket_name,self.time])
+        ## Now we're going to get the path to the results directory in the submit folder: 
+        self.jobname = "job_{}_{}_{}".format(submit_name,bucket_name,self.timestamp)
         jobpath = os.path.join(self.path,os.environ['OUTDIR'],self.jobname)
         self.jobpath = jobpath
-        ## Reset this directory
-        create_jobdir  = utilsparam.s3.mkdir_reset(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
+        create_jobdir  = utilsparam.s3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
         
+        print(self.path,'path')
         self.logger = utilsparam.s3.JobLogger_demo(self.bucket_name, self.jobpath)
-        self.logger.append("Initializing EPI analysis: Parameter search for 2D LDS.")
-        self.logger.write()
-        #self.out_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.OUTDIR)
-        #self.in_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.INDIR)
-            
         ## Check what instance we should use. 
         try:
             self.instance_type = submit_file['instance_type'] # TODO default option from config
@@ -848,7 +851,7 @@ class Submission_Launch_log_demo(Submission_Launch_full):
             ## Now raise an exception to halt processing, because this is a catastrophic error.  
             raise ValueError(os.environ["MISSING_CONFIG_ERROR"])
 
-        self.logger.append("Valid dataset and config file for EPI analysis request detected. Reading EPI blueprint.")
+        self.logger.append("EPI analysis request detected with dataset {}, config file {}. Reading EPI blueprint.".format(self.data_name,self.config_name))
         self.logger.write()
 
         ## Check that we have the actual data in the bucket.  
@@ -949,58 +952,6 @@ class Submission_Launch_log_demo(Submission_Launch_full):
             self.logger.write()
         self.logger.append("All jobs submitted. Processing...")
 
-class Submission_Start_Stack():
-    ## Submission class for the case where the instances are being started.
-    def __init__(self,bucket_name,key):
-        # Get Upload Location Information
-        self.bucket_name = bucket_name
-        self.path = os.path.join(*key.split('/')[:-2])
-        print('logging at '+self.path)
-        self.logger = utilsparam.s3.Logger(self.bucket_name, self.path)
-        #self.out_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.OUTDIR)
-        #self.in_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.INDIR)
-        
-        # Load Content Of Submit File
-        submit_config = utilsparam.s3.load_json(bucket_name, key)
-        self.instance_id = submit_config['instance_id'] # TODO default option from config
-        self.data_filename = submit_config['filename'] # TODO validate extensions & check existence
-        
-    def acquire_instance(self):
-        self.instance = utilsparam.ec2.get_instance(self.instance_id,self.logger)
-
-    def start_instance(self):
-        utilsparam.ec2.start_instance_if_stopped(
-            instance=self.instance,
-            logger=self.logger
-        )
-
-    def process_inputs(self):
-        """ Initiates Processing On Previously Acquired EC2 Instance """
-        print(self.bucket_name,'bucket name')
-        print(self.data_filename,'filename')
-        print(os.environ['OUTDIR'],'outdir')
-        self.logger.append("Sending command: {}".format(
-            os.environ['COMMAND'].format(
-                self.bucket_name, self.data_filename, os.environ['OUTDIR']
-            )
-        ))
-        response = utilsparam.ssm.execute_commands_on_linux_instances(
-            commands=[os.environ['COMMAND'].format(
-                self.bucket_name, self.data_filename, os.environ['OUTDIR']
-            )], # TODO: variable outdir as option
-            instance_ids=[self.instance.instance_id],
-            working_dirs=[os.environ['WORKING_DIRECTORY']],
-            log_bucket_name=self.bucket_name,
-            log_path=self.logger.path
-        )
-    ## Declare rules to monitor the states of these instances.  
-    def put_instance_monitor_rule(self): 
-        self.logger.append('Setting up monitoring on instance')
-        ## First declare a monitoring rule for this instance: 
-        ruledata,rulename = utilsparam.events.put_instance_rule(self.instance.instance_id)
-        arn = ruledata['RuleArn']
-        ## Now attach it to the given target
-        targetdata = utilsparam.events.put_instance_target(rulename) 
 
 def process_upload(bucket_name, key):
     """ Given an upload key and bucket name, determine & take appropriate action

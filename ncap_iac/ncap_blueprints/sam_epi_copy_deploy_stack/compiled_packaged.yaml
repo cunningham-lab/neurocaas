@@ -61,7 +61,7 @@ Resources:
     Type: AWS::CloudFormation::CustomResource
   FigLambda:
     Properties:
-      CodeUri: s3://ctnsampackages/2a6d79d96ce9302c8a68689abe77b2bc
+      CodeUri: s3://ctnsampackages/c2bb09ae541f8967e9865056914abc79
       Description: Lambda Function logging start/stop for NCAP
       Events: {}
       Handler: log.eventshandler
@@ -120,7 +120,7 @@ Resources:
     Type: AWS::CloudFormation::CustomResource
   MainLambda:
     Properties:
-      CodeUri: s3://ctnsampackages/be13dc72d44bbdabe36a391c0ac9cbda
+      CodeUri: s3://ctnsampackages/1799c3724e2a6f675592f2595b33a9ef
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
@@ -196,7 +196,7 @@ Resources:
     Type: AWS::S3::Bucket
   S3DelObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/47134e927776694259cbc9db2cdc7fc7
+      CodeUri: s3://ctnsampackages/dad378e8ff0d78f4d71d9d4b4e6b7f7c
       Description: Deletes Objects from S3
       Environment:
         Variables:
@@ -266,7 +266,7 @@ Resources:
     Type: AWS::IAM::Role
   S3PutObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/c410af81f9d8b3a0a1fe511e9e644874
+      CodeUri: s3://ctnsampackages/6fd7125f2a558585e791e90bc9b2a748
       Description: Puts Objects in S3
       Environment:
         Variables:
@@ -311,7 +311,7 @@ Resources:
     Type: AWS::Serverless::Function
   SearchLambda:
     Properties:
-      CodeUri: s3://ctnsampackages/0705fbffcad81349d9800daee3a5a33f
+      CodeUri: s3://ctnsampackages/846b065c37b4c90642a0c263f6967851
       Description: Postprocessing Lambda Function for Serverless
       Environment:
         Variables:

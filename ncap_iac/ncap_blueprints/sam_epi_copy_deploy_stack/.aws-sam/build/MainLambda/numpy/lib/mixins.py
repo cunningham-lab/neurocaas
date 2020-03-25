@@ -5,8 +5,8 @@ import sys
 
 from numpy.core import umath as um
 
-
-__all__ = ['NDArrayOperatorsMixin']
+# Nothing should be exposed in the top-level NumPy module.
+__all__ = []
 
 
 def _disables_array_ufunc(obj):
