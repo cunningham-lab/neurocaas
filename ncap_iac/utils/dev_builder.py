@@ -161,57 +161,7 @@ class NeuroCaaSTemplate(object):
         users_attached = self.template.add_resource(UserToGroupAddition(affiliatedict['AffiliateName']+'UserNet',GroupName = Ref(group),Users = usernames))
 
     def customize_userpolicy(self,affiliatedict):
-        bucketname = self.config['PipelineName']
-        affiliatename = affiliatedict["AffiliateName"]
-        indir = self.config['Lambda']['LambdaConfig']['INDIR']
-        outdir = self.config['Lambda']['LambdaConfig']['OUTDIR']
-        logdir = self.config['Lambda']['LambdaConfig']['LOGDIR']
-        ## First get the template policy 
-        with open('policies/iam_user_base_policy_doc.json','r') as f:
-            obj = json.load(f)
-        ## Give LIST permissions for the affiliate folder and subdirectories.  
-        obj["Statement"].append({
-            'Sid': 'ListBucket',
-            'Effect': 'Allow',
-            'Action': 's3:ListBucket',
-            'Resource': ['arn:aws:s3:::'+bucketname],
-            'Condition':{'StringEquals':{'s3:prefix':['',
-                affiliatename+'/',
-                affiliatename+'/'+indir,
-                affiliatename+'/'+outdir,
-                affiliatename+'/'+logdir,
-                affiliatename+'/'+indir+'/',
-                affiliatename+'/'+outdir+'/',
-                affiliatename+'/'+logdir+'/',
-            ],'s3:delimiter':['/']}}})
-        ## Give LIST permissions within all subdirectories too. 
-        obj["Statement"].append({
-            'Sid': "ListSubBucket",
-            'Effect': 'Allow',
-            'Action': 's3:ListBucket',
-            'Resource': ['arn:aws:s3:::'+bucketname],
-            'Condition':{'StringLike':{'s3:prefix':[
-                affiliatename+'/'+indir+'/*',
-                affiliatename+'/'+outdir+'/*',
-                affiliatename+'/'+logdir+'/*'
-            ]}}})
-        ## Give PUT, and DELETE permissions for the input subdirectory: 
-        obj["Statement"].append({
-            'Sid': 'Inputfolderwrite',
-            'Effect': 'Allow',
-            'Action': ['s3:PutObject','s3:DeleteObject'],
-            'Resource': ['arn:aws:s3:::'+bucketname+'/'+affiliatename+'/'+indir+'/*']
-             })
-        ## Give GET, and DELETE permissions for the output and log subdirectory: 
-        obj["Statement"].append({
-            'Sid': 'Outputfolderwrite',
-            'Effect': 'Allow',
-            'Action': ['s3:GetObject','s3:DeleteObject'],
-            'Resource': ['arn:aws:s3:::'+bucketname+'/'+affiliatename+'/'+outdir+'/*','arn:aws:s3:::'+bucketname+'/'+affiliatename+'/'+logdir+'/*']
-             })
-        with open('policies/'+affiliatename+'_policy.json','w') as fw: 
-            json.dump(obj,fw,indent = 2)
-        return obj
+        raise NotImplementedError
 
     def generate_usergroup(self,affiliatedict):
         affiliatename = affiliatedict["AffiliateName"]
@@ -365,9 +315,20 @@ class DevTemplate(NeuroCaaSTemplate):
                                   DependsOn = bucketname)
         basefolder = self.template.add_resource(basemake)
 
+        logfoldername = "LogFolder"+affiliatename
+
+        ## A log folder to keep track of all resource monitoring across all users.  
+        logmake = CustomResource(logfoldername,
+                                 ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                 BucketName = self.config['PipelineName'],
+                                 Path = "",
+                                 DirName = self.config['Lambda']['LambdaConfig']['LOGDIR'],
+                                 DependsOn = bucketname)
+        logfolder = self.template.add_resource(logmake)
+
         ## Designate cfn resource names for each: 
-        basenames = ["InFolder","OutFolder","LogFolder","SubmitFolder","ConfigFolder"]
-        dirnamekeys = ["INDIR","OUTDIR","LOGDIR","SUBMITDIR","CONFIGDIR"]
+        basenames = ["InFolder","OutFolder","SubmitFolder","ConfigFolder"]
+        dirnamekeys = ["INDIR","OUTDIR","SUBMITDIR","CONFIGDIR"]
         pairs = {b:d for b,d in zip(basenames,dirnamekeys)}
         for key in pairs:
             cfn_name = key+affiliatename
@@ -499,6 +460,9 @@ class DevTemplate(NeuroCaaSTemplate):
 
     ## Add in a lambda function to write cloudwatch events to s3 bucket "ncapctnfigures" 
     def add_figure_lambda(self):
+        ## The figure lambda function needs the following information: 
+        # 1. the development bucket where it should be writing this info. 
+        # 2. 
         ## Now add to a lambda function: 
         function = Function('FigLambda',
                 CodeUri = '../../protocols',
