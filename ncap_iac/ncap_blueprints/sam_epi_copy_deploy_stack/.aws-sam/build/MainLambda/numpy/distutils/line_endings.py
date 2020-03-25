@@ -11,8 +11,7 @@ def dos2unix(file):
         print(file, "Directory!")
         return
 
-    with open(file, "rb") as fp:
-        data = fp.read()
+    data = open(file, "rb").read()
     if '\0' in data:
         print(file, "Binary!")
         return
@@ -20,8 +19,9 @@ def dos2unix(file):
     newdata = re.sub("\r\n", "\n", data)
     if newdata != data:
         print('dos2unix:', file)
-        with open(file, "wb") as f:
-            f.write(newdata)
+        f = open(file, "wb")
+        f.write(newdata)
+        f.close()
         return file
     else:
         print(file, 'ok')
@@ -45,8 +45,7 @@ def unix2dos(file):
         print(file, "Directory!")
         return
 
-    with open(file, "rb") as fp:
-        data = fp.read()
+    data = open(file, "rb").read()
     if '\0' in data:
         print(file, "Binary!")
         return
@@ -54,8 +53,9 @@ def unix2dos(file):
     newdata = re.sub("\n", "\r\n", newdata)
     if newdata != data:
         print('unix2dos:', file)
-        with open(file, "wb") as f:
-            f.write(newdata)
+        f = open(file, "wb")
+        f.write(newdata)
+        f.close()
         return file
     else:
         print(file, 'ok')

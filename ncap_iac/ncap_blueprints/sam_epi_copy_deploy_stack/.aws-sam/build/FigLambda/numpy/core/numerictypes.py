@@ -140,7 +140,6 @@ genericTypeRank = ['bool', 'int8', 'uint8', 'int16', 'uint16',
                    'complex32', 'complex64', 'complex128', 'complex160',
                    'complex192', 'complex256', 'complex512', 'object']
 
-@set_module('numpy')
 def maximum_sctype(t):
     """
     Return the scalar type of highest precision of the same kind as the input.
@@ -164,19 +163,19 @@ def maximum_sctype(t):
     Examples
     --------
     >>> np.maximum_sctype(int)
-    <class 'numpy.int64'>
+    <type 'numpy.int64'>
     >>> np.maximum_sctype(np.uint8)
-    <class 'numpy.uint64'>
+    <type 'numpy.uint64'>
     >>> np.maximum_sctype(complex)
-    <class 'numpy.complex256'> # may vary
+    <type 'numpy.complex192'>
 
     >>> np.maximum_sctype(str)
-    <class 'numpy.str_'>
+    <type 'numpy.string_'>
 
     >>> np.maximum_sctype('i2')
-    <class 'numpy.int64'>
+    <type 'numpy.int64'>
     >>> np.maximum_sctype('f4')
-    <class 'numpy.float128'> # may vary
+    <type 'numpy.float96'>
 
     """
     g = obj2sctype(t)
@@ -261,21 +260,22 @@ def obj2sctype(rep, default=None):
     Examples
     --------
     >>> np.obj2sctype(np.int32)
-    <class 'numpy.int32'>
+    <type 'numpy.int32'>
     >>> np.obj2sctype(np.array([1., 2.]))
-    <class 'numpy.float64'>
+    <type 'numpy.float64'>
     >>> np.obj2sctype(np.array([1.j]))
-    <class 'numpy.complex128'>
+    <type 'numpy.complex128'>
 
     >>> np.obj2sctype(dict)
-    <class 'numpy.object_'>
+    <type 'numpy.object_'>
     >>> np.obj2sctype('string')
+    <type 'numpy.string_'>
 
     >>> np.obj2sctype(1, default=list)
-    <class 'list'>
+    <type 'list'>
 
     """
-    # prevent abstract classes being upcast
+    # prevent abtract classes being upcast
     if isinstance(rep, type) and issubclass(rep, generic):
         return rep
     # extract dtype from arrays
@@ -319,7 +319,7 @@ def issubclass_(arg1, arg2):
     Examples
     --------
     >>> np.issubclass_(np.int32, int)
-    False # True on Python 2.7
+    True
     >>> np.issubclass_(np.int32, float)
     False
 
@@ -347,12 +347,12 @@ def issubsctype(arg1, arg2):
 
     See Also
     --------
-    issctype, issubdtype, obj2sctype
+    issctype, issubdtype,obj2sctype
 
     Examples
     --------
     >>> np.issubsctype('S8', str)
-    False
+    True
     >>> np.issubsctype(np.array([1]), int)
     True
     >>> np.issubsctype(np.array([1]), float)
@@ -485,9 +485,9 @@ def sctype2char(sctype):
 
     Examples
     --------
-    >>> for sctype in [np.int32, np.double, np.complex_, np.string_, np.ndarray]:
+    >>> for sctype in [np.int32, float, complex, np.string_, np.ndarray]:
     ...     print(np.sctype2char(sctype))
-    l # may vary
+    l
     d
     D
     S

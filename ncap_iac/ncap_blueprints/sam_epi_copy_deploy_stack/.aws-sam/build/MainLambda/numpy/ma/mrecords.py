@@ -19,6 +19,7 @@ import sys
 import warnings
 
 import numpy as np
+import numpy.core.numerictypes as ntypes
 from numpy.compat import basestring
 from numpy import (
         bool_, dtype, ndarray, recarray, array as narray
@@ -166,21 +167,23 @@ class MaskedRecords(MaskedArray, object):
             _dict['_baseclass'] = recarray
         return
 
-    @property
-    def _data(self):
+    def _getdata(self):
         """
         Returns the data as a recarray.
 
         """
         return ndarray.view(self, recarray)
 
-    @property
-    def _fieldmask(self):
+    _data = property(fget=_getdata)
+
+    def _getfieldmask(self):
         """
         Alias to mask.
 
         """
         return self._mask
+
+    _fieldmask = property(fget=_getfieldmask)
 
     def __len__(self):
         """
@@ -208,7 +211,7 @@ class MaskedRecords(MaskedArray, object):
         _localdict = ndarray.__getattribute__(self, '__dict__')
         _data = ndarray.view(self, _localdict['_baseclass'])
         obj = _data.getfield(*res)
-        if obj.dtype.names is not None:
+        if obj.dtype.fields:
             raise NotImplementedError("MaskedRecords is currently limited to"
                                       "simple records.")
         # Get some special attributes
@@ -221,8 +224,7 @@ class MaskedRecords(MaskedArray, object):
             except IndexError:
                 # Couldn't find a mask: use the default (nomask)
                 pass
-            tp_len = len(_mask.dtype)
-            hasmasked = _mask.view((bool, ((tp_len,) if tp_len else ()))).any()
+            hasmasked = _mask.view((bool, (len(_mask.dtype) or 1))).any()
         if (obj.shape or hasmasked):
             obj = obj.view(MaskedArray)
             obj._baseclass = ndarray
@@ -260,7 +262,8 @@ class MaskedRecords(MaskedArray, object):
             fielddict = ndarray.__getattribute__(self, 'dtype').fields or {}
             optinfo = ndarray.__getattribute__(self, '_optinfo') or {}
             if not (attr in fielddict or attr in optinfo):
-                raise
+                exctype, value = sys.exc_info()[:2]
+                raise exctype(value)
         else:
             # Get the list of names
             fielddict = ndarray.__getattribute__(self, 'dtype').fields or {}

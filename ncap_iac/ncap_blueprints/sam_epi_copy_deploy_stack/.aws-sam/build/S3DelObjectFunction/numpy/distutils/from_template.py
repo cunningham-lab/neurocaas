@@ -212,21 +212,22 @@ include_src_re = re.compile(r"(\n|\A)\s*include\s*['\"](?P<name>[\w\d./\\]+[.]sr
 
 def resolve_includes(source):
     d = os.path.dirname(source)
-    with open(source) as fid:
-        lines = []
-        for line in fid:
-            m = include_src_re.match(line)
-            if m:
-                fn = m.group('name')
-                if not os.path.isabs(fn):
-                    fn = os.path.join(d, fn)
-                if os.path.isfile(fn):
-                    print('Including file', fn)
-                    lines.extend(resolve_includes(fn))
-                else:
-                    lines.append(line)
+    fid = open(source)
+    lines = []
+    for line in fid:
+        m = include_src_re.match(line)
+        if m:
+            fn = m.group('name')
+            if not os.path.isabs(fn):
+                fn = os.path.join(d, fn)
+            if os.path.isfile(fn):
+                print('Including file', fn)
+                lines.extend(resolve_includes(fn))
             else:
                 lines.append(line)
+        else:
+            lines.append(line)
+    fid.close()
     return lines
 
 def process_file(source):
@@ -258,7 +259,6 @@ def main():
     allstr = fid.read()
     writestr = process_str(allstr)
     outfile.write(writestr)
-
 
 if __name__ == "__main__":
     main()

@@ -3,17 +3,15 @@
 __all__ = ["get_info","show"]
 
 
+
 import os
 import sys
 
 extra_dll_dir = os.path.join(os.path.dirname(__file__), '.libs')
 
 if sys.platform == 'win32' and os.path.isdir(extra_dll_dir):
-    if sys.version_info >= (3, 8):
-        os.add_dll_directory(extra_dll_dir)
-    else:
-        os.environ.setdefault('PATH', '')
-        os.environ['PATH'] += os.pathsep + extra_dll_dir
+    os.environ.setdefault('PATH', '')
+    os.environ['PATH'] += os.pathsep + extra_dll_dir
 
 blas_mkl_info={}
 blis_info={}
@@ -38,3 +36,4 @@ def show():
             if k == "sources" and len(v) > 200:
                 v = v[:60] + " ...\n... " + v[-60:]
             print("    %s = %s" % (k,v))
+    

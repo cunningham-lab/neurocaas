@@ -266,100 +266,11 @@ class NeuroCaaSTemplate(object):
             self.template.add_output(Output('SecretAccessKey'+username,Value = secretkey,Description = 'Secret Key of new user: '+username+" in group "+ affiliatename))
         return user_t
 
-    ## We can now move on to the actual lambda function!!
     def add_submit_lambda(self):
-        ## We will make event triggers for all affiliates. 
-        all_affiliates = self.config["UXData"]["Affiliates"]
-        ## Make Rule sets for each affiliate: 
-        all_events = {}
-        for affiliate in all_affiliates: 
-            ## Get necessary properties: 
-            affiliatename = affiliate["AffiliateName"]
-            ## If user input, reads directly from input directory. If other function output, reads from output directory.
-            assert type(affiliate["UserInput"]) == bool, "must provide a json boolean for UserInput"
-            if affiliate["UserInput"] == True:
-                readdir = self.config['Lambda']['LambdaConfig']['INDIR'] 
-            elif affiliate["UserInput"] == False: 
-                readdir = self.config['Lambda']['LambdaConfig']['OUTDIR'] 
+        raise NotImplementedError
 
-            aff_filter = Filter('Filter'+affiliatename,
-                    S3Key = S3Key('S3Key'+affiliatename,
-                        Rules= [Rules('PrefixRule'+affiliatename,Name = 'prefix',Value = affiliatename+'/'+readdir),
-                                Rules('SuffixRule'+affiliatename,Name = 'suffix',Value = 'submit.json')])) 
-            event_name = 'BucketEvent'+affiliatename
-            all_events[event_name] = {'Type':'S3',
-                                      'Properties':{
-                                          'Bucket':Ref('PipelineMainBucket'),
-                                          'Events':['s3:ObjectCreated:*'],
-                                          'Filter':aff_filter}}
-        ## We're going to add in all of the lambda configuration items to the runtime environment.
-        lambdaconfig = self.config['Lambda']['LambdaConfig']
-        ### Most of the config can be done through the config file, but we will pass certain elements from the template. 
-        lambdaconfig['figlambid'] = Ref(self.figurelamb) 
-        lambdaconfig['figlambarn'] = GetAtt(self.figurelamb,'Arn')
-        lambdaconfig['cwrolearn'] = GetAtt(self.cwrole,'Arn')
-
-        ## Additionally, we're going to add in the git commit version. 
-        lambdaconfig['versionid'] = subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8") 
-        ## Now add to a lambda function: 
-        function = Function('MainLambda',
-                CodeUri = self.config['Lambda']["CodeUri"],##'../lambda_repo',
-                Runtime = 'python3.6',
-                Handler = self.config['Lambda']["Handler"],##'submit_start.handler',
-                Description = 'Main Lambda Function for Serverless',
-                MemorySize = 128,
-                Timeout = self.config["Lambda"]['LambdaConfig']["EXECUTION_TIMEOUT"],
-                Role = 'arn:aws:iam::739988523141:role/lambda_dataflow', ## TODO: Create this in template
-                Events= all_events,
-                #Environment = Environment(Variables={'figlambid':Ref(self.figurelamb),'figlambarn':GetAtt(self.figurelamb,'Arn'),'cwrolearn':GetAtt(self.cwrole,'Arn')})
-                Environment = Environment(Variables=lambdaconfig)
-                )         
-        self.template.add_resource(function)
-
-    ## Add in a lambda function to write cloudwatch events to s3 bucket "ncapctnfigures" 
     def add_figure_lambda(self):
-        ## Now add to a lambda function: 
-        function = Function('FigLambda',
-                CodeUri = '../../protocols',
-                Runtime = 'python3.6',
-                Handler = 'log.eventshandler',
-                Description = 'Lambda Function logging start/stop for NCAP',
-                MemorySize = 128,
-                Timeout = 90,
-                Role = 'arn:aws:iam::739988523141:role/lambda_dataflow', ## TODO: Create this in template
-                Events= {})         
-        figurelamb = self.template.add_resource(function)
-        ## Attach specific permissions to invoke this lambda function as well. 
-        cwpermission = Permission('CWPermissions',
-                Action = 'lambda:InvokeFunction',
-                Principal = 'events.amazonaws.com',
-                FunctionName = Ref(figurelamb))
-        self.template.add_resource(cwpermission)
-        
-        ## Because this lambda function gets invoked by an unknown target, we need to take care of its log group separately. 
-        
-        figloggroup = LogGroup('FignameLogGroup',LogGroupName=Sub("/aws/lambda/${FigLambda}"))
-        self.template.add_resource(figloggroup)
-
-        ## Now we need to configure this function as a potential target. 
-        ## Initialize role to send events to cloudwatch
-        with open('policies/cloudwatch_events_assume_role_doc.json','r') as f:
-            cloudwatchassume_role_doc = json.load(f)
-        ## Now get the actual policy: 
-        with open('policies/cloudwatch_events_policy_doc.json','r') as f:
-            cloudwatch_policy_doc = json.load(f)
-        cloudwatchpolicy = ManagedPolicy("CloudwatchBusPolicy",
-                Description = Join(" ",["Base Policy for all lambda function roles in",Ref(AWS_STACK_NAME)]),
-                PolicyDocument = cloudwatch_policy_doc)
-        self.template.add_resource(cloudwatchpolicy)
-        ## create the role: 
-        cwrole = Role("CloudWatchBusRole",
-                AssumeRolePolicyDocument=cloudwatchassume_role_doc,
-                ManagedPolicyArns = [Ref(cloudwatchpolicy)])
-        cwrole_attached = self.template.add_resource(cwrole)
-        self.cwrole = cwrole_attached
-        return figurelamb
-
+        raise NotImplementedError
 
 ## First define a function that loads the relevant config file into memory: 
 class DevTemplate(NeuroCaaSTemplate):
@@ -386,7 +297,7 @@ class DevTemplate(NeuroCaaSTemplate):
 
     def initialize_template(self):
         """
-        Defining function for development mode template. Makes per-dev group folders.s
+        Defining function for development mode template. Makes per-dev group folders. NOTE: once folders have been created, they will not be modified by additional updates. This protects user data. 
         """
         template = Template()
         ## Apply a transform to use serverless functions. 
@@ -468,32 +379,167 @@ class DevTemplate(NeuroCaaSTemplate):
                                       DependsOn = [bucketname,basefoldername])
             folder = self.template.add_resource(make)
 
+    def customize_userpolicy(self,affiliatedict):
+        bucketname = self.config['PipelineName']
+        affiliatename = affiliatedict["AffiliateName"]
+        indir = self.config['Lambda']['LambdaConfig']['INDIR']
+        outdir = self.config['Lambda']['LambdaConfig']['OUTDIR']
+        logdir = self.config['Lambda']['LambdaConfig']['LOGDIR']
+        subdir = self.config['Lambda']['LambdaConfig']['SUBMITDIR']
+        condir = self.config['Lambda']['LambdaConfig']['CONFIGDIR']
+        ## First get the template policy 
+        with open('policies/iam_user_base_policy_doc.json','r') as f:
+            obj = json.load(f)
+        ## The following policies are not iterated for readability:
+        ## Give LIST permissions for the affiliate folder and subdirectories.  
+        obj["Statement"].append({
+            'Sid': 'ListBucket',
+            'Effect': 'Allow',
+            'Action': 's3:ListBucket',
+            'Resource': ['arn:aws:s3:::'+bucketname],
+            'Condition':{'StringEquals':{'s3:prefix':['',
+                affiliatename+'/',
+                affiliatename+'/'+indir,
+                affiliatename+'/'+outdir,
+                affiliatename+'/'+logdir,
+                affiliatename+'/'+subdir,
+                affiliatename+'/'+condir,
+                affiliatename+'/'+indir+'/',
+                affiliatename+'/'+outdir+'/',
+                affiliatename+'/'+logdir+'/',
+                affiliatename+'/'+subdir+'/',
+                affiliatename+'/'+condir+'/'
+            ],'s3:delimiter':['/']}}})
+        ## Give LIST permissions within all subdirectories too. 
+        obj["Statement"].append({
+            'Sid': "ListSubBucket",
+            'Effect': 'Allow',
+            'Action': 's3:ListBucket',
+            'Resource': ['arn:aws:s3:::'+bucketname],
+            'Condition':{'StringLike':{'s3:prefix':[
+                affiliatename+'/'+indir+'/*',
+                affiliatename+'/'+outdir+'/*',
+                affiliatename+'/'+condir+'/*',
+                affiliatename+'/'+subdir+'/*',
+                affiliatename+'/'+logdir+'/*'
+            ]}}})
+        ## Give PUT, and DELETE permissions for the input, config, and submit subdirectories: 
+        obj["Statement"].append({
+            'Sid': 'Inputfolderwrite',
+            'Effect': 'Allow',
+            'Action': ['s3:PutObject','s3:DeleteObject'],
+            'Resource': ['arn:aws:s3:::'+bucketname+'/'+affiliatename+'/'+indir+'/*',
+                         'arn:aws:s3:::'+bucketname+'/'+affiliatename+'/'+condir+'/*',
+                         'arn:aws:s3:::'+bucketname+'/'+affiliatename+'/'+subdir+'/*'
+                         ]
+             })
+        
+        ## Give GET, and DELETE permissions for the output, config and log subdirectory: 
+        obj["Statement"].append({
+           'Sid': 'Outputfolderwrite',
+            'Effect': 'Allow',
+            'Action': ['s3:GetObject','s3:DeleteObject'],
+            'Resource': ['arn:aws:s3:::'+bucketname+'/'+affiliatename+'/'+outdir+'/*',
+                         'arn:aws:s3:::'+bucketname+'/'+affiliatename+'/'+condir+'/*',
+                         ]
+             })
+        with open('policies/'+affiliatename+'_policy.json','w') as fw: 
+            json.dump(obj,fw,indent = 2)
+        return obj
+    
+    ## We can now move on to the actual lambda function!!
+    def add_submit_lambda(self):
+        ## We will make event triggers for all affiliates. 
+        all_affiliates = self.config["UXData"]["Affiliates"]
+        ## Make Rule sets for each affiliate: 
+        all_events = {}
+        for affiliate in all_affiliates: 
+            ## Get necessary properties: 
+            affiliatename = affiliate["AffiliateName"]
+            ## If user input, reads directly from input directory. If other function output, reads from output directory.
+            assert type(affiliate["UserInput"]) == bool, "must provide a json boolean for UserInput"
+            if affiliate["UserInput"] == True:
+                readdir = self.config['Lambda']['LambdaConfig']['SUBMITDIR'] 
+            elif affiliate["UserInput"] == False: 
+                readdir = self.config['Lambda']['LambdaConfig']['OUTDIR'] 
 
+            aff_filter = Filter('Filter'+affiliatename,
+                    S3Key = S3Key('S3Key'+affiliatename,
+                        Rules= [Rules('PrefixRule'+affiliatename,Name = 'prefix',Value = affiliatename+'/'+readdir),
+                                Rules('SuffixRule'+affiliatename,Name = 'suffix',Value = 'submit.json')])) 
+            event_name = 'BucketEvent'+affiliatename
+            all_events[event_name] = {'Type':'S3',
+                                      'Properties':{
+                                          'Bucket':Ref('PipelineMainBucket'),
+                                          'Events':['s3:ObjectCreated:*'],
+                                          'Filter':aff_filter}}
+        ## We're going to add in all of the lambda configuration items to the runtime environment.
+        lambdaconfig = self.config['Lambda']['LambdaConfig']
+        ### Most of the config can be done through the config file, but we will pass certain elements from the template. 
+        lambdaconfig['figlambid'] = Ref(self.figurelamb) 
+        lambdaconfig['figlambarn'] = GetAtt(self.figurelamb,'Arn')
+        lambdaconfig['cwrolearn'] = GetAtt(self.cwrole,'Arn')
 
-        ### Now an input folder:
-        #inmake = CustomResource(infoldername,
-        #                          ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
-        #                          BucketName = self.config['PipelineName'],
-        #                          Path = affiliatename+'/',
-        #                          DirName = self.config['Lambda']['LambdaConfig']['INDIR'],
-        #                          DependsOn = [bucketname,basefoldername])
-        #infolder = self.template.add_resource(inmake)
-        ### Likewise an output folder:
-        #outmake = CustomResource(outfoldername,
-        #                          ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
-        #                          BucketName = self.config['PipelineName'],
-        #                          Path = affiliatename+'/',
-        #                          DirName = self.config['Lambda']['LambdaConfig']['OUTDIR'],
-        #                          DependsOn = [bucketname,basefoldername])
-        #outfolder = self.template.add_resource(outmake)
-        ### Likewise a log folder
-        #logmake = CustomResource(logfoldername,
-        #                          ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
-        #                          BucketName = self.config['PipelineName'],
-        #                          Path = affiliatename+'/',
-        #                          DirName = self.config['Lambda']['LambdaConfig']['LOGDIR'],
-        #                          DependsOn = [bucketname,basefoldername])
-        #logfolder = self.template.add_resource(logmake)
+        ## Additionally, we're going to add in the git commit version. 
+        lambdaconfig['versionid'] = subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8") 
+        ## Now add to a lambda function: 
+        function = Function('MainLambda',
+                CodeUri = self.config['Lambda']["CodeUri"],##'../lambda_repo',
+                Runtime = 'python3.6',
+                Handler = self.config['Lambda']["Handler"],##'submit_start.handler',
+                Description = 'Main Lambda Function for Serverless',
+                MemorySize = 128,
+                Timeout = self.config["Lambda"]['LambdaConfig']["EXECUTION_TIMEOUT"],
+                Role = 'arn:aws:iam::739988523141:role/lambda_dataflow', ## TODO: Create this in template
+                Events= all_events,
+                #Environment = Environment(Variables={'figlambid':Ref(self.figurelamb),'figlambarn':GetAtt(self.figurelamb,'Arn'),'cwrolearn':GetAtt(self.cwrole,'Arn')})
+                Environment = Environment(Variables=lambdaconfig)
+                )         
+        self.template.add_resource(function)
+
+    ## Add in a lambda function to write cloudwatch events to s3 bucket "ncapctnfigures" 
+    def add_figure_lambda(self):
+        ## Now add to a lambda function: 
+        function = Function('FigLambda',
+                CodeUri = '../../protocols',
+                Runtime = 'python3.6',
+                Handler = 'log.eventshandler',
+                Description = 'Lambda Function logging start/stop for NCAP',
+                MemorySize = 128,
+                Timeout = 90,
+                Role = 'arn:aws:iam::739988523141:role/lambda_dataflow', ## TODO: Create this in template
+                Events= {})         
+        figurelamb = self.template.add_resource(function)
+        ## Attach specific permissions to invoke this lambda function as well. 
+        cwpermission = Permission('CWPermissions',
+                Action = 'lambda:InvokeFunction',
+                Principal = 'events.amazonaws.com',
+                FunctionName = Ref(figurelamb))
+        self.template.add_resource(cwpermission)
+        
+        ## Because this lambda function gets invoked by an unknown target, we need to take care of its log group separately. 
+        
+        figloggroup = LogGroup('FignameLogGroup',LogGroupName=Sub("/aws/lambda/${FigLambda}"))
+        self.template.add_resource(figloggroup)
+
+        ## Now we need to configure this function as a potential target. 
+        ## Initialize role to send events to cloudwatch
+        with open('policies/cloudwatch_events_assume_role_doc.json','r') as f:
+            cloudwatchassume_role_doc = json.load(f)
+        ## Now get the actual policy: 
+        with open('policies/cloudwatch_events_policy_doc.json','r') as f:
+            cloudwatch_policy_doc = json.load(f)
+        cloudwatchpolicy = ManagedPolicy("CloudwatchBusPolicy",
+                Description = Join(" ",["Base Policy for all lambda function roles in",Ref(AWS_STACK_NAME)]),
+                PolicyDocument = cloudwatch_policy_doc)
+        self.template.add_resource(cloudwatchpolicy)
+        ## create the role: 
+        cwrole = Role("CloudWatchBusRole",
+                AssumeRolePolicyDocument=cloudwatchassume_role_doc,
+                ManagedPolicyArns = [Ref(cloudwatchpolicy)])
+        cwrole_attached = self.template.add_resource(cwrole)
+        self.cwrole = cwrole_attached
+        return figurelamb
 
 if __name__ == "__main__":
     filename = sys.argv[1]

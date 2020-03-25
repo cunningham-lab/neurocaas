@@ -1,0 +1,591 @@
+Resources:
+  BaseFoldercunninghamlabEPIdevelop:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: epi-ncap-stable
+      DirName: cunninghamlabEPIdevelop
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  BaseFoldergroup2develop:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: epi-ncap-stable
+      DirName: group2develop
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  CWPermissions:
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: FigLambda
+      Principal: events.amazonaws.com
+    Type: AWS::Lambda::Permission
+  CloudWatchBusRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - events.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - Ref: CloudwatchBusPolicy
+    Type: AWS::IAM::Role
+  CloudwatchBusPolicy:
+    Properties:
+      Description:
+        Fn::Join:
+        - ' '
+        - - Base Policy for all lambda function roles in
+          - Ref: AWS::StackName
+      PolicyDocument:
+        Statement:
+        - Action: events:*
+          Effect: Allow
+          Resource: '*'
+          Sid: CloudWatchEventsFullAccess
+        - Action: iam:PassRole
+          Effect: Allow
+          Resource: arn:aws:iam::*:role/AWS_Events_Invoke_Targets
+          Sid: IAMPassRoleForCloudWatchEvents
+        Version: '2012-10-17'
+    Type: AWS::IAM::ManagedPolicy
+  ConfigFoldercunninghamlabEPIdevelop:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldercunninghamlabEPIdevelop
+    Properties:
+      BucketName: epi-ncap-stable
+      DirName: config
+      Path: cunninghamlabEPIdevelop/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  ConfigFoldergroup2develop:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldergroup2develop
+    Properties:
+      BucketName: epi-ncap-stable
+      DirName: config
+      Path: group2develop/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  DeleteCustomResource:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: epi-ncap-stable
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  FigLambda:
+    Properties:
+      CodeUri: FigLambda
+      Description: Lambda Function logging start/stop for NCAP
+      Events: {}
+      Handler: log.eventshandler
+      MemorySize: 128
+      Role: arn:aws:iam::739988523141:role/lambda_dataflow
+      Runtime: python3.6
+      Timeout: 90
+    Type: AWS::Serverless::Function
+  FignameLogGroup:
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/${FigLambda}
+    Type: AWS::Logs::LogGroup
+  InFoldercunninghamlabEPIdevelop:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldercunninghamlabEPIdevelop
+    Properties:
+      BucketName: epi-ncap-stable
+      DirName: inputs
+      Path: cunninghamlabEPIdevelop/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  InFoldergroup2develop:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldergroup2develop
+    Properties:
+      BucketName: epi-ncap-stable
+      DirName: inputs
+      Path: group2develop/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LambdaBaseRole:
+    Properties:
+      Description:
+        Fn::Join:
+        - ' '
+        - - Base Policy for all lambda function roles in
+          - Ref: AWS::StackName
+      PolicyDocument:
+        Statement:
+        - Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Effect: Allow
+          Resource: arn:aws:logs:*:*:*
+        Version: '2012-10-17'
+    Type: AWS::IAM::ManagedPolicy
+  LogFoldercunninghamlabEPIdevelop:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldercunninghamlabEPIdevelop
+    Properties:
+      BucketName: epi-ncap-stable
+      DirName: logs
+      Path: cunninghamlabEPIdevelop/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LogFoldergroup2develop:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldergroup2develop
+    Properties:
+      BucketName: epi-ncap-stable
+      DirName: logs
+      Path: group2develop/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  MainLambda:
+    Properties:
+      CodeUri: MainLambda
+      Description: Main Lambda Function for Serverless
+      Environment:
+        Variables:
+          AMI: ami-07b90d36fb4860629
+          COMMAND: ls; cd ../../../../home/ubuntu; ncap_remote/run_epi.sh "{}" "{}"
+            "{}" "{}"; . ncap_remote/ncap_utils/workflow.sh; cleanup
+          CONFIG: config.yaml
+          CONFIGDIR: config
+          DEPLOY_LIMIT: 100
+          EXECUTION_TIMEOUT: 180
+          IAM_ROLE: pmd-s3-ssm
+          INDIR: inputs
+          INSTANCE_TYPE: m5.xlarge
+          KEY_NAME: ta_testkey
+          LAUNCH: true
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MISSING_CONFIG_ERROR: We need a config file to analyze data.
+          MONITOR: false
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: launch-wizard-34
+          SHUTDOWN_BEHAVIOR: terminate
+          SSM_TIMEOUT: 172000
+          SUBMITDIR: submissions
+          WORKING_DIRECTORY: ~/bin
+          cwrolearn:
+            Fn::GetAtt:
+            - CloudWatchBusRole
+            - Arn
+          figlambarn:
+            Fn::GetAtt:
+            - FigLambda
+            - Arn
+          figlambid:
+            Ref: FigLambda
+          versionid: '275d05f48bf99f0327705943a9dc256c49531ae4
+
+            '
+      Events:
+        BucketEventcunninghamlabEPIdevelop:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: cunninghamlabEPIdevelop/inputs
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
+        BucketEventgroup2develop:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: group2develop/inputs
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
+      Handler: submit_start.handler_log_demo
+      MemorySize: 128
+      Role: arn:aws:iam::739988523141:role/lambda_dataflow
+      Runtime: python3.6
+      Timeout: 180
+    Type: AWS::Serverless::Function
+  OutFoldercunninghamlabEPIdevelop:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldercunninghamlabEPIdevelop
+    Properties:
+      BucketName: epi-ncap-stable
+      DirName: results
+      Path: cunninghamlabEPIdevelop/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  OutFoldergroup2develop:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldergroup2develop
+    Properties:
+      BucketName: epi-ncap-stable
+      DirName: results
+      Path: group2develop/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  PipelineMainBucket:
+    Properties:
+      AccessControl: Private
+      BucketName: epi-ncap-stable
+    Type: AWS::S3::Bucket
+  S3DelObjectFunction:
+    Properties:
+      CodeUri: S3DelObjectFunction
+      Description: Deletes Objects from S3
+      Environment:
+        Variables:
+          AMI: ami-07b90d36fb4860629
+          COMMAND: ls; cd ../../../../home/ubuntu; ncap_remote/run_epi.sh "{}" "{}"
+            "{}" "{}"; . ncap_remote/ncap_utils/workflow.sh; cleanup
+          CONFIG: config.yaml
+          CONFIGDIR: config
+          DEPLOY_LIMIT: 100
+          EXECUTION_TIMEOUT: 180
+          IAM_ROLE: pmd-s3-ssm
+          INDIR: inputs
+          INSTANCE_TYPE: m5.xlarge
+          KEY_NAME: ta_testkey
+          LAUNCH: true
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MISSING_CONFIG_ERROR: We need a config file to analyze data.
+          MONITOR: false
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: launch-wizard-34
+          SHUTDOWN_BEHAVIOR: terminate
+          SSM_TIMEOUT: 172000
+          SUBMITDIR: submissions
+          WORKING_DIRECTORY: ~/bin
+          cwrolearn:
+            Fn::GetAtt:
+            - CloudWatchBusRole
+            - Arn
+          figlambarn:
+            Fn::GetAtt:
+            - FigLambda
+            - Arn
+          figlambid:
+            Ref: FigLambda
+          versionid: '275d05f48bf99f0327705943a9dc256c49531ae4
+
+            '
+      Handler: helper.handler_deldir
+      Role:
+        Fn::GetAtt:
+        - S3MakePathRole
+        - Arn
+      Runtime: python3.6
+      Timeout: 30
+    Type: AWS::Serverless::Function
+  S3MakePathRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - Ref: LambdaBaseRole
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - s3:DeleteObject
+            - s3:ListBucket
+            - s3:PutObject
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: write_s3_policy
+    Type: AWS::IAM::Role
+  S3PutObjectFunction:
+    Properties:
+      CodeUri: S3PutObjectFunction
+      Description: Puts Objects in S3
+      Environment:
+        Variables:
+          AMI: ami-07b90d36fb4860629
+          COMMAND: ls; cd ../../../../home/ubuntu; ncap_remote/run_epi.sh "{}" "{}"
+            "{}" "{}"; . ncap_remote/ncap_utils/workflow.sh; cleanup
+          CONFIG: config.yaml
+          CONFIGDIR: config
+          DEPLOY_LIMIT: 100
+          EXECUTION_TIMEOUT: 180
+          IAM_ROLE: pmd-s3-ssm
+          INDIR: inputs
+          INSTANCE_TYPE: m5.xlarge
+          KEY_NAME: ta_testkey
+          LAUNCH: true
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MISSING_CONFIG_ERROR: We need a config file to analyze data.
+          MONITOR: false
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: launch-wizard-34
+          SHUTDOWN_BEHAVIOR: terminate
+          SSM_TIMEOUT: 172000
+          SUBMITDIR: submissions
+          WORKING_DIRECTORY: ~/bin
+          cwrolearn:
+            Fn::GetAtt:
+            - CloudWatchBusRole
+            - Arn
+          figlambarn:
+            Fn::GetAtt:
+            - FigLambda
+            - Arn
+          figlambid:
+            Ref: FigLambda
+          versionid: '275d05f48bf99f0327705943a9dc256c49531ae4
+
+            '
+      Handler: helper.handler_mkdir
+      Role:
+        Fn::GetAtt:
+        - S3MakePathRole
+        - Arn
+      Runtime: python3.6
+      Timeout: 30
+    Type: AWS::Serverless::Function
+  SubmitFoldercunninghamlabEPIdevelop:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldercunninghamlabEPIdevelop
+    Properties:
+      BucketName: epi-ncap-stable
+      DirName: submissions
+      Path: cunninghamlabEPIdevelop/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  SubmitFoldergroup2develop:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldergroup2develop
+    Properties:
+      BucketName: epi-ncap-stable
+      DirName: submissions
+      Path: group2develop/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  UserGroupcunninghamlabEPIdevelop:
+    Properties:
+      GroupName: cunninghamlabEPIdevelopgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - cunninghamlabEPIdevelop/
+                - cunninghamlabEPIdevelop/inputs
+                - cunninghamlabEPIdevelop/results
+                - cunninghamlabEPIdevelop/logs
+                - cunninghamlabEPIdevelop/inputs/
+                - cunninghamlabEPIdevelop/results/
+                - cunninghamlabEPIdevelop/logs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::epi-ncap-stable
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - cunninghamlabEPIdevelop/inputs/*
+                - cunninghamlabEPIdevelop/results/*
+                - cunninghamlabEPIdevelop/logs/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::epi-ncap-stable
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::epi-ncap-stable/cunninghamlabEPIdevelop/inputs/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::epi-ncap-stable/cunninghamlabEPIdevelop/results/*
+            - arn:aws:s3:::epi-ncap-stable/cunninghamlabEPIdevelop/logs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: cunninghamlabEPIdeveloppolicy
+    Type: AWS::IAM::Group
+  UserGroupgroup2develop:
+    Properties:
+      GroupName: group2developgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - group2develop/
+                - group2develop/inputs
+                - group2develop/results
+                - group2develop/logs
+                - group2develop/inputs/
+                - group2develop/results/
+                - group2develop/logs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::epi-ncap-stable
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - group2develop/inputs/*
+                - group2develop/results/*
+                - group2develop/logs/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::epi-ncap-stable
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::epi-ncap-stable/group2develop/inputs/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::epi-ncap-stable/group2develop/results/*
+            - arn:aws:s3:::epi-ncap-stable/group2develop/logs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: group2developpolicy
+    Type: AWS::IAM::Group
+  cunninghamlabEPIdevelopUserNet:
+    Properties:
+      GroupName:
+        Ref: UserGroupcunninghamlabEPIdevelop
+      Users:
+      - jpccosyneus-east-1
+      - srbcosyneus-east-1
+      - tacosyneus-east-1
+    Type: AWS::IAM::UserToGroupAddition
+  group2developUserNet:
+    Properties:
+      GroupName:
+        Ref: UserGroupgroup2develop
+      Users:
+      - jpccosyneus-east-1
+      - srbcosyneus-east-1
+      - tacosyneus-east-1
+    Type: AWS::IAM::UserToGroupAddition
+Transform: AWS::Serverless-2016-10-31

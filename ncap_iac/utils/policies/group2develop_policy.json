@@ -1,0 +1,96 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": "s3:GetBucketLocation",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor3",
+      "Effect": "Allow",
+      "Action": "s3:HeadBucket",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor1",
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ListBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::epi-ncap-stable"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "s3:prefix": [
+            "",
+            "group2develop/",
+            "group2develop/inputs",
+            "group2develop/results",
+            "group2develop/logs",
+            "group2develop/submissions",
+            "group2develop/configs",
+            "group2develop/inputs/",
+            "group2develop/results/",
+            "group2develop/logs/",
+            "group2develop/submissions/",
+            "group2develop/configs/"
+          ],
+          "s3:delimiter": [
+            "/"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ListSubBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::epi-ncap-stable"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "group2develop/inputs/*",
+            "group2develop/results/*",
+            "group2develop/configs/*",
+            "group2develop/submissions/*",
+            "group2develop/logs/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "Inputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::epi-ncap-stable/group2develop/inputs/*",
+        "arn:aws:s3:::epi-ncap-stable/group2develop/configs/*",
+        "arn:aws:s3:::epi-ncap-stable/group2develop/submissions/*"
+      ]
+    },
+    {
+      "Sid": "Outputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::epi-ncap-stable/group2develop/results/*",
+        "arn:aws:s3:::epi-ncap-stable/group2develop/configs/*"
+      ]
+    }
+  ]
+}

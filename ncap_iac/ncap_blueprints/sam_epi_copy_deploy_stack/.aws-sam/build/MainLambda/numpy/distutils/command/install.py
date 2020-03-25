@@ -64,15 +64,16 @@ class install(old_install):
             # bdist_rpm fails when INSTALLED_FILES contains
             # paths with spaces. Such paths must be enclosed
             # with double-quotes.
-            with open(self.record, 'r') as f:
-                lines = []
-                need_rewrite = False
-                for l in f:
-                    l = l.rstrip()
-                    if ' ' in l:
-                        need_rewrite = True
-                        l = '"%s"' % (l)
-                    lines.append(l)
+            f = open(self.record, 'r')
+            lines = []
+            need_rewrite = False
+            for l in f:
+                l = l.rstrip()
+                if ' ' in l:
+                    need_rewrite = True
+                    l = '"%s"' % (l)
+                lines.append(l)
+            f.close()
             if need_rewrite:
                 self.execute(write_file,
                              (self.record, lines),

@@ -8,7 +8,7 @@ abc module from the stdlib, hence it is only available for Python >= 2.6.
 """
 from __future__ import division, absolute_import, print_function
 
-import abc
+from abc import ABCMeta, abstractmethod, abstractproperty
 import numbers
 
 import numpy as np
@@ -16,7 +16,7 @@ from . import polyutils as pu
 
 __all__ = ['ABCPolyBase']
 
-class ABCPolyBase(abc.ABC):
+class ABCPolyBase(object):
     """An abstract base class for immutable series classes.
 
     ABCPolyBase provides the standard Python numerical methods
@@ -59,6 +59,7 @@ class ABCPolyBase(abc.ABC):
         Default window of the class.
 
     """
+    __metaclass__ = ABCMeta
 
     # Not hashable
     __hash__ = None
@@ -69,84 +70,68 @@ class ABCPolyBase(abc.ABC):
     # Limit runaway size. T_n^m has degree n*m
     maxpower = 100
 
-    @property
-    @abc.abstractmethod
+    @abstractproperty
     def domain(self):
         pass
 
-    @property
-    @abc.abstractmethod
+    @abstractproperty
     def window(self):
         pass
 
-    @property
-    @abc.abstractmethod
+    @abstractproperty
     def nickname(self):
         pass
 
-    @property
-    @abc.abstractmethod
+    @abstractproperty
     def basis_name(self):
         pass
 
-    @staticmethod
-    @abc.abstractmethod
-    def _add(c1, c2):
+    @abstractmethod
+    def _add(self):
         pass
 
-    @staticmethod
-    @abc.abstractmethod
-    def _sub(c1, c2):
+    @abstractmethod
+    def _sub(self):
         pass
 
-    @staticmethod
-    @abc.abstractmethod
-    def _mul(c1, c2):
+    @abstractmethod
+    def _mul(self):
         pass
 
-    @staticmethod
-    @abc.abstractmethod
-    def _div(c1, c2):
+    @abstractmethod
+    def _div(self):
         pass
 
-    @staticmethod
-    @abc.abstractmethod
-    def _pow(c, pow, maxpower=None):
+    @abstractmethod
+    def _pow(self):
         pass
 
-    @staticmethod
-    @abc.abstractmethod
-    def _val(x, c):
+    @abstractmethod
+    def _val(self):
         pass
 
-    @staticmethod
-    @abc.abstractmethod
-    def _int(c, m, k, lbnd, scl):
+    @abstractmethod
+    def _int(self):
         pass
 
-    @staticmethod
-    @abc.abstractmethod
-    def _der(c, m, scl):
+    @abstractmethod
+    def _der(self):
         pass
 
-    @staticmethod
-    @abc.abstractmethod
-    def _fit(x, y, deg, rcond, full):
+    @abstractmethod
+    def _fit(self):
         pass
 
-    @staticmethod
-    @abc.abstractmethod
-    def _line(off, scl):
+    @abstractmethod
+    def _line(self):
         pass
 
-    @staticmethod
-    @abc.abstractmethod
-    def _roots(c):
+    @abstractmethod
+    def _roots(self):
         pass
 
-    @staticmethod
-    @abc.abstractmethod
-    def _fromroots(r):
+    @abstractmethod
+    def _fromroots(self):
         pass
 
     def has_samecoef(self, other):

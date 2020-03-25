@@ -48,9 +48,10 @@ class PytestTester(object):
     """
     Pytest test runner.
 
-    A test function is typically added to a package's __init__.py like so::
+    This class is made available in ``numpy.testing``, and a test function
+    is typically added to a package's __init__.py like so::
 
-      from numpy._pytesttester import PytestTester
+      from numpy.testing import PytestTester
       test = PytestTester(__name__).test
       del PytestTester
 
@@ -66,12 +67,6 @@ class PytestTester(object):
     ----------
     module_name : module name
         The name of the module to test.
-
-    Notes
-    -----
-    Unlike the previous ``nose``-based implementation, this class is not
-    publicly exposed as it performs some ``numpy``-specific warning
-    suppression.
 
     """
     def __init__(self, module_name):

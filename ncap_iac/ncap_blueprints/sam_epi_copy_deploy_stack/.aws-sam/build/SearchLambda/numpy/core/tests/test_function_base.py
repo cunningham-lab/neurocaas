@@ -49,7 +49,7 @@ class TestLogspace(object):
         assert_(len(y) == 50)
         y = logspace(0, 6, num=100)
         assert_(y[-1] == 10 ** 6)
-        y = logspace(0, 6, endpoint=False)
+        y = logspace(0, 6, endpoint=0)
         assert_(y[-1] < 10 ** 6)
         y = logspace(0, 6, num=7)
         assert_array_equal(y, [1, 10, 100, 1e3, 1e4, 1e5, 1e6])
@@ -229,14 +229,17 @@ class TestLinspace(object):
         assert_(len(y) == 50)
         y = linspace(2, 10, num=100)
         assert_(y[-1] == 10)
-        y = linspace(2, 10, endpoint=False)
+        y = linspace(2, 10, endpoint=0)
         assert_(y[-1] < 10)
         assert_raises(ValueError, linspace, 0, 10, num=-1)
 
     def test_corner(self):
         y = list(linspace(0, 1, 1))
         assert_(y == [0.0], y)
-        assert_raises(TypeError, linspace, 0, 1, num=2.5)
+        with suppress_warnings() as sup:
+            sup.filter(DeprecationWarning, ".*safely interpreted as an integer")
+            y = list(linspace(0, 1, 2.5))
+            assert_(y == [0.0, 1.0])
 
     def test_type(self):
         t1 = linspace(0, 1, 0).dtype
@@ -351,20 +354,14 @@ class TestLinspace(object):
                          arange(j+1, dtype=int))
 
     def test_retstep(self):
-        for num in [0, 1, 2]:
-            for ept in [False, True]:
+        y = linspace(0, 1, 2, retstep=True)
+        assert_(isinstance(y, tuple) and len(y) == 2)
+        for num in (0, 1):
+            for ept in (False, True):
                 y = linspace(0, 1, num, endpoint=ept, retstep=True)
-                assert isinstance(y, tuple) and len(y) == 2
-                if num == 2:
-                    y0_expect = [0.0, 1.0] if ept else [0.0, 0.5]
-                    assert_array_equal(y[0], y0_expect)
-                    assert_equal(y[1], y0_expect[1])
-                elif num == 1 and not ept:
-                    assert_array_equal(y[0], [0.0])
-                    assert_equal(y[1], 1.0)
-                else:
-                    assert_array_equal(y[0], [0.0][:num])
-                    assert isnan(y[1])
+                assert_(isinstance(y, tuple) and len(y) == 2 and
+                        len(y[0]) == num and isnan(y[1]),
+                        'num={0}, endpoint={1}'.format(num, ept))
 
     def test_object(self):
         start = array(1, dtype='O')

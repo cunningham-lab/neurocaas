@@ -20,7 +20,6 @@ def handler_mkdir(event,context):
     ## Get properties: 
     try:
         if event['RequestType'] == 'Create':
-            print(event['RequestType'])
             props = event['ResourceProperties']
             ## Get individual properties: 
             bucket = props['BucketName']
@@ -28,6 +27,8 @@ def handler_mkdir(event,context):
             dirname = props['DirName']
             ## Now plug in:
             utils.s3.mkdir(bucket,path,dirname)
+        else:
+            print(event['RequestType'])
         utils.serverless.sendResponse(event,context,"SUCCESS",responseData)
 
     except Exception as e:
