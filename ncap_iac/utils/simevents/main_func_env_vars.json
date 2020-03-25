@@ -11,7 +11,9 @@
         "SHUTDOWN_BEHAVIOR": "terminate",
         "CONFIG": "config.yaml",
         "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
-        "EXECUTION_TIMEOUT": 360 
-
+        "EXECUTION_TIMEOUT": 360,
+        "cwrolearn":"arn:aws:iam::739988523141:role/caiman-ncap-CloudWatchBusRole-1RUXFZTS0DOK0",
+        "figlambarn":"arn:aws:lambda:us-east-1:739988523141:function:caiman-ncap-FigLambda-PHVQWETPZ0IY",
+        "figlambid":"caiman-ncap-FigLambda-PHVQWETPZ0IY"
     }
 }
