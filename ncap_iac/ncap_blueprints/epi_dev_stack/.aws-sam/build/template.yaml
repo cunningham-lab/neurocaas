@@ -67,7 +67,7 @@ Resources:
     - BaseFoldercunninghamlabEPIdevelop
     Properties:
       BucketName: epi-ncap-stable
-      DirName: config
+      DirName: configs
       Path: cunninghamlabEPIdevelop/
       ServiceToken:
         Fn::GetAtt:
@@ -80,7 +80,7 @@ Resources:
     - BaseFoldergroup2develop
     Properties:
       BucketName: epi-ncap-stable
-      DirName: config
+      DirName: configs
       Path: group2develop/
       ServiceToken:
         Fn::GetAtt:
@@ -156,26 +156,22 @@ Resources:
         Version: '2012-10-17'
     Type: AWS::IAM::ManagedPolicy
   LogFoldercunninghamlabEPIdevelop:
-    DependsOn:
-    - PipelineMainBucket
-    - BaseFoldercunninghamlabEPIdevelop
+    DependsOn: PipelineMainBucket
     Properties:
       BucketName: epi-ncap-stable
       DirName: logs
-      Path: cunninghamlabEPIdevelop/
+      Path: ''
       ServiceToken:
         Fn::GetAtt:
         - S3PutObjectFunction
         - Arn
     Type: AWS::CloudFormation::CustomResource
   LogFoldergroup2develop:
-    DependsOn:
-    - PipelineMainBucket
-    - BaseFoldergroup2develop
+    DependsOn: PipelineMainBucket
     Properties:
       BucketName: epi-ncap-stable
       DirName: logs
-      Path: group2develop/
+      Path: ''
       ServiceToken:
         Fn::GetAtt:
         - S3PutObjectFunction
@@ -191,7 +187,7 @@ Resources:
           COMMAND: ls; cd ../../../../home/ubuntu; ncap_remote/run_epi.sh "{}" "{}"
             "{}" "{}"; . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
-          CONFIGDIR: config
+          CONFIGDIR: configs
           DEPLOY_LIMIT: 100
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: pmd-s3-ssm
@@ -220,7 +216,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '275d05f48bf99f0327705943a9dc256c49531ae4
+          versionid: 'c5096ab50cd6c39475eb9464912b2e7d075e34cb
 
             '
       Events:
@@ -234,7 +230,7 @@ Resources:
               S3Key:
                 Rules:
                 - Name: prefix
-                  Value: cunninghamlabEPIdevelop/inputs
+                  Value: cunninghamlabEPIdevelop/submissions
                 - Name: suffix
                   Value: submit.json
           Type: S3
@@ -248,7 +244,7 @@ Resources:
               S3Key:
                 Rules:
                 - Name: prefix
-                  Value: group2develop/inputs
+                  Value: group2develop/submissions
                 - Name: suffix
                   Value: submit.json
           Type: S3
@@ -299,7 +295,7 @@ Resources:
           COMMAND: ls; cd ../../../../home/ubuntu; ncap_remote/run_epi.sh "{}" "{}"
             "{}" "{}"; . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
-          CONFIGDIR: config
+          CONFIGDIR: configs
           DEPLOY_LIMIT: 100
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: pmd-s3-ssm
@@ -328,7 +324,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '275d05f48bf99f0327705943a9dc256c49531ae4
+          versionid: 'c5096ab50cd6c39475eb9464912b2e7d075e34cb
 
             '
       Handler: helper.handler_deldir
@@ -374,7 +370,7 @@ Resources:
           COMMAND: ls; cd ../../../../home/ubuntu; ncap_remote/run_epi.sh "{}" "{}"
             "{}" "{}"; . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
-          CONFIGDIR: config
+          CONFIGDIR: configs
           DEPLOY_LIMIT: 100
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: pmd-s3-ssm
@@ -403,7 +399,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '275d05f48bf99f0327705943a9dc256c49531ae4
+          versionid: 'c5096ab50cd6c39475eb9464912b2e7d075e34cb
 
             '
       Handler: helper.handler_mkdir
@@ -469,9 +465,13 @@ Resources:
                 - cunninghamlabEPIdevelop/inputs
                 - cunninghamlabEPIdevelop/results
                 - cunninghamlabEPIdevelop/logs
+                - cunninghamlabEPIdevelop/submissions
+                - cunninghamlabEPIdevelop/configs
                 - cunninghamlabEPIdevelop/inputs/
                 - cunninghamlabEPIdevelop/results/
                 - cunninghamlabEPIdevelop/logs/
+                - cunninghamlabEPIdevelop/submissions/
+                - cunninghamlabEPIdevelop/configs/
             Effect: Allow
             Resource:
             - arn:aws:s3:::epi-ncap-stable
@@ -482,6 +482,8 @@ Resources:
                 s3:prefix:
                 - cunninghamlabEPIdevelop/inputs/*
                 - cunninghamlabEPIdevelop/results/*
+                - cunninghamlabEPIdevelop/configs/*
+                - cunninghamlabEPIdevelop/submissions/*
                 - cunninghamlabEPIdevelop/logs/*
             Effect: Allow
             Resource:
@@ -493,6 +495,8 @@ Resources:
             Effect: Allow
             Resource:
             - arn:aws:s3:::epi-ncap-stable/cunninghamlabEPIdevelop/inputs/*
+            - arn:aws:s3:::epi-ncap-stable/cunninghamlabEPIdevelop/configs/*
+            - arn:aws:s3:::epi-ncap-stable/cunninghamlabEPIdevelop/submissions/*
             Sid: Inputfolderwrite
           - Action:
             - s3:GetObject
@@ -500,7 +504,7 @@ Resources:
             Effect: Allow
             Resource:
             - arn:aws:s3:::epi-ncap-stable/cunninghamlabEPIdevelop/results/*
-            - arn:aws:s3:::epi-ncap-stable/cunninghamlabEPIdevelop/logs/*
+            - arn:aws:s3:::epi-ncap-stable/cunninghamlabEPIdevelop/configs/*
             Sid: Outputfolderwrite
           Version: '2012-10-17'
         PolicyName: cunninghamlabEPIdeveloppolicy
@@ -534,9 +538,13 @@ Resources:
                 - group2develop/inputs
                 - group2develop/results
                 - group2develop/logs
+                - group2develop/submissions
+                - group2develop/configs
                 - group2develop/inputs/
                 - group2develop/results/
                 - group2develop/logs/
+                - group2develop/submissions/
+                - group2develop/configs/
             Effect: Allow
             Resource:
             - arn:aws:s3:::epi-ncap-stable
@@ -547,6 +555,8 @@ Resources:
                 s3:prefix:
                 - group2develop/inputs/*
                 - group2develop/results/*
+                - group2develop/configs/*
+                - group2develop/submissions/*
                 - group2develop/logs/*
             Effect: Allow
             Resource:
@@ -558,6 +568,8 @@ Resources:
             Effect: Allow
             Resource:
             - arn:aws:s3:::epi-ncap-stable/group2develop/inputs/*
+            - arn:aws:s3:::epi-ncap-stable/group2develop/configs/*
+            - arn:aws:s3:::epi-ncap-stable/group2develop/submissions/*
             Sid: Inputfolderwrite
           - Action:
             - s3:GetObject
@@ -565,7 +577,7 @@ Resources:
             Effect: Allow
             Resource:
             - arn:aws:s3:::epi-ncap-stable/group2develop/results/*
-            - arn:aws:s3:::epi-ncap-stable/group2develop/logs/*
+            - arn:aws:s3:::epi-ncap-stable/group2develop/configs/*
             Sid: Outputfolderwrite
           Version: '2012-10-17'
         PolicyName: group2developpolicy
