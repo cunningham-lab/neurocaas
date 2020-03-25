@@ -252,8 +252,19 @@ class Submission_Launch_log_test():
         except IndexError as e:
             ## If the filename is just "submit.json, we just don't append anything to the job name. "
             submit_name = ""
+        #### Parse submit file 
+        submit_file = utilsparam.s3.load_json(bucket_name, key)
+        
+        ## These next three fields check that the submit file is correctly formatted
+        try: 
+            self.timestamp = submit_file["timestamp"]
+            ## KEY: Now set up logging in the input folder too: 
+        except KeyError as ke:
+            ## Now raise an exception to halt processing, because this is a catastrophic error.  
+            raise ValueError("Missing timestamp when data was uploaded.")
+
         ## Now we're going to get the path to the results directory in the submit folder: 
-        self.jobname = "job"+submit_name+self.time
+        self.jobname = "job_{}_{}_{}".format(submit_name,bucket_name,self.timestamp)
         jobpath = os.path.join(self.path,os.environ['OUTDIR'],self.jobname)
         self.jobpath_submit = jobpath
         ## And create a corresponding directory in the submit area. 
@@ -261,10 +272,7 @@ class Submission_Launch_log_test():
         ## a logger for the submit area.  
         self.submitlogger = utilsparam.s3.JobLogger(self.bucket_name, self.jobpath_submit)
 
-        #### Parse submit file 
-        submit_file = utilsparam.s3.load_json(bucket_name, key)
-        
-        ## These next three fields check that the submit file is correctly formatted
+
         ## Check that we have a dataname field:
         submit_errmsg = "INPUT ERROR: Submit file does not contain field {}, needed to analyze data."
         try: 
@@ -652,21 +660,25 @@ class Submission_Launch_log_demo():
             ## If the filename is just "submit.json, we just don't append anything to the job name. "
             submit_name = ""
             
-        ## Now we're going to get the path to the results directory: 
-        self.jobname = "job"+submit_name+'epi_demo'
+        #### Parse submit file 
+        submit_file = utilsparam.s3.load_json(bucket_name, key)
+        
+        ## These next three fields check that the submit file is correctly formatted
+        try: 
+            self.timestamp = submit_file["timestamp"]
+            ## KEY: Now set up logging in the input folder too: 
+        except KeyError as ke:
+            ## Now raise an exception to halt processing, because this is a catastrophic error.  
+            raise ValueError("Missing timestamp when data was uploaded.")
+
+        ## Now we're going to get the path to the results directory in the submit folder: 
+        self.jobname = "job_{}_{}_{}".format(submit_name,bucket_name,self.timestamp)
         jobpath = os.path.join(self.path,os.environ['OUTDIR'],self.jobname)
         self.jobpath = jobpath
-        ## Reset this directory
-        create_jobdir  = utilsparam.s3.mkdir_reset(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
+        create_jobdir  = utilsparam.s3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
         
+        print(self.path,'path')
         self.logger = utilsparam.s3.JobLogger_demo(self.bucket_name, self.jobpath)
-        self.logger.append("Initializing EPI analysis: Parameter search for 2D LDS.")
-        self.logger.write()
-        #self.out_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.OUTDIR)
-        #self.in_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.INDIR)
-
-        # Load Content Of Submit File 
-        submit_file = utilsparam.s3.load_json(bucket_name, key)
         ## Check what instance we should use. 
         try:
             self.instance_type = submit_file['instance_type'] # TODO default option from config
