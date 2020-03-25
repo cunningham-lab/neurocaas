@@ -45,15 +45,11 @@ class Submission_dev():
         except IndexError as e:
             ## If the filename is just "submit.json, we just don't append anything to the job name. "
             submit_name = ""
-            
-        ## Now we're going to get the path to the results directory: 
-        
-        #self.out_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.OUTDIR)
-        #self.in_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.INDIR)
 
         #### Parse submit file 
         submit_file = utilsparam.s3.load_json(bucket_name, key)
         
+        ## Machine formatted fields (error only available in lambda) 
         ## These next three fields check that the submit file is correctly formatted
         try: 
             self.timestamp = submit_file["timestamp"]
@@ -62,28 +58,29 @@ class Submission_dev():
             ## Now raise an exception to halt processing, because this is a catastrophic error.  
             raise ValueError("Missing timestamp when data was uploaded.")
 
-        ## Now we're going to get the path to the results directory in the submit folder: 
+        ## Initialize s3 directory for this job. 
         self.jobname = "job_{}_{}_{}".format(submit_name,bucket_name,self.timestamp)
         jobpath = os.path.join(self.path,os.environ['OUTDIR'],self.jobname)
         self.jobpath = jobpath
         ## And create a corresponding directory in the submit area. 
         create_jobdir  = utilsparam.s3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
+
+        ## Create a logging object and write to it. 
         ## a logger for the submit area.  
         self.logger = utilsparam.s3.JobLogger_demo(self.bucket_name, self.jobpath)
         self.logger.append("Initializing EPI analysis: Parameter search for 2D LDS.")
         self.logger.write()
-        ## Check what instance we should use. 
-
+        ########################
+        ## Now parse the rest of the file. 
         try:
             self.instance_type = submit_file['instance_type'] # TODO default option from config
         except KeyError as ke: 
             msg = "Using default instance type {} from config file".format(os.environ["INSTANCE_TYPE"])
             self.instance_type = os.environ["INSTANCE_TYPE"]
-            ## Log this message.- not crucial for logging. 
-            #self.logger.append(msg)
-            #self.logger.write()
+            # Log this message 
+            self.logger.append(msg)
+            self.logger.write()
 
-        ## These next two check that the submit file is correctly formatted
         ## Check that we have a dataname field:
         submit_errmsg = "INPUT ERROR: Submit file does not contain field {}, needed to analyze data."
         try: 
@@ -110,7 +107,8 @@ class Submission_dev():
 
         self.logger.append("EPI analysis request detected with dataset {}, config file {}. Reading EPI blueprint.".format(self.data_name,self.config_name))
         self.logger.write()
-
+        ########################## 
+        ## Check for the existence of the corresponding data and config in s3. 
         ## Check that we have the actual data in the bucket.  
         exists_errmsg = "INPUT ERROR: S3 Bucket does not contain {}"
         if not utilsparam.s3.exists(self.bucket_name,self.data_name): 
