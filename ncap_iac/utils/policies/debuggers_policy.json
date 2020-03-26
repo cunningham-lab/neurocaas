@@ -24,7 +24,7 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::ncapctnteststack"
+        "arn:aws:s3:::epi-ncap-stable"
       ],
       "Condition": {
         "StringEquals": {
@@ -33,10 +33,13 @@
             "debuggers/",
             "debuggers/inputs",
             "debuggers/results",
-            "debuggers/logs",
+            "logs",
+            "debuggers/submissions",
+            "debuggers/configs",
             "debuggers/inputs/",
             "debuggers/results/",
-            "debuggers/logs/"
+            "debuggers/submissions/",
+            "debuggers/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -49,14 +52,15 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::ncapctnteststack"
+        "arn:aws:s3:::epi-ncap-stable"
       ],
       "Condition": {
         "StringLike": {
           "s3:prefix": [
             "debuggers/inputs/*",
             "debuggers/results/*",
-            "debuggers/logs/*"
+            "debuggers/configs/*",
+            "debuggers/submissions/*"
           ]
         }
       }
@@ -69,7 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::ncapctnteststack/debuggers/inputs/*"
+        "arn:aws:s3:::epi-ncap-stable/debuggers/inputs/*",
+        "arn:aws:s3:::epi-ncap-stable/debuggers/configs/*",
+        "arn:aws:s3:::epi-ncap-stable/debuggers/submissions/*"
       ]
     },
     {
@@ -80,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::ncapctnteststack/debuggers/results/*",
-        "arn:aws:s3:::ncapctnteststack/debuggers/logs/*"
+        "arn:aws:s3:::epi-ncap-stable/debuggers/results/*",
+        "arn:aws:s3:::epi-ncap-stable/debuggers/configs/*"
       ]
     }
   ]

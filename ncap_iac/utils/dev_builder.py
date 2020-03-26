@@ -336,6 +336,16 @@ class DevTemplate(NeuroCaaSTemplate):
                                      DependsOn = [bucketname,logfoldername])
             logafffolder = self.template.add_resource(logaffmake)
 
+        ## Finally, make a "debug" folder that will always exist: 
+        logdebugmake = CustomResource(logfoldername+"debug",
+                                     ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                     BucketName = self.config['PipelineName'],
+                                     Path = self.config['Lambda']['LambdaConfig']['LOGDIR']+'/',
+                                     DirName = "debug",
+                                     DependsOn = [bucketname,logfoldername])
+        logdebugfolder = self.template.add_resource(logdebugmake)
+
+
 
     def add_affiliate_folder(self,affiliatename):
         ## Declare depends on resources: 
