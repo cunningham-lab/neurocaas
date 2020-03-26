@@ -33,12 +33,11 @@
             "group2develop/",
             "group2develop/inputs",
             "group2develop/results",
-            "group2develop/logs",
+            "logs",
             "group2develop/submissions",
             "group2develop/configs",
             "group2develop/inputs/",
             "group2develop/results/",
-            "group2develop/logs/",
             "group2develop/submissions/",
             "group2develop/configs/"
           ],
@@ -61,8 +60,7 @@
             "group2develop/inputs/*",
             "group2develop/results/*",
             "group2develop/configs/*",
-            "group2develop/submissions/*",
-            "group2develop/logs/*"
+            "group2develop/submissions/*"
           ]
         }
       }

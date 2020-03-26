@@ -33,12 +33,11 @@
             "cunninghamlabEPIdevelop/",
             "cunninghamlabEPIdevelop/inputs",
             "cunninghamlabEPIdevelop/results",
-            "cunninghamlabEPIdevelop/logs",
+            "logs",
             "cunninghamlabEPIdevelop/submissions",
             "cunninghamlabEPIdevelop/configs",
             "cunninghamlabEPIdevelop/inputs/",
             "cunninghamlabEPIdevelop/results/",
-            "cunninghamlabEPIdevelop/logs/",
             "cunninghamlabEPIdevelop/submissions/",
             "cunninghamlabEPIdevelop/configs/"
           ],
@@ -61,8 +60,7 @@
             "cunninghamlabEPIdevelop/inputs/*",
             "cunninghamlabEPIdevelop/results/*",
             "cunninghamlabEPIdevelop/configs/*",
-            "cunninghamlabEPIdevelop/submissions/*",
-            "cunninghamlabEPIdevelop/logs/*"
+            "cunninghamlabEPIdevelop/submissions/*"
           ]
         }
       }

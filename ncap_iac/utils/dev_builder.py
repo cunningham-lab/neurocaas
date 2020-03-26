@@ -242,6 +242,7 @@ class DevTemplate(NeuroCaaSTemplate):
         affiliatedicts = self.config['UXData']['Affiliates']
         for affdict in affiliatedicts:
             self.add_affiliate(affdict)
+        self.add_log_folder(affiliatedicts)
         self.figurelamb = self.add_figure_lambda()
         self.add_submit_lambda()
 
@@ -300,6 +301,42 @@ class DevTemplate(NeuroCaaSTemplate):
         ## We can add other custom resource initializations in the future
         return template,mkfunction_attached,delfunction_attached
 
+    def add_log_folder(self,affiliatedicts):
+        "this has to happen after affiliates are defined"
+        bucketname = 'PipelineMainBucket'
+        logfoldername = "LogFolder"
+
+        ## A log folder to keep track of all resource monitoring across all users.  
+        logmake = CustomResource(logfoldername,
+                                 ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                 BucketName = self.config['PipelineName'],
+                                 Path = "",
+                                 DirName = self.config['Lambda']['LambdaConfig']['LOGDIR'],
+                                 DependsOn = bucketname)
+        logfolder = self.template.add_resource(logmake)
+
+        ## Make an "active jobs" subfolder within: 
+        logactivemake = CustomResource(logfoldername+"active",
+                                 ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                 BucketName = self.config['PipelineName'],
+                                 Path = self.config['Lambda']['LambdaConfig']['LOGDIR']+'/',
+                                 DirName = "active",
+                                 DependsOn = [bucketname,logfoldername])
+        logactivefolder = self.template.add_resource(logactivemake)
+
+        ## Make a folder for each affiliate so they can be assigned completed jobs too. 
+        for affdict in affiliatedicts:
+            print(affdict,"dict here")
+            affiliatename = affdict["AffiliateName"]
+            logaffmake = CustomResource(logfoldername+affiliatename,
+                                     ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                     BucketName = self.config['PipelineName'],
+                                     Path = self.config['Lambda']['LambdaConfig']['LOGDIR']+'/',
+                                     DirName = affiliatename,
+                                     DependsOn = [bucketname,logfoldername])
+            logafffolder = self.template.add_resource(logaffmake)
+
+
     def add_affiliate_folder(self,affiliatename):
         ## Declare depends on resources: 
         bucketname = 'PipelineMainBucket'
@@ -314,17 +351,6 @@ class DevTemplate(NeuroCaaSTemplate):
                                   DirName = affiliatename,
                                   DependsOn = bucketname)
         basefolder = self.template.add_resource(basemake)
-
-        logfoldername = "LogFolder"+affiliatename
-
-        ## A log folder to keep track of all resource monitoring across all users.  
-        logmake = CustomResource(logfoldername,
-                                 ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
-                                 BucketName = self.config['PipelineName'],
-                                 Path = "",
-                                 DirName = self.config['Lambda']['LambdaConfig']['LOGDIR'],
-                                 DependsOn = bucketname)
-        logfolder = self.template.add_resource(logmake)
 
         ## Designate cfn resource names for each: 
         basenames = ["InFolder","OutFolder","SubmitFolder","ConfigFolder"]
@@ -362,12 +388,11 @@ class DevTemplate(NeuroCaaSTemplate):
                 affiliatename+'/',
                 affiliatename+'/'+indir,
                 affiliatename+'/'+outdir,
-                affiliatename+'/'+logdir,
+                logdir,
                 affiliatename+'/'+subdir,
                 affiliatename+'/'+condir,
                 affiliatename+'/'+indir+'/',
                 affiliatename+'/'+outdir+'/',
-                affiliatename+'/'+logdir+'/',
                 affiliatename+'/'+subdir+'/',
                 affiliatename+'/'+condir+'/'
             ],'s3:delimiter':['/']}}})
@@ -381,8 +406,7 @@ class DevTemplate(NeuroCaaSTemplate):
                 affiliatename+'/'+indir+'/*',
                 affiliatename+'/'+outdir+'/*',
                 affiliatename+'/'+condir+'/*',
-                affiliatename+'/'+subdir+'/*',
-                affiliatename+'/'+logdir+'/*'
+                affiliatename+'/'+subdir+'/*'
             ]}}})
         ## Give PUT, and DELETE permissions for the input, config, and submit subdirectories: 
         obj["Statement"].append({
