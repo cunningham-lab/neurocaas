@@ -5,11 +5,10 @@ import re
 
 
 try:
-    #import utils_param.config as config
-    import utilsparam.s3
-    import utilsparam.ssm
-    import utilsparam.ec2
-    import utilsparam.events
+    from utilsparam import s3 as utilsparams3
+    from utilsparam import ssm as utilsparamssm
+    from utilsparam import ec2 as utilsparamec2
+    from utilsparam import events as utilsparamevents
 except Exception as e:
     error = str(e)
     stacktrace = json.dumps(traceback.format_exc())
@@ -47,7 +46,7 @@ class Submission_dev():
             submit_name = ""
 
         #### Parse submit file 
-        submit_file = utilsparam.s3.load_json(bucket_name, key)
+        submit_file = utilsparams3.load_json(bucket_name, key)
         
         ## Machine formatted fields (error only available in lambda) 
         ## These next three fields check that the submit file is correctly formatted
@@ -63,11 +62,11 @@ class Submission_dev():
         jobpath = os.path.join(self.path,os.environ['OUTDIR'],self.jobname)
         self.jobpath = jobpath
         ## And create a corresponding directory in the submit area. 
-        create_jobdir  = utilsparam.s3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
+        create_jobdir  = utilsparams3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
 
         ## Create a logging object and write to it. 
         ## a logger for the submit area.  
-        self.logger = utilsparam.s3.JobLogger_demo(self.bucket_name, self.jobpath)
+        self.logger = utilsparams3.JobLogger_demo(self.bucket_name, self.jobpath)
         self.logger.append("Unique analysis version id: {}".format(os.environ['versionid'].split("\n")[0]))
         self.logger.append("Initializing EPI analysis: Parameter search for 2D LDS.")
         self.logger.write()
@@ -112,12 +111,12 @@ class Submission_dev():
         ## Check for the existence of the corresponding data and config in s3. 
         ## Check that we have the actual data in the bucket.  
         exists_errmsg = "INPUT ERROR: S3 Bucket does not contain {}"
-        if not utilsparam.s3.exists(self.bucket_name,self.data_name): 
+        if not utilsparams3.exists(self.bucket_name,self.data_name): 
             msg = exists_errmsg.format(self.data_name)
             self.logger.append(msg)
             self.logger.write()
             raise ValueError("dataname given does not exist in bucket.")
-        elif not utilsparam.s3.exists(self.bucket_name,self.config_name): 
+        elif not utilsparams3.exists(self.bucket_name,self.config_name): 
             msg = exists_errmsg.format(self.config_name)
             self.logger.append(msg)
             self.logger.write()
@@ -126,8 +125,23 @@ class Submission_dev():
 
         ## Now get the actual paths to relevant data from the foldername: 
 
-        self.filenames = utilsparam.s3.extract_files(self.bucket_name,self.data_name,ext = None) 
+        self.filenames = utilsparams3.extract_files(self.bucket_name,self.data_name,ext = None) 
         assert len(self.filenames) > 0, "we must have data to analyze."
+
+    def get_costmonitoring(self):
+        """
+        Gets the cost incurred by a given group so far by looking at the logs bucket of the appropriate s3 folder.  
+         
+        """
+        ## first get the path to the log folder we should be looking at. 
+        groupname = self.data_name.split('/')[0]
+        assert len(groupname) > 0; "groupname must exist."
+        logfolder_path = "logs/{}/".format(groupname) 
+        ## now get all of the computereport filenames: 
+        all_files = utilsparams3.ls(self.bucketname,os.path.join(groupname,"computereport"))
+        print(all_files)
+        
+
 
     def acquire_instance(self):
         """ Acquires & Starts New EC2 Instances Of The Requested Type & AMI. Specialized certificate messages.
@@ -140,7 +154,7 @@ class Submission_dev():
         ##TODO we are right here. 
 
         ## Check how many instances are running. 
-        active = utilsparam.ec2.count_active_instances(self.instance_type)
+        active = utilsparamec2.count_active_instances(self.instance_type)
         ## Ensure that we have enough bandwidth to support this request:
         if active +nb_instances < int(os.environ['DEPLOY_LIMIT']):
             pass
@@ -149,7 +163,7 @@ class Submission_dev():
         
 
         for i in range(nb_instances):
-            instance = utilsparam.ec2.launch_new_instance(
+            instance = utilsparamec2.launch_new_instance(
             instance_type=self.instance_type, 
             ami=os.environ['AMI'],
             logger= []# self.logger
@@ -160,7 +174,7 @@ class Submission_dev():
 
     def start_instance(self):
         """ Starts new instances if stopped. We write a special loop for this one because we only need a single 60 second pause for all the intances, not one for each in serial. Specialized certificate messages. """
-        utilsparam.ec2.start_instances_if_stopped(
+        utilsparamec2.start_instances_if_stopped(
             instances=self.instances,
             logger=[]#self.logger
         )
@@ -199,7 +213,7 @@ class Submission_dev():
               self.bucket_name, filename, outpath_full, self.config_name
               ) for filename in self.filenames],"command send")
         for f,filename in enumerate(self.filenames):
-            response = utilsparam.ssm.execute_commands_on_linux_instances(
+            response = utilsparamssm.execute_commands_on_linux_instances(
                 commands=[os.environ['COMMAND'].format(
                     self.bucket_name, filename, outpath_full, self.config_name
                     )], # TODO: variable outdir as option
@@ -220,10 +234,10 @@ class Submission_dev():
         for instance in self.instances:
             self.logger.append('Setting up monitoring on instance '+str(instance))
             ## First declare a monitoring rule for this instance: 
-            ruledata,rulename = utilsparam.events.put_instance_rule(instance.instance_id)
+            ruledata,rulename = utilsparamevents.put_instance_rule(instance.instance_id)
             arn = ruledata['RuleArn']
             ## Now attach it to the given target
-            targetdata = utilsparam.events.put_instance_target(rulename) 
+            targetdata = utilsparamevents.put_instance_target(rulename) 
 
 ## Lambda code for deployment from other buckets. 
 class Submission_deploy():
@@ -269,7 +283,7 @@ class Submission_deploy():
             ## If the filename is just "submit.json, we just don't append anything to the job name. "
             submit_name = ""
         #### Parse submit file 
-        submit_file = utilsparam.s3.load_json(bucket_name, key)
+        submit_file = utilsparams3.load_json(bucket_name, key)
         
         ## These next three fields check that the submit file is correctly formatted
         try: 
@@ -284,9 +298,9 @@ class Submission_deploy():
         jobpath = os.path.join(self.path,os.environ['OUTDIR'],self.jobname)
         self.jobpath_submit = jobpath
         ## And create a corresponding directory in the submit area. 
-        create_jobdir  = utilsparam.s3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
+        create_jobdir  = utilsparams3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
         ## a logger for the submit area.  
-        self.logger = utilsparam.s3.JobLogger_demo(self.bucket_name, self.jobpath)
+        self.logger = utilsparams3.JobLogger_demo(self.bucket_name, self.jobpath)
         self.logger.append("Initializing EPI analysis: Parameter search for 2D LDS.")
         self.logger.write()
 
@@ -302,7 +316,7 @@ class Submission_deploy():
         try: 
             self.input_bucket_name = submit_file["bucketname"]
             ## KEY: Now set up logging in the input folder too: 
-            self.inputlogger = utilsparam.s3.JobLogger(self.input_bucket_name,os.path.join(os.environ['OUTDIR'],self.jobname)) ##TODO: this relies upon "OUTDIR" being the same in the submit and input buckets. Make sure to alter this later. 
+            self.inputlogger = utilsparams3.JobLogger(self.input_bucket_name,os.path.join(os.environ['OUTDIR'],self.jobname)) ##TODO: this relies upon "OUTDIR" being the same in the submit and input buckets. Make sure to alter this later. 
         except KeyError as ke:
 
             print(submit_errmsg.format(ke))
@@ -340,14 +354,14 @@ class Submission_deploy():
 
         ## Check that we have the actual data in the bucket.  
         exists_errmsg = "INPUT ERROR: S3 Bucket does not contain {}"
-        if not utilsparam.s3.exists(self.input_bucket_name,self.data_name): 
+        if not utilsparams3.exists(self.input_bucket_name,self.data_name): 
             msg = exists_errmsg.format(self.data_name)
             self.submitlogger.append(msg)
             self.submitlogger.write()
             self.inputlogger.append(msg)
             self.inputlogger.write()
             raise ValueError("dataname given does not exist in bucket.")
-        elif not utilsparam.s3.exists(self.input_bucket_name,self.config_name): 
+        elif not utilsparams3.exists(self.input_bucket_name,self.config_name): 
             msg = exists_errmsg.format(self.config_name)
             self.submitlogger.append(msg)
             self.submitlogger.write()
@@ -370,7 +384,7 @@ class Submission_deploy():
 
         ## Now get the actual paths to relevant data from the foldername: 
 
-        self.filenames = utilsparam.s3.extract_files(self.input_bucket_name,self.data_name,ext = None) 
+        self.filenames = utilsparams3.extract_files(self.input_bucket_name,self.data_name,ext = None) 
         assert len(self.filenames) > 0, "we must have data to analyze."
 
     def acquire_instance(self):
@@ -379,7 +393,7 @@ class Submission_deploy():
         nb_instances = len(self.filenames)
 
         ## Check how many instances are running. 
-        active = utilsparam.ec2.count_active_instances(self.instance_type)
+        active = utilsparamec2.count_active_instances(self.instance_type)
         ## Ensure that we have enough bandwidth to support this request:
         if active +nb_instances < int(os.environ['DEPLOY_LIMIT']):
             pass
@@ -388,7 +402,7 @@ class Submission_deploy():
             self.inputlogger.append("RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NCAP administrator.")
         
         for i in range(nb_instances):
-            instance = utilsparam.ec2.launch_new_instance(
+            instance = utilsparamec2.launch_new_instance(
             instance_type=self.instance_type, 
             ami=os.environ['AMI'],
             logger=self.inputlogger
@@ -398,7 +412,7 @@ class Submission_deploy():
 
     def start_instance(self):
         """ Starts new instances if stopped. We write a special loop for this one because we only need a single 60 second pause for all the intances, not one for each in serial"""
-        utilsparam.ec2.start_instances_if_stopped(
+        utilsparamec2.start_instances_if_stopped(
             instances=self.instances,
             logger=self.inputlogger
         )
@@ -410,10 +424,10 @@ class Submission_deploy():
             self.submitlogger.append('Setting up monitoring on instance '+str(instance))
             self.inputlogger.append('Setting up monitoring on instance '+str(instance))
             ## First declare a monitoring rule for this instance: 
-            ruledata,rulename = utilsparam.events.put_instance_rule(instance.instance_id)
+            ruledata,rulename = utilsparamevents.put_instance_rule(instance.instance_id)
             arn = ruledata['RuleArn']
             ## Now attach it to the given target
-            targetdata = utilsparam.events.put_instance_target(rulename) 
+            targetdata = utilsparamevents.put_instance_target(rulename) 
 
     def process_inputs(self):
         """ Initiates Processing On Previously Acquired EC2 Instance. This version requires that you include a config (fourth) argument """
@@ -449,7 +463,7 @@ class Submission_deploy():
               ) for filename in self.filenames],"command sent")
 
         for f,filename in enumerate(self.filenames):
-            response = utilsparam.ssm.execute_commands_on_linux_instances(
+            response = utilsparamssm.execute_commands_on_linux_instances(
                 commands=[os.environ['COMMAND'].format(
                     self.input_bucket_name, filename, outpath_full, self.config_name
                     )], # TODO: variable outdir as option
@@ -499,7 +513,7 @@ class Submission_Launch_folder():
         nb_instances = len(self.filenames)
 
         ## Check how many instances are running. 
-        active = utilsparam.ec2.count_active_instances(self.instance_type)
+        active = utilsparamec2.count_active_instances(self.instance_type)
         ## Ensure that we have enough bandwidth to support this request:
         if active +nb_instances < int(os.environ['DEPLOY_LIMIT']):
             pass
@@ -508,7 +522,7 @@ class Submission_Launch_folder():
         
 
         for i in range(nb_instances):
-            instance = utilsparam.ec2.launch_new_instance(
+            instance = utilsparamec2.launch_new_instance(
             instance_type=self.instance_type, 
             ami=os.environ['AMI'],
             logger=self.logger
@@ -518,7 +532,7 @@ class Submission_Launch_folder():
 
     def start_instance(self):
         """ Starts new instances if stopped. We write a special loop for this one because we only need a single 60 second pause for all the intances, not one for each in serial"""
-        utilsparam.ec2.start_instances_if_stopped(
+        utilsparamec2.start_instances_if_stopped(
             instances=self.instances,
             logger=self.logger
         )
@@ -529,10 +543,10 @@ class Submission_Launch_folder():
         for instance in self.instances:
             self.logger.append('Setting up monitoring on instance '+str(instance))
             ## First declare a monitoring rule for this instance: 
-            ruledata,rulename = utilsparam.events.put_instance_rule(instance.instance_id)
+            ruledata,rulename = utilsparamevents.put_instance_rule(instance.instance_id)
             arn = ruledata['RuleArn']
             ## Now attach it to the given target
-            targetdata = utilsparam.events.put_instance_target(rulename) 
+            targetdata = utilsparamevents.put_instance_target(rulename) 
 
     def process_inputs(self):
         raise NotImplementedError
@@ -562,15 +576,15 @@ class Submission_Launch_log_dev(Submission_Launch_folder):
         self.jobname = "job"+submit_name+self.time
         jobpath = os.path.join(self.path,os.environ['OUTDIR'],self.jobname)
         self.jobpath = jobpath
-        create_jobdir  = utilsparam.s3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
+        create_jobdir  = utilsparams3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
         
         print(self.path,'path')
-        self.logger = utilsparam.s3.JobLogger(self.bucket_name, self.jobpath)
-        #self.out_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.OUTDIR)
-        #self.in_path = utilsparam.s3.mkdir(self.bucket_name, self.path, config.INDIR)
+        self.logger = utilsparams3.JobLogger(self.bucket_name, self.jobpath)
+        #self.out_path = utilsparams3.mkdir(self.bucket_name, self.path, config.OUTDIR)
+        #self.in_path = utilsparams3.mkdir(self.bucket_name, self.path, config.INDIR)
 
         # Load Content Of Submit File 
-        submit_file = utilsparam.s3.load_json(bucket_name, key)
+        submit_file = utilsparams3.load_json(bucket_name, key)
         ## Check what instance we should use. 
         try:
             self.instance_type = submit_file['instance_type'] # TODO default option from config
@@ -608,12 +622,12 @@ class Submission_Launch_log_dev(Submission_Launch_folder):
 
         ## Check that we have the actual data in the bucket.  
         exists_errmsg = "INPUT ERROR: S3 Bucket does not contain {}"
-        if not utilsparam.s3.exists(self.bucket_name,self.data_name): 
+        if not utilsparams3.exists(self.bucket_name,self.data_name): 
             msg = exists_errmsg.format(self.data_name)
             self.logger.append(msg)
             self.logger.write()
             raise ValueError("dataname given does not exist in bucket.")
-        elif not utilsparam.s3.exists(self.bucket_name,self.config_name): 
+        elif not utilsparams3.exists(self.bucket_name,self.config_name): 
             msg = exists_errmsg.format(self.config_name)
             self.logger.append(msg)
             self.logger.write()
@@ -622,7 +636,7 @@ class Submission_Launch_log_dev(Submission_Launch_folder):
 
         ## Now get the actual paths to relevant data from the foldername: 
 
-        self.filenames = utilsparam.s3.extract_files(self.bucket_name,self.data_name,ext = None) 
+        self.filenames = utilsparams3.extract_files(self.bucket_name,self.data_name,ext = None) 
         assert len(self.filenames) > 0, "we must have data to analyze."
 
     def process_inputs(self):
@@ -651,7 +665,7 @@ class Submission_Launch_log_dev(Submission_Launch_folder):
               self.bucket_name, filename, outpath_full, self.config_name
               ) for filename in self.filenames],"command send")
         for f,filename in enumerate(self.filenames):
-            response = utilsparam.ssm.execute_commands_on_linux_instances(
+            response = utilsparamssm.execute_commands_on_linux_instances(
                 commands=[os.environ['COMMAND'].format(
                     self.bucket_name, filename, outpath_full, self.config_name
                     )], # TODO: variable outdir as option
