@@ -1,0 +1,11 @@
+{
+"instance-id":"id",
+"instance-type":"some instance type",
+"spot":false,
+"price":0.4,
+"databucket":"bucket that data lives in.",
+"datapath":"path to the data inside this bucket.",
+"jobpath":"path to the results directory given",
+"start":"2019-11-01T15:27:05Z",
+"end":"2019-11-01T15:36:01Z"
+}
