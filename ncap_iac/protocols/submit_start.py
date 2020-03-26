@@ -68,6 +68,7 @@ class Submission_dev():
         ## Create a logging object and write to it. 
         ## a logger for the submit area.  
         self.logger = utilsparam.s3.JobLogger_demo(self.bucket_name, self.jobpath)
+        self.logger.append("Unique analysis version id: {}".format(os.environ['versionid'].split("\n")[0]))
         self.logger.append("Initializing EPI analysis: Parameter search for 2D LDS.")
         self.logger.write()
         ########################
@@ -129,9 +130,14 @@ class Submission_dev():
         assert len(self.filenames) > 0, "we must have data to analyze."
 
     def acquire_instance(self):
-        """ Acquires & Starts New EC2 Instances Of The Requested Type & AMI. Specialized certificate messages. """
+        """ Acquires & Starts New EC2 Instances Of The Requested Type & AMI. Specialized certificate messages.
+        This version of the code checks against two constraints: how many jobs the user has run, and how many instances are currently running. 
+        """
         instances = []
         nb_instances = len(self.filenames)
+
+        ## Check how much compute this group has already run. 
+        ##TODO we are right here. 
 
         ## Check how many instances are running. 
         active = utilsparam.ec2.count_active_instances(self.instance_type)
