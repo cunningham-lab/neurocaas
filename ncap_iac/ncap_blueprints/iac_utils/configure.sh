@@ -18,7 +18,16 @@ source activate sam
 echo $scriptdir, $ncaprootdir
 cd "$ncaprootdir"/ncap_blueprints
 mkdir "$1"
-cp stack_config_template_newexample.json "$ncaprootdir"/ncap_blueprints/"$1"/stack_config_template.json 
+# Make a subdirectory for testing materials 
+mkdir "$1"/test_resources
+
+## Copy in the stack config template: 
+cp ../utils/templates/stack_config_template_newexample.json "$ncaprootdir"/ncap_blueprints/"$1"/stack_config_template.json 
+
+## Also copy in testing materials: 
+cp ../utils/templates/exampledevsubmit.json "$ncaprootdir"/ncap_blueprints/"$1"/test_resources/exampledevsubmit.json
+cp ../utils/simevents/s3_putevent.json "$ncaprootdir"/ncap_blueprints/"$1"/test_resources/s3_putevent.json
+cp ../utils/templates/{computereport_1234567.json,computereport_2345678.json} "$ncaprootdir"/ncap_blueprints/"$1"/test_resources/ 
 
 git add "$ncaprootdir"/ncap_blueprints/"$1"/ 
 git commit -m "automatic commit: deployed pipeline '$1'" 

@@ -1,6 +1,6 @@
 {
-    "dataname": "debuggroup/inputs/datafile.txt",
-    "configname": "debuggroup/config/config.yaml",
+    "dataname": "examplegroup2EPIdevelop/inputs/datafile.txt",
+    "configname": "examplegroup2EPIdevelop/configs/config.json",
     "instance_type": "t2.micro",
     "timestamp": "444:444:444"
 }
