@@ -62,4 +62,5 @@ fi
 ## We need to navigate to the pipeline directory because we have a relative path in our compilation code. 
 cd $PIPEDIR
 echo $ncaprootdir "rootdir"
+
 sam build -t compiled_template.json -m "$ncaprootdir"/protocols/requirements.txt

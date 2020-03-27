@@ -2,10 +2,9 @@
     "PipelineName":"epi-ncap-stable",
     "REGION":"us-east-1",
     "STAGE":"develop",
-    "MAXCOST":100,
     "Lambda":{
         "CodeUri":"../../protocols",
-        "Handler":"submit_start.handler_log_demo",
+        "Handler":"submit_start.handler_develop",
         "PostCodeUri":"../../protocols",
         "PostHandler":"postprocess.epipostprocess",
         "Launch":true, 
@@ -26,7 +25,8 @@
             "LAUNCH":true,
             "LOGFILE":"lambda_log.txt",
             "DEPLOY_LIMIT":100,
-            "MONITOR":false
+            "MAXCOST":100,
+            "MONITOR":true
         }
     },
     "UXData":{
@@ -38,7 +38,7 @@
             "ContactEmail":"tgabe94@gmail.com"
         },
         {
-            "AffiliateName":"group2develop",
+            "AffiliateName":"examplegroup2EPIdevelop",
             "UserNames":["jpccosyne","srbcosyne","tacosyne"],
             "UserInput":true,
             "ContactEmail":"tgabe94@gmail.com"

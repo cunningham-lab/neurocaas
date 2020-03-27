@@ -2,6 +2,7 @@ import os
 import json
 import traceback
 import re
+from datetime import datetime
 
 
 try:
@@ -34,7 +35,7 @@ class Submission_dev():
         # Get Upload Location Information
         self.bucket_name = bucket_name
         ## Get directory above the input directory. 
-        self.path = re.findall('.+?(?=/'+os.environ["INDIR"]+')',key)[0] 
+        self.path = re.findall('.+?(?=/'+os.environ["SUBMITDIR"]+')',key)[0] 
         ## Now add in the time parameter: 
         self.time = time
         ## We will index by the submit file name prefix if it exists: 
@@ -111,6 +112,7 @@ class Submission_dev():
         ## Check for the existence of the corresponding data and config in s3. 
         ## Check that we have the actual data in the bucket.  
         exists_errmsg = "INPUT ERROR: S3 Bucket does not contain {}"
+        print(self.bucket_name,self.data_name,"bucket and data naem")
         if not utilsparams3.exists(self.bucket_name,self.data_name): 
             msg = exists_errmsg.format(self.data_name)
             self.logger.append(msg)
@@ -134,14 +136,45 @@ class Submission_dev():
          
         """
         ## first get the path to the log folder we should be looking at. 
-        groupname = self.data_name.split('/')[0]
-        assert len(groupname) > 0; "groupname must exist."
-        logfolder_path = "logs/{}/".format(groupname) 
+        group_name = self.data_name.split('/')[0]
+        assert len(group_name) > 0; "group_name must exist."
+        logfolder_path = "logs/{}/".format(group_name) 
+        full_reportpath = os.path.join(logfolder_path,"computereport")
         ## now get all of the computereport filenames: 
-        all_files = utilsparams3.ls(self.bucketname,os.path.join(groupname,"computereport"))
-        print(all_files)
-        
+        all_files = utilsparams3.ls_name(self.bucket_name,full_reportpath)
 
+        ## for each, we extract the contents: 
+        jobdata = {}
+        cost = 0
+        ## now calculate the cost:
+        for jobfile in all_files:
+            instanceid = jobfile.split(full_reportpath+"_")[1].split(".json")[0]
+            print(instanceid)
+            jobdata = utilsparams3.load_json(self.bucket_name,jobfile)
+            price = jobdata["price"]
+            start = jobdata["start"]
+            end = jobdata["end"]
+            starttime = datetime.strptime(start, "%Y-%m-%dT%H:%M:%SZ")
+            endtime = datetime.strptime(end, "%Y-%m-%dT%H:%M:%SZ")
+            diff = endtime-starttime
+            duration = abs(diff.seconds)
+            cost = price*duration/3600.
+            cost+= cost
+        
+        ## Now compare with budget:
+        budget = float(os.environ["MAXCOST"])
+
+        if cost < budget:
+            message = "Incurred cost so far: ${}. Remaining budget: ${}".format(cost,budget-cost)
+            self.logger.append(message)
+            self.logger.write()
+            validjob = True
+        elif cost >= budget:
+            message = "Incurred cost so far: ${}. Over budget (${}), cancelling job. Contact administrator.".format(cost,budget)
+            self.logger.append(message)
+            self.logger.write()
+            validjob = False
+        return validjob
 
     def acquire_instance(self):
         """ Acquires & Starts New EC2 Instances Of The Requested Type & AMI. Specialized certificate messages.
@@ -150,8 +183,6 @@ class Submission_dev():
         instances = []
         nb_instances = len(self.filenames)
 
-        ## Check how much compute this group has already run. 
-        ##TODO we are right here. 
 
         ## Check how many instances are running. 
         active = utilsparamec2.count_active_instances(self.instance_type)
@@ -171,6 +202,11 @@ class Submission_dev():
             instances.append(instance)
         self.logger.append("Setting up {} EPI infrastructures from blueprint, please wait...".format(nb_instances))
         self.instances = instances
+
+    def log_jobs(self):
+        """
+        Once instances are acquired, create dictionaries that log their properties.  
+        """
 
     def start_instance(self):
         """ Starts new instances if stopped. We write a special loop for this one because we only need a single 60 second pause for all the intances, not one for each in serial. Specialized certificate messages. """
@@ -732,27 +768,32 @@ def process_upload_dev(bucket_name, key,time):
     elif os.environ["LAUNCH"] == 'false':
         raise NotImplementedError("This option not available for configs. ")
     print("acquiring")
-    submission.acquire_instance()
-    print('writing0')
-    submission.logger.write()
-    ## NOTE: IN LAMBDA,  JSON BOOLEANS ARE CONVERTED TO STRING
-    if os.environ["MONITOR"] == "true":
-        print('setting up monitor')
-        submission.put_instance_monitor_rule()
-    elif os.environ["MONITOR"] == "false":
-        print("skipping monitor")
-    print('writing1')
-    submission.logger.write()
-    print('starting')
-    submission.start_instance()
-    print('writing2')
-    submission.logger.write()
-    print('sending')
-    submission.process_inputs()
-    print("writing3")
-    submission.logger.write()
 
-    submission.logger.write()
+    valid = submission.get_costmonitoring()
+
+    if valid:
+        submission.acquire_instance()
+        print('writing0')
+        submission.logger.write()
+        ## NOTE: IN LAMBDA,  JSON BOOLEANS ARE CONVERTED TO STRING
+        if os.environ["MONITOR"] == "true":
+            print('setting up monitor')
+            submission.put_instance_monitor_rule()
+        elif os.environ["MONITOR"] == "false":
+            print("skipping monitor")
+        print('writing1')
+        submission.logger.write()
+        print('starting')
+        submission.start_instance()
+        print('writing2')
+        submission.logger.write()
+        print('sending')
+        submission.process_inputs()
+        print("writing3")
+        submission.logger.write()
+    else:
+        pass
+
 ## New 2/11: for disjoint data and upload buckets. 
 def process_upload_deploy(bucket_name, key,time):
     """ 

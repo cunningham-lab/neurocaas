@@ -47,6 +47,13 @@ def ls(bucket, path):
     return [
         objname.key for objname in bucket.objects.filter(Prefix=path)
     ]
+    
+def ls_name(bucket_name, path):
+    """ Get all objects with bucket as strings"""
+    bucket = s3_resource.Bucket(bucket_name)
+    return [
+        objname.key for objname in bucket.objects.filter(Prefix=path)
+    ]
 
 def exists(bucket_name, path):
     """ checks if there is any data under the given (Prefix) path for the given bucket. """
