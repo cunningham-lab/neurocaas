@@ -203,6 +203,32 @@ class Submission_dev():
         self.logger.append("Setting up {} EPI infrastructures from blueprint, please wait...".format(nb_instances))
         self.instances = instances
 
+    def acquire_instances(self,nb_instances,maxduration = None):
+        """
+        Streamlines acquisition, setting up of multiple instances. Better exception handling when instances cannot be launched, and spot instances with defined duration when avaialble.   
+
+        """
+        nb_instances = len(self.filenames)
+
+        ## Check how many instances are running. 
+        active = utilsparamec2.count_active_instances(self.instance_type)
+        ## Ensure that we have enough bandwidth to support this request:
+        if active +nb_instances < int(os.environ['DEPLOY_LIMIT']):
+            pass
+        else:
+            self.logger.append("RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NCAP administrator.")
+        
+
+        for i in range(nb_instances):
+            instance = utilsparamec2.launch_new_instance(
+            instance_type=self.instance_type, 
+            ami=os.environ['AMI'],
+            logger= []# self.logger
+            )
+            instances.append(instance)
+        self.logger.append("Setting up {} EPI infrastructures from blueprint, please wait...".format(nb_instances))
+        self.instances = instances
+
     def log_jobs(self):
         """
         Once instances are acquired, create dictionaries that log their properties.  
