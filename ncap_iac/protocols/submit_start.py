@@ -176,6 +176,24 @@ class Submission_dev():
             validjob = False
         return validjob
 
+    def parse_config(self):
+        """
+        Parse the config file given for specific neurocaas parameters. In particular, the *duration* of the job, and the *dataset size* 
+        """
+        passed_config = utilsparams3.load_json(self.bucket_name,self.config_name)
+        try:
+            self.jobduration = passed_config["__duration__"]
+        except KeyError:
+            self.logger.append("parameter __duration__ not given, proceeding with standard compute launch.")
+            self.logger.write()
+            self.jobduration = None
+        try:
+            self.jobsize = passed_config["__dataset_size__"]
+        except KeyError:
+            self.logger.append("parameter __dataset_size__ is not given, proceeding with standard compute launch." )
+            self.logger.write()
+            self.jobsize = None
+
     def acquire_instance(self):
         """ Acquires & Starts New EC2 Instances Of The Requested Type & AMI. Specialized certificate messages.
         This version of the code checks against two constraints: how many jobs the user has run, and how many instances are currently running. 
@@ -203,7 +221,7 @@ class Submission_dev():
         self.logger.append("Setting up {} EPI infrastructures from blueprint, please wait...".format(nb_instances))
         self.instances = instances
 
-    def acquire_instances(self,nb_instances,maxduration = None):
+    def acquire_instances(self):
         """
         Streamlines acquisition, setting up of multiple instances. Better exception handling when instances cannot be launched, and spot instances with defined duration when avaialble.   
 
@@ -216,18 +234,28 @@ class Submission_dev():
         if active +nb_instances < int(os.environ['DEPLOY_LIMIT']):
             pass
         else:
-            self.logger.append("RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NCAP administrator.")
+            self.logger.append("RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NeuroCAAS admin")
+            raise ValueError("Instance requests greater than pipeline bandwidth")
         
 
-        for i in range(nb_instances):
-            instance = utilsparamec2.launch_new_instance(
-            instance_type=self.instance_type, 
-            ami=os.environ['AMI'],
-            logger= []# self.logger
-            )
-            instances.append(instance)
-        self.logger.append("Setting up {} EPI infrastructures from blueprint, please wait...".format(nb_instances))
+        instances = utilsparamec2.launch_new_instances(
+        instance_type=self.instance_type, 
+        ami=os.environ['AMI'],
+        logger=  self.logger,
+        number = nb_instances,
+        duration = self.jobduration
+        )
+
+        ## Even though we have a check in place, also check how many were launched:
+        try:
+            assert len(instances) > 0
+        except AssertionError:
+            logger.append("instances not launched. AWS capacity reached. Please contact NeuroCAAS admin.")
+            raise
+
         self.instances = instances
+
+
 
     def log_jobs(self):
         """
@@ -293,13 +321,19 @@ class Submission_dev():
     ## Declare rules to monitor the states of these instances.  
     def put_instance_monitor_rule(self): 
         """ For multiple datasets."""
-        for instance in self.instances:
-            self.logger.append('Setting up monitoring on instance '+str(instance))
-            ## First declare a monitoring rule for this instance: 
-            ruledata,rulename = utilsparamevents.put_instance_rule(instance.instance_id)
-            arn = ruledata['RuleArn']
-            ## Now attach it to the given target
-            targetdata = utilsparamevents.put_instance_target(rulename) 
+        self.logger.append("Setting up monitoring on all instances.") 
+        ruledata,rulename = utilsparamevents.put_instances_rule(self.instances,self.jobname)
+        arn = ruledata['RuleArn']
+        ## Now attach it to the given target
+        targetdata = utilsparamevents.put_instance_target(rulename) 
+
+        #for instance in self.instances:
+        #    self.logger.append('Setting up monitoring on instance '+str(instance))
+        #    ## First declare a monitoring rule for this instance: 
+        #    ruledata,rulename = utilsparamevents.put_instance_rule(instance.instance_id)
+        #    arn = ruledata['RuleArn']
+        #    ## Now attach it to the given target
+        #    targetdata = utilsparamevents.put_instance_target(rulename) 
 
 ## Lambda code for deployment from other buckets. 
 class Submission_deploy():
@@ -798,7 +832,8 @@ def process_upload_dev(bucket_name, key,time):
     valid = submission.get_costmonitoring()
 
     if valid:
-        submission.acquire_instance()
+        submission.parse_config()
+        submission.acquire_instances()
         print('writing0')
         submission.logger.write()
         ## NOTE: IN LAMBDA,  JSON BOOLEANS ARE CONVERTED TO STRING
