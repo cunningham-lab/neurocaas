@@ -4,6 +4,7 @@ from math import ceil
 #from .env_vars import *
 
 import boto3
+import botocore
 
 #from .config import IAM_ROLE, KEY_NAME, SECURITY_GROUPS, SHUTDOWN_BEHAVIOR
 
@@ -43,10 +44,22 @@ def start_instances_if_stopped(instances, logger):
         
         # If not running, run:
         if state != 'running':
-            logger.append("Starting Instance...")
-            instance.start()
-            instance.wait_until_running()
-            logger.append('Instance started!')
+            try:
+                logger.append("Starting Instance...")
+                instance.start()
+                instance.wait_until_running()
+                logger.append('Instance started!')
+            except botocore.exceptions.ClientError as e:
+                if e.response["Error"]["Code"] == "UnsupportedOperation":
+                    logger.append("Spot Instance, cannot be started manually. .")
+                    ##TODO: figure out if you have to wait for this additionally. 
+                    instance.wait_until_running()
+                    logger.append('Instance started!')
+                else:
+                    print("unhandled error, quitting")
+                    logger.append("unhandled error during job start, quitting")
+                    logger.write()
+                    raise
     time.sleep(60)
     logger.append("Instances Initialized")
 
@@ -93,7 +106,7 @@ def launch_new_instances(instance_type, ami, logger, number, duration = None):
     ## Now we will take the parsed duration and use it to launch instances.  
     
     if spot_duration is None:
-        logger.append("save not available (duration not given or greater than 6 hours)")
+        logger.append("save not available (duration not given or greater than 6 hours). Launching standard instance.")
         logger.write()
         instances = ec2_resource.create_instances(
             ImageId=ami,
@@ -128,6 +141,7 @@ def launch_new_instances(instance_type, ami, logger, number, duration = None):
         )
 
     [logger.append("New instance {} created!".format(instances[i])) for i in range(number)]
+    logger.write()
     return instances
 
 def count_active_instances(instance_type):
