@@ -25,4 +25,15 @@ def eventshandler(event,context):
     
     
 
+## 
+def monitor_updater(event,context):
+    """
+    Newest version of events monitoring that updates pre-existing logs. 
+
+    """
+    ## 1. First, find the instance id. 
+    ## 2. Go find the appropriate log folder in the bucket [bucket available through os. ]
+    ## 3. Now figure out if this is an "running" or "shutting-down" statechange. "
+    ## 4. accordingly, either update the log [running] or update the log and move it to the appropriate folder [given by the log contents.]
+    ## Include exception handling for the case where one of the fields is not completed. 
 
