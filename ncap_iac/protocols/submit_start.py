@@ -10,6 +10,7 @@ try:
     from utilsparam import ssm as utilsparamssm
     from utilsparam import ec2 as utilsparamec2
     from utilsparam import events as utilsparamevents
+    from utilsparam import pricing as utilsparampricing
 except Exception as e:
     error = str(e)
     stacktrace = json.dumps(traceback.format_exc())
@@ -255,12 +256,32 @@ class Submission_dev():
 
         self.instances = instances
 
-
-
     def log_jobs(self):
         """
-        Once instances are acquired, create dictionaries that log their properties.  
+        Once instances are acquired, create logs that can be filled in as they run.  
         """
+
+        all_logs = []
+        for instance in self.instances:
+            log = {}
+            log["instance-id"] = instance.instance_id 
+            log["instance-type"] = instance.instance_type
+            if instance.spot_instance_request_id:
+                log["spot"] = True
+            else:
+                log["spot"] = False
+            log["price"] = utilsparampricing.price_instance(instance)
+            log["databucket"] = self.bucket_name
+            log["datapath"] = self.data_name 
+            log["jobpath"] = self.jobpath
+            log["start"] = None
+            log["end"] = None
+            utilsparams3.write_active_monitorlog(self.bucket_name,instance.instance_id,log)
+            all_logs.append(log)
+        return all_logs
+
+
+
 
     def start_instance(self):
         """ Starts new instances if stopped. We write a special loop for this one because we only need a single 60 second pause for all the intances, not one for each in serial. Specialized certificate messages. """
@@ -835,6 +856,10 @@ def process_upload_dev(bucket_name, key,time):
         submission.parse_config()
         submission.acquire_instances()
         print('writing0')
+        submission.logger.write()
+
+        submission.log_jobs()
+        print("logging")
         submission.logger.write()
         ## NOTE: IN LAMBDA,  JSON BOOLEANS ARE CONVERTED TO STRING
         if os.environ["MONITOR"] == "true":

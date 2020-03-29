@@ -86,6 +86,20 @@ def extract_files(bucket_name,prefix,ext = None):
 
     return file_list 
 
+def write_active_monitorlog(bucketname,name,log):
+    """
+    Given the name of a bucket, writes an active monitoring log to that bucket.  
+    inputs:
+    bucketname (str): the name of the bucket that we are writing this log to. the path is already known.
+    name (str): the name of the instance we are setting up monitoring for. 
+    log (dict): the contents of the log file. 
+    """
+    bucket = s3_resource.Bucket(bucketname)
+    bucket.put_object(
+            Key = os.path.join("logs","active",name),
+            Body = bytes(json.dumps(log,indent = 2).encode('UTF-8'))
+            )
+
 class WriteMetric():
     """ Utility Class For Benchmarking performance """
 
