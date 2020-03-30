@@ -1,0 +1,11 @@
+{
+"instance-id":"id1",
+"instance-type":"some instance type",
+"spot":false,
+"price":0.4,
+"databucket":"epi-ncap-stable",
+"datapath":"examplegroup2EPIdevelop/inputs/datafile.txt",
+"jobpath":"job__epi-ncap-stable_444:444:444",
+"start":null,
+"end":null
+}

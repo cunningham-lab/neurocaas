@@ -140,7 +140,7 @@ class Submission_dev():
         group_name = self.data_name.split('/')[0]
         assert len(group_name) > 0; "group_name must exist."
         logfolder_path = "logs/{}/".format(group_name) 
-        full_reportpath = os.path.join(logfolder_path,"computereport")
+        full_reportpath = os.path.join(logfolder_path,"i-")
         ## now get all of the computereport filenames: 
         all_files = utilsparams3.ls_name(self.bucket_name,full_reportpath)
 

@@ -30,6 +30,26 @@ def put_instance_rule(instance_id):
             RoleArn =os.environ['cwrolearn'])
     return response,name
 
+## Create event rule for multiple instances. index by the job id instead. 
+def put_instances_rule(instances,jobid):
+    jobname = jobid.replace(":","_") ## TODO: Kind of messy. 
+    event_pattern = {
+            "source": ["aws.ec2"],
+            "detail-type": ["EC2 Instance State-change Notification"],
+            "detail":{
+                "state":["running","stopped",'shutting-down'],
+                "instance-id":[instance.instance_id for instance in instances]}}
+    ep_encoded = json.dumps(event_pattern)
+    name = "Monitor"+jobname
+    response = events.put_rule(
+            Name = name,
+            EventPattern = ep_encoded,
+            State = 'ENABLED',
+            Description = 'on-the-fly monitoring setup for job '+jobid, 
+            RoleArn =os.environ['cwrolearn'])
+    return response,name
+
+
 ## Create target: 
 def put_instance_target(rulename):
     response = events.put_targets(
