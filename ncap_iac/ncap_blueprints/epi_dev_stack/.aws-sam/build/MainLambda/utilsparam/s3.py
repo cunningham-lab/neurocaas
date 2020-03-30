@@ -61,6 +61,27 @@ def exists(bucket_name, path):
     objlist = [objname.key for objname in bucket.objects.filter(Prefix=path)]
     return len(objlist) >0
 
+def cp(bucket_name,pathfrom,pathto): 
+    """
+    Implement a copy function from [pathfrom] to [pathto] within the same bucket. 
+    inputs:
+    bucket_name (str): the name of the bucket 
+    pathfrom (str): the path from which to copy. Must include filename.
+    pathto (str): the path to which we will copy. Must include filename. 
+    """
+    #s3_resource.Object(bucket_name,pathto).copy_from(CopySource = pathfrom)
+    s3_resource.meta.client.copy({"Bucket":bucket_name,"Key":pathfrom},bucket_name,pathto)
+
+def mv(bucket_name,pathfrom,pathto):
+    """
+    Implements a move function from [pathfrom] to [pathto] within the same bucket. 
+    bucket_name (str): the name of the bucket 
+    pathfrom (str): the path from which to copy. Must include filename.
+    pathto (str): the path to which we will copy. Must include filename. 
+    """
+    cp(bucket_name,pathfrom,pathto)
+    s3_resource.Object(bucket_name,pathfrom).delete()
+
 def load_json(bucket_name, key):
     """ """
     file_object = s3_resource.Object(bucket_name, key)
@@ -85,6 +106,48 @@ def extract_files(bucket_name,prefix,ext = None):
         file_list = [obj.key for obj in objgen if obj.key[-1] != "/" and obj.key.split(".")[-1] == ext]
 
     return file_list 
+
+def write_active_monitorlog(bucketname,name,log):
+    """
+    Given the name of a bucket, writes an active monitoring log to that bucket.  
+    inputs:
+    bucketname (str): the name of the bucket that we are writing this log to. the path is already known.
+    name (str): the name of the instance we are setting up monitoring for. 
+    log (dict): the contents of the log file. 
+    """
+    bucket = s3_resource.Bucket(bucketname)
+    bucket.put_object(
+            Key = os.path.join("logs","active",name),
+            Body = bytes(json.dumps(log,indent = 2).encode('UTF-8'))
+            )
+
+def update_monitorlog(bucketname,name,status,time):
+    """
+    Called by the monitor_updater lambda function. Updates existing log files. 
+    """
+    bucket = s3_resource.Bucket(bucketname)
+    key = "logs/active/{}".format(name)
+    log_translate = {"running":"start","shutting-down":"end"}
+
+    try:
+        log = load_json(bucketname,key)
+        log[log_translate[status]] = time
+        bucket.put_object(
+                Key = os.path.join("logs","active",name),
+                Body = bytes(json.dumps(log,indent = 2).encode('UTF-8'))
+                )
+        
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "NoSuchKey":
+            print("log {} does not exist".format(key))
+            raise
+        else:
+            print("unhandled exception.")
+            raise
+
+    return log
+
+    
 
 class WriteMetric():
     """ Utility Class For Benchmarking performance """

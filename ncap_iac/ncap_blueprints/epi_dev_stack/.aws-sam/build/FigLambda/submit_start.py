@@ -10,6 +10,7 @@ try:
     from utilsparam import ssm as utilsparamssm
     from utilsparam import ec2 as utilsparamec2
     from utilsparam import events as utilsparamevents
+    from utilsparam import pricing as utilsparampricing
 except Exception as e:
     error = str(e)
     stacktrace = json.dumps(traceback.format_exc())
@@ -176,10 +177,23 @@ class Submission_dev():
             validjob = False
         return validjob
 
-
-
-        
-
+    def parse_config(self):
+        """
+        Parse the config file given for specific neurocaas parameters. In particular, the *duration* of the job, and the *dataset size* 
+        """
+        passed_config = utilsparams3.load_json(self.bucket_name,self.config_name)
+        try:
+            self.jobduration = passed_config["__duration__"]
+        except KeyError:
+            self.logger.append("parameter __duration__ not given, proceeding with standard compute launch.")
+            self.logger.write()
+            self.jobduration = None
+        try:
+            self.jobsize = passed_config["__dataset_size__"]
+        except KeyError:
+            self.logger.append("parameter __dataset_size__ is not given, proceeding with standard compute launch." )
+            self.logger.write()
+            self.jobsize = None
 
     def acquire_instance(self):
         """ Acquires & Starts New EC2 Instances Of The Requested Type & AMI. Specialized certificate messages.
@@ -188,8 +202,6 @@ class Submission_dev():
         instances = []
         nb_instances = len(self.filenames)
 
-        ## Check how much compute this group has already run. 
-        ##TODO we are right here. 
 
         ## Check how many instances are running. 
         active = utilsparamec2.count_active_instances(self.instance_type)
@@ -209,6 +221,67 @@ class Submission_dev():
             instances.append(instance)
         self.logger.append("Setting up {} EPI infrastructures from blueprint, please wait...".format(nb_instances))
         self.instances = instances
+
+    def acquire_instances(self):
+        """
+        Streamlines acquisition, setting up of multiple instances. Better exception handling when instances cannot be launched, and spot instances with defined duration when avaialble.   
+
+        """
+        nb_instances = len(self.filenames)
+
+        ## Check how many instances are running. 
+        active = utilsparamec2.count_active_instances(self.instance_type)
+        ## Ensure that we have enough bandwidth to support this request:
+        if active +nb_instances < int(os.environ['DEPLOY_LIMIT']):
+            pass
+        else:
+            self.logger.append("RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NeuroCAAS admin")
+            raise ValueError("Instance requests greater than pipeline bandwidth")
+        
+
+        instances = utilsparamec2.launch_new_instances(
+        instance_type=self.instance_type, 
+        ami=os.environ['AMI'],
+        logger=  self.logger,
+        number = nb_instances,
+        duration = self.jobduration
+        )
+
+        ## Even though we have a check in place, also check how many were launched:
+        try:
+            assert len(instances) > 0
+        except AssertionError:
+            logger.append("instances not launched. AWS capacity reached. Please contact NeuroCAAS admin.")
+            raise
+
+        self.instances = instances
+
+    def log_jobs(self):
+        """
+        Once instances are acquired, create logs that can be filled in as they run.  
+        """
+
+        all_logs = []
+        for instance in self.instances:
+            log = {}
+            log["instance-id"] = instance.instance_id 
+            log["instance-type"] = instance.instance_type
+            if instance.spot_instance_request_id:
+                log["spot"] = True
+            else:
+                log["spot"] = False
+            log["price"] = utilsparampricing.price_instance(instance)
+            log["databucket"] = self.bucket_name
+            log["datapath"] = self.data_name 
+            log["jobpath"] = self.jobpath
+            log["start"] = None
+            log["end"] = None
+            utilsparams3.write_active_monitorlog(self.bucket_name,instance.instance_id,log)
+            all_logs.append(log)
+        return all_logs
+
+
+
 
     def start_instance(self):
         """ Starts new instances if stopped. We write a special loop for this one because we only need a single 60 second pause for all the intances, not one for each in serial. Specialized certificate messages. """
@@ -269,13 +342,19 @@ class Submission_dev():
     ## Declare rules to monitor the states of these instances.  
     def put_instance_monitor_rule(self): 
         """ For multiple datasets."""
-        for instance in self.instances:
-            self.logger.append('Setting up monitoring on instance '+str(instance))
-            ## First declare a monitoring rule for this instance: 
-            ruledata,rulename = utilsparamevents.put_instance_rule(instance.instance_id)
-            arn = ruledata['RuleArn']
-            ## Now attach it to the given target
-            targetdata = utilsparamevents.put_instance_target(rulename) 
+        self.logger.append("Setting up monitoring on all instances.") 
+        ruledata,rulename = utilsparamevents.put_instances_rule(self.instances,self.jobname)
+        arn = ruledata['RuleArn']
+        ## Now attach it to the given target
+        targetdata = utilsparamevents.put_instance_target(rulename) 
+
+        #for instance in self.instances:
+        #    self.logger.append('Setting up monitoring on instance '+str(instance))
+        #    ## First declare a monitoring rule for this instance: 
+        #    ruledata,rulename = utilsparamevents.put_instance_rule(instance.instance_id)
+        #    arn = ruledata['RuleArn']
+        #    ## Now attach it to the given target
+        #    targetdata = utilsparamevents.put_instance_target(rulename) 
 
 ## Lambda code for deployment from other buckets. 
 class Submission_deploy():
@@ -774,8 +853,13 @@ def process_upload_dev(bucket_name, key,time):
     valid = submission.get_costmonitoring()
 
     if valid:
-        submission.acquire_instance()
+        submission.parse_config()
+        submission.acquire_instances()
         print('writing0')
+        submission.logger.write()
+
+        submission.log_jobs()
+        print("logging")
         submission.logger.write()
         ## NOTE: IN LAMBDA,  JSON BOOLEANS ARE CONVERTED TO STRING
         if os.environ["MONITOR"] == "true":

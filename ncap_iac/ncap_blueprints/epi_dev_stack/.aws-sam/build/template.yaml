@@ -100,8 +100,13 @@ Resources:
     Properties:
       CodeUri: FigLambda
       Description: Lambda Function logging start/stop for NCAP
+      Environment:
+        Variables:
+          BUCKET_NAME: epi-ncap-stable
+          INDIR: inputs
+          REGION: us-east-1
       Events: {}
-      Handler: log.eventshandler
+      Handler: log.monitor_updater
       MemorySize: 128
       Role: arn:aws:iam::739988523141:role/lambda_dataflow
       Runtime: python3.6
@@ -238,7 +243,7 @@ Resources:
           LAUNCH: true
           LOGDIR: logs
           LOGFILE: lambda_log.txt
-          MAXCOST: 0
+          MAXCOST: 100
           MISSING_CONFIG_ERROR: We need a config file to analyze data.
           MONITOR: true
           OUTDIR: results
@@ -258,7 +263,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '6f6a79d0f704c0eda58cd1dc11f6afe0e3502a88
+          versionid: '2cd9198c7a8c1089b83c61ef40e239a623fa02ad
 
             '
       Events:
@@ -347,7 +352,7 @@ Resources:
           LAUNCH: true
           LOGDIR: logs
           LOGFILE: lambda_log.txt
-          MAXCOST: 0
+          MAXCOST: 100
           MISSING_CONFIG_ERROR: We need a config file to analyze data.
           MONITOR: true
           OUTDIR: results
@@ -367,7 +372,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '6f6a79d0f704c0eda58cd1dc11f6afe0e3502a88
+          versionid: '2cd9198c7a8c1089b83c61ef40e239a623fa02ad
 
             '
       Handler: helper.handler_deldir
@@ -423,7 +428,7 @@ Resources:
           LAUNCH: true
           LOGDIR: logs
           LOGFILE: lambda_log.txt
-          MAXCOST: 0
+          MAXCOST: 100
           MISSING_CONFIG_ERROR: We need a config file to analyze data.
           MONITOR: true
           OUTDIR: results
@@ -443,7 +448,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '6f6a79d0f704c0eda58cd1dc11f6afe0e3502a88
+          versionid: '2cd9198c7a8c1089b83c61ef40e239a623fa02ad
 
             '
       Handler: helper.handler_mkdir

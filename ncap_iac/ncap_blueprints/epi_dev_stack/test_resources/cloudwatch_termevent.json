@@ -4,13 +4,13 @@
   "detail-type": "EC2 Instance State-change Notification",
   "source": "aws.ec2",
   "account": "111122223333",
-  "time": "2017-12-22T18:43:48Z",
+  "time": "2017-12-22T18:45:48Z",
   "region": "us-east-1",
   "resources": [
     "arn:aws:ec2:us-east-1:123456789012:instance/ i-1234567890abcdef0"
   ],
   "detail": {
-    "instance-id": " i-1234567890abcdef0",
-    "state": "running"
+    "instance-id": "i-1234567890abcdef0",
+    "state": "shutting-down"
   }
 }
