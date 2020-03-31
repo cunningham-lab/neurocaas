@@ -13,6 +13,9 @@ import secrets
 import os
 import boto3
 
+## Import global parameters: 
+with open("../global_params.json") as gp:
+    gpdict = json.load(gp)
 
 ## Function that takes in a pipeline config file. 
 
@@ -85,8 +88,17 @@ class NeuroCaaSTemplate(object):
         assert error == 0, 'please fix formatting errors in config file'
 
         ## Fill in some additional fields. 
-        keys = ['INDIR','OUTDIR','LOGDIR',"CONFIGDIR","SUBMITDIR"]
-        vals = ['inputs','results','logs',"configs","submissions"]
+        keys = ['INDIR',
+                'OUTDIR',
+                'LOGDIR',
+                "CONFIGDIR",
+                "SUBMITDIR"]
+        vals = [gpdict["input_directory"],
+                gpdict["output_directory"],
+                gpdict["log_directory"],
+                gpdict["config_directory"],
+                gpdict["submission_directory"]]
+        #vals = ['inputs','results','logs',"configs","submissions"]
         appenddict = {k:v for k,v in zip(keys,vals)}
         obj['Lambda']['LambdaConfig'].update(appenddict)
 
@@ -341,7 +353,7 @@ class DevTemplate(NeuroCaaSTemplate):
                                      ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
                                      BucketName = self.config['PipelineName'],
                                      Path = self.config['Lambda']['LambdaConfig']['LOGDIR']+'/',
-                                     DirName = "debug",
+                                     DirName = "debug"+self.config["PipelineName"],
                                      DependsOn = [bucketname,logfoldername])
         logdebugfolder = self.template.add_resource(logdebugmake)
 
@@ -501,11 +513,15 @@ class DevTemplate(NeuroCaaSTemplate):
         function = Function('FigLambda',
                 CodeUri = '../../protocols',
                 Runtime = 'python3.6',
-                Handler = 'log.eventshandler',
+                Handler = 'log.monitor_updater',
                 Description = 'Lambda Function logging start/stop for NCAP',
                 MemorySize = 128,
                 Timeout = 90,
                 Role = 'arn:aws:iam::739988523141:role/lambda_dataflow', ## TODO: Create this in template
+                Environment = Environment(Variables={"BUCKET_NAME":self.config["PipelineName"],
+                    "INDIR":self.config['Lambda']['LambdaConfig']['INDIR'],
+                    "REGION":self.config["REGION"]
+                    }),
                 Events= {})         
         figurelamb = self.template.add_resource(function)
         ## Attach specific permissions to invoke this lambda function as well. 
