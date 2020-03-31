@@ -7,10 +7,12 @@ import re
 import datetime
 import subprocess
 import json
+import pathlib
 
-
-## Import global parameters: 
-with open("../../global_params.json") as gp:
+## Get global parameters:
+utildir = pathlib.Path(__file__).parent.absolute()
+basedir = os.path.dirname(os.path.dirname(utildir))
+with open(os.path.join(basedir,"global_params.json")) as gp:
     gpdict = json.load(gp)
 
 ## New class to develop an ami.
