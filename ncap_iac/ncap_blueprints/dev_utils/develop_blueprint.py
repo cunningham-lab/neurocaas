@@ -8,6 +8,11 @@ import datetime
 import subprocess
 import json
 
+
+## Import global parameters: 
+with open("../../global_params.json") as gp:
+    gpdict = json.load(gp)
+
 ## New class to develop an ami.
 
 class NeuroCaaSAMI(object):
@@ -159,7 +164,7 @@ class NeuroCaaSAMI(object):
         command_unformatted = self.config['Lambda']['LambdaConfig']['COMMAND']
         ## Get relevant parameters:
         bucketname_test = self.config['PipelineName']
-        outdir = os.path.join(self.config['Lambda']['LambdaConfig']['OUTDIR'],"debugjob{}".format(str(datetime.datetime.now())))
+        outdir = os.path.join(gpdict["output_directory"],"debugjob{}".format(str(datetime.datetime.now())))
 
         ## Now get a represetative dataset:
         s3 = boto3.resource("s3")
@@ -210,7 +215,7 @@ class NeuroCaaSAMI(object):
         command_unformatted = self.config['Lambda']['LambdaConfig']['COMMAND']
         ## Get relevant parameters:
         bucketname_test = self.config['PipelineName']
-        outdir = os.path.join(self.config['Lambda']['LambdaConfig']['OUTDIR'],"debugjob{}".format(str(datetime.datetime.now())))
+        outdir = os.path.join(gpdict["output_directory"],"debugjob{}".format(str(datetime.datetime.now())))
 
         ## Now get a represetative dataset:
         s3 = boto3.resource("s3")
@@ -243,9 +248,9 @@ class NeuroCaaSAMI(object):
         ### The below mimics the structure of initialize_datasets_dev that is used by the lambda function. 
         template_dict = {"status":"INITIALIZING","reason":"NONE","stdout":"not given yet","stderr":"not given yet","input":data_filename,"instance":self.instance.instance_id,"command":commandid}
         dataset_basename = os.path.basename(data_filename)
-        dataset_dir = re.findall("(.+)/{}/".format(self.config['Lambda']['LambdaConfig']['INDIR']),data_filename)[0]
+        dataset_dir = re.findall("(.+)/{}/".format(gpdict["input_directory"]),data_filename)[0]
         status_name = "DATASET_NAME:{}_STATUS.txt".format(dataset_basename)
-        status_path = os.path.join(dataset_dir,outdir,self.config['Lambda']['LambdaConfig']['LOGDIR'],status_name)
+        status_path = os.path.join(dataset_dir,outdir,gpdict["log_directory"],status_name)
         statusobj = s3_resource.Object(self.config['PipelineName'],status_path)
         statusobj.put(Body = (bytes(json.dumps(template_dict).encode("UTF-8"))))
 
