@@ -25,6 +25,7 @@ class ConstructBlueprintBase():
         """
         os.remove(os.path.join(pathname,"stack_config_template.json"))
         os.rmdir(pathname)
+        subprocess.call(["git","rm",pathname])
 
 class ConstructProfileBase():
     """
@@ -197,7 +198,7 @@ class TestConfigureProfile(ConstructProfileBase):
         os.chdir("../")
         subprocess.call(["bash","user_profiles/iac_utils/configure.sh",self.pathname])
         captured = capfd.readouterr()
-        captured.err.split("\n")[3] == "AssertionError: Names must be alphanumeric"
+        assert captured.err.split("\n")[3] == "AssertionError: Names must be alphanumeric"
         os.chdir(currdir)
         
     def test_name_uppercase(self,pytestconfig,capfd):
@@ -211,5 +212,5 @@ class TestConfigureProfile(ConstructProfileBase):
         os.chdir("../")
         subprocess.call(["bash","user_profiles/iac_utils/configure.sh",self.pathname])
         captured = capfd.readouterr()
-        captured.err.split("\n")[3] == "AssertionError: Names must be alphanumeric"
+        assert captured.err.split("\n")[3] == "AssertionError: Names must be alphanumeric"
         os.chdir(currdir)
