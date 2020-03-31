@@ -1,7 +1,10 @@
 import os 
 import json
+import pathlib
 ## Get global parameters:
-with open("../../global_params.json") as gp:
+utildir = pathlib.Path(__file__).parent.absolute()
+basedir = os.path.dirname(os.path.dirname(utildir))
+with open(os.path.join(basedir,"global_params.json")) as gp:
     gpdict = json.load(gp)
 
 os.environ["REGION"] = "us-east-1"
