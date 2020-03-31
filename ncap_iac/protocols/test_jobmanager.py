@@ -19,8 +19,5 @@ def create_good_submission_args():
 class TestSubmission(): 
 
     def test_init_parse_submit(self,monkeypatch,create_good_submission_args):
-        monkeypatch.setenv("INDIR",'inputs')
-        monkeypatch.setenv("REGION",'us-east-1')
-        monkeypatch.setattr("utilsparam.s3.os.environ",{"REGION","us-east-1"})
         Submission_dev(*create_good_submission_args)
         

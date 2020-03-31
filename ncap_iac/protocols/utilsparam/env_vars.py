@@ -16,3 +16,6 @@ os.environ["cwrolearn"] = "arn:aws:iam::739988523141:role/caiman-ncap-CloudWatch
 os.environ["INDIR"]=gpdict["input_directory"]
 os.environ["OUTDIR"]=gpdict["output_directory"]
 os.environ["LOGDIR"]=gpdict["log_directory"]
+os.environ["CONFIGDIR"]=gpdict["config_directory"]
+os.environ["SUBMITDIR"]=gpdict["submission_directory"]
+os.environ["versionid"]="pytestingversion"

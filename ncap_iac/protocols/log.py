@@ -2,7 +2,30 @@ import os
 import re
 import json 
 import traceback 
-import utilsparam.s3 as utilsparams3
+
+try:
+    ## Works when running in lambda:
+    from utilsparam import s3 as utilsparams3
+    from utilsparam import ssm as utilsparamssm
+    from utilsparam import ec2 as utilsparamec2
+    from utilsparam import events as utilsparamevents
+    from utilsparam import pricing as utilsparampricing
+except Exception as e:
+    try:
+        ## Most likely this comes from pytest and relative imports. 
+        from ncap_iac.protocols.utilsparam import s3 as utilsparams3
+        from ncap_iac.protocols.utilsparam import ssm as utilsparamssm
+        from ncap_iac.protocols.utilsparam import ec2 as utilsparamec2
+        from ncap_iac.protocols.utilsparam import events as utilsparamevents
+        from ncap_iac.protocols.utilsparam import pricing as utilsparampricing
+    except Exception as e_supp:
+        error = str(e)+str(e_supp)
+        stacktrace = json.dumps(traceback.format_exc())
+        message = "Exception: " + error + "  Stacktrace: " + stacktrace
+        err = {"message": message}
+        print(err)
+
+
 
 ## Function to take output of cloudwatch events and write to figure file. 
 
@@ -43,6 +66,8 @@ def monitor_updater(event,context):
     bucket_name = os.environ["BUCKET_NAME"]
     
     if statechange in ["running","shutting-down"]:
+        print(logname)
+        print(utilsparams3.ls_name(bucket_name,"logs/active/"))
         log = utilsparams3.update_monitorlog(bucket_name,logname,statechange,time) 
         path_to_data = log["datapath"]
         groupname = re.findall('.+?(?=/'+os.environ["INDIR"]+')',path_to_data)[0]
