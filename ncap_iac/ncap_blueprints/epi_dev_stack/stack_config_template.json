@@ -1,48 +1,59 @@
 {
-    "PipelineName":"epi-ncap-stable",
-    "REGION":"us-east-1",
-    "STAGE":"develop",
-    "Lambda":{
-        "CodeUri":"../../protocols",
-        "Handler":"submit_start.handler_develop",
-        "PostCodeUri":"../../protocols",
-        "PostHandler":"postprocess.epipostprocess",
-        "Launch":true, 
-        "LambdaConfig":{
-            "AMI":"ami-07b90d36fb4860629",
+    "PipelineName": "epi-ncap-stable",
+    "REGION": "us-east-1",
+    "STAGE": "develop",
+    "Lambda": {
+        "CodeUri": "../../protocols",
+        "Handler": "submit_start.handler_develop",
+        "PostCodeUri": "../../protocols",
+        "PostHandler": "postprocess.epipostprocess",
+        "Launch": true,
+        "LambdaConfig": {
+            "AMI": "ami-03faf9674c2720aca",
             "INSTANCE_TYPE": "m5.xlarge",
             "REGION": "us-east-1",
-            "SECURITY_GROUPS":"launch-wizard-34",
-            "IAM_ROLE":"pmd-s3-ssm",
-            "KEY_NAME":"ta_testkey",
-            "WORKING_DIRECTORY":"~/bin",
-            "COMMAND":"ls; cd ../../../../home/ubuntu; ncap_remote/run_epi.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
-            "SHUTDOWN_BEHAVIOR":"terminate",
-            "CONFIG":"config.yaml",
-            "MISSING_CONFIG_ERROR":"We need a config file to analyze data.",
-            "EXECUTION_TIMEOUT":180,
-            "SSM_TIMEOUT":172000,
-            "LAUNCH":true,
-            "LOGFILE":"lambda_log.txt",
-            "DEPLOY_LIMIT":100,
-            "MAXCOST":100,
-            "MONITOR":true
+            "SECURITY_GROUPS": "launch-wizard-34",
+            "IAM_ROLE": "pmd-s3-ssm",
+            "KEY_NAME": "ta_testkey",
+            "WORKING_DIRECTORY": "~/bin",
+            "COMMAND": "ls; cd ../../../../home/ubuntu; ncap_remote/run_mock.sh \"{}\" \"{}\" \"{}\" \"{}\";",
+            "SHUTDOWN_BEHAVIOR": "terminate",
+            "CONFIG": "config.yaml",
+            "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+            "EXECUTION_TIMEOUT": 180,
+            "SSM_TIMEOUT": 172000,
+            "LAUNCH": true,
+            "LOGFILE": "lambda_log.txt",
+            "DEPLOY_LIMIT": 100,
+            "MAXCOST": 100,
+            "MONITOR": true,
+            "OUTDIR": "results",
+            "INDIR": "inputs",
+            "LOGDIR": "logs"
         }
     },
-    "UXData":{
-    "Affiliates":[
-        {
-            "AffiliateName":"cunninghamlabEPIdevelop",
-            "UserNames":["jpccosyne","srbcosyne","tacosyne"],
-            "UserInput":true,
-            "ContactEmail":"tgabe94@gmail.com"
-        },
-        {
-            "AffiliateName":"examplegroup2EPIdevelop",
-            "UserNames":["jpccosyne","srbcosyne","tacosyne"],
-            "UserInput":true,
-            "ContactEmail":"tgabe94@gmail.com"
-        }
-    ]
+    "UXData": {
+        "Affiliates": [
+            {
+                "AffiliateName": "cunninghamlabEPIdevelop",
+                "UserNames": [
+                    "jpccosyne",
+                    "srbcosyne",
+                    "tacosyne"
+                ],
+                "UserInput": true,
+                "ContactEmail": "tgabe94@gmail.com"
+            },
+            {
+                "AffiliateName": "examplegroup2EPIdevelop",
+                "UserNames": [
+                    "jpccosyne",
+                    "srbcosyne",
+                    "tacosyne"
+                ],
+                "UserInput": true,
+                "ContactEmail": "tgabe94@gmail.com"
+            }
+        ]
     }
 }
