@@ -2,6 +2,7 @@ import os
 import re
 import json 
 import traceback 
+import time as timepkg
 
 try:
     ## Works when running in lambda:
@@ -19,7 +20,7 @@ except Exception as e:
         from ncap_iac.protocols.utilsparam import events as utilsparamevents
         from ncap_iac.protocols.utilsparam import pricing as utilsparampricing
     except Exception as e_supp:
-        error = str(e)+str(e_supp)
+        error = "error from original import: {}; error from second import: {}".format(str(e),str(e_supp))
         stacktrace = json.dumps(traceback.format_exc())
         message = "Exception: " + error + "  Stacktrace: " + stacktrace
         err = {"message": message}
@@ -70,13 +71,26 @@ def monitor_updater(event,context):
         print(utilsparams3.ls_name(bucket_name,"logs/active/"))
         log = utilsparams3.update_monitorlog(bucket_name,logname,statechange,time) 
         path_to_data = log["datapath"]
+        jobname = os.path.basename(log["jobpath"]).replace(":","_") ## Monitoring names cannot have 
         groupname = re.findall('.+?(?=/'+os.environ["INDIR"]+')',path_to_data)[0]
-        print(groupname,"groupname")
         ## Log name for the group that make this job: 
         current_job_log = os.path.join("logs","active",logname)
         completed_job_log =  os.path.join("logs",groupname,logname)
         if statechange == "shutting-down":
             utilsparams3.mv(bucket_name,current_job_log,completed_job_log)
+            timepkg.sleep(5)
+            ## Now check if we can delete this rule:
+            rulename = "Monitor{}".format(jobname)
+            instances_under_rule = utilsparamevents.get_monitored_instances(rulename) 
+            condition = [utilsparams3.exists(bucket_name,os.path.join("logs","active","{}.json".format(inst))) for inst in instances_under_rule]
+            ## Delete the rule
+            if not any(condition):
+                ## get the target:
+                response = utilsparamevents.full_delete_rule(rulename)
+                
+            else:
+                pass
+
     else:
         print("unhandled state change. quitting")
         raise ValueError("statechange {} not expected".format(statechange))
