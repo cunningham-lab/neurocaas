@@ -10,7 +10,7 @@
     "arn:aws:ec2:us-east-1:123456789012:instance/ i-1234567890abcdef0"
   ],
   "detail": {
-    "instance-id": " i-1234567890abcdef0",
-    "state": "terminated"
+    "instance-id": "i-1234567890abcdef0",
+    "state": "shutting-down"
   }
 }

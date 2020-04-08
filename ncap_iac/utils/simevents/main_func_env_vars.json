@@ -15,5 +15,10 @@
         "cwrolearn":"arn:aws:iam::739988523141:role/caiman-ncap-CloudWatchBusRole-1RUXFZTS0DOK0",
         "figlambarn":"arn:aws:lambda:us-east-1:739988523141:function:caiman-ncap-FigLambda-PHVQWETPZ0IY",
         "figlambid":"caiman-ncap-FigLambda-PHVQWETPZ0IY"
+    },
+    "FigLambda":{
+        "BUCKET_NAME":"epi-ncap-stable",
+        "REGION": "us-east0",
+        "INDIR":"inputs"
     }
 }

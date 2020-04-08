@@ -24,7 +24,7 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::ctnfrontendexample2"
+        "arn:aws:s3:::epi-ncap-stable"
       ],
       "Condition": {
         "StringEquals": {
@@ -33,10 +33,13 @@
             "examplegroup2/",
             "examplegroup2/inputs",
             "examplegroup2/results",
-            "examplegroup2/logs",
+            "logs",
+            "examplegroup2/submissions",
+            "examplegroup2/configs",
             "examplegroup2/inputs/",
             "examplegroup2/results/",
-            "examplegroup2/logs/"
+            "examplegroup2/submissions/",
+            "examplegroup2/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -49,14 +52,15 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::ctnfrontendexample2"
+        "arn:aws:s3:::epi-ncap-stable"
       ],
       "Condition": {
         "StringLike": {
           "s3:prefix": [
             "examplegroup2/inputs/*",
             "examplegroup2/results/*",
-            "examplegroup2/logs/*"
+            "examplegroup2/configs/*",
+            "examplegroup2/submissions/*"
           ]
         }
       }
@@ -69,7 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::ctnfrontendexample2/examplegroup2/inputs/*"
+        "arn:aws:s3:::epi-ncap-stable/examplegroup2/inputs/*",
+        "arn:aws:s3:::epi-ncap-stable/examplegroup2/configs/*",
+        "arn:aws:s3:::epi-ncap-stable/examplegroup2/submissions/*"
       ]
     },
     {
@@ -80,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::ctnfrontendexample2/examplegroup2/results/*",
-        "arn:aws:s3:::ctnfrontendexample2/examplegroup2/logs/*"
+        "arn:aws:s3:::epi-ncap-stable/examplegroup2/results/*",
+        "arn:aws:s3:::epi-ncap-stable/examplegroup2/configs/*"
       ]
     }
   ]
