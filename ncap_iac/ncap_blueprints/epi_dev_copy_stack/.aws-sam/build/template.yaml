@@ -229,7 +229,7 @@ Resources:
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
-          AMI: ami-03faf9674c2720aca
+          AMI: ami-0530d6b24ef36874d
           COMMAND: ls; cd /home/ubuntu; ncap_remote/run_mock.sh "{}" "{}" "{}" "{}";
             . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
@@ -263,7 +263,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: 'b654cc20ea6abc773de495eb87ffb8ea406b1262
+          versionid: 'cfeee0f6eb488f48bcf257453b14b1ab28985aec
 
             '
       Events:
@@ -338,7 +338,7 @@ Resources:
       Description: Deletes Objects from S3
       Environment:
         Variables:
-          AMI: ami-03faf9674c2720aca
+          AMI: ami-0530d6b24ef36874d
           COMMAND: ls; cd /home/ubuntu; ncap_remote/run_mock.sh "{}" "{}" "{}" "{}";
             . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
@@ -372,7 +372,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: 'b654cc20ea6abc773de495eb87ffb8ea406b1262
+          versionid: 'cfeee0f6eb488f48bcf257453b14b1ab28985aec
 
             '
       Handler: helper.handler_deldir
@@ -414,7 +414,7 @@ Resources:
       Description: Puts Objects in S3
       Environment:
         Variables:
-          AMI: ami-03faf9674c2720aca
+          AMI: ami-0530d6b24ef36874d
           COMMAND: ls; cd /home/ubuntu; ncap_remote/run_mock.sh "{}" "{}" "{}" "{}";
             . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
@@ -448,7 +448,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: 'b654cc20ea6abc773de495eb87ffb8ea406b1262
+          versionid: 'cfeee0f6eb488f48bcf257453b14b1ab28985aec
 
             '
       Handler: helper.handler_mkdir
