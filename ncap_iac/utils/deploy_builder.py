@@ -147,7 +147,7 @@ class PipelineTemplate(NCAPTemplate):
         function = Function('FigLambda',
                 CodeUri = '../../protocols',
                 Runtime = 'python3.6',
-                Handler = 'log.eventshandler',
+                Handler = 'log.monitor_updater',
                 Description = 'Lambda Function logging start/stop for NCAP',
                 MemorySize = 128,
                 Timeout = 90,

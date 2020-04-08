@@ -2,7 +2,6 @@
     "PipelineName":"bucket name. must be lowercase alphanumeric (dashes okay)",
     "REGION":"AWS region code (example us-east-1)",
     "STAGE":"develop or deploy",
-    "MAXCOST":"maximum per user allowed cost (integer) before lockout",
     "Lambda":{
         "CodeUri":"../lambda_repo",
         "Handler":"submit_start.handler_log_dev",
@@ -24,6 +23,7 @@
             "LAUNCH":true,
             "LOGFILE":"lambda_log.txt",
             "DEPLOY_LIMIT":100,
+            "MAXCOST":"maximum per user allowed cost (integer) before lockout",
             "MONITOR":false
         }
     },
