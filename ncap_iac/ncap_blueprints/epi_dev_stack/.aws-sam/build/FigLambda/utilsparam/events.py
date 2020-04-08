@@ -1,6 +1,7 @@
 import boto3 
 import json
 import os
+import ast
 
 
 ## Declare resources and clients: 
@@ -59,4 +60,27 @@ def put_instance_target(rulename):
                     'Arn':os.environ['figlambarn'],
                     'Id':os.environ['figlambid']}])
     return response
+
+## Get the instances monitored by this rule: 
+def get_monitored_instances(rulename):
+    instances = ast.literal_eval(events.describe_rule(Name=rulename)["EventPattern"])["detail"]["instance-id"]
+    return instances
+
+def get_and_remove_target(rulename):
+    """
+    Returns the target id. 
+    """
+    targid = events.list_targets_by_rule(Rule=rulename)["Targets"][0]["Id"]
+    response = events.remove_targets(Rule=rulename,Ids =[targid])
+    return response
+
+def full_delete_rule(rulename):
+    """
+    Normally, to remove a rule you must first remove all its targets. This function does all steps simultaneously.  
+    """
+    targresponse = get_and_remove_target(rulename)
+    deleteresponse = events.delete_rule(Name= rulename)
+    return [targresponse,deleteresponse]
+
+
 

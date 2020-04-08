@@ -128,17 +128,35 @@ def launch_new_instances(instance_type, ami, logger, number, duration = None):
                     }
                 
                 }
-        instances = ec2_resource.create_instances(
-            ImageId=ami,
-            InstanceType=instance_type,
-            IamInstanceProfile={'Name': os.environ['IAM_ROLE']},
-            MinCount=number,
-            MaxCount=number,
-            KeyName=os.environ['KEY_NAME'],
-            SecurityGroups=[os.environ['SECURITY_GROUPS']],
-            InstanceInitiatedShutdownBehavior=os.environ['SHUTDOWN_BEHAVIOR'],
-            InstanceMarketOptions = marketoptions
-        )
+        try:
+            instances = ec2_resource.create_instances(
+                ImageId=ami,
+                InstanceType=instance_type,
+                IamInstanceProfile={'Name': os.environ['IAM_ROLE']},
+                MinCount=number,
+                MaxCount=number,
+                KeyName=os.environ['KEY_NAME'],
+                SecurityGroups=[os.environ['SECURITY_GROUPS']],
+                InstanceInitiatedShutdownBehavior=os.environ['SHUTDOWN_BEHAVIOR'],
+                InstanceMarketOptions = marketoptions
+            )
+        except botocore.exceptions.ClientError as e:
+            if e.response["Error"]["Code"] == "InsufficientInstanceCapacity":
+                logger.append("save not available (beyond available aws capacity). Launching standard instance.")
+                logger.write()
+                instances = ec2_resource.create_instances(
+                    ImageId=ami,
+                    InstanceType=instance_type,
+                    IamInstanceProfile={'Name': os.environ['IAM_ROLE']},
+                    MinCount=number,
+                    MaxCount=number,
+                    KeyName=os.environ['KEY_NAME'],
+                    SecurityGroups=[os.environ['SECURITY_GROUPS']],
+                    InstanceInitiatedShutdownBehavior=os.environ['SHUTDOWN_BEHAVIOR']
+                )
+            else:
+                logger.append("unhandled error while launching save instances. contact admin.")
+                raise ValueError("Unhandled exception")
 
     [logger.append("New instance {} created!".format(instances[i])) for i in range(number)]
     logger.write()

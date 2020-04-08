@@ -229,16 +229,16 @@ Resources:
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
-          AMI: ami-07b90d36fb4860629
-          COMMAND: ls; cd ../../../../home/ubuntu; ncap_remote/run_epi.sh "{}" "{}"
-            "{}" "{}"; . ncap_remote/ncap_utils/workflow.sh; cleanup
+          AMI: ami-0530d6b24ef36874d
+          COMMAND: ls; cd /home/ubuntu; ncap_remote/run_mock.sh "{}" "{}" "{}" "{}";
+            . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
           DEPLOY_LIMIT: 100
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: pmd-s3-ssm
           INDIR: inputs
-          INSTANCE_TYPE: m5.xlarge
+          INSTANCE_TYPE: t2.micro
           KEY_NAME: ta_testkey
           LAUNCH: true
           LOGDIR: logs
@@ -263,7 +263,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '2cd9198c7a8c1089b83c61ef40e239a623fa02ad
+          versionid: 'b06a8dc22fbb91c7159ec0186ce7ee880f176f31
 
             '
       Events:
@@ -338,16 +338,16 @@ Resources:
       Description: Deletes Objects from S3
       Environment:
         Variables:
-          AMI: ami-07b90d36fb4860629
-          COMMAND: ls; cd ../../../../home/ubuntu; ncap_remote/run_epi.sh "{}" "{}"
-            "{}" "{}"; . ncap_remote/ncap_utils/workflow.sh; cleanup
+          AMI: ami-0530d6b24ef36874d
+          COMMAND: ls; cd /home/ubuntu; ncap_remote/run_mock.sh "{}" "{}" "{}" "{}";
+            . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
           DEPLOY_LIMIT: 100
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: pmd-s3-ssm
           INDIR: inputs
-          INSTANCE_TYPE: m5.xlarge
+          INSTANCE_TYPE: t2.micro
           KEY_NAME: ta_testkey
           LAUNCH: true
           LOGDIR: logs
@@ -372,7 +372,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '2cd9198c7a8c1089b83c61ef40e239a623fa02ad
+          versionid: 'b06a8dc22fbb91c7159ec0186ce7ee880f176f31
 
             '
       Handler: helper.handler_deldir
@@ -414,16 +414,16 @@ Resources:
       Description: Puts Objects in S3
       Environment:
         Variables:
-          AMI: ami-07b90d36fb4860629
-          COMMAND: ls; cd ../../../../home/ubuntu; ncap_remote/run_epi.sh "{}" "{}"
-            "{}" "{}"; . ncap_remote/ncap_utils/workflow.sh; cleanup
+          AMI: ami-0530d6b24ef36874d
+          COMMAND: ls; cd /home/ubuntu; ncap_remote/run_mock.sh "{}" "{}" "{}" "{}";
+            . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
           DEPLOY_LIMIT: 100
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: pmd-s3-ssm
           INDIR: inputs
-          INSTANCE_TYPE: m5.xlarge
+          INSTANCE_TYPE: t2.micro
           KEY_NAME: ta_testkey
           LAUNCH: true
           LOGDIR: logs
@@ -448,7 +448,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '2cd9198c7a8c1089b83c61ef40e239a623fa02ad
+          versionid: 'b06a8dc22fbb91c7159ec0186ce7ee880f176f31
 
             '
       Handler: helper.handler_mkdir

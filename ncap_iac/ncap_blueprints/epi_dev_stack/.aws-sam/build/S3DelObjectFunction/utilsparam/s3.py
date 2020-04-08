@@ -127,6 +127,7 @@ def update_monitorlog(bucketname,name,status,time):
     """
     bucket = s3_resource.Bucket(bucketname)
     key = "logs/active/{}".format(name)
+    print(key,"key")
     log_translate = {"running":"start","shutting-down":"end"}
 
     try:
