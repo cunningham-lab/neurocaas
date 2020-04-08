@@ -4,19 +4,27 @@ import traceback
 import re
 from datetime import datetime
 
-
 try:
+    ## Works when running in lambda:
     from utilsparam import s3 as utilsparams3
     from utilsparam import ssm as utilsparamssm
     from utilsparam import ec2 as utilsparamec2
     from utilsparam import events as utilsparamevents
     from utilsparam import pricing as utilsparampricing
 except Exception as e:
-    error = str(e)
-    stacktrace = json.dumps(traceback.format_exc())
-    message = "Exception: " + error + "  Stacktrace: " + stacktrace
-    err = {"message": message}
-    print(err)
+    try:
+        ## Most likely this comes from pytest and relative imports. 
+        from ncap_iac.protocols.utilsparam import s3 as utilsparams3
+        from ncap_iac.protocols.utilsparam import ssm as utilsparamssm
+        from ncap_iac.protocols.utilsparam import ec2 as utilsparamec2
+        from ncap_iac.protocols.utilsparam import events as utilsparamevents
+        from ncap_iac.protocols.utilsparam import pricing as utilsparampricing
+    except Exception as e_supp:
+        error = str(e)+str(e_supp)
+        stacktrace = json.dumps(traceback.format_exc())
+        message = "Exception: " + error + "  Stacktrace: " + stacktrace
+        err = {"message": message}
+        print(err)
 
 
 def respond(err, res=None):
@@ -140,7 +148,7 @@ class Submission_dev():
         group_name = self.data_name.split('/')[0]
         assert len(group_name) > 0; "group_name must exist."
         logfolder_path = "logs/{}/".format(group_name) 
-        full_reportpath = os.path.join(logfolder_path,"computereport")
+        full_reportpath = os.path.join(logfolder_path,"i-")
         ## now get all of the computereport filenames: 
         all_files = utilsparams3.ls_name(self.bucket_name,full_reportpath)
 
@@ -149,8 +157,7 @@ class Submission_dev():
         cost = 0
         ## now calculate the cost:
         for jobfile in all_files:
-            instanceid = jobfile.split(full_reportpath+"_")[1].split(".json")[0]
-            print(instanceid)
+            instanceid = jobfile.split(full_reportpath)[1].split(".json")[0]
             jobdata = utilsparams3.load_json(self.bucket_name,jobfile)
             price = jobdata["price"]
             start = jobdata["start"]
@@ -182,6 +189,7 @@ class Submission_dev():
         Parse the config file given for specific neurocaas parameters. In particular, the *duration* of the job, and the *dataset size* 
         """
         passed_config = utilsparams3.load_json(self.bucket_name,self.config_name)
+        print(passed_config,"passedconfig")
         try:
             self.jobduration = passed_config["__duration__"]
         except KeyError:
@@ -265,6 +273,7 @@ class Submission_dev():
         for instance in self.instances:
             log = {}
             log["instance-id"] = instance.instance_id 
+            name = "{}.json".format(log["instance-id"])
             log["instance-type"] = instance.instance_type
             if instance.spot_instance_request_id:
                 log["spot"] = True
@@ -276,7 +285,7 @@ class Submission_dev():
             log["jobpath"] = self.jobpath
             log["start"] = None
             log["end"] = None
-            utilsparams3.write_active_monitorlog(self.bucket_name,instance.instance_id,log)
+            utilsparams3.write_active_monitorlog(self.bucket_name,name,log)
             all_logs.append(log)
         return all_logs
 
