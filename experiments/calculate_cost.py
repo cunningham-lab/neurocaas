@@ -1025,7 +1025,7 @@ def plot_humans(pipeline,pricing = "Orig",compute = True):
             cost = 1499+1000 # for hardware + storage  
             ## Factor in support cost per year (from AWS TCO calculator) server maintenance, storage maintenance, : 
             support = [225+4+135]*5
-            maxval = 12 
+            maxval = 7 
         if pricing == "Hard":
             ## Also have a baseline cost for computer: 
             cost = 1539
@@ -1173,7 +1173,7 @@ def plot_humans(pipeline,pricing = "Orig",compute = True):
     lower = [0.755,0.400,0.045]
 
     if pipeline == "CaImAn":
-        legend = ax.legend(prop = {'size': 49},title = 'Hardware Lifetime',loc = "lower right")
+        legend = ax.legend(prop = {'size': 47},title = 'Hardware Lifetime',loc = "lower right")
         legend.get_title().set_fontsize('50')
     else:
         pass
