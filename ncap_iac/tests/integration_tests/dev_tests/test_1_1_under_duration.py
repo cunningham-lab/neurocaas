@@ -15,6 +15,8 @@ with open(os.path.join(basedir,"global_params.json")) as gp:
 def test_standard_case():
     s3_client = boto3.client("s3")
     s3_resource = boto3.resource("s3")
+    ec2_client = boto3.client("ec2")
+    waiter = ec2_client.get_waiter("instance_terminated")
     #from ..test_resources.set_remote import *
 
     test_path = "../test_resources"
@@ -71,6 +73,7 @@ def test_standard_case():
         waittime = int(cfdict["wait"])
 
     time.sleep(waittime+200)
+
     ## check that the appropriate results folder exists. 
     resultlogpath = os.path.join(groupname,"results","job__epi-ncap-stable_{}".format(submit["timestamp"]),"logs")
     try:
@@ -89,8 +92,9 @@ def test_standard_case():
         dsdict = json.loads(raw_content)
         assert dsdict["status"] in ["SUCCESS","INITIALIZING"]
         instanceid = dsdict["instance"]
+        waiter.wait(InstanceIds=[instanceid])
         ## Now go get the corresponding log file:
-        print(instanceid)
+        print(os.path.join("logs",groupname,"{}.json".format(instanceid)))
         log_object = s3_resource.Object(bucketname,os.path.join("logs",groupname,"{}.json".format(instanceid)))
         log_content = log_object.get()['Body'].read().decode('utf-8')
         logdict = json.loads(log_content)

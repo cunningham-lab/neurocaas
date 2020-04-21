@@ -162,7 +162,7 @@
                 "Events": {},
                 "Handler": "log.monitor_updater",
                 "MemorySize": 128,
-                "Role": "arn:aws:iam::739988523141:role/lambda_dataflow",
+                "Role": "arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ",
                 "Runtime": "python3.6",
                 "Timeout": 90
             },
@@ -341,10 +341,10 @@
                         "CONFIGDIR": "configs",
                         "DEPLOY_LIMIT": 100,
                         "EXECUTION_TIMEOUT": 180,
-                        "IAM_ROLE": "pmd-s3-ssm",
+                        "IAM_ROLE": "SSMRole",
                         "INDIR": "inputs",
                         "INSTANCE_TYPE": "t2.micro",
-                        "KEY_NAME": "ta_testkey",
+                        "KEY_NAME": "testkeystack-custom-dev-key-pair",
                         "LAUNCH": true,
                         "LOGDIR": "logs",
                         "LOGFILE": "lambda_log.txt",
@@ -353,7 +353,7 @@
                         "MONITOR": true,
                         "OUTDIR": "results",
                         "REGION": "us-east-1",
-                        "SECURITY_GROUPS": "launch-wizard-34",
+                        "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
                         "SHUTDOWN_BEHAVIOR": "terminate",
                         "SSM_TIMEOUT": 172000,
                         "SUBMITDIR": "submissions",
@@ -373,7 +373,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "b06a8dc22fbb91c7159ec0186ce7ee880f176f31\n"
+                        "versionid": "a48eee5ef7cc7315c0b342850bf75b4322150733\n"
                     }
                 },
                 "Events": {
@@ -430,7 +430,7 @@
                 },
                 "Handler": "submit_start.handler_develop",
                 "MemorySize": 128,
-                "Role": "arn:aws:iam::739988523141:role/lambda_dataflow",
+                "Role": "arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ",
                 "Runtime": "python3.6",
                 "Timeout": 180
             },
@@ -491,10 +491,10 @@
                         "CONFIGDIR": "configs",
                         "DEPLOY_LIMIT": 100,
                         "EXECUTION_TIMEOUT": 180,
-                        "IAM_ROLE": "pmd-s3-ssm",
+                        "IAM_ROLE": "SSMRole",
                         "INDIR": "inputs",
                         "INSTANCE_TYPE": "t2.micro",
-                        "KEY_NAME": "ta_testkey",
+                        "KEY_NAME": "testkeystack-custom-dev-key-pair",
                         "LAUNCH": true,
                         "LOGDIR": "logs",
                         "LOGFILE": "lambda_log.txt",
@@ -503,7 +503,7 @@
                         "MONITOR": true,
                         "OUTDIR": "results",
                         "REGION": "us-east-1",
-                        "SECURITY_GROUPS": "launch-wizard-34",
+                        "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
                         "SHUTDOWN_BEHAVIOR": "terminate",
                         "SSM_TIMEOUT": 172000,
                         "SUBMITDIR": "submissions",
@@ -523,7 +523,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "b06a8dc22fbb91c7159ec0186ce7ee880f176f31\n"
+                        "versionid": "a48eee5ef7cc7315c0b342850bf75b4322150733\n"
                     }
                 },
                 "Handler": "helper.handler_deldir",
@@ -595,10 +595,10 @@
                         "CONFIGDIR": "configs",
                         "DEPLOY_LIMIT": 100,
                         "EXECUTION_TIMEOUT": 180,
-                        "IAM_ROLE": "pmd-s3-ssm",
+                        "IAM_ROLE": "SSMRole",
                         "INDIR": "inputs",
                         "INSTANCE_TYPE": "t2.micro",
-                        "KEY_NAME": "ta_testkey",
+                        "KEY_NAME": "testkeystack-custom-dev-key-pair",
                         "LAUNCH": true,
                         "LOGDIR": "logs",
                         "LOGFILE": "lambda_log.txt",
@@ -607,7 +607,7 @@
                         "MONITOR": true,
                         "OUTDIR": "results",
                         "REGION": "us-east-1",
-                        "SECURITY_GROUPS": "launch-wizard-34",
+                        "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
                         "SHUTDOWN_BEHAVIOR": "terminate",
                         "SSM_TIMEOUT": 172000,
                         "SUBMITDIR": "submissions",
@@ -627,7 +627,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "b06a8dc22fbb91c7159ec0186ce7ee880f176f31\n"
+                        "versionid": "a48eee5ef7cc7315c0b342850bf75b4322150733\n"
                     }
                 },
                 "Handler": "helper.handler_mkdir",

@@ -162,11 +162,15 @@ class Submission_dev():
             price = jobdata["price"]
             start = jobdata["start"]
             end = jobdata["end"]
-            starttime = datetime.strptime(start, "%Y-%m-%dT%H:%M:%SZ")
-            endtime = datetime.strptime(end, "%Y-%m-%dT%H:%M:%SZ")
-            diff = endtime-starttime
-            duration = abs(diff.seconds)
-            cost = price*duration/3600.
+            try:
+                starttime = datetime.strptime(start, "%Y-%m-%dT%H:%M:%SZ")
+                endtime = datetime.strptime(end, "%Y-%m-%dT%H:%M:%SZ")
+                diff = endtime-starttime
+                duration = abs(diff.seconds)
+                cost = price*duration/3600.
+            except TypeError:
+                ## In rare cases it seems one or the other of these things don't actually have entries. This is a problem. for now, charge for the hour: 
+                cost = price
             cost+= cost
         
         ## Now compare with budget:
@@ -202,33 +206,6 @@ class Submission_dev():
             self.logger.append("parameter __dataset_size__ is not given, proceeding with standard compute launch." )
             self.logger.write()
             self.jobsize = None
-
-    def acquire_instance(self):
-        """ Acquires & Starts New EC2 Instances Of The Requested Type & AMI. Specialized certificate messages.
-        This version of the code checks against two constraints: how many jobs the user has run, and how many instances are currently running. 
-        """
-        instances = []
-        nb_instances = len(self.filenames)
-
-
-        ## Check how many instances are running. 
-        active = utilsparamec2.count_active_instances(self.instance_type)
-        ## Ensure that we have enough bandwidth to support this request:
-        if active +nb_instances < int(os.environ['DEPLOY_LIMIT']):
-            pass
-        else:
-            self.logger.append("RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NCAP administrator.")
-        
-
-        for i in range(nb_instances):
-            instance = utilsparamec2.launch_new_instance(
-            instance_type=self.instance_type, 
-            ami=os.environ['AMI'],
-            logger= []# self.logger
-            )
-            instances.append(instance)
-        self.logger.append("Setting up {} EPI infrastructures from blueprint, please wait...".format(nb_instances))
-        self.instances = instances
 
     def acquire_instances(self):
         """

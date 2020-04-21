@@ -162,7 +162,7 @@
                 "Events": {},
                 "Handler": "log.monitor_updater",
                 "MemorySize": 128,
-                "Role": "arn:aws:iam::739988523141:role/lambda_dataflow",
+                "Role": "arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ",
                 "Runtime": "python3.6",
                 "Timeout": 90
             },
@@ -373,7 +373,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "cfeee0f6eb488f48bcf257453b14b1ab28985aec\n"
+                        "versionid": "a48eee5ef7cc7315c0b342850bf75b4322150733\n"
                     }
                 },
                 "Events": {
@@ -430,7 +430,7 @@
                 },
                 "Handler": "submit_start.handler_develop",
                 "MemorySize": 128,
-                "Role": "arn:aws:iam::739988523141:role/lambda_dataflow",
+                "Role": "arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ",
                 "Runtime": "python3.6",
                 "Timeout": 180
             },
@@ -523,7 +523,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "cfeee0f6eb488f48bcf257453b14b1ab28985aec\n"
+                        "versionid": "a48eee5ef7cc7315c0b342850bf75b4322150733\n"
                     }
                 },
                 "Handler": "helper.handler_deldir",
@@ -627,7 +627,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "cfeee0f6eb488f48bcf257453b14b1ab28985aec\n"
+                        "versionid": "a48eee5ef7cc7315c0b342850bf75b4322150733\n"
                     }
                 },
                 "Handler": "helper.handler_mkdir",

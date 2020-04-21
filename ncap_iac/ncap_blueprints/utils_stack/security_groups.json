@@ -1,0 +1,26 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {
+        "SecurityGroupDev":{
+            "Type":"AWS::EC2::SecurityGroup",
+            "Properties":{
+                "GroupDescription":"Security Group with ssh enabled for developers",
+                "SecurityGroupIngress":[
+                    {
+                        "Description":"Ingress rule via ssh.",
+                        "IpProtocol":"tcp",
+                        "FromPort":22,
+                        "ToPort":22,
+                        "CidrIp":"0.0.0.0/0"
+                    }                
+                ]
+            }
+        },
+        "SecurityGroupDeploy":{
+            "Type":"AWS::EC2::SecurityGroup",
+            "Properties":{
+                "GroupDescription":"Security Group with only outbound rules (accessible only through ssm)"
+            }
+        }
+    }
+}
