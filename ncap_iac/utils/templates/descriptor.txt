@@ -1,0 +1,2 @@
+Automation document for the volume mount code is from: 
+https://stackoverflow.com/questions/57208761/aws-boto3-wait-until-volume-is-attached-to-ec2-instance
