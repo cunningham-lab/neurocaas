@@ -10,6 +10,8 @@ import botocore
 
 # Boto3 Resources & Clients
 ec2_resource = boto3.resource('ec2')
+ec2_client = boto3.client('ec2')
+volume_available_waiter = ec2_client.get_waiter('volume_available')
 
 def get_instance(instanceid,logger):
     """ Gets the instance given an instance id.  """
@@ -80,7 +82,7 @@ def launch_new_instance(instance_type, ami, logger):
     logger.append("New instance {} created!".format(instances[0]))
     return instances[0]
 
-def launch_new_instances(instance_type, ami, logger, number, duration = None):
+def launch_new_instances(instance_type, ami, logger, number, add_size, duration = None):
     """ Script To Launch New Instance From Image
     If duration parameter is specified, will launch the appropriate cost instance
     If number parameter is specified, will try to launch the requested number of instances. If not available, then will return none. 
@@ -103,12 +105,29 @@ def launch_new_instances(instance_type, ami, logger, number, duration = None):
         logger.write()
         raise ValueError("duration not valid.")
 
+    ## Now parse the dataset size and figure if we should diverge from default behavior. 
+
+    #TODO: add something here. 
+
     ## Now we will take the parsed duration and use it to launch instances.  
     
     if spot_duration is None:
         logger.append("save not available (duration not given or greater than 6 hours). Launching standard instance.")
         logger.write()
+        response = ec2_client.describe_images(ImageIds = [os.environ["AMI"]])
+        root = response["Images"][0]["RootDeviceName"]
         instances = ec2_resource.create_instances(
+            BlockDeviceMappings=[
+                {
+                    "DeviceName": root,
+                    "Ebs": {
+                        "DeleteOnTermination": True,
+                        "VolumeSize":add_size,
+                        "VolumeType":"gp2",
+                        "Encrypted": False
+                        }
+                    
+                    }],
             ImageId=ami,
             InstanceType=instance_type,
             IamInstanceProfile={'Name': os.environ['IAM_ROLE']},
@@ -130,6 +149,17 @@ def launch_new_instances(instance_type, ami, logger, number, duration = None):
                 }
         try:
             instances = ec2_resource.create_instances(
+                BlockDeviceMappings=[
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": True,
+                            "VolumeSize":add_size,
+                            "VolumeType":"gp2",
+                            "Encrypted": False
+                            }
+                        
+                        }],
                 ImageId=ami,
                 InstanceType=instance_type,
                 IamInstanceProfile={'Name': os.environ['IAM_ROLE']},
@@ -145,6 +175,17 @@ def launch_new_instances(instance_type, ami, logger, number, duration = None):
                 logger.append("save not available (beyond available aws capacity). Launching standard instance.")
                 logger.write()
                 instances = ec2_resource.create_instances(
+                    BlockDeviceMappings=[
+                        {
+                            "DeviceName": "/dev/sda1",
+                            "Ebs": {
+                                "DeleteOnTermination": True,
+                                "VolumeSize":add_size,
+                                "VolumeType":"gp2",
+                                "Encrypted": False
+                                }
+                            
+                            }],
                     ImageId=ami,
                     InstanceType=instance_type,
                     IamInstanceProfile={'Name': os.environ['IAM_ROLE']},
@@ -172,3 +213,51 @@ def count_active_instances(instance_type):
     """
     instances = ec2_resource.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running','pending','stopping','shutting-down']},{'Name':'instance-type',"Values":[instance_type]}])
     return len([i for i in instances])
+
+def prepare_volumes(instances_info):
+    """
+    For each instance id that you pass to this function, the function will create and attach volumes to the instance to accomodate data sizes.  
+    Inputs: 
+    instances_info (dict): a dictionary with instance ids as keys and required dataset sizes as values (integers).  
+    Outputs:
+    (dict): a dictionary where the instance ids as keys and the create and attach response codes. 
+    """
+    all_responses = {}
+    if instances_info is None:
+        pass
+    else:
+        for instance_id in instances_info:
+            template_response = {"create":None,"attach":None,"mod":None}
+            size = instances_info[instance_id]
+            ## Get the availability zone from describing the instances. 
+            avzone = ec2_client.describe_instances(InstanceIds=[instance_id])["Reservations"][0]["Instances"][0]["Placement"]["AvailabilityZone"]
+            ## Create the volume.
+            createoutput = ec2_client.create_volume(AvailabilityZone = avzone,Size = size,VolumeType = "gp2")
+            volume_available_waiter.wait(VolumeIds=[createoutput["VolumeId"]])
+            ## Attach that to the instance: (Were assuming it's initialized and ready)
+            attachoutput = ec2_client.attach_volume(Device = "/dev/sdh",InstanceId=instance_id,VolumeId = createoutput["VolumeId"])
+            ## Finally, alter the termination status so the volume terminates with the instance. 
+            modoutput = ec2_client.modify_instance_attribute(BlockDeviceMappings = [{"DeviceName":"/dev/sdh","Ebs":{"DeleteOnTermination":True,"VolumeId":createoutput["VolumeId"]}}],InstanceId = instance_id)
+            template_response["create"] = createoutput
+            template_response["attach"] = attachoutput
+            template_response["mod"] = modoutput
+            all_responses[instance_id] = template_response
+    return all_responses
+
+def get_volumesize(imageid):
+    """
+    Given the id of an ami, returns the volume size associated with the root device. 
+    Inputs: 
+    imageid (str): a string giving the id of the ami we will be analyzing. 
+    Outputs: 
+    (int): an integer giving the size of the volume assigned to the AMI. 
+    """
+    response = ec2_client.describe_images(ImageIds = [imageid])
+    root = response["Images"][0]["RootDeviceName"]
+    mappings = response["Images"][0]["BlockDeviceMappings"]
+    rootdevice = [m for m in mappings if m["DeviceName"] == root][0]
+    rootdevicevolume = rootdevice["Ebs"]["VolumeSize"]
+    return(rootdevicevolume)
+
+
+

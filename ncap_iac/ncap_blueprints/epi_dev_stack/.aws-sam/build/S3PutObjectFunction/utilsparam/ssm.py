@@ -26,3 +26,15 @@ def execute_commands_on_linux_instances(commands,
         OutputS3BucketName=log_bucket_name,
         OutputS3KeyPrefix=log_path
     )
+
+def mount_volumes(attach_responses):
+    """
+    Uses an automation document to automatically mount the volume on remote with an appropriate file system. 
+    Inputs: 
+    attach_responses: (dict) a dictionary of dictionaries where the keys are instance ids, and the values are dictionaries of responses to the creation, attachment, and modification of volumes for them. 
+    """
+    ## The document is declared in the utils stack to initialize neurocaas. 
+    for instance_id in attach_responses: 
+        volume_id = attach_responses[instance_id]["create"]["VolumeId"]
+        ## Automation assume role is generated from utils stack. TODO: make the pulling of stack resource arns automatic. 
+        ssm_client.start_automation_execution(DocumentName= "NeuroCaaS AutomountDocument",Parameters = {"InstanceId":[instance_id],"VolumeId":[volume_id],"AutomationAssumeRole":["arn:aws:iam::739988523141:role/testutilsstack-MountRole-HYJ75PSR095O"]})

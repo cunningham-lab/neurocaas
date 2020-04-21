@@ -162,11 +162,15 @@ class Submission_dev():
             price = jobdata["price"]
             start = jobdata["start"]
             end = jobdata["end"]
-            starttime = datetime.strptime(start, "%Y-%m-%dT%H:%M:%SZ")
-            endtime = datetime.strptime(end, "%Y-%m-%dT%H:%M:%SZ")
-            diff = endtime-starttime
-            duration = abs(diff.seconds)
-            cost = price*duration/3600.
+            try:
+                starttime = datetime.strptime(start, "%Y-%m-%dT%H:%M:%SZ")
+                endtime = datetime.strptime(end, "%Y-%m-%dT%H:%M:%SZ")
+                diff = endtime-starttime
+                duration = abs(diff.seconds)
+                cost = price*duration/3600.
+            except TypeError:
+                ## In rare cases it seems one or the other of these things don't actually have entries. This is a problem. for now, charge for the hour: 
+                cost = price
             cost+= cost
         
         ## Now compare with budget:
@@ -203,33 +207,6 @@ class Submission_dev():
             self.logger.write()
             self.jobsize = None
 
-    def acquire_instance(self):
-        """ Acquires & Starts New EC2 Instances Of The Requested Type & AMI. Specialized certificate messages.
-        This version of the code checks against two constraints: how many jobs the user has run, and how many instances are currently running. 
-        """
-        instances = []
-        nb_instances = len(self.filenames)
-
-
-        ## Check how many instances are running. 
-        active = utilsparamec2.count_active_instances(self.instance_type)
-        ## Ensure that we have enough bandwidth to support this request:
-        if active +nb_instances < int(os.environ['DEPLOY_LIMIT']):
-            pass
-        else:
-            self.logger.append("RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NCAP administrator.")
-        
-
-        for i in range(nb_instances):
-            instance = utilsparamec2.launch_new_instance(
-            instance_type=self.instance_type, 
-            ami=os.environ['AMI'],
-            logger= []# self.logger
-            )
-            instances.append(instance)
-        self.logger.append("Setting up {} EPI infrastructures from blueprint, please wait...".format(nb_instances))
-        self.instances = instances
-
     def acquire_instances(self):
         """
         Streamlines acquisition, setting up of multiple instances. Better exception handling when instances cannot be launched, and spot instances with defined duration when avaialble.   
@@ -252,6 +229,7 @@ class Submission_dev():
         ami=os.environ['AMI'],
         logger=  self.logger,
         number = nb_instances,
+        add_size = self.full_volumesize,
         duration = self.jobduration
         )
 
@@ -357,13 +335,32 @@ class Submission_dev():
         ## Now attach it to the given target
         targetdata = utilsparamevents.put_instance_target(rulename) 
 
-        #for instance in self.instances:
-        #    self.logger.append('Setting up monitoring on instance '+str(instance))
-        #    ## First declare a monitoring rule for this instance: 
-        #    ruledata,rulename = utilsparamevents.put_instance_rule(instance.instance_id)
-        #    arn = ruledata['RuleArn']
-        #    ## Now attach it to the given target
-        #    targetdata = utilsparamevents.put_instance_target(rulename) 
+    def compute_volumesize(self):
+        """
+        Takes the current ami volume size and adds in the size of the data that will be analyzed.  
+        """
+        ## First compute default volume size. 
+        default_size = utilsparamec2.get_volumesize(os.environ["AMI"]) 
+        if self.jobsize is not None: 
+            self.full_volumesize = default_size+self.jobsize
+        else: 
+            self.full_volumesize = default_size
+
+## We are no longer using this function. It depends upon automation documents that can be found in the cfn utils_stack template. Consider using this as a reference when switching to automation documents instead of pure runcommand. 
+    def add_volumes(self):
+        """
+        adds volumes to the data you will process. 
+        """
+        print(self.jobsize,"self.jobsize")
+        if self.jobsize is not None: 
+            ## create a dictionary pairing your instance_ids with jobsize. 
+            ## later we can tailor this. 
+            instancedict = {inst.instance_id:self.jobsize for inst in self.instances}
+            attach_responses = utilsparamec2.prepare_volumes(instancedict)
+            utilsparamssm.mount_volumes(attach_responses)
+        else: 
+            pass
+
 
 ## Lambda code for deployment from other buckets. 
 class Submission_deploy():
@@ -863,8 +860,12 @@ def process_upload_dev(bucket_name, key,time):
 
     if valid:
         submission.parse_config()
+        print("computing volumesize")
+        submission.compute_volumesize()
+        print("writing1")
+        submission.logger.write()
         submission.acquire_instances()
-        print('writing0')
+        print('writing2')
         submission.logger.write()
 
         submission.log_jobs()
@@ -876,15 +877,15 @@ def process_upload_dev(bucket_name, key,time):
             submission.put_instance_monitor_rule()
         elif os.environ["MONITOR"] == "false":
             print("skipping monitor")
-        print('writing1')
+        print('writing3')
         submission.logger.write()
         print('starting')
         submission.start_instance()
-        print('writing2')
+        print('writing4')
         submission.logger.write()
         print('sending')
         submission.process_inputs()
-        print("writing3")
+        print("writing5")
         submission.logger.write()
     else:
         pass
