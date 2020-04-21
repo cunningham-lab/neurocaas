@@ -1,0 +1,36 @@
+---
+description: "Automation Document Example YAML Template"
+schemaVersion: "0.3"
+assumeRole: "{{ AutomationAssumeRole }}"
+parameters:
+  InstanceId:
+    type: "String"
+    description: "(Required) The ID of the EC2 Instance."
+  VolumeId:
+    type: "String"
+    description: "(Required) The ID of the volume."
+  AutomationAssumeRole:
+    type: "String"
+    description: "(Optional) The ARN of the role that allows Automation to perform the actions on your behalf."
+    default: ""
+
+mainSteps:
+- name: "VerifyVolumeAttached"
+  action: "aws:waitForAwsResourceProperty"
+  timeoutSeconds: 600
+  inputs:
+    Service: "ec2"
+    Api: "DescribeVolumes"
+    VolumeIds: ["{{ VolumeId }}"]
+    PropertySelector: "$.Volumes[0].Attachments[0].State"
+    DesiredValues:
+    - "attached"
+
+- name: "MountVolume"
+  action: "aws:runCommand"
+  inputs:
+    DocumentName: "AWS-RunShellScript"
+    InstanceIds:
+    - "{{InstanceId}}"
+    Parameters:
+      commands: ['echo "STARTING MOUNT SEQUENCE"','echo $(lsblk)','mkfs -t xfs /dev/sdh','mkdir /data','mount /dev/sdh /data']

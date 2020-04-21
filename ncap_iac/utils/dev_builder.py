@@ -497,7 +497,7 @@ class DevTemplate(NeuroCaaSTemplate):
                 Description = 'Main Lambda Function for Serverless',
                 MemorySize = 128,
                 Timeout = self.config["Lambda"]['LambdaConfig']["EXECUTION_TIMEOUT"],
-                Role = 'arn:aws:iam::739988523141:role/lambda_dataflow', ## TODO: Create this in template
+                Role = 'arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ', ## TODO: Create this in template
                 Events= all_events,
                 #Environment = Environment(Variables={'figlambid':Ref(self.figurelamb),'figlambarn':GetAtt(self.figurelamb,'Arn'),'cwrolearn':GetAtt(self.cwrole,'Arn')})
                 Environment = Environment(Variables=lambdaconfig)
@@ -517,7 +517,8 @@ class DevTemplate(NeuroCaaSTemplate):
                 Description = 'Lambda Function logging start/stop for NCAP',
                 MemorySize = 128,
                 Timeout = 90,
-                Role = 'arn:aws:iam::739988523141:role/lambda_dataflow', ## TODO: Create this in template
+                #Role = 'arn:aws:iam::739988523141:role/lambda_dataflow', ## TODO: Create this in template
+                Role = 'arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ',
                 Environment = Environment(Variables={"BUCKET_NAME":self.config["PipelineName"],
                     "INDIR":self.config['Lambda']['LambdaConfig']['INDIR'],
                     "REGION":self.config["REGION"]
