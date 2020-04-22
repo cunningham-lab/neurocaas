@@ -9,7 +9,7 @@
         "PostCodeUri": "../../protocols",
         "PostHandler": "postprocess.epipostprocess",
         "LambdaConfig": {
-            "AMI": "ami-0b00812e4d74eacb0",
+            "AMI": "ami-04cda699507dc11af",
             "INSTANCE_TYPE": "p3.2xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
