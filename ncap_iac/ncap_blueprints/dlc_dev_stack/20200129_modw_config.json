@@ -1,0 +1,8 @@
+{
+    "mode":"test",
+    "modeldata":{
+	    "modelpath": "sawtelllabDLC/inputs/fish_trackerSep11-trainset95shuffle1/",
+        "datapath": "sawtelllabDLC/inputs/20200129_videos/", 
+        "configpath": "sawtelllabDLC/inputs/myconfig_analysis.py"
+        }
+}
