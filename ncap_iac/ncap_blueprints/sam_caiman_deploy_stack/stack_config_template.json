@@ -5,7 +5,7 @@
         "CodeUri": "../lambda_repo",
         "Handler": "submit_start.handler_log_dev",
         "LambdaConfig": {
-            "AMI": "ami-0985671cd2b869925",
+            "AMI": "ami-0e2b8721f2c2fce22",
             "INSTANCE_TYPE": "m5.16xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "launch-wizard-tcp",
