@@ -429,12 +429,12 @@ Resources:
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
-          AMI: ami-0ec64672e75865761
+          AMI: ami-0c0a57494a92dda83
           COMMAND: ls; cd /home/ubuntu; ncap_remote/dlc_rc.sh "{}" "{}" "{}" "{}";
             . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
-          DEPLOY_LIMIT: 300
+          DEPLOY_LIMIT: 100
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: SSMRole
           INDIR: inputs
@@ -443,7 +443,7 @@ Resources:
           LAUNCH: true
           LOGDIR: logs
           LOGFILE: lambda_log.txt
-          MAXCOST: 100
+          MAXCOST: 300
           MISSING_CONFIG_ERROR: We need a config file to analyze data.
           MONITOR: true
           OUTDIR: results
@@ -463,7 +463,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '0ec9a8cfb4c28857fde4a4abc136c93d9aedfed5
+          versionid: '3a54cf3093db5f4fe4bd5acdef4ec168055767a8
 
             '
       Events:
@@ -646,12 +646,12 @@ Resources:
       Description: Deletes Objects from S3
       Environment:
         Variables:
-          AMI: ami-0ec64672e75865761
+          AMI: ami-0c0a57494a92dda83
           COMMAND: ls; cd /home/ubuntu; ncap_remote/dlc_rc.sh "{}" "{}" "{}" "{}";
             . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
-          DEPLOY_LIMIT: 300
+          DEPLOY_LIMIT: 100
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: SSMRole
           INDIR: inputs
@@ -660,7 +660,7 @@ Resources:
           LAUNCH: true
           LOGDIR: logs
           LOGFILE: lambda_log.txt
-          MAXCOST: 100
+          MAXCOST: 300
           MISSING_CONFIG_ERROR: We need a config file to analyze data.
           MONITOR: true
           OUTDIR: results
@@ -680,7 +680,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '0ec9a8cfb4c28857fde4a4abc136c93d9aedfed5
+          versionid: '3a54cf3093db5f4fe4bd5acdef4ec168055767a8
 
             '
       Handler: helper.handler_deldir
@@ -722,12 +722,12 @@ Resources:
       Description: Puts Objects in S3
       Environment:
         Variables:
-          AMI: ami-0ec64672e75865761
+          AMI: ami-0c0a57494a92dda83
           COMMAND: ls; cd /home/ubuntu; ncap_remote/dlc_rc.sh "{}" "{}" "{}" "{}";
             . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
-          DEPLOY_LIMIT: 300
+          DEPLOY_LIMIT: 100
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: SSMRole
           INDIR: inputs
@@ -736,7 +736,7 @@ Resources:
           LAUNCH: true
           LOGDIR: logs
           LOGFILE: lambda_log.txt
-          MAXCOST: 100
+          MAXCOST: 300
           MISSING_CONFIG_ERROR: We need a config file to analyze data.
           MONITOR: true
           OUTDIR: results
@@ -756,7 +756,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '0ec9a8cfb4c28857fde4a4abc136c93d9aedfed5
+          versionid: '3a54cf3093db5f4fe4bd5acdef4ec168055767a8
 
             '
       Handler: helper.handler_mkdir

@@ -194,7 +194,7 @@ Resources:
     Type: AWS::CloudFormation::CustomResource
   FigLambda:
     Properties:
-      CodeUri: s3://ctnsampackages/1a887c739c60c50a3a3073b063124ac1
+      CodeUri: s3://ctnsampackages/10fd9d3b7c96b076aa3333d6c087fef7
       Description: Lambda Function logging start/stop for NCAP
       Environment:
         Variables:
@@ -425,16 +425,16 @@ Resources:
     Type: AWS::CloudFormation::CustomResource
   MainLambda:
     Properties:
-      CodeUri: s3://ctnsampackages/9ca97feef70b9d5e5bf4e5fc3ed203ee
+      CodeUri: s3://ctnsampackages/d23072de65276de633e534ec347cfc5a
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
-          AMI: ami-0ec64672e75865761
+          AMI: ami-0c0a57494a92dda83
           COMMAND: ls; cd /home/ubuntu; ncap_remote/dlc_rc.sh "{}" "{}" "{}" "{}";
             . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
-          DEPLOY_LIMIT: 300
+          DEPLOY_LIMIT: 100
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: SSMRole
           INDIR: inputs
@@ -443,7 +443,7 @@ Resources:
           LAUNCH: true
           LOGDIR: logs
           LOGFILE: lambda_log.txt
-          MAXCOST: 100
+          MAXCOST: 300
           MISSING_CONFIG_ERROR: We need a config file to analyze data.
           MONITOR: true
           OUTDIR: results
@@ -463,7 +463,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '0ec9a8cfb4c28857fde4a4abc136c93d9aedfed5
+          versionid: '3a54cf3093db5f4fe4bd5acdef4ec168055767a8
 
             '
       Events:
@@ -642,16 +642,16 @@ Resources:
     Type: AWS::S3::Bucket
   S3DelObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/75a628506ff5cf42f45b44c19c8d3454
+      CodeUri: s3://ctnsampackages/d23072de65276de633e534ec347cfc5a
       Description: Deletes Objects from S3
       Environment:
         Variables:
-          AMI: ami-0ec64672e75865761
+          AMI: ami-0c0a57494a92dda83
           COMMAND: ls; cd /home/ubuntu; ncap_remote/dlc_rc.sh "{}" "{}" "{}" "{}";
             . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
-          DEPLOY_LIMIT: 300
+          DEPLOY_LIMIT: 100
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: SSMRole
           INDIR: inputs
@@ -660,7 +660,7 @@ Resources:
           LAUNCH: true
           LOGDIR: logs
           LOGFILE: lambda_log.txt
-          MAXCOST: 100
+          MAXCOST: 300
           MISSING_CONFIG_ERROR: We need a config file to analyze data.
           MONITOR: true
           OUTDIR: results
@@ -680,7 +680,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '0ec9a8cfb4c28857fde4a4abc136c93d9aedfed5
+          versionid: '3a54cf3093db5f4fe4bd5acdef4ec168055767a8
 
             '
       Handler: helper.handler_deldir
@@ -718,16 +718,16 @@ Resources:
     Type: AWS::IAM::Role
   S3PutObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/88757edf1a0dd3c21049708ce630ebca
+      CodeUri: s3://ctnsampackages/9b8c321e73392a4310711dab41a17f04
       Description: Puts Objects in S3
       Environment:
         Variables:
-          AMI: ami-0ec64672e75865761
+          AMI: ami-0c0a57494a92dda83
           COMMAND: ls; cd /home/ubuntu; ncap_remote/dlc_rc.sh "{}" "{}" "{}" "{}";
             . ncap_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
-          DEPLOY_LIMIT: 300
+          DEPLOY_LIMIT: 100
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: SSMRole
           INDIR: inputs
@@ -736,7 +736,7 @@ Resources:
           LAUNCH: true
           LOGDIR: logs
           LOGFILE: lambda_log.txt
-          MAXCOST: 100
+          MAXCOST: 300
           MISSING_CONFIG_ERROR: We need a config file to analyze data.
           MONITOR: true
           OUTDIR: results
@@ -756,7 +756,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '0ec9a8cfb4c28857fde4a4abc136c93d9aedfed5
+          versionid: '3a54cf3093db5f4fe4bd5acdef4ec168055767a8
 
             '
       Handler: helper.handler_mkdir
