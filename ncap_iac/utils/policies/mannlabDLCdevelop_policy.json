@@ -1,0 +1,94 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": "s3:GetBucketLocation",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor3",
+      "Effect": "Allow",
+      "Action": "s3:HeadBucket",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor1",
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ListBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap-stable"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "s3:prefix": [
+            "",
+            "mannlabdlcdevelop/",
+            "mannlabdlcdevelop/inputs",
+            "mannlabdlcdevelop/results",
+            "logs",
+            "mannlabdlcdevelop/submissions",
+            "mannlabdlcdevelop/configs",
+            "mannlabdlcdevelop/inputs/",
+            "mannlabdlcdevelop/results/",
+            "mannlabdlcdevelop/submissions/",
+            "mannlabdlcdevelop/configs/"
+          ],
+          "s3:delimiter": [
+            "/"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ListSubBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap-stable"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "mannlabdlcdevelop/inputs/*",
+            "mannlabdlcdevelop/results/*",
+            "mannlabdlcdevelop/configs/*",
+            "mannlabdlcdevelop/submissions/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "Inputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap-stable/mannlabdlcdevelop/inputs/*",
+        "arn:aws:s3:::dlc-ncap-stable/mannlabdlcdevelop/configs/*",
+        "arn:aws:s3:::dlc-ncap-stable/mannlabdlcdevelop/submissions/*"
+      ]
+    },
+    {
+      "Sid": "Outputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap-stable/mannlabdlcdevelop/results/*",
+        "arn:aws:s3:::dlc-ncap-stable/mannlabdlcdevelop/configs/*"
+      ]
+    }
+  ]
+}

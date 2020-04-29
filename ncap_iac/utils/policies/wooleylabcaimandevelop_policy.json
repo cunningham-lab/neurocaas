@@ -1,0 +1,94 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": "s3:GetBucketLocation",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor3",
+      "Effect": "Allow",
+      "Action": "s3:HeadBucket",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor1",
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ListBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::caiman-ncap-stable"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "s3:prefix": [
+            "",
+            "wooleylabcaimandevelop/",
+            "wooleylabcaimandevelop/inputs",
+            "wooleylabcaimandevelop/results",
+            "logs",
+            "wooleylabcaimandevelop/submissions",
+            "wooleylabcaimandevelop/configs",
+            "wooleylabcaimandevelop/inputs/",
+            "wooleylabcaimandevelop/results/",
+            "wooleylabcaimandevelop/submissions/",
+            "wooleylabcaimandevelop/configs/"
+          ],
+          "s3:delimiter": [
+            "/"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ListSubBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::caiman-ncap-stable"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "wooleylabcaimandevelop/inputs/*",
+            "wooleylabcaimandevelop/results/*",
+            "wooleylabcaimandevelop/configs/*",
+            "wooleylabcaimandevelop/submissions/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "Inputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::caiman-ncap-stable/wooleylabcaimandevelop/inputs/*",
+        "arn:aws:s3:::caiman-ncap-stable/wooleylabcaimandevelop/configs/*",
+        "arn:aws:s3:::caiman-ncap-stable/wooleylabcaimandevelop/submissions/*"
+      ]
+    },
+    {
+      "Sid": "Outputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::caiman-ncap-stable/wooleylabcaimandevelop/results/*",
+        "arn:aws:s3:::caiman-ncap-stable/wooleylabcaimandevelop/configs/*"
+      ]
+    }
+  ]
+}

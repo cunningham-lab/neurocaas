@@ -1,0 +1,44 @@
+{
+    "PipelineName":"epi-ncap",
+    "REGION":"us-east-1",
+    "STAGE":"develop",
+    "Lambda":{
+        "CodeUri":"../../protocols",
+        "Handler":"submit_start.handler_log_demo",
+        "PostCodeUri":"../../protocols",
+        "PostHandler":"postprocess.epipostprocess",
+        "Launch":true, 
+        "LambdaConfig":{
+            "AMI":"ami-07b90d36fb4860629",
+            "INSTANCE_TYPE": "m5.xlarge",
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS":"launch-wizard-34",
+            "IAM_ROLE":"pmd-s3-ssm",
+            "KEY_NAME":"ta_testkey",
+            "WORKING_DIRECTORY":"~/bin",
+            "COMMAND":"ls; cd ../../../../home/ubuntu; ncap_remote/run_epi.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
+            "SHUTDOWN_BEHAVIOR":"terminate",
+            "CONFIG":"config.yaml",
+            "MISSING_CONFIG_ERROR":"We need a config file to analyze data.",
+            "EXECUTION_TIMEOUT":180,
+            "SSM_TIMEOUT":172000,
+            "LOGDIR":"logs",
+            "OUTDIR":"results",
+            "INDIR":"inputs",
+            "LAUNCH":true,
+            "LOGFILE":"lambda_log.txt",
+            "DEPLOY_LIMIT":100,
+            "MONITOR":false
+        }
+    },
+    "UXData":{
+    "Affiliates":[
+        {
+            "AffiliateName":"cunninghamlabEPI",
+            "UserNames":["jpccosyne","srbcosyne","tacosyne"],
+            "UserInput":true,
+            "ContactEmail":"tgabe94@gmail.com"
+        }
+    ]
+    }
+}

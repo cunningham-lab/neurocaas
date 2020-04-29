@@ -1,0 +1,26 @@
+{
+    "UXData":{
+    "Affiliates":[
+        {
+            "AffiliateName":"neurotheoryworkshopadditionalusers",
+            "UserNames":["wy2303","awl2145","jeremforest","rachelaswanson","wx2203","rn2446","md3681","fs2545","re2365","mwhiteway","cm3746"],
+            "Pipelines":["Path to processing directory. If processing directory lives at root, can be \"\""],
+            "PipelineDir":["Directory where pipeline should be built"],
+            "ContactEmail":"The email that we should notify regarding processing status."
+        }
+    ]
+    },
+    "Lambda":{
+        "LambdaConfig":{
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS":"Type of instance to launch.",
+            "IAM_ROLE":"iam role with ssm and s3 access",
+            "EXECUTION_TIMEOUT":"172800",
+            "LOGDIR":"logs",
+            "OUTDIR":"results",
+            "INDIR":"inputs",
+            "LOGFILE":"lambda_log.txt",
+            "MONITOR":true
+        }
+    }
+}

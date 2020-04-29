@@ -1,0 +1,44 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Automation document creator for mounting volumes. From https://stackoverflow.com/questions/57208761/aws-boto3-wait-until-volume-is-attached-to-ec2-instance" 
+
+Resources:
+  MountDoc:
+    Type: "AWS::SSM::Document"
+    Properties:
+      Content:  
+        description: "Automation Document Example YAML Template"
+        schemaVersion: "0.3"
+        assumeRole: "{{ AutomationAssumeRole }}"
+        parameters:
+          InstanceId:
+            type: "String"
+            description: "(Required) The ID of the EC2 Instance."
+          VolumeId:
+            type: "String"
+            description: "(Required) The ID of the volume."
+          AutomationAssumeRole:
+            type: "String"
+            description: "(Optional) The ARN of the role that allows Automation to perform the actions on your behalf."
+            default: ""
+        mainSteps:
+        - name: "VerifyVolumeAttached"
+          action: "aws:waitForAwsResourceProperty"
+          timeoutSeconds: 600
+          inputs:
+            Service: "ec2"
+            Api: "DescribeVolumes"
+            VolumeIds: ["{{ VolumeId }}"]
+            PropertySelector: "$.Volumes[0].Attachments[0].State"
+            DesiredValues:
+            - "attached"
+        - name: "MountVolume"
+          action: "aws:runCommand"
+          inputs:
+            DocumentName: "AWS-RunShellScript"
+            InstanceIds:
+            - "{{InstanceId}}"
+            Parameters:
+              commands: ['echo "STARTING MOUNT SEQUENCE"','echo $(lsblk)','mkfs -t xfs /dev/sdh','mkdir /data','mount /dev/sdh /data']
+      DocumentType: "Automation"
+      Name: "NeuroCaaSAutomountDocument"

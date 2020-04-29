@@ -1,0 +1,94 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": "s3:GetBucketLocation",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor3",
+      "Effect": "Allow",
+      "Action": "s3:HeadBucket",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor1",
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ListBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap-web"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "s3:prefix": [
+            "",
+            "sawtelllab/",
+            "sawtelllab/inputs",
+            "sawtelllab/results",
+            "logs",
+            "sawtelllab/submissions",
+            "sawtelllab/configs",
+            "sawtelllab/inputs/",
+            "sawtelllab/results/",
+            "sawtelllab/submissions/",
+            "sawtelllab/configs/"
+          ],
+          "s3:delimiter": [
+            "/"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ListSubBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap-web"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "sawtelllab/inputs/*",
+            "sawtelllab/results/*",
+            "sawtelllab/configs/*",
+            "sawtelllab/submissions/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "Inputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap-web/sawtelllab/inputs/*",
+        "arn:aws:s3:::dlc-ncap-web/sawtelllab/configs/*",
+        "arn:aws:s3:::dlc-ncap-web/sawtelllab/submissions/*"
+      ]
+    },
+    {
+      "Sid": "Outputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap-web/sawtelllab/results/*",
+        "arn:aws:s3:::dlc-ncap-web/sawtelllab/configs/*"
+      ]
+    }
+  ]
+}

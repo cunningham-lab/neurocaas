@@ -1,0 +1,578 @@
+{
+    "Outputs": {
+        "AccessKeyawl2145": {
+            "Description": "Access Key of user: awl2145 in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Ref": "userkeyawl2145"
+            }
+        },
+        "AccessKeycm3746": {
+            "Description": "Access Key of user: cm3746 in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Ref": "userkeycm3746"
+            }
+        },
+        "AccessKeyfs2545": {
+            "Description": "Access Key of user: fs2545 in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Ref": "userkeyfs2545"
+            }
+        },
+        "AccessKeyjeremforest": {
+            "Description": "Access Key of user: jeremforest in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Ref": "userkeyjeremforest"
+            }
+        },
+        "AccessKeymd3681": {
+            "Description": "Access Key of user: md3681 in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Ref": "userkeymd3681"
+            }
+        },
+        "AccessKeymwhiteway": {
+            "Description": "Access Key of user: mwhiteway in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Ref": "userkeymwhiteway"
+            }
+        },
+        "AccessKeyrachelaswanson": {
+            "Description": "Access Key of user: rachelaswanson in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Ref": "userkeyrachelaswanson"
+            }
+        },
+        "AccessKeyre2365": {
+            "Description": "Access Key of user: re2365 in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Ref": "userkeyre2365"
+            }
+        },
+        "AccessKeyrn2446": {
+            "Description": "Access Key of user: rn2446 in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Ref": "userkeyrn2446"
+            }
+        },
+        "AccessKeywx2203": {
+            "Description": "Access Key of user: wx2203 in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Ref": "userkeywx2203"
+            }
+        },
+        "AccessKeywy2303": {
+            "Description": "Access Key of user: wy2303 in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Ref": "userkeywy2303"
+            }
+        },
+        "Passwordawl2145": {
+            "Description": "Default password of new user awl2145 in group neurotheoryworkshopadditionalusers",
+            "Value": "c8c6b6f1e38944ce"
+        },
+        "Passwordcm3746": {
+            "Description": "Default password of new user cm3746 in group neurotheoryworkshopadditionalusers",
+            "Value": "aba6d20233b9c54c"
+        },
+        "Passwordfs2545": {
+            "Description": "Default password of new user fs2545 in group neurotheoryworkshopadditionalusers",
+            "Value": "39a3a1ef00059a58"
+        },
+        "Passwordjeremforest": {
+            "Description": "Default password of new user jeremforest in group neurotheoryworkshopadditionalusers",
+            "Value": "d558ed7a52c45a66"
+        },
+        "Passwordmd3681": {
+            "Description": "Default password of new user md3681 in group neurotheoryworkshopadditionalusers",
+            "Value": "42efbf51bad9ff83"
+        },
+        "Passwordmwhiteway": {
+            "Description": "Default password of new user mwhiteway in group neurotheoryworkshopadditionalusers",
+            "Value": "eb368db810ee0c0f"
+        },
+        "Passwordrachelaswanson": {
+            "Description": "Default password of new user rachelaswanson in group neurotheoryworkshopadditionalusers",
+            "Value": "9d8c62f42882b0c7"
+        },
+        "Passwordre2365": {
+            "Description": "Default password of new user re2365 in group neurotheoryworkshopadditionalusers",
+            "Value": "fe136491df29a63d"
+        },
+        "Passwordrn2446": {
+            "Description": "Default password of new user rn2446 in group neurotheoryworkshopadditionalusers",
+            "Value": "ac34546afe194205"
+        },
+        "Passwordwx2203": {
+            "Description": "Default password of new user wx2203 in group neurotheoryworkshopadditionalusers",
+            "Value": "ad7e824fd563c9b2"
+        },
+        "Passwordwy2303": {
+            "Description": "Default password of new user wy2303 in group neurotheoryworkshopadditionalusers",
+            "Value": "af09610fc978613c"
+        },
+        "SecretAccessKeyawl2145": {
+            "Description": "Secret Key of new user: awl2145 in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeyawl2145",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeycm3746": {
+            "Description": "Secret Key of new user: cm3746 in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeycm3746",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeyfs2545": {
+            "Description": "Secret Key of new user: fs2545 in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeyfs2545",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeyjeremforest": {
+            "Description": "Secret Key of new user: jeremforest in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeyjeremforest",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeymd3681": {
+            "Description": "Secret Key of new user: md3681 in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeymd3681",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeymwhiteway": {
+            "Description": "Secret Key of new user: mwhiteway in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeymwhiteway",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeyrachelaswanson": {
+            "Description": "Secret Key of new user: rachelaswanson in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeyrachelaswanson",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeyre2365": {
+            "Description": "Secret Key of new user: re2365 in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeyre2365",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeyrn2446": {
+            "Description": "Secret Key of new user: rn2446 in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeyrn2446",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeywx2203": {
+            "Description": "Secret Key of new user: wx2203 in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeywx2203",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "SecretAccessKeywy2303": {
+            "Description": "Secret Key of new user: wy2303 in group neurotheoryworkshopadditionalusers",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeywy2303",
+                    "SecretAccessKey"
+                ]
+            }
+        }
+    },
+    "Resources": {
+        "DeleteCustomResourceneurotheoryworkshopadditionalusers": {
+            "DependsOn": "PipelineBucketneurotheoryworkshopadditionalusers",
+            "Properties": {
+                "BucketName": "neurotheoryworkshopadditionalusers",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LambdaBaseRole": {
+            "Properties": {
+                "Description": {
+                    "Fn::Join": [
+                        " ",
+                        [
+                            "Base Policy for all lambda function roles in",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "logs:CreateLogGroup",
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": "arn:aws:logs:*:*:*"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::IAM::ManagedPolicy"
+        },
+        "PipelineBucketneurotheoryworkshopadditionalusers": {
+            "Properties": {
+                "AccessControl": "Private",
+                "BucketName": "neurotheoryworkshopadditionalusers"
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "S3DelObjectFunction": {
+            "Properties": {
+                "CodeUri": "../../protocols",
+                "Description": "Deletes Objects from S3",
+                "Environment": {
+                    "Variables": {
+                        "EXECUTION_TIMEOUT": "172800",
+                        "IAM_ROLE": "iam role with ssm and s3 access",
+                        "INDIR": "inputs",
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "Type of instance to launch."
+                    }
+                },
+                "Handler": "helper.handler_deldir",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "S3MakePathRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "S3MakePathRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "LambdaBaseRole"
+                    }
+                ],
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "s3:DeleteObject",
+                                        "s3:ListBucket",
+                                        "s3:PutObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "write_s3_policy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "S3PutObjectFunction": {
+            "Properties": {
+                "CodeUri": "../../protocols",
+                "Description": "Puts Objects in S3",
+                "Environment": {
+                    "Variables": {
+                        "EXECUTION_TIMEOUT": "172800",
+                        "IAM_ROLE": "iam role with ssm and s3 access",
+                        "INDIR": "inputs",
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "Type of instance to launch."
+                    }
+                },
+                "Handler": "helper.handler_mkdir",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "S3MakePathRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "neurotheoryworkshopadditionalusersuserawl2145": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "c8c6b6f1e38944ce",
+                    "PasswordResetRequired": "false"
+                },
+                "Path": "/neurotheoryworkshopadditionalusers/",
+                "UserName": "awl2145us-east-1"
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "neurotheoryworkshopadditionalusersusercm3746": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "aba6d20233b9c54c",
+                    "PasswordResetRequired": "false"
+                },
+                "Path": "/neurotheoryworkshopadditionalusers/",
+                "UserName": "cm3746us-east-1"
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "neurotheoryworkshopadditionalusersuserfs2545": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "39a3a1ef00059a58",
+                    "PasswordResetRequired": "false"
+                },
+                "Path": "/neurotheoryworkshopadditionalusers/",
+                "UserName": "fs2545us-east-1"
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "neurotheoryworkshopadditionalusersuserjeremforest": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "d558ed7a52c45a66",
+                    "PasswordResetRequired": "false"
+                },
+                "Path": "/neurotheoryworkshopadditionalusers/",
+                "UserName": "jeremforestus-east-1"
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "neurotheoryworkshopadditionalusersusermd3681": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "42efbf51bad9ff83",
+                    "PasswordResetRequired": "false"
+                },
+                "Path": "/neurotheoryworkshopadditionalusers/",
+                "UserName": "md3681us-east-1"
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "neurotheoryworkshopadditionalusersusermwhiteway": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "eb368db810ee0c0f",
+                    "PasswordResetRequired": "false"
+                },
+                "Path": "/neurotheoryworkshopadditionalusers/",
+                "UserName": "mwhitewayus-east-1"
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "neurotheoryworkshopadditionalusersuserrachelaswanson": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "9d8c62f42882b0c7",
+                    "PasswordResetRequired": "false"
+                },
+                "Path": "/neurotheoryworkshopadditionalusers/",
+                "UserName": "rachelaswansonus-east-1"
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "neurotheoryworkshopadditionalusersuserre2365": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "fe136491df29a63d",
+                    "PasswordResetRequired": "false"
+                },
+                "Path": "/neurotheoryworkshopadditionalusers/",
+                "UserName": "re2365us-east-1"
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "neurotheoryworkshopadditionalusersuserrn2446": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "ac34546afe194205",
+                    "PasswordResetRequired": "false"
+                },
+                "Path": "/neurotheoryworkshopadditionalusers/",
+                "UserName": "rn2446us-east-1"
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "neurotheoryworkshopadditionalusersuserwx2203": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "ad7e824fd563c9b2",
+                    "PasswordResetRequired": "false"
+                },
+                "Path": "/neurotheoryworkshopadditionalusers/",
+                "UserName": "wx2203us-east-1"
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "neurotheoryworkshopadditionalusersuserwy2303": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "af09610fc978613c",
+                    "PasswordResetRequired": "false"
+                },
+                "Path": "/neurotheoryworkshopadditionalusers/",
+                "UserName": "wy2303us-east-1"
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "userkeyawl2145": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "neurotheoryworkshopadditionalusersuserawl2145"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeycm3746": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "neurotheoryworkshopadditionalusersusercm3746"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeyfs2545": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "neurotheoryworkshopadditionalusersuserfs2545"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeyjeremforest": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "neurotheoryworkshopadditionalusersuserjeremforest"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeymd3681": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "neurotheoryworkshopadditionalusersusermd3681"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeymwhiteway": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "neurotheoryworkshopadditionalusersusermwhiteway"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeyrachelaswanson": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "neurotheoryworkshopadditionalusersuserrachelaswanson"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeyre2365": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "neurotheoryworkshopadditionalusersuserre2365"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeyrn2446": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "neurotheoryworkshopadditionalusersuserrn2446"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeywx2203": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "neurotheoryworkshopadditionalusersuserwx2203"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "userkeywy2303": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "neurotheoryworkshopadditionalusersuserwy2303"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        }
+    },
+    "Transform": "AWS::Serverless-2016-10-31"
+}

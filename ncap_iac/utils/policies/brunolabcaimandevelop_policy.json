@@ -1,0 +1,94 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": "s3:GetBucketLocation",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor3",
+      "Effect": "Allow",
+      "Action": "s3:HeadBucket",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor1",
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ListBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::caiman-ncap-stable"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "s3:prefix": [
+            "",
+            "brunolabcaimandevelop/",
+            "brunolabcaimandevelop/inputs",
+            "brunolabcaimandevelop/results",
+            "logs",
+            "brunolabcaimandevelop/submissions",
+            "brunolabcaimandevelop/configs",
+            "brunolabcaimandevelop/inputs/",
+            "brunolabcaimandevelop/results/",
+            "brunolabcaimandevelop/submissions/",
+            "brunolabcaimandevelop/configs/"
+          ],
+          "s3:delimiter": [
+            "/"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ListSubBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::caiman-ncap-stable"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "brunolabcaimandevelop/inputs/*",
+            "brunolabcaimandevelop/results/*",
+            "brunolabcaimandevelop/configs/*",
+            "brunolabcaimandevelop/submissions/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "Inputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::caiman-ncap-stable/brunolabcaimandevelop/inputs/*",
+        "arn:aws:s3:::caiman-ncap-stable/brunolabcaimandevelop/configs/*",
+        "arn:aws:s3:::caiman-ncap-stable/brunolabcaimandevelop/submissions/*"
+      ]
+    },
+    {
+      "Sid": "Outputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::caiman-ncap-stable/brunolabcaimandevelop/results/*",
+        "arn:aws:s3:::caiman-ncap-stable/brunolabcaimandevelop/configs/*"
+      ]
+    }
+  ]
+}

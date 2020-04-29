@@ -1,0 +1,1411 @@
+{
+    "Resources": {
+        "BaseFolderbrunolab": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "brunolab",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "BaseFolderorigdevs": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "origdevs",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "BaseFolderpeterkagroup": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "peterkagroup",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "BaseFolderwooleylab": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "wooleylab",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "CWPermissions": {
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Ref": "FigLambda"
+                },
+                "Principal": "events.amazonaws.com"
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "CloudWatchBusRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "events.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "CloudwatchBusPolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "CloudwatchBusPolicy": {
+            "Properties": {
+                "Description": {
+                    "Fn::Join": [
+                        " ",
+                        [
+                            "Base Policy for all lambda function roles in",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "events:*",
+                            "Effect": "Allow",
+                            "Resource": "*",
+                            "Sid": "CloudWatchEventsFullAccess"
+                        },
+                        {
+                            "Action": "iam:PassRole",
+                            "Effect": "Allow",
+                            "Resource": "arn:aws:iam::*:role/AWS_Events_Invoke_Targets",
+                            "Sid": "IAMPassRoleForCloudWatchEvents"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::IAM::ManagedPolicy"
+        },
+        "ConfigFolderbrunolab": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderbrunolab"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "configs",
+                "Path": "brunolab/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "ConfigFolderorigdevs": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderorigdevs"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "configs",
+                "Path": "origdevs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "ConfigFolderpeterkagroup": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderpeterkagroup"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "configs",
+                "Path": "peterkagroup/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "ConfigFolderwooleylab": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderwooleylab"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "configs",
+                "Path": "wooleylab/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "DeleteCustomResource": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "FigLambda": {
+            "Properties": {
+                "CodeUri": "../../protocols",
+                "Description": "Lambda Function logging start/stop for NCAP",
+                "Environment": {
+                    "Variables": {
+                        "BUCKET_NAME": "caiman-ncap-web",
+                        "INDIR": "inputs",
+                        "REGION": "us-east-1"
+                    }
+                },
+                "Events": {},
+                "Handler": "log.monitor_updater",
+                "MemorySize": 128,
+                "Role": "arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ",
+                "Runtime": "python3.6",
+                "Timeout": 90
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "FignameLogGroup": {
+            "Properties": {
+                "LogGroupName": {
+                    "Fn::Sub": "/aws/lambda/${FigLambda}"
+                }
+            },
+            "Type": "AWS::Logs::LogGroup"
+        },
+        "InFolderbrunolab": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderbrunolab"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "inputs",
+                "Path": "brunolab/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "InFolderorigdevs": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderorigdevs"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "inputs",
+                "Path": "origdevs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "InFolderpeterkagroup": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderpeterkagroup"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "inputs",
+                "Path": "peterkagroup/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "InFolderwooleylab": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderwooleylab"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "inputs",
+                "Path": "wooleylab/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LambdaBaseRole": {
+            "Properties": {
+                "Description": {
+                    "Fn::Join": [
+                        " ",
+                        [
+                            "Base Policy for all lambda function roles in",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "logs:CreateLogGroup",
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": "arn:aws:logs:*:*:*"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::IAM::ManagedPolicy"
+        },
+        "LogFolder": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "logs",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderactive": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "active",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderbrunolab": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "brunolab",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderdebug": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "debugcaiman-ncap-web",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderorigdevs": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "origdevs",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderpeterkagroup": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "peterkagroup",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderwooleylab": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "wooleylab",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "MainLambda": {
+            "Properties": {
+                "CodeUri": "../../protocols",
+                "Description": "Main Lambda Function for Serverless",
+                "Environment": {
+                    "Variables": {
+                        "AMI": "ami-0c03d5ceacec4a53f",
+                        "COMMAND": "ls; cd /home/ubuntu; ncap_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
+                        "CONFIG": "config.yaml",
+                        "CONFIGDIR": "configs",
+                        "DEPLOY_LIMIT": 100,
+                        "EXECUTION_TIMEOUT": 180,
+                        "IAM_ROLE": "SSMRole",
+                        "INDIR": "inputs",
+                        "INSTANCE_TYPE": "m5.16xlarge",
+                        "KEY_NAME": "testkeystack-custom-dev-key-pair",
+                        "LAUNCH": true,
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MAXCOST": 300,
+                        "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
+                        "SHUTDOWN_BEHAVIOR": "terminate",
+                        "SSM_TIMEOUT": 172000,
+                        "SUBMITDIR": "submissions",
+                        "WORKING_DIRECTORY": "~/bin",
+                        "cwrolearn": {
+                            "Fn::GetAtt": [
+                                "CloudWatchBusRole",
+                                "Arn"
+                            ]
+                        },
+                        "figlambarn": {
+                            "Fn::GetAtt": [
+                                "FigLambda",
+                                "Arn"
+                            ]
+                        },
+                        "figlambid": {
+                            "Ref": "FigLambda"
+                        },
+                        "versionid": "7790858029530a4b396a569dd1f0136216313e3f\n"
+                    }
+                },
+                "Events": {
+                    "BucketEventbrunolab": {
+                        "Properties": {
+                            "Bucket": {
+                                "Ref": "PipelineMainBucket"
+                            },
+                            "Events": [
+                                "s3:ObjectCreated:*"
+                            ],
+                            "Filter": {
+                                "S3Key": {
+                                    "Rules": [
+                                        {
+                                            "Name": "prefix",
+                                            "Value": "brunolab/submissions"
+                                        },
+                                        {
+                                            "Name": "suffix",
+                                            "Value": "submit.json"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "Type": "S3"
+                    },
+                    "BucketEventorigdevs": {
+                        "Properties": {
+                            "Bucket": {
+                                "Ref": "PipelineMainBucket"
+                            },
+                            "Events": [
+                                "s3:ObjectCreated:*"
+                            ],
+                            "Filter": {
+                                "S3Key": {
+                                    "Rules": [
+                                        {
+                                            "Name": "prefix",
+                                            "Value": "origdevs/submissions"
+                                        },
+                                        {
+                                            "Name": "suffix",
+                                            "Value": "submit.json"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "Type": "S3"
+                    },
+                    "BucketEventpeterkagroup": {
+                        "Properties": {
+                            "Bucket": {
+                                "Ref": "PipelineMainBucket"
+                            },
+                            "Events": [
+                                "s3:ObjectCreated:*"
+                            ],
+                            "Filter": {
+                                "S3Key": {
+                                    "Rules": [
+                                        {
+                                            "Name": "prefix",
+                                            "Value": "peterkagroup/submissions"
+                                        },
+                                        {
+                                            "Name": "suffix",
+                                            "Value": "submit.json"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "Type": "S3"
+                    },
+                    "BucketEventwooleylab": {
+                        "Properties": {
+                            "Bucket": {
+                                "Ref": "PipelineMainBucket"
+                            },
+                            "Events": [
+                                "s3:ObjectCreated:*"
+                            ],
+                            "Filter": {
+                                "S3Key": {
+                                    "Rules": [
+                                        {
+                                            "Name": "prefix",
+                                            "Value": "wooleylab/submissions"
+                                        },
+                                        {
+                                            "Name": "suffix",
+                                            "Value": "submit.json"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "Type": "S3"
+                    }
+                },
+                "Handler": "submit_start.handler_develop",
+                "MemorySize": 128,
+                "Role": "arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ",
+                "Runtime": "python3.6",
+                "Timeout": 180
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "OutFolderbrunolab": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderbrunolab"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "results",
+                "Path": "brunolab/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "OutFolderorigdevs": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderorigdevs"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "results",
+                "Path": "origdevs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "OutFolderpeterkagroup": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderpeterkagroup"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "results",
+                "Path": "peterkagroup/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "OutFolderwooleylab": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderwooleylab"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "results",
+                "Path": "wooleylab/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "PipelineMainBucket": {
+            "Properties": {
+                "AccessControl": "Private",
+                "BucketName": "caiman-ncap-web"
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "S3DelObjectFunction": {
+            "Properties": {
+                "CodeUri": "../../protocols",
+                "Description": "Deletes Objects from S3",
+                "Environment": {
+                    "Variables": {
+                        "AMI": "ami-0c03d5ceacec4a53f",
+                        "COMMAND": "ls; cd /home/ubuntu; ncap_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
+                        "CONFIG": "config.yaml",
+                        "CONFIGDIR": "configs",
+                        "DEPLOY_LIMIT": 100,
+                        "EXECUTION_TIMEOUT": 180,
+                        "IAM_ROLE": "SSMRole",
+                        "INDIR": "inputs",
+                        "INSTANCE_TYPE": "m5.16xlarge",
+                        "KEY_NAME": "testkeystack-custom-dev-key-pair",
+                        "LAUNCH": true,
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MAXCOST": 300,
+                        "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
+                        "SHUTDOWN_BEHAVIOR": "terminate",
+                        "SSM_TIMEOUT": 172000,
+                        "SUBMITDIR": "submissions",
+                        "WORKING_DIRECTORY": "~/bin",
+                        "cwrolearn": {
+                            "Fn::GetAtt": [
+                                "CloudWatchBusRole",
+                                "Arn"
+                            ]
+                        },
+                        "figlambarn": {
+                            "Fn::GetAtt": [
+                                "FigLambda",
+                                "Arn"
+                            ]
+                        },
+                        "figlambid": {
+                            "Ref": "FigLambda"
+                        },
+                        "versionid": "7790858029530a4b396a569dd1f0136216313e3f\n"
+                    }
+                },
+                "Handler": "helper.handler_deldir",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "S3MakePathRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "S3MakePathRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "LambdaBaseRole"
+                    }
+                ],
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "s3:DeleteObject",
+                                        "s3:ListBucket",
+                                        "s3:PutObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "write_s3_policy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "S3PutObjectFunction": {
+            "Properties": {
+                "CodeUri": "../../protocols",
+                "Description": "Puts Objects in S3",
+                "Environment": {
+                    "Variables": {
+                        "AMI": "ami-0c03d5ceacec4a53f",
+                        "COMMAND": "ls; cd /home/ubuntu; ncap_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
+                        "CONFIG": "config.yaml",
+                        "CONFIGDIR": "configs",
+                        "DEPLOY_LIMIT": 100,
+                        "EXECUTION_TIMEOUT": 180,
+                        "IAM_ROLE": "SSMRole",
+                        "INDIR": "inputs",
+                        "INSTANCE_TYPE": "m5.16xlarge",
+                        "KEY_NAME": "testkeystack-custom-dev-key-pair",
+                        "LAUNCH": true,
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MAXCOST": 300,
+                        "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
+                        "SHUTDOWN_BEHAVIOR": "terminate",
+                        "SSM_TIMEOUT": 172000,
+                        "SUBMITDIR": "submissions",
+                        "WORKING_DIRECTORY": "~/bin",
+                        "cwrolearn": {
+                            "Fn::GetAtt": [
+                                "CloudWatchBusRole",
+                                "Arn"
+                            ]
+                        },
+                        "figlambarn": {
+                            "Fn::GetAtt": [
+                                "FigLambda",
+                                "Arn"
+                            ]
+                        },
+                        "figlambid": {
+                            "Ref": "FigLambda"
+                        },
+                        "versionid": "7790858029530a4b396a569dd1f0136216313e3f\n"
+                    }
+                },
+                "Handler": "helper.handler_mkdir",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "S3MakePathRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "SubmitFolderbrunolab": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderbrunolab"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "submissions",
+                "Path": "brunolab/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "SubmitFolderorigdevs": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderorigdevs"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "submissions",
+                "Path": "origdevs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "SubmitFolderpeterkagroup": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderpeterkagroup"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "submissions",
+                "Path": "peterkagroup/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "SubmitFolderwooleylab": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderwooleylab"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "submissions",
+                "Path": "wooleylab/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "UserGroupbrunolabcaimanncapweb": {
+            "Properties": {
+                "GroupName": "brunolabcaimanncapwebgroup",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "s3:GetBucketLocation",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor0"
+                                },
+                                {
+                                    "Action": "s3:HeadBucket",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor3"
+                                },
+                                {
+                                    "Action": "s3:ListAllMyBuckets",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor1"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringEquals": {
+                                            "s3:delimiter": [
+                                                "/"
+                                            ],
+                                            "s3:prefix": [
+                                                "",
+                                                "brunolab/",
+                                                "brunolab/inputs",
+                                                "brunolab/results",
+                                                "logs",
+                                                "brunolab/submissions",
+                                                "brunolab/configs",
+                                                "brunolab/inputs/",
+                                                "brunolab/results/",
+                                                "brunolab/submissions/",
+                                                "brunolab/configs/"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web"
+                                    ],
+                                    "Sid": "ListBucket"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringLike": {
+                                            "s3:prefix": [
+                                                "brunolab/inputs/*",
+                                                "brunolab/results/*",
+                                                "brunolab/configs/*",
+                                                "brunolab/submissions/*"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web"
+                                    ],
+                                    "Sid": "ListSubBucket"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web/brunolab/inputs/*",
+                                        "arn:aws:s3:::caiman-ncap-web/brunolab/configs/*",
+                                        "arn:aws:s3:::caiman-ncap-web/brunolab/submissions/*"
+                                    ],
+                                    "Sid": "Inputfolderwrite"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web/brunolab/results/*",
+                                        "arn:aws:s3:::caiman-ncap-web/brunolab/configs/*"
+                                    ],
+                                    "Sid": "Outputfolderwrite"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "brunolabpolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Group"
+        },
+        "UserGrouporigdevscaimanncapweb": {
+            "Properties": {
+                "GroupName": "origdevscaimanncapwebgroup",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "s3:GetBucketLocation",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor0"
+                                },
+                                {
+                                    "Action": "s3:HeadBucket",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor3"
+                                },
+                                {
+                                    "Action": "s3:ListAllMyBuckets",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor1"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringEquals": {
+                                            "s3:delimiter": [
+                                                "/"
+                                            ],
+                                            "s3:prefix": [
+                                                "",
+                                                "origdevs/",
+                                                "origdevs/inputs",
+                                                "origdevs/results",
+                                                "logs",
+                                                "origdevs/submissions",
+                                                "origdevs/configs",
+                                                "origdevs/inputs/",
+                                                "origdevs/results/",
+                                                "origdevs/submissions/",
+                                                "origdevs/configs/"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web"
+                                    ],
+                                    "Sid": "ListBucket"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringLike": {
+                                            "s3:prefix": [
+                                                "origdevs/inputs/*",
+                                                "origdevs/results/*",
+                                                "origdevs/configs/*",
+                                                "origdevs/submissions/*"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web"
+                                    ],
+                                    "Sid": "ListSubBucket"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web/origdevs/inputs/*",
+                                        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*",
+                                        "arn:aws:s3:::caiman-ncap-web/origdevs/submissions/*"
+                                    ],
+                                    "Sid": "Inputfolderwrite"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web/origdevs/results/*",
+                                        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*"
+                                    ],
+                                    "Sid": "Outputfolderwrite"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "origdevspolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Group"
+        },
+        "UserGrouppeterkagroupcaimanncapweb": {
+            "Properties": {
+                "GroupName": "peterkagroupcaimanncapwebgroup",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "s3:GetBucketLocation",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor0"
+                                },
+                                {
+                                    "Action": "s3:HeadBucket",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor3"
+                                },
+                                {
+                                    "Action": "s3:ListAllMyBuckets",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor1"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringEquals": {
+                                            "s3:delimiter": [
+                                                "/"
+                                            ],
+                                            "s3:prefix": [
+                                                "",
+                                                "peterkagroup/",
+                                                "peterkagroup/inputs",
+                                                "peterkagroup/results",
+                                                "logs",
+                                                "peterkagroup/submissions",
+                                                "peterkagroup/configs",
+                                                "peterkagroup/inputs/",
+                                                "peterkagroup/results/",
+                                                "peterkagroup/submissions/",
+                                                "peterkagroup/configs/"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web"
+                                    ],
+                                    "Sid": "ListBucket"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringLike": {
+                                            "s3:prefix": [
+                                                "peterkagroup/inputs/*",
+                                                "peterkagroup/results/*",
+                                                "peterkagroup/configs/*",
+                                                "peterkagroup/submissions/*"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web"
+                                    ],
+                                    "Sid": "ListSubBucket"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web/peterkagroup/inputs/*",
+                                        "arn:aws:s3:::caiman-ncap-web/peterkagroup/configs/*",
+                                        "arn:aws:s3:::caiman-ncap-web/peterkagroup/submissions/*"
+                                    ],
+                                    "Sid": "Inputfolderwrite"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web/peterkagroup/results/*",
+                                        "arn:aws:s3:::caiman-ncap-web/peterkagroup/configs/*"
+                                    ],
+                                    "Sid": "Outputfolderwrite"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "peterkagrouppolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Group"
+        },
+        "UserGroupwooleylabcaimanncapweb": {
+            "Properties": {
+                "GroupName": "wooleylabcaimanncapwebgroup",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "s3:GetBucketLocation",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor0"
+                                },
+                                {
+                                    "Action": "s3:HeadBucket",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor3"
+                                },
+                                {
+                                    "Action": "s3:ListAllMyBuckets",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor1"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringEquals": {
+                                            "s3:delimiter": [
+                                                "/"
+                                            ],
+                                            "s3:prefix": [
+                                                "",
+                                                "wooleylab/",
+                                                "wooleylab/inputs",
+                                                "wooleylab/results",
+                                                "logs",
+                                                "wooleylab/submissions",
+                                                "wooleylab/configs",
+                                                "wooleylab/inputs/",
+                                                "wooleylab/results/",
+                                                "wooleylab/submissions/",
+                                                "wooleylab/configs/"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web"
+                                    ],
+                                    "Sid": "ListBucket"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringLike": {
+                                            "s3:prefix": [
+                                                "wooleylab/inputs/*",
+                                                "wooleylab/results/*",
+                                                "wooleylab/configs/*",
+                                                "wooleylab/submissions/*"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web"
+                                    ],
+                                    "Sid": "ListSubBucket"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web/wooleylab/inputs/*",
+                                        "arn:aws:s3:::caiman-ncap-web/wooleylab/configs/*",
+                                        "arn:aws:s3:::caiman-ncap-web/wooleylab/submissions/*"
+                                    ],
+                                    "Sid": "Inputfolderwrite"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web/wooleylab/results/*",
+                                        "arn:aws:s3:::caiman-ncap-web/wooleylab/configs/*"
+                                    ],
+                                    "Sid": "Outputfolderwrite"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "wooleylabpolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Group"
+        },
+        "brunolabUserNet": {
+            "Properties": {
+                "GroupName": {
+                    "Ref": "UserGroupbrunolabcaimanncapweb"
+                },
+                "Users": [
+                    "rb2604us-east-1",
+                    "sb4096us-east-1",
+                    "dk2643us-east-1"
+                ]
+            },
+            "Type": "AWS::IAM::UserToGroupAddition"
+        },
+        "origdevsUserNet": {
+            "Properties": {
+                "GroupName": {
+                    "Ref": "UserGrouporigdevscaimanncapweb"
+                },
+                "Users": [
+                    "agiovannuccius-east-1"
+                ]
+            },
+            "Type": "AWS::IAM::UserToGroupAddition"
+        },
+        "peterkagroupUserNet": {
+            "Properties": {
+                "GroupName": {
+                    "Ref": "UserGrouppeterkagroupcaimanncapweb"
+                },
+                "Users": [
+                    "dspus-east-1",
+                    "va2371us-east-1",
+                    "ioc2104us-east-1"
+                ]
+            },
+            "Type": "AWS::IAM::UserToGroupAddition"
+        },
+        "wooleylabUserNet": {
+            "Properties": {
+                "GroupName": {
+                    "Ref": "UserGroupwooleylabcaimanncapweb"
+                },
+                "Users": [
+                    "sw2277us-east-1"
+                ]
+            },
+            "Type": "AWS::IAM::UserToGroupAddition"
+        }
+    },
+    "Transform": "AWS::Serverless-2016-10-31"
+}

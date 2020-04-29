@@ -1,0 +1,7 @@
+{
+    "config":"yassgeneralusers/inputs/config.yaml",
+    "geom":"yassgeneralusers/inputs/geom.txt",
+    "latest":false,
+    "__dataset_size__":300,
+    "__duration__":null
+}

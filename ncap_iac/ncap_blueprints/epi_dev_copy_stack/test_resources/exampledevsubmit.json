@@ -1,0 +1,7 @@
+{
+    "dataname": "examplegroup2/inputs/datafile.txt",
+    "configname": "examplegroup2/inputs/config.yaml",
+    "instance_type": "t2.micro",
+    "timestamp": "444:444:444"
+}
+

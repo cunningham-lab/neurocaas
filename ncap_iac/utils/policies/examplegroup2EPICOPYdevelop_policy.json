@@ -1,0 +1,94 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": "s3:GetBucketLocation",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor3",
+      "Effect": "Allow",
+      "Action": "s3:HeadBucket",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor1",
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ListBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::epi-ncap-copy-stable"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "s3:prefix": [
+            "",
+            "examplegroup2EPICOPYdevelop/",
+            "examplegroup2EPICOPYdevelop/inputs",
+            "examplegroup2EPICOPYdevelop/results",
+            "logs",
+            "examplegroup2EPICOPYdevelop/submissions",
+            "examplegroup2EPICOPYdevelop/configs",
+            "examplegroup2EPICOPYdevelop/inputs/",
+            "examplegroup2EPICOPYdevelop/results/",
+            "examplegroup2EPICOPYdevelop/submissions/",
+            "examplegroup2EPICOPYdevelop/configs/"
+          ],
+          "s3:delimiter": [
+            "/"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ListSubBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::epi-ncap-copy-stable"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "examplegroup2EPICOPYdevelop/inputs/*",
+            "examplegroup2EPICOPYdevelop/results/*",
+            "examplegroup2EPICOPYdevelop/configs/*",
+            "examplegroup2EPICOPYdevelop/submissions/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "Inputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::epi-ncap-copy-stable/examplegroup2EPICOPYdevelop/inputs/*",
+        "arn:aws:s3:::epi-ncap-copy-stable/examplegroup2EPICOPYdevelop/configs/*",
+        "arn:aws:s3:::epi-ncap-copy-stable/examplegroup2EPICOPYdevelop/submissions/*"
+      ]
+    },
+    {
+      "Sid": "Outputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::epi-ncap-copy-stable/examplegroup2EPICOPYdevelop/results/*",
+        "arn:aws:s3:::epi-ncap-copy-stable/examplegroup2EPICOPYdevelop/configs/*"
+      ]
+    }
+  ]
+}
