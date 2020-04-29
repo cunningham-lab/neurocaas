@@ -33,6 +33,10 @@ if [ "$stagestr" == "develop" ]
 then 
     echo "development version."
     python dev_builder.py $PIPEDIR/stack_config_template.json 
+elif [ "$stagestr" == "webdev" ]
+then
+    echo "web development version."
+    python webdev_builder.py $PIPEDIR/stack_config_template.json 
 elif [ "$stagestr" == "deploy" ]
 then
     echo "deployment version."

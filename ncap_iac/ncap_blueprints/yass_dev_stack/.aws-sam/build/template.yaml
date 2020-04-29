@@ -1,4 +1,26 @@
 Resources:
+  BaseFoldercarcealabyassdev:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: yass-ncap-stable
+      DirName: carcealabyassdev
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  BaseFoldersawtelllabyassdevelop:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: yass-ncap-stable
+      DirName: sawtelllabyassdevelop
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   BaseFolderyassgeneralusers:
     DependsOn: PipelineMainBucket
     Properties:
@@ -50,6 +72,32 @@ Resources:
           Sid: IAMPassRoleForCloudWatchEvents
         Version: '2012-10-17'
     Type: AWS::IAM::ManagedPolicy
+  ConfigFoldercarcealabyassdev:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldercarcealabyassdev
+    Properties:
+      BucketName: yass-ncap-stable
+      DirName: configs
+      Path: carcealabyassdev/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  ConfigFoldersawtelllabyassdevelop:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldersawtelllabyassdevelop
+    Properties:
+      BucketName: yass-ncap-stable
+      DirName: configs
+      Path: sawtelllabyassdevelop/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   ConfigFolderyassgeneralusers:
     DependsOn:
     - PipelineMainBucket
@@ -93,6 +141,32 @@ Resources:
       LogGroupName:
         Fn::Sub: /aws/lambda/${FigLambda}
     Type: AWS::Logs::LogGroup
+  InFoldercarcealabyassdev:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldercarcealabyassdev
+    Properties:
+      BucketName: yass-ncap-stable
+      DirName: inputs
+      Path: carcealabyassdev/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  InFoldersawtelllabyassdevelop:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldersawtelllabyassdevelop
+    Properties:
+      BucketName: yass-ncap-stable
+      DirName: inputs
+      Path: sawtelllabyassdevelop/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   InFolderyassgeneralusers:
     DependsOn:
     - PipelineMainBucket
@@ -147,6 +221,19 @@ Resources:
         - S3PutObjectFunction
         - Arn
     Type: AWS::CloudFormation::CustomResource
+  LogFoldercarcealabyassdev:
+    DependsOn:
+    - PipelineMainBucket
+    - LogFolder
+    Properties:
+      BucketName: yass-ncap-stable
+      DirName: carcealabyassdev
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   LogFolderdebug:
     DependsOn:
     - PipelineMainBucket
@@ -154,6 +241,19 @@ Resources:
     Properties:
       BucketName: yass-ncap-stable
       DirName: debugyass-ncap-stable
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LogFoldersawtelllabyassdevelop:
+    DependsOn:
+    - PipelineMainBucket
+    - LogFolder
+    Properties:
+      BucketName: yass-ncap-stable
+      DirName: sawtelllabyassdevelop
       Path: logs/
       ServiceToken:
         Fn::GetAtt:
@@ -193,7 +293,7 @@ Resources:
           LAUNCH: true
           LOGDIR: logs
           LOGFILE: lambda_log.txt
-          MAXCOST: 100
+          MAXCOST: 300
           MISSING_CONFIG_ERROR: We need a config file to analyze data.
           MONITOR: true
           OUTDIR: results
@@ -213,10 +313,38 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '9f4c7bfb45c2f55b934df0b4df562a4ce22878cb
+          versionid: '3a54cf3093db5f4fe4bd5acdef4ec168055767a8
 
             '
       Events:
+        BucketEventcarcealabyassdev:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: carcealabyassdev/submissions
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
+        BucketEventsawtelllabyassdevelop:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: sawtelllabyassdevelop/submissions
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
         BucketEventyassgeneralusers:
           Properties:
             Bucket:
@@ -237,6 +365,32 @@ Resources:
       Runtime: python3.6
       Timeout: 180
     Type: AWS::Serverless::Function
+  OutFoldercarcealabyassdev:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldercarcealabyassdev
+    Properties:
+      BucketName: yass-ncap-stable
+      DirName: results
+      Path: carcealabyassdev/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  OutFoldersawtelllabyassdevelop:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldersawtelllabyassdevelop
+    Properties:
+      BucketName: yass-ncap-stable
+      DirName: results
+      Path: sawtelllabyassdevelop/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   OutFolderyassgeneralusers:
     DependsOn:
     - PipelineMainBucket
@@ -275,7 +429,7 @@ Resources:
           LAUNCH: true
           LOGDIR: logs
           LOGFILE: lambda_log.txt
-          MAXCOST: 100
+          MAXCOST: 300
           MISSING_CONFIG_ERROR: We need a config file to analyze data.
           MONITOR: true
           OUTDIR: results
@@ -295,7 +449,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '9f4c7bfb45c2f55b934df0b4df562a4ce22878cb
+          versionid: '3a54cf3093db5f4fe4bd5acdef4ec168055767a8
 
             '
       Handler: helper.handler_deldir
@@ -351,7 +505,7 @@ Resources:
           LAUNCH: true
           LOGDIR: logs
           LOGFILE: lambda_log.txt
-          MAXCOST: 100
+          MAXCOST: 300
           MISSING_CONFIG_ERROR: We need a config file to analyze data.
           MONITOR: true
           OUTDIR: results
@@ -371,7 +525,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '9f4c7bfb45c2f55b934df0b4df562a4ce22878cb
+          versionid: '3a54cf3093db5f4fe4bd5acdef4ec168055767a8
 
             '
       Handler: helper.handler_mkdir
@@ -382,6 +536,32 @@ Resources:
       Runtime: python3.6
       Timeout: 30
     Type: AWS::Serverless::Function
+  SubmitFoldercarcealabyassdev:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldercarcealabyassdev
+    Properties:
+      BucketName: yass-ncap-stable
+      DirName: submissions
+      Path: carcealabyassdev/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  SubmitFoldersawtelllabyassdevelop:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldersawtelllabyassdevelop
+    Properties:
+      BucketName: yass-ncap-stable
+      DirName: submissions
+      Path: sawtelllabyassdevelop/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   SubmitFolderyassgeneralusers:
     DependsOn:
     - PipelineMainBucket
@@ -395,6 +575,148 @@ Resources:
         - S3PutObjectFunction
         - Arn
     Type: AWS::CloudFormation::CustomResource
+  UserGroupcarcealabyassdev:
+    Properties:
+      GroupName: carcealabyassdevgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - carcealabyassdev/
+                - carcealabyassdev/inputs
+                - carcealabyassdev/results
+                - logs
+                - carcealabyassdev/submissions
+                - carcealabyassdev/configs
+                - carcealabyassdev/inputs/
+                - carcealabyassdev/results/
+                - carcealabyassdev/submissions/
+                - carcealabyassdev/configs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::yass-ncap-stable
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - carcealabyassdev/inputs/*
+                - carcealabyassdev/results/*
+                - carcealabyassdev/configs/*
+                - carcealabyassdev/submissions/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::yass-ncap-stable
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::yass-ncap-stable/carcealabyassdev/inputs/*
+            - arn:aws:s3:::yass-ncap-stable/carcealabyassdev/configs/*
+            - arn:aws:s3:::yass-ncap-stable/carcealabyassdev/submissions/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::yass-ncap-stable/carcealabyassdev/results/*
+            - arn:aws:s3:::yass-ncap-stable/carcealabyassdev/configs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: carcealabyassdevpolicy
+    Type: AWS::IAM::Group
+  UserGroupsawtelllabyassdevelop:
+    Properties:
+      GroupName: sawtelllabyassdevelopgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - sawtelllabyassdevelop/
+                - sawtelllabyassdevelop/inputs
+                - sawtelllabyassdevelop/results
+                - logs
+                - sawtelllabyassdevelop/submissions
+                - sawtelllabyassdevelop/configs
+                - sawtelllabyassdevelop/inputs/
+                - sawtelllabyassdevelop/results/
+                - sawtelllabyassdevelop/submissions/
+                - sawtelllabyassdevelop/configs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::yass-ncap-stable
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - sawtelllabyassdevelop/inputs/*
+                - sawtelllabyassdevelop/results/*
+                - sawtelllabyassdevelop/configs/*
+                - sawtelllabyassdevelop/submissions/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::yass-ncap-stable
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::yass-ncap-stable/sawtelllabyassdevelop/inputs/*
+            - arn:aws:s3:::yass-ncap-stable/sawtelllabyassdevelop/configs/*
+            - arn:aws:s3:::yass-ncap-stable/sawtelllabyassdevelop/submissions/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::yass-ncap-stable/sawtelllabyassdevelop/results/*
+            - arn:aws:s3:::yass-ncap-stable/sawtelllabyassdevelop/configs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: sawtelllabyassdeveloppolicy
+    Type: AWS::IAM::Group
   UserGroupyassgeneralusers:
     Properties:
       GroupName: yassgeneralusersgroup
@@ -466,6 +788,21 @@ Resources:
           Version: '2012-10-17'
         PolicyName: yassgeneraluserspolicy
     Type: AWS::IAM::Group
+  carcealabyassdevUserNet:
+    Properties:
+      GroupName:
+        Ref: UserGroupcarcealabyassdev
+      Users:
+      - ioanacarceaus-east-1
+      - zahraadahmanus-east-1
+    Type: AWS::IAM::UserToGroupAddition
+  sawtelllabyassdevelopUserNet:
+    Properties:
+      GroupName:
+        Ref: UserGroupsawtelllabyassdevelop
+      Users:
+      - aw3057us-east-1
+    Type: AWS::IAM::UserToGroupAddition
   yassgeneralusersUserNet:
     Properties:
       GroupName:

@@ -1,0 +1,1492 @@
+Resources:
+  BaseFolderbendeskylab:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: bendeskylab
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  BaseFolderbrunolab:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: brunolab
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  BaseFolderctnncapdev:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: ctnncapdev
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  BaseFolderhillmanlab:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: hillmanlab
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  BaseFoldermannlab:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: mannlab
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  BaseFolderorigdevs:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: origdevs
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  BaseFoldersawtelllab:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: sawtelllab
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  CWPermissions:
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: FigLambda
+      Principal: events.amazonaws.com
+    Type: AWS::Lambda::Permission
+  CloudWatchBusRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - events.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - Ref: CloudwatchBusPolicy
+    Type: AWS::IAM::Role
+  CloudwatchBusPolicy:
+    Properties:
+      Description:
+        Fn::Join:
+        - ' '
+        - - Base Policy for all lambda function roles in
+          - Ref: AWS::StackName
+      PolicyDocument:
+        Statement:
+        - Action: events:*
+          Effect: Allow
+          Resource: '*'
+          Sid: CloudWatchEventsFullAccess
+        - Action: iam:PassRole
+          Effect: Allow
+          Resource: arn:aws:iam::*:role/AWS_Events_Invoke_Targets
+          Sid: IAMPassRoleForCloudWatchEvents
+        Version: '2012-10-17'
+    Type: AWS::IAM::ManagedPolicy
+  ConfigFolderbendeskylab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbendeskylab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: configs
+      Path: bendeskylab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  ConfigFolderbrunolab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbrunolab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: configs
+      Path: brunolab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  ConfigFolderctnncapdev:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderctnncapdev
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: configs
+      Path: ctnncapdev/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  ConfigFolderhillmanlab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderhillmanlab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: configs
+      Path: hillmanlab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  ConfigFoldermannlab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldermannlab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: configs
+      Path: mannlab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  ConfigFolderorigdevs:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderorigdevs
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: configs
+      Path: origdevs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  ConfigFoldersawtelllab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldersawtelllab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: configs
+      Path: sawtelllab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  DeleteCustomResource:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: dlc-ncap-web
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  FigLambda:
+    Properties:
+      CodeUri: FigLambda
+      Description: Lambda Function logging start/stop for NCAP
+      Environment:
+        Variables:
+          BUCKET_NAME: dlc-ncap-web
+          INDIR: inputs
+          REGION: us-east-1
+      Events: {}
+      Handler: log.monitor_updater
+      MemorySize: 128
+      Role: arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ
+      Runtime: python3.6
+      Timeout: 90
+    Type: AWS::Serverless::Function
+  FignameLogGroup:
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/${FigLambda}
+    Type: AWS::Logs::LogGroup
+  InFolderbendeskylab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbendeskylab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: inputs
+      Path: bendeskylab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  InFolderbrunolab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbrunolab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: inputs
+      Path: brunolab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  InFolderctnncapdev:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderctnncapdev
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: inputs
+      Path: ctnncapdev/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  InFolderhillmanlab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderhillmanlab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: inputs
+      Path: hillmanlab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  InFoldermannlab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldermannlab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: inputs
+      Path: mannlab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  InFolderorigdevs:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderorigdevs
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: inputs
+      Path: origdevs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  InFoldersawtelllab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldersawtelllab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: inputs
+      Path: sawtelllab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LambdaBaseRole:
+    Properties:
+      Description:
+        Fn::Join:
+        - ' '
+        - - Base Policy for all lambda function roles in
+          - Ref: AWS::StackName
+      PolicyDocument:
+        Statement:
+        - Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Effect: Allow
+          Resource: arn:aws:logs:*:*:*
+        Version: '2012-10-17'
+    Type: AWS::IAM::ManagedPolicy
+  LogFolder:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: logs
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LogFolderactive:
+    DependsOn:
+    - PipelineMainBucket
+    - LogFolder
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: active
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LogFolderbendeskylab:
+    DependsOn:
+    - PipelineMainBucket
+    - LogFolder
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: bendeskylab
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LogFolderbrunolab:
+    DependsOn:
+    - PipelineMainBucket
+    - LogFolder
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: brunolab
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LogFolderctnncapdev:
+    DependsOn:
+    - PipelineMainBucket
+    - LogFolder
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: ctnncapdev
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LogFolderdebug:
+    DependsOn:
+    - PipelineMainBucket
+    - LogFolder
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: debugdlc-ncap-web
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LogFolderhillmanlab:
+    DependsOn:
+    - PipelineMainBucket
+    - LogFolder
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: hillmanlab
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LogFoldermannlab:
+    DependsOn:
+    - PipelineMainBucket
+    - LogFolder
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: mannlab
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LogFolderorigdevs:
+    DependsOn:
+    - PipelineMainBucket
+    - LogFolder
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: origdevs
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LogFoldersawtelllab:
+    DependsOn:
+    - PipelineMainBucket
+    - LogFolder
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: sawtelllab
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  MainLambda:
+    Properties:
+      CodeUri: MainLambda
+      Description: Main Lambda Function for Serverless
+      Environment:
+        Variables:
+          AMI: ami-08908548fb646cbcc
+          COMMAND: ls; cd /home/ubuntu; ncap_remote/dlc_rc.sh "{}" "{}" "{}" "{}";
+            . ncap_remote/ncap_utils/workflow.sh; cleanup
+          CONFIG: config.yaml
+          CONFIGDIR: configs
+          DEPLOY_LIMIT: 300
+          EXECUTION_TIMEOUT: 180
+          IAM_ROLE: SSMRole
+          INDIR: inputs
+          INSTANCE_TYPE: p3.2xlarge
+          KEY_NAME: testkeystack-custom-dev-key-pair
+          LAUNCH: true
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MAXCOST: 100
+          MISSING_CONFIG_ERROR: We need a config file to analyze data.
+          MONITOR: true
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3
+          SHUTDOWN_BEHAVIOR: terminate
+          SSM_TIMEOUT: 172000
+          SUBMITDIR: submissions
+          WORKING_DIRECTORY: /home/ubuntu
+          cwrolearn:
+            Fn::GetAtt:
+            - CloudWatchBusRole
+            - Arn
+          figlambarn:
+            Fn::GetAtt:
+            - FigLambda
+            - Arn
+          figlambid:
+            Ref: FigLambda
+          versionid: 'd19301500f43ee362e2eae7b3fce125830b2b3a1
+
+            '
+      Events:
+        BucketEventbendeskylab:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: bendeskylab/submissions
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
+        BucketEventbrunolab:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: brunolab/submissions
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
+        BucketEventctnncapdev:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: ctnncapdev/submissions
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
+        BucketEventhillmanlab:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: hillmanlab/submissions
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
+        BucketEventmannlab:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: mannlab/submissions
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
+        BucketEventorigdevs:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: origdevs/submissions
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
+        BucketEventsawtelllab:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: sawtelllab/submissions
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
+      Handler: submit_start.handler_develop
+      MemorySize: 128
+      Role: arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ
+      Runtime: python3.6
+      Timeout: 180
+    Type: AWS::Serverless::Function
+  OutFolderbendeskylab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbendeskylab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: results
+      Path: bendeskylab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  OutFolderbrunolab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbrunolab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: results
+      Path: brunolab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  OutFolderctnncapdev:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderctnncapdev
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: results
+      Path: ctnncapdev/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  OutFolderhillmanlab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderhillmanlab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: results
+      Path: hillmanlab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  OutFoldermannlab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldermannlab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: results
+      Path: mannlab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  OutFolderorigdevs:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderorigdevs
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: results
+      Path: origdevs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  OutFoldersawtelllab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldersawtelllab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: results
+      Path: sawtelllab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  PipelineMainBucket:
+    Properties:
+      AccessControl: Private
+      BucketName: dlc-ncap-web
+    Type: AWS::S3::Bucket
+  S3DelObjectFunction:
+    Properties:
+      CodeUri: S3DelObjectFunction
+      Description: Deletes Objects from S3
+      Environment:
+        Variables:
+          AMI: ami-08908548fb646cbcc
+          COMMAND: ls; cd /home/ubuntu; ncap_remote/dlc_rc.sh "{}" "{}" "{}" "{}";
+            . ncap_remote/ncap_utils/workflow.sh; cleanup
+          CONFIG: config.yaml
+          CONFIGDIR: configs
+          DEPLOY_LIMIT: 300
+          EXECUTION_TIMEOUT: 180
+          IAM_ROLE: SSMRole
+          INDIR: inputs
+          INSTANCE_TYPE: p3.2xlarge
+          KEY_NAME: testkeystack-custom-dev-key-pair
+          LAUNCH: true
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MAXCOST: 100
+          MISSING_CONFIG_ERROR: We need a config file to analyze data.
+          MONITOR: true
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3
+          SHUTDOWN_BEHAVIOR: terminate
+          SSM_TIMEOUT: 172000
+          SUBMITDIR: submissions
+          WORKING_DIRECTORY: /home/ubuntu
+          cwrolearn:
+            Fn::GetAtt:
+            - CloudWatchBusRole
+            - Arn
+          figlambarn:
+            Fn::GetAtt:
+            - FigLambda
+            - Arn
+          figlambid:
+            Ref: FigLambda
+          versionid: 'd19301500f43ee362e2eae7b3fce125830b2b3a1
+
+            '
+      Handler: helper.handler_deldir
+      Role:
+        Fn::GetAtt:
+        - S3MakePathRole
+        - Arn
+      Runtime: python3.6
+      Timeout: 30
+    Type: AWS::Serverless::Function
+  S3MakePathRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - Ref: LambdaBaseRole
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - s3:DeleteObject
+            - s3:ListBucket
+            - s3:PutObject
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: write_s3_policy
+    Type: AWS::IAM::Role
+  S3PutObjectFunction:
+    Properties:
+      CodeUri: S3PutObjectFunction
+      Description: Puts Objects in S3
+      Environment:
+        Variables:
+          AMI: ami-08908548fb646cbcc
+          COMMAND: ls; cd /home/ubuntu; ncap_remote/dlc_rc.sh "{}" "{}" "{}" "{}";
+            . ncap_remote/ncap_utils/workflow.sh; cleanup
+          CONFIG: config.yaml
+          CONFIGDIR: configs
+          DEPLOY_LIMIT: 300
+          EXECUTION_TIMEOUT: 180
+          IAM_ROLE: SSMRole
+          INDIR: inputs
+          INSTANCE_TYPE: p3.2xlarge
+          KEY_NAME: testkeystack-custom-dev-key-pair
+          LAUNCH: true
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MAXCOST: 100
+          MISSING_CONFIG_ERROR: We need a config file to analyze data.
+          MONITOR: true
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3
+          SHUTDOWN_BEHAVIOR: terminate
+          SSM_TIMEOUT: 172000
+          SUBMITDIR: submissions
+          WORKING_DIRECTORY: /home/ubuntu
+          cwrolearn:
+            Fn::GetAtt:
+            - CloudWatchBusRole
+            - Arn
+          figlambarn:
+            Fn::GetAtt:
+            - FigLambda
+            - Arn
+          figlambid:
+            Ref: FigLambda
+          versionid: 'd19301500f43ee362e2eae7b3fce125830b2b3a1
+
+            '
+      Handler: helper.handler_mkdir
+      Role:
+        Fn::GetAtt:
+        - S3MakePathRole
+        - Arn
+      Runtime: python3.6
+      Timeout: 30
+    Type: AWS::Serverless::Function
+  SubmitFolderbendeskylab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbendeskylab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: submissions
+      Path: bendeskylab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  SubmitFolderbrunolab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderbrunolab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: submissions
+      Path: brunolab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  SubmitFolderctnncapdev:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderctnncapdev
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: submissions
+      Path: ctnncapdev/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  SubmitFolderhillmanlab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderhillmanlab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: submissions
+      Path: hillmanlab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  SubmitFoldermannlab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldermannlab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: submissions
+      Path: mannlab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  SubmitFolderorigdevs:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderorigdevs
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: submissions
+      Path: origdevs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  SubmitFoldersawtelllab:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFoldersawtelllab
+    Properties:
+      BucketName: dlc-ncap-web
+      DirName: submissions
+      Path: sawtelllab/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  UserGroupbendeskylabdlcncapweb:
+    Properties:
+      GroupName: bendeskylabdlcncapwebgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - bendeskylab/
+                - bendeskylab/inputs
+                - bendeskylab/results
+                - logs
+                - bendeskylab/submissions
+                - bendeskylab/configs
+                - bendeskylab/inputs/
+                - bendeskylab/results/
+                - bendeskylab/submissions/
+                - bendeskylab/configs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - bendeskylab/inputs/*
+                - bendeskylab/results/*
+                - bendeskylab/configs/*
+                - bendeskylab/submissions/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web/bendeskylab/inputs/*
+            - arn:aws:s3:::dlc-ncap-web/bendeskylab/configs/*
+            - arn:aws:s3:::dlc-ncap-web/bendeskylab/submissions/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web/bendeskylab/results/*
+            - arn:aws:s3:::dlc-ncap-web/bendeskylab/configs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: bendeskylabpolicy
+    Type: AWS::IAM::Group
+  UserGroupbrunolabdlcncapweb:
+    Properties:
+      GroupName: brunolabdlcncapwebgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - brunolab/
+                - brunolab/inputs
+                - brunolab/results
+                - logs
+                - brunolab/submissions
+                - brunolab/configs
+                - brunolab/inputs/
+                - brunolab/results/
+                - brunolab/submissions/
+                - brunolab/configs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - brunolab/inputs/*
+                - brunolab/results/*
+                - brunolab/configs/*
+                - brunolab/submissions/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web/brunolab/inputs/*
+            - arn:aws:s3:::dlc-ncap-web/brunolab/configs/*
+            - arn:aws:s3:::dlc-ncap-web/brunolab/submissions/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web/brunolab/results/*
+            - arn:aws:s3:::dlc-ncap-web/brunolab/configs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: brunolabpolicy
+    Type: AWS::IAM::Group
+  UserGroupctnncapdevdlcncapweb:
+    Properties:
+      GroupName: ctnncapdevdlcncapwebgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - ctnncapdev/
+                - ctnncapdev/inputs
+                - ctnncapdev/results
+                - logs
+                - ctnncapdev/submissions
+                - ctnncapdev/configs
+                - ctnncapdev/inputs/
+                - ctnncapdev/results/
+                - ctnncapdev/submissions/
+                - ctnncapdev/configs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - ctnncapdev/inputs/*
+                - ctnncapdev/results/*
+                - ctnncapdev/configs/*
+                - ctnncapdev/submissions/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web/ctnncapdev/inputs/*
+            - arn:aws:s3:::dlc-ncap-web/ctnncapdev/configs/*
+            - arn:aws:s3:::dlc-ncap-web/ctnncapdev/submissions/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web/ctnncapdev/results/*
+            - arn:aws:s3:::dlc-ncap-web/ctnncapdev/configs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: ctnncapdevpolicy
+    Type: AWS::IAM::Group
+  UserGrouphillmanlabdlcncapweb:
+    Properties:
+      GroupName: hillmanlabdlcncapwebgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - hillmanlab/
+                - hillmanlab/inputs
+                - hillmanlab/results
+                - logs
+                - hillmanlab/submissions
+                - hillmanlab/configs
+                - hillmanlab/inputs/
+                - hillmanlab/results/
+                - hillmanlab/submissions/
+                - hillmanlab/configs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - hillmanlab/inputs/*
+                - hillmanlab/results/*
+                - hillmanlab/configs/*
+                - hillmanlab/submissions/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web/hillmanlab/inputs/*
+            - arn:aws:s3:::dlc-ncap-web/hillmanlab/configs/*
+            - arn:aws:s3:::dlc-ncap-web/hillmanlab/submissions/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web/hillmanlab/results/*
+            - arn:aws:s3:::dlc-ncap-web/hillmanlab/configs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: hillmanlabpolicy
+    Type: AWS::IAM::Group
+  UserGroupmannlabdlcncapweb:
+    Properties:
+      GroupName: mannlabdlcncapwebgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - mannlab/
+                - mannlab/inputs
+                - mannlab/results
+                - logs
+                - mannlab/submissions
+                - mannlab/configs
+                - mannlab/inputs/
+                - mannlab/results/
+                - mannlab/submissions/
+                - mannlab/configs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - mannlab/inputs/*
+                - mannlab/results/*
+                - mannlab/configs/*
+                - mannlab/submissions/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web/mannlab/inputs/*
+            - arn:aws:s3:::dlc-ncap-web/mannlab/configs/*
+            - arn:aws:s3:::dlc-ncap-web/mannlab/submissions/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web/mannlab/results/*
+            - arn:aws:s3:::dlc-ncap-web/mannlab/configs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: mannlabpolicy
+    Type: AWS::IAM::Group
+  UserGrouporigdevsdlcncapweb:
+    Properties:
+      GroupName: origdevsdlcncapwebgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - origdevs/
+                - origdevs/inputs
+                - origdevs/results
+                - logs
+                - origdevs/submissions
+                - origdevs/configs
+                - origdevs/inputs/
+                - origdevs/results/
+                - origdevs/submissions/
+                - origdevs/configs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - origdevs/inputs/*
+                - origdevs/results/*
+                - origdevs/configs/*
+                - origdevs/submissions/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web/origdevs/inputs/*
+            - arn:aws:s3:::dlc-ncap-web/origdevs/configs/*
+            - arn:aws:s3:::dlc-ncap-web/origdevs/submissions/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web/origdevs/results/*
+            - arn:aws:s3:::dlc-ncap-web/origdevs/configs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: origdevspolicy
+    Type: AWS::IAM::Group
+  UserGroupsawtelllabdlcncapweb:
+    Properties:
+      GroupName: sawtelllabdlcncapwebgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - sawtelllab/
+                - sawtelllab/inputs
+                - sawtelllab/results
+                - logs
+                - sawtelllab/submissions
+                - sawtelllab/configs
+                - sawtelllab/inputs/
+                - sawtelllab/results/
+                - sawtelllab/submissions/
+                - sawtelllab/configs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - sawtelllab/inputs/*
+                - sawtelllab/results/*
+                - sawtelllab/configs/*
+                - sawtelllab/submissions/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web/sawtelllab/inputs/*
+            - arn:aws:s3:::dlc-ncap-web/sawtelllab/configs/*
+            - arn:aws:s3:::dlc-ncap-web/sawtelllab/submissions/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::dlc-ncap-web/sawtelllab/results/*
+            - arn:aws:s3:::dlc-ncap-web/sawtelllab/configs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: sawtelllabpolicy
+    Type: AWS::IAM::Group
+  bendeskylabUserNet:
+    Properties:
+      GroupName:
+        Ref: UserGroupbendeskylabdlcncapweb
+      Users:
+      - ps3121us-east-1
+      - aln2128us-east-1
+      - fh3050us-east-1
+    Type: AWS::IAM::UserToGroupAddition
+  brunolabUserNet:
+    Properties:
+      GroupName:
+        Ref: UserGroupbrunolabdlcncapweb
+      Users:
+      - rb2604us-east-1
+      - sb4096us-east-1
+      - dk2643us-east-1
+    Type: AWS::IAM::UserToGroupAddition
+  ctnncapdevUserNet:
+    Properties:
+      GroupName:
+        Ref: UserGroupctnncapdevdlcncapweb
+      Users:
+      - ta2507us-east-1
+    Type: AWS::IAM::UserToGroupAddition
+  hillmanlabUserNet:
+    Properties:
+      GroupName:
+        Ref: UserGrouphillmanlabdlcncapweb
+      Users:
+      - hillmanlabaccountus-east-1
+    Type: AWS::IAM::UserToGroupAddition
+  mannlabUserNet:
+    Properties:
+      GroupName:
+        Ref: UserGroupmannlabdlcncapweb
+      Users:
+      - sz2835us-east-1
+    Type: AWS::IAM::UserToGroupAddition
+  origdevsUserNet:
+    Properties:
+      GroupName:
+        Ref: UserGrouporigdevsdlcncapweb
+      Users:
+      - mmathisus-east-1
+      - amathisus-east-1
+    Type: AWS::IAM::UserToGroupAddition
+  sawtelllabUserNet:
+    Properties:
+      GroupName:
+        Ref: UserGroupsawtelllabdlcncapweb
+      Users:
+      - aw3057us-east-1
+      - raw2163us-east-1
+      - hxh2001us-east-1
+      - qz2311us-east-1
+    Type: AWS::IAM::UserToGroupAddition
+Transform: AWS::Serverless-2016-10-31

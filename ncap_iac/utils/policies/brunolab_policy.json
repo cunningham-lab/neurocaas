@@ -24,7 +24,7 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::ctnncap213example"
+        "arn:aws:s3:::caiman-ncap-web"
       ],
       "Condition": {
         "StringEquals": {
@@ -33,10 +33,13 @@
             "brunolab/",
             "brunolab/inputs",
             "brunolab/results",
-            "brunolab/logs",
+            "logs",
+            "brunolab/submissions",
+            "brunolab/configs",
             "brunolab/inputs/",
             "brunolab/results/",
-            "brunolab/logs/"
+            "brunolab/submissions/",
+            "brunolab/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -49,14 +52,15 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::ctnncap213example"
+        "arn:aws:s3:::caiman-ncap-web"
       ],
       "Condition": {
         "StringLike": {
           "s3:prefix": [
             "brunolab/inputs/*",
             "brunolab/results/*",
-            "brunolab/logs/*"
+            "brunolab/configs/*",
+            "brunolab/submissions/*"
           ]
         }
       }
@@ -69,7 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::ctnncap213example/brunolab/inputs/*"
+        "arn:aws:s3:::caiman-ncap-web/brunolab/inputs/*",
+        "arn:aws:s3:::caiman-ncap-web/brunolab/configs/*",
+        "arn:aws:s3:::caiman-ncap-web/brunolab/submissions/*"
       ]
     },
     {
@@ -80,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::ctnncap213example/brunolab/results/*",
-        "arn:aws:s3:::ctnncap213example/brunolab/logs/*"
+        "arn:aws:s3:::caiman-ncap-web/brunolab/results/*",
+        "arn:aws:s3:::caiman-ncap-web/brunolab/configs/*"
       ]
     }
   ]

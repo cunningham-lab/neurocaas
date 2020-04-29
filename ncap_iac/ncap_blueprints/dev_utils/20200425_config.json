@@ -1,0 +1,7 @@
+{
+    "analysis"
+    "modeldata":{
+	    "modelpath": "sawtelllabdlcdevelop/inputs/fish_trackerSep11-trainset95shuffle1/",
+        "configpath": "sawtelllabdlcdevelop/inputs/myconfig_analysis_ncap.py"
+        }
+}

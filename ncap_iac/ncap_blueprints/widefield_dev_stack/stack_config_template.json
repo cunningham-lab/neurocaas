@@ -8,7 +8,7 @@
         "Launch":true, 
         "LambdaConfig":{
             "AMI":"ami-045deefcfb062fd2a",
-            "INSTANCE_TYPE": "default instance type",
+            "INSTANCE_TYPE": "",
             "REGION": "us-east-1",
             "SECURITY_GROUPS":"testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
             "IAM_ROLE":"SSMRole",

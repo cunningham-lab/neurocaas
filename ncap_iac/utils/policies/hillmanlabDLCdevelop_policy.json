@@ -1,0 +1,94 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": "s3:GetBucketLocation",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor3",
+      "Effect": "Allow",
+      "Action": "s3:HeadBucket",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor1",
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ListBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap-stable"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "s3:prefix": [
+            "",
+            "hillmanlabdlcdevelop/",
+            "hillmanlabdlcdevelop/inputs",
+            "hillmanlabdlcdevelop/results",
+            "logs",
+            "hillmanlabdlcdevelop/submissions",
+            "hillmanlabdlcdevelop/configs",
+            "hillmanlabdlcdevelop/inputs/",
+            "hillmanlabdlcdevelop/results/",
+            "hillmanlabdlcdevelop/submissions/",
+            "hillmanlabdlcdevelop/configs/"
+          ],
+          "s3:delimiter": [
+            "/"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ListSubBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap-stable"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "hillmanlabdlcdevelop/inputs/*",
+            "hillmanlabdlcdevelop/results/*",
+            "hillmanlabdlcdevelop/configs/*",
+            "hillmanlabdlcdevelop/submissions/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "Inputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap-stable/hillmanlabdlcdevelop/inputs/*",
+        "arn:aws:s3:::dlc-ncap-stable/hillmanlabdlcdevelop/configs/*",
+        "arn:aws:s3:::dlc-ncap-stable/hillmanlabdlcdevelop/submissions/*"
+      ]
+    },
+    {
+      "Sid": "Outputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap-stable/hillmanlabdlcdevelop/results/*",
+        "arn:aws:s3:::dlc-ncap-stable/hillmanlabdlcdevelop/configs/*"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": "s3:GetBucketLocation",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor3",
+      "Effect": "Allow",
+      "Action": "s3:HeadBucket",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor1",
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ListBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::caiman-ncap-stable"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "s3:prefix": [
+            "",
+            "peterkagroupcaimandevelop/",
+            "peterkagroupcaimandevelop/inputs",
+            "peterkagroupcaimandevelop/results",
+            "logs",
+            "peterkagroupcaimandevelop/submissions",
+            "peterkagroupcaimandevelop/configs",
+            "peterkagroupcaimandevelop/inputs/",
+            "peterkagroupcaimandevelop/results/",
+            "peterkagroupcaimandevelop/submissions/",
+            "peterkagroupcaimandevelop/configs/"
+          ],
+          "s3:delimiter": [
+            "/"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ListSubBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::caiman-ncap-stable"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "peterkagroupcaimandevelop/inputs/*",
+            "peterkagroupcaimandevelop/results/*",
+            "peterkagroupcaimandevelop/configs/*",
+            "peterkagroupcaimandevelop/submissions/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "Inputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::caiman-ncap-stable/peterkagroupcaimandevelop/inputs/*",
+        "arn:aws:s3:::caiman-ncap-stable/peterkagroupcaimandevelop/configs/*",
+        "arn:aws:s3:::caiman-ncap-stable/peterkagroupcaimandevelop/submissions/*"
+      ]
+    },
+    {
+      "Sid": "Outputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::caiman-ncap-stable/peterkagroupcaimandevelop/results/*",
+        "arn:aws:s3:::caiman-ncap-stable/peterkagroupcaimandevelop/configs/*"
+      ]
+    }
+  ]
+}

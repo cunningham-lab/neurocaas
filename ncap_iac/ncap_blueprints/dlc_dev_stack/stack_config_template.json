@@ -1,7 +1,7 @@
 {
     "PipelineName": "dlc-ncap-stable",
     "REGION": "us-east-1",
-    "STAGE": "develop",
+    "STAGE": "webdev",
     "Lambda": {
         "CodeUri": "../../protocols",
         "Handler": "submit_start.handler_develop",

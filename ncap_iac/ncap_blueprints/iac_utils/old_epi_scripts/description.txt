@@ -1,0 +1,1 @@
+Folder containing development scripts for EPI as shown during COSYNE 2020. to run, bring them into the folder above. They are compatible only with EPI stacks. 

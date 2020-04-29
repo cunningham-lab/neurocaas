@@ -24,7 +24,7 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::bendeskymonitored"
+        "arn:aws:s3:::dlc-ncap-web"
       ],
       "Condition": {
         "StringEquals": {
@@ -33,10 +33,13 @@
             "bendeskylab/",
             "bendeskylab/inputs",
             "bendeskylab/results",
-            "bendeskylab/logs",
+            "logs",
+            "bendeskylab/submissions",
+            "bendeskylab/configs",
             "bendeskylab/inputs/",
             "bendeskylab/results/",
-            "bendeskylab/logs/"
+            "bendeskylab/submissions/",
+            "bendeskylab/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -49,14 +52,15 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::bendeskymonitored"
+        "arn:aws:s3:::dlc-ncap-web"
       ],
       "Condition": {
         "StringLike": {
           "s3:prefix": [
             "bendeskylab/inputs/*",
             "bendeskylab/results/*",
-            "bendeskylab/logs/*"
+            "bendeskylab/configs/*",
+            "bendeskylab/submissions/*"
           ]
         }
       }
@@ -69,7 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::bendeskymonitored/bendeskylab/inputs/*"
+        "arn:aws:s3:::dlc-ncap-web/bendeskylab/inputs/*",
+        "arn:aws:s3:::dlc-ncap-web/bendeskylab/configs/*",
+        "arn:aws:s3:::dlc-ncap-web/bendeskylab/submissions/*"
       ]
     },
     {
@@ -80,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::bendeskymonitored/bendeskylab/results/*",
-        "arn:aws:s3:::bendeskymonitored/bendeskylab/logs/*"
+        "arn:aws:s3:::dlc-ncap-web/bendeskylab/results/*",
+        "arn:aws:s3:::dlc-ncap-web/bendeskylab/configs/*"
       ]
     }
   ]
