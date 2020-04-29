@@ -1,15 +1,15 @@
 {
     "PipelineName":"bucket name. must be lowercase alphanumeric (dashes okay)",
     "REGION":"AWS region code (example us-east-1)",
-    "STAGE":"develop or deploy",
+    "STAGE":"webdev (default) develop or deploy",
     "Lambda":{
         "CodeUri":"../lambda_repo",
         "Handler":"submit_start.handler_log_dev",
         "Launch":true, 
         "LambdaConfig":{
-            "AMI":"ami-045deefcfb062fd2a",
+            "AMI":"instance id",
             "INSTANCE_TYPE": "default instance type",
-            "REGION": "us-east-1",
+            "REGION": "AWS region code",
             "SECURITY_GROUPS":"testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
             "IAM_ROLE":"SSMRole",
             "KEY_NAME":"testkeystack-custom-dev-key-pair",
@@ -23,8 +23,8 @@
             "LAUNCH":true,
             "LOGFILE":"lambda_log.txt",
             "DEPLOY_LIMIT":100,
-            "MAXCOST":"maximum per user allowed cost (integer) before lockout",
-            "MONITOR":false
+            "MAXCOST":"maximum per user allowed cost (integer) before lockout. Set to 300 by default.",
+            "MONITOR":true
         }
     },
     "UXData":{
