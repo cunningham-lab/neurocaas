@@ -66,7 +66,7 @@ class NeuroCaaSAMI(object):
         self.ami_hist = []
         self.instance_saved = False
 
-    def launch_ami(self,ami = None):
+    def launch_ami(self,ami = None,dataset_size = None):
         """
         Launches an instance from an ami. If ami is not given, launches the default ami of the pipeline as indicated in the stack configuration file. Launches on the instance type given in this same stack configuration file.
 
@@ -97,17 +97,40 @@ class NeuroCaaSAMI(object):
         instance_type = self.config['Lambda']['LambdaConfig']['INSTANCE_TYPE']
         ec2_resource = boto3.resource('ec2')
         assert self.check_clear()
-        out = ec2_resource.create_instances(ImageId=ami_id,
-                InstanceType = instance_type,
-                MinCount=1,
-                MaxCount=1,
-                DryRun=False,
-                KeyName = "testkeystack-custom-dev-key-pair", 
-                #SecurityGroups=['testsgstack-SecurityGroupDev-1NQJIDBJG16KK'],
-                SecurityGroups=[gpdict["securitygroupdevname"]],
-                IamInstanceProfile={
-                    'Name':'SSMRole'})
-        ## Now get the instance id:
+        if dataset_size is None:
+            out = ec2_resource.create_instances(ImageId=ami_id,
+                    InstanceType = instance_type,
+                    MinCount=1,
+                    MaxCount=1,
+                    DryRun=False,
+                    KeyName = "testkeystack-custom-dev-key-pair", 
+                    #SecurityGroups=['testsgstack-SecurityGroupDev-1NQJIDBJG16KK'],
+                    SecurityGroups=[gpdict["securitygroupdevname"]],
+                    IamInstanceProfile={
+                        'Name':'SSMRole'})
+        else: 
+            instances = ec2_resource.create_instances(
+                    BlockDeviceMappings=[
+                        {
+                            "DeviceName": "/dev/sda1",
+                            "Ebs": {
+                                "DeleteOnTermination": True,
+                                "VolumeSize":dataset_size,
+                                "VolumeType":"gp2",
+                                "Encrypted": False
+                                }
+                            
+                            }],
+                    ImageId=ami_id,
+                    InstanceType=instance_type,
+                    MinCount=1,
+                    MaxCount=1,
+                    DryRun=False,
+                    KeyName="testkeystack-custom-dev-key-pair",
+                    SecurityGroups=[gpdict["securitygroupdevname"]],
+                    IamInstanceProfile={'Name': "SSMRole"}
+                )
+# Now get the instance id:
         self.instance = out[0]
         ## Add to the history:
         self.instance_hist.append(out[0])
