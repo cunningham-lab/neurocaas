@@ -2,9 +2,9 @@ Main repository for the [NeuroCAAS project](neurocaas.com), providing a neurosci
 
 This repository hosts all of the Code that makes up our IaC approach, with structure as described in the paper [Link to pdf here]
 Structure: 
-- paper (material specifically related to the NeuroCaaS paper)
+- paper (material specifically related to the NeuroCAAS paper)
 - media (demo movies, slides, etc.)
-- experiments (benchmarking code for NeuroCaaS on existing algorithms)
+- experiments (benchmarking code for NeuroCAAS on existing algorithms)
 - ncap\_iac (the core code of the project)
     - ncap blueprints (code representing analysis pipelines.)
     - user profiles (code representing users.)
@@ -21,10 +21,10 @@ Structure:
 - jq (json parser)
 
 Coming soon:
--SSM [link]
--voltage imaging pipeline [link]
--deep graph pose [link]
--gene spot finder
+- SSM [link]
+- voltage imaging pipeline [link]
+- deep graph pose [link]
+- gene spot finder
 
 Future directions:
 - website-based dev portal
