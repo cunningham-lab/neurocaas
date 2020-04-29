@@ -12,7 +12,7 @@ import pathlib
 ## Get global parameters:
 utildir = pathlib.Path(__file__).parent.absolute()
 basedir = os.path.dirname(os.path.dirname(utildir))
-with open(os.path.join(basedir,"global_params.json")) as gp:
+with open(os.path.join(basedir,"global_params_initialized.json")) as gp:
     gpdict = json.load(gp)
 
 ## New class to develop an ami.
@@ -102,10 +102,11 @@ class NeuroCaaSAMI(object):
                 MinCount=1,
                 MaxCount=1,
                 DryRun=False,
-                KeyName = "ta_testkey",
-                SecurityGroups=['launch-wizard-34'],
+                KeyName = "testkeystack-custom-dev-key-pair", 
+                #SecurityGroups=['testsgstack-SecurityGroupDev-1NQJIDBJG16KK'],
+                SecurityGroups=[gpdict["securitygroupdevname"]],
                 IamInstanceProfile={
-                    'Name':'ec2_ssm'})
+                    'Name':'SSMRole'})
         ## Now get the instance id:
         self.instance = out[0]
         ## Add to the history:

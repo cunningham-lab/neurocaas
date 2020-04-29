@@ -373,7 +373,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "a48eee5ef7cc7315c0b342850bf75b4322150733\n"
+                        "versionid": "5866ee54d48a0a4dce7f2e1edf5db0052d5049d8\n"
                     }
                 },
                 "Events": {
@@ -523,7 +523,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "a48eee5ef7cc7315c0b342850bf75b4322150733\n"
+                        "versionid": "5866ee54d48a0a4dce7f2e1edf5db0052d5049d8\n"
                     }
                 },
                 "Handler": "helper.handler_deldir",
@@ -627,7 +627,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "a48eee5ef7cc7315c0b342850bf75b4322150733\n"
+                        "versionid": "5866ee54d48a0a4dce7f2e1edf5db0052d5049d8\n"
                     }
                 },
                 "Handler": "helper.handler_mkdir",

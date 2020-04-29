@@ -24,7 +24,12 @@ mkdir "$1"/test_resources
 ## Copy in the stack config template: 
 cp ../utils/templates/stack_config_template_newexample.json "$ncaprootdir"/ncap_blueprints/"$1"/stack_config_template.json 
 
-## Also copy in testing materials: 
+## Now alter variables to match what are given in initialized global parameters: 
+secgroup=$(jq '.securitygroupdeployname' "$ncaprootdir"/global_params_initialized.json | sed 's/"//g')
+tmp=$(mktemp)
+jq --arg secgroup $secgroup '.Lambda.LambdaConfig.SECURITY_GROUPS = $secgroup' "$ncaprootdir"/ncap_blueprints/"$1"/stack_config_template.json > $tmp && mv $tmp "$ncaprootdir"/ncap_blueprints/"$1"/stack_config_template.json 
+
+# Also copy in testing materials: 
 cp ../utils/templates/exampledevsubmit.json "$ncaprootdir"/ncap_blueprints/"$1"/test_resources/exampledevsubmit.json
 cp ../utils/simevents/s3_putevent.json "$ncaprootdir"/ncap_blueprints/"$1"/test_resources/s3_putevent.json
 cp ../utils/simevents/{cloudwatch_startevent.json,cloudwatch_termevent.json} "$ncaprootdir"/ncap_blueprints/"$1"/test_resources/

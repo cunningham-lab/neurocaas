@@ -1,0 +1,94 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": "s3:GetBucketLocation",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor3",
+      "Effect": "Allow",
+      "Action": "s3:HeadBucket",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor1",
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ListBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::yass-ncap-stable"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "s3:prefix": [
+            "",
+            "sawtelllabyassdevelop/",
+            "sawtelllabyassdevelop/inputs",
+            "sawtelllabyassdevelop/results",
+            "logs",
+            "sawtelllabyassdevelop/submissions",
+            "sawtelllabyassdevelop/configs",
+            "sawtelllabyassdevelop/inputs/",
+            "sawtelllabyassdevelop/results/",
+            "sawtelllabyassdevelop/submissions/",
+            "sawtelllabyassdevelop/configs/"
+          ],
+          "s3:delimiter": [
+            "/"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ListSubBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::yass-ncap-stable"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "sawtelllabyassdevelop/inputs/*",
+            "sawtelllabyassdevelop/results/*",
+            "sawtelllabyassdevelop/configs/*",
+            "sawtelllabyassdevelop/submissions/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "Inputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::yass-ncap-stable/sawtelllabyassdevelop/inputs/*",
+        "arn:aws:s3:::yass-ncap-stable/sawtelllabyassdevelop/configs/*",
+        "arn:aws:s3:::yass-ncap-stable/sawtelllabyassdevelop/submissions/*"
+      ]
+    },
+    {
+      "Sid": "Outputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::yass-ncap-stable/sawtelllabyassdevelop/results/*",
+        "arn:aws:s3:::yass-ncap-stable/sawtelllabyassdevelop/configs/*"
+      ]
+    }
+  ]
+}

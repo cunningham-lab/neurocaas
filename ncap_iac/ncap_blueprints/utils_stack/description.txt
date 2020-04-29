@@ -27,7 +27,7 @@ To recover your secret key, please type:
 
 aws ssm get-parameter --name /testkeystack/neurocaas/private-dev-key  --with-decryption 
 
-paste the entire "value" field (minus quotes) into a file not under version control, and call the file testkeystack-custom-dev-key-pair.pem
+paste the entire "value" field (minus quotes) into a file not under version control, and call the file testkeystack-custom-dev-key-pair.pem. Remember to respect the newline characters.
 
 
 Key generation for resources that you declare  [necessary for developer access to AMIs] via lambda custom resource. 

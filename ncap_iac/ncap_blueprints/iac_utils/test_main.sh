@@ -1,4 +1,5 @@
 #!/bin/bash
+## Note this file is for internal testing of lambda functions, and references main_func_env_vars, a CtN AWS account specific resource. 
 ### Script that automates the testing of submission lambda functions 
 set -e
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"

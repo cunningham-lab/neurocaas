@@ -25,7 +25,7 @@
             "LAUNCH": true,
             "LOGFILE": "lambda_log.txt",
             "DEPLOY_LIMIT": 100,
-            "MAXCOST": 100,
+            "MAXCOST": 300,
             "MONITOR": true,
             "LOGDIR": "logs",
             "OUTDIR": "results",
@@ -38,6 +38,26 @@
                 "AffiliateName": "yassgeneralusers",
                 "UserNames": [
                     "ta2507"
+                ],
+                "PipelinePath": "",
+                "PipelineDir": "trackingfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
+            },
+            {
+                "AffiliateName": "sawtelllabyassdevelop",
+                "UserNames": [
+                    "aw3057"
+                ],
+                "PipelinePath": "",
+                "PipelineDir": "trackingfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
+            },
+            {
+                "AffiliateName": "carcealabyassdev",
+                "UserNames": [
+                    "ioanacarcea","zahraadahman"
                 ],
                 "PipelinePath": "",
                 "PipelineDir": "trackingfolder",
