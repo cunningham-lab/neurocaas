@@ -1,0 +1,15 @@
+{
+"Pipeline":"cnmfmonitored1",
+"Date":"10/21/19",
+"Description":"Third experiment using CNMF pipeline at scale on a benchmark dataset: only difference is upload time, now using columbia ethernet at 50 mb/s",
+"InstanceType":"m5.16xlarge",
+"InstanceIDs":["i-094534cc0d8f99c7b"],
+"InstanceAMI":"ami-0db5492c69f5a77aa",
+"DatasetKeys":["paninskilab/inputs/images_J115.zip"],
+"DatasetSizes":[78.7],
+"ResultSizes":[3.3],
+"UploadTime":1810,
+"InstanceComputeTimes":[["18:55:15","20:00:43"]],
+"LambdaComputeTimes":[79000],
+"LambdaMemory":128
+}

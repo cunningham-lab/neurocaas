@@ -1,0 +1,94 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": "s3:GetBucketLocation",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor3",
+      "Effect": "Allow",
+      "Action": "s3:HeadBucket",
+      "Resource": "*"
+    },
+    {
+      "Sid": "VisualEditor1",
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ListBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap-web"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "s3:prefix": [
+            "",
+            "bendeskylab/",
+            "bendeskylab/inputs",
+            "bendeskylab/results",
+            "logs",
+            "bendeskylab/submissions",
+            "bendeskylab/configs",
+            "bendeskylab/inputs/",
+            "bendeskylab/results/",
+            "bendeskylab/submissions/",
+            "bendeskylab/configs/"
+          ],
+          "s3:delimiter": [
+            "/"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ListSubBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap-web"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "bendeskylab/inputs/*",
+            "bendeskylab/results/*",
+            "bendeskylab/configs/*",
+            "bendeskylab/submissions/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "Inputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap-web/bendeskylab/inputs/*",
+        "arn:aws:s3:::dlc-ncap-web/bendeskylab/configs/*",
+        "arn:aws:s3:::dlc-ncap-web/bendeskylab/submissions/*"
+      ]
+    },
+    {
+      "Sid": "Outputfolderwrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::dlc-ncap-web/bendeskylab/results/*",
+        "arn:aws:s3:::dlc-ncap-web/bendeskylab/configs/*"
+      ]
+    }
+  ]
+}

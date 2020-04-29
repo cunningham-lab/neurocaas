@@ -1,0 +1,3 @@
+Our DLC implementation is based on version 1.0: 
+which can be found at commit: 
+eb955bfcb25175510e07eec8a755908b9e63cf88

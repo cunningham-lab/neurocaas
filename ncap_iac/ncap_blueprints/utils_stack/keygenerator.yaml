@@ -1,0 +1,21 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Demo Custom CloudFormation Secret Provider
+
+Resources:
+  PrivateKey:
+    Type: Custom::RSAKey
+    Properties:
+      Name: !Sub '/${AWS::StackName}/neurocaas/private-dev-key'
+      Version: v1
+      NoEcho: False
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-secret-provider'
+
+  KeyPair:
+    Type: Custom::KeyPair
+    DependsOn: PrivateKey
+    Properties:
+      Name: !Sub '${AWS::StackName}-custom-dev-key-pair'
+      NoEcho: False
+      PublicKeyMaterial: !GetAtt 'PrivateKey.PublicKey'
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-secret-provider'

@@ -1,0 +1,7 @@
+{
+    "mode":"test",
+    "modeldata":{
+	    "modelpath": "sawtelllabdlcdevelop/inputs/reachingJan30-trainset95shuffle1/",
+            "configpath": "sawtelllabdlcdevelop/inputs/myconfig_analysis_template.py"
+        }
+}

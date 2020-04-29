@@ -1,0 +1,24 @@
+{
+    "MainLambda":{
+        "AMI": "ami-0887103890d4198a1",
+        "REGION": "us-east-1",
+        "INSTANCE_TYPE": "t2.micro",
+        "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
+        "IAM_ROLE": "SSMRole",
+        "KEY_NAME": "testkeystack-custom-dev-key-pair",
+        "WORKING_DIRECTORY":"~/bin",
+        "COMMAND":"cd /home/ec2-user; bin/run.sh \"{}\" \"{}\" \"{}\"",
+        "SHUTDOWN_BEHAVIOR": "terminate",
+        "CONFIG": "config.yaml",
+        "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+        "EXECUTION_TIMEOUT": 360,
+        "cwrolearn":"arn:aws:iam::739988523141:role/caiman-ncap-CloudWatchBusRole-1RUXFZTS0DOK0",
+        "figlambarn":"arn:aws:lambda:us-east-1:739988523141:function:caiman-ncap-FigLambda-PHVQWETPZ0IY",
+        "figlambid":"caiman-ncap-FigLambda-PHVQWETPZ0IY"
+    },
+    "FigLambda":{
+        "BUCKET_NAME":"epi-ncap-stable",
+        "REGION": "us-east0",
+        "INDIR":"inputs"
+    }
+}

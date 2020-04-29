@@ -1,0 +1,7 @@
+{
+    "config":"carcealabyassdev/inputs/config.yaml",
+    "geom":"carcealabyassdev/inputs/geom.txt",
+    "latest":false,
+    "__dataset_size__":300,
+    "__duration__":null
+}

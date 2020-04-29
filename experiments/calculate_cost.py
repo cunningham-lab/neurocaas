@@ -190,7 +190,7 @@ def plot_timebar_compare(filepaths,comptimes,xlabels,title):
     ## Plot ticks: 
     offset_inds = np.stack([ind-offset,ind+offset],axis = 1).flatten()
     ax.set_xticks(offset_inds)
-    ax.set_xticklabels([xlabels[0]+' (local)',xlabels[0]+" (NCAP)",xlabels[1]+' (local)',xlabels[1]+" (NCAP)",xlabels[2]+' (local)',xlabels[2]+" (NCAP)"],rotation = 25,ha = 'right',fontsize = 38)
+    ax.set_xticklabels([xlabels[0]+' (local)',xlabels[0]+" (NeuroCAAS)",xlabels[1]+' (local)',xlabels[1]+" (NeuroCAAS)",xlabels[2]+' (local)',xlabels[2]+" (NeuroCAAS)"],rotation = 25,ha = 'right',fontsize = 38)
     ax.set_title(title,fontsize = 54)
     ax.set_ylabel('Time (seconds)',fontsize = 38)
     ax.set_xlabel('Dataset Size (GB)',fontsize = 38)
@@ -228,7 +228,7 @@ def plot_timebar_compare_mock(filepaths,xlabels,title):
     ## Plot ticks: 
     offset_inds = np.stack([ind-offset,ind+offset],axis = 1).flatten()
     ax.set_xticks(offset_inds)
-    ax.set_xticklabels([xlabels[0]+' (local)',xlabels[0]+" (NCAP)",xlabels[1]+' (local)',xlabels[1]+" (NCAP)",xlabels[2]+' (local)',xlabels[2]+" (NCAP)"],rotation = 25,ha = 'right',fontsize = 38)
+    ax.set_xticklabels([xlabels[0]+' (local)',xlabels[0]+" (NeuroCAAS)",xlabels[1]+' (local)',xlabels[1]+" (NeuroCAAS)",xlabels[2]+' (local)',xlabels[2]+" (NeuroCAAS)"],rotation = 25,ha = 'right',fontsize = 38)
     ax.set_title(title,fontsize = 54)
     ax.set_ylabel('Time (seconds)',fontsize = 38)
     plt.setp(ax.get_xticklabels(), fontsize=38)
@@ -265,10 +265,10 @@ def plot_timebar_compare_mock(filepaths,xlabels,title):
 #    
 #    ## Plot ticks: 
 #    ax.set_xticks(ind)
-#    ax.set_xticklabels([xlabels[0]+' (NCAP)',xlabels[1]+' (NCAP)',xlabels[2]+' (NCAP)'])
+#    ax.set_xticklabels([xlabels[0]+' (NeuroCAAS)',xlabels[1]+' (NeuroCAAS)',xlabels[2]+' (NeuroCAAS)'])
 #    #offset_inds = np.stack([ind-offset,ind+offset],axis = 1).flatten()
 #    #ax.set_xticks(offset_inds)
-#    #ax.set_xticklabels([xlabels[0]+' (local)',xlabels[0]+" (NCAP)",xlabels[1]+' (local)',xlabels[1]+" (NCAP)",xlabels[2]+' (local)',xlabels[2]+" (NCAP)"],rotation = 25,ha = 'right')
+#    #ax.set_xticklabels([xlabels[0]+' (local)',xlabels[0]+" (NeuroCAAS)",xlabels[1]+' (local)',xlabels[1]+" (NeuroCAAS)",xlabels[2]+' (local)',xlabels[2]+" (NeuroCAAS)"],rotation = 25,ha = 'right')
 #    ax.set_title(title)
 #    ax.set_ylabel('seconds')
 #    ax.legend()
@@ -308,7 +308,7 @@ def plot_costbar_spot(filepaths,xlabels,title,spot,spot1,spot6):
     
     ## Plot ticks: 
     #ax.set_xticks(ind)
-    #ax.set_xticklabels([xlabels[0]+' (NCAP)',xlabels[1]+' (NCAP)',xlabels[2]+' (NCAP)'],fontsize = 38)
+    #ax.set_xticklabels([xlabels[0]+' (NeuroCAAS)',xlabels[1]+' (NeuroCAAS)',xlabels[2]+' (NeuroCAAS)'],fontsize = 38)
     offset_inds = np.stack([ind-offset,ind+offset],axis = 1).flatten()
     ax.set_xticks(offset_inds)
     ax.set_xticklabels([xlabels[0]+' (Std)',xlabels[0]+" (Save)",xlabels[1]+' (Std)',xlabels[1]+" (Save)",xlabels[2]+' (Std)',xlabels[2]+" (Save)"],rotation = 25,ha = 'right')
@@ -351,10 +351,10 @@ def plot_costbar_baseline(filepaths,xlabels,title):
     
     ## Plot ticks: 
     ax.set_xticks(ind)
-    ax.set_xticklabels([xlabels[0]+' (NCAP)',xlabels[1]+' (NCAP)',xlabels[2]+' (NCAP)'],fontsize = 38)
+    ax.set_xticklabels([xlabels[0]+' (NeuroCAAS)',xlabels[1]+' (NeuroCAAS)',xlabels[2]+' (NeuroCAAS)'],fontsize = 38)
     #offset_inds = np.stack([ind-offset,ind+offset],axis = 1).flatten()
     #ax.set_xticks(offset_inds)
-    #ax.set_xticklabels([xlabels[0]+' (local)',xlabels[0]+" (NCAP)",xlabels[1]+' (local)',xlabels[1]+" (NCAP)",xlabels[2]+' (local)',xlabels[2]+" (NCAP)"],rotation = 25,ha = 'right')
+    #ax.set_xticklabels([xlabels[0]+' (local)',xlabels[0]+" (NeuroCAAS)",xlabels[1]+' (local)',xlabels[1]+" (NeuroCAAS)",xlabels[2]+' (local)',xlabels[2]+" (NeuroCAAS)"],rotation = 25,ha = 'right')
     ax.set_title(title,fontsize = 54)
     ax.set_ylabel('Cost (dollars)',fontsize = 38)
     ax.set_xlabel('Dataset Size',fontsize = 38)
@@ -366,7 +366,7 @@ def plot_costbar_baseline(filepaths,xlabels,title):
     plt.show()
 
 
-## Define a function that takes in a dataset generation rate, an NCAP dataset cost rate, a machine tco and storage rate and caluclates crossovers. 
+## Define a function that takes in a dataset generation rate, an NeuroCAAS dataset cost rate, a machine tco and storage rate and caluclates crossovers. 
 def plot_TCO_xover_multiple_spotduration(filepaths,hardware,spot1,spot6,title,labels,xaxis = [None,None,None]):
     fig,ax = plt.subplots(figsize = (12,14))
     #labels = ['8 GB','36 GB','79 GB']
@@ -436,7 +436,7 @@ def plot_TCO_xover_spot(filepath,hardware,spot,title=None,axes = False,label = N
     price_store = 0#0.01250 #gb_store*0.05 ## Assume 50$ per terabyte
     ## Assuming a rate of n datasets per week, this gives: 
 
-    ## Now get the cost per dataset for NCAP
+    ## Now get the cost per dataset for NeuroCAAS
     price_ncap = np.sum(metricobj.get_costmetrics_spot(spot))
     price_ncap_store = (np.sum(metricobj.get_costmetrics_spot(spot))+0.0125)
     print(hardware,price_ncap,price_store)
@@ -476,7 +476,7 @@ def plot_TCO_xover_spotduration(filepath,hardware,spot1,spot6,title= None,axes =
     price_store = 0#0.01250 #gb_store*0.05 ## Assume 50$ per terabyte
     ## Assuming a rate of n datasets per week, this gives: 
 
-    ## Now get the cost per dataset for NCAP
+    ## Now get the cost per dataset for NeuroCAAS
     price_ncap = np.sum(metricobj.get_costmetrics_spotduration(spot1,spot6))
     price_ncap_store = (np.sum(metricobj.get_costmetrics_spotduration(spot1,spot6))+0.0125)
     print(hardware,price_ncap,price_store)
@@ -516,7 +516,7 @@ def plot_TCO_xover(filepath,hardware,axes = False,label = None,xaxis =None):
     price_store = 0#0.01250 #gb_store*0.05 ## Assume 50$ per terabyte
     ## Assuming a rate of n datasets per week, this gives: 
 
-    ## Now get the cost per dataset for NCAP
+    ## Now get the cost per dataset for NeuroCAAS
     price_ncap = np.sum(metricobj.get_costmetrics())
     price_ncap_store = (np.sum(metricobj.get_costmetrics())+0.0125)
     print(hardware,price_ncap,price_store)
@@ -553,7 +553,7 @@ def plot_TCO_rate(filepath,hardware,rate):
     ## Assuming a rate of n datasets per week, this gives: 
     ax.plot(inds,hardware+price_store*inds,label = 'Local')
 
-    ## Now get the cost per week for NCAP
+    ## Now get the cost per week for NeuroCAAS
     #price_ncap = np.sum(metricobj.get_costmetrics())*rate
     price_ncap_store = (np.sum(metricobj.get_costmetrics())+0.0125)*rate
 
@@ -563,7 +563,7 @@ def plot_TCO_rate(filepath,hardware,rate):
     
 
     #ax.plot(inds,price_ncap*inds)
-    ax.plot(inds,price_ncap_store*inds,label = 'NCAP')
+    ax.plot(inds,price_ncap_store*inds,label = 'NeuroCAAS')
     plt.xlabel('Weeks')
     plt.ylabel('Cost')
     ax.axvline(x = xover_store,color = 'black')
@@ -591,7 +591,7 @@ def plot_cost_TCO_datasetsxover(filepaths,tco,title):
     mean = np.mean(normed)
     std = np.std(normed)
     print(mean,std)
-    plt.plot(ind,mean*ind,'black',label = 'NCAP')
+    plt.plot(ind,mean*ind,'black',label = 'NeuroCAAS')
     plt.plot(ind,(mean+std)*ind,'black',linestyle ='--')
     plt.plot(ind,(mean-std)*ind,'black',linestyle ='--')
     plt.xlabel('Datasets Analyzed (225 MB, 20 minutes)')
@@ -620,7 +620,7 @@ def plot_cost_TCO_datasets(filepaths,tco,title):
     mean = np.mean(normed)
     std = np.std(normed)
     print(mean,std)
-    plt.plot(ind,mean*ind,'black',label = 'NCAP')
+    plt.plot(ind,mean*ind,'black',label = 'NeuroCAAS')
     plt.plot(ind,(mean+std)*ind,'black',linestyle ='--')
     plt.plot(ind,(mean-std)*ind,'black',linestyle ='--')
     plt.xlabel('Datasets Analyzed (225 MB, 20 minutes)')
@@ -645,7 +645,7 @@ def plot_cost_TCO_gb(filepaths,tco,title):
     mean = np.mean(normed)
     std = np.std(normed)
     print(mean,std)
-    plt.plot(ind,mean*ind,'black',label = 'NCAP')
+    plt.plot(ind,mean*ind,'black',label = 'NeuroCAAS')
     plt.plot(ind,(mean+std)*ind,'black',linestyle ='--')
     plt.plot(ind,(mean-std)*ind,'black',linestyle ='--')
     plt.xlabel('GB Analyzed')
@@ -685,8 +685,11 @@ def plot_cost_bar_data(filepaths,xlabels,legend,filename):
         costs = Loca_costs
         
     metricobjects = [JobMetrics(path) for path in filepaths]
-    costmetrics = [job.get_costmetrics_spotduration(costs[1],costs[2]) for job in metricobjects]
-    costmetrics_save = [job.get_costmetrics_spot(costs[0]) for job in metricobjects]
+    costmetrics = [job.get_costmetrics() for job in metricobjects]
+    costmetrics_save = [job.get_costmetrics_spotduration(costs[1],costs[2]) for job in metricobjects]
+    #costmetrics_save = [job.get_costmetrics_spot(costs[0]) for job in metricobjects]
+    #costmetrics = [job.get_costmetrics_spotduration(costs[1],costs[2]) for job in metricobjects]
+    #costmetrics_save = [job.get_costmetrics_spot(costs[0]) for job in metricobjects]
     totalcost = [np.sum(costmetric) for costmetric in costmetrics]
     totalcost_save = [np.sum(costmetric) for costmetric in costmetrics_save]
     ## Now we want to format this as rows and columns 
@@ -805,7 +808,7 @@ def plot_cost(pipeline,compute =True):
     else:
         raise NotImplementedError("This option does not exist yet.")
 
-    legend = ['NCAP','NCAP Save']
+    legend = ['NeuroCAAS','NeuroCAAS Save']
     ## Save to a file because it's easy. 
     tablename = os.path.join(pipeline,pipeline+'costlog.txt')
     ## Compute if we are supposed to:
@@ -866,7 +869,7 @@ def plot_cost(pipeline,compute =True):
     ax.set_yticklabels(ylabels,size = yticklabel_size)
     ax.set_ylabel('Cost (Dollars)',size = ylabel_size)
     #ax.set_aspect(2.5)
-    #ax.set_title('NCAP Cost vs. Dataset Size',size = title_size,pad = 10.0)
+    #ax.set_title('NeuroCAAS Cost vs. Dataset Size',size = title_size,pad = 10.0)
 
     ## Only plot the legend if CaImAn
     if pipeline == "CaImAn":
@@ -903,7 +906,7 @@ def plot_time(pipeline,compute= True):
         timeint = 2800 
     else:
         raise NotImplementedError("This option does not exist yet.")
-    legend = ['Local','NCAP']
+    legend = ['Local','NeuroCAAS']
     breakout = ['Upload','Compute']
     ## Save to a file because it's easy. 
     tablename = os.path.join(pipeline,pipeline+'timelog.txt')
@@ -1010,19 +1013,19 @@ def plot_humans(pipeline,pricing = "Orig",compute = True):
             cost = 1599 
             ## Factor in support cost per year (from wipro whitepaper [morey & nambiar 2010]): 
             support = [716,768,824,891+75,969+171]
-            maxval = 9 
+            maxval = 5 
         if pricing == "Local":
             ## Also have a baseline cost for computer: 
             cost = 1539
             ## Factor in support cost per year (from wipro whitepaper [morey & nambiar 2010]): 
             support = [716,768,824,891+75,969+171]
-            maxval = 9 
+            maxval = 5 
         if pricing == "Cluster":
             ## TCO cost calculator 
             cost = 1499+1000 # for hardware + storage  
             ## Factor in support cost per year (from AWS TCO calculator) server maintenance, storage maintenance, : 
             support = [225+4+135]*5
-            maxval = 12 
+            maxval = 7 
         if pricing == "Hard":
             ## Also have a baseline cost for computer: 
             cost = 1539
@@ -1080,9 +1083,9 @@ def plot_humans(pipeline,pricing = "Orig",compute = True):
         raise NotImplementedError("This option does not exist yet.")
     paths = [os.path.join(pipeline,filename) for filename in filenames]
     ## Additional information w.r.t. plotting:
-    costlegend = ['NCAP','NCAP Save']
+    costlegend = ['NeuroCAAS','NeuroCAAS Save']
     breakout = ['Upload','Compute']
-    timelegend = ['Local','NCAP']
+    timelegend = ['Local','NeuroCAAS']
     ## Save to a file because it's easy. 
     costfilename = os.path.join(pipeline,pipeline+'costlog.txt')
     timefilename = os.path.join(pipeline,pipeline+'timelog.txt')
@@ -1170,7 +1173,7 @@ def plot_humans(pipeline,pricing = "Orig",compute = True):
     lower = [0.755,0.400,0.045]
 
     if pipeline == "CaImAn":
-        legend = ax.legend(prop = {'size': 52},title = 'Hardware Lifetime',loc = "lower right")
+        legend = ax.legend(prop = {'size': 47},title = 'Hardware Lifetime',loc = "lower right")
         legend.get_title().set_fontsize('50')
     else:
         pass
@@ -1295,9 +1298,9 @@ def plot_utilization(pipeline,pricing = "Orig"):
         raise NotImplementedError("This option does not exist yet.")
     paths = [os.path.join(pipeline,filename) for filename in filenames]
     ## Additional information w.r.t. plotting:
-    costlegend = ['NCAP','NCAP Save']
+    costlegend = ['NeuroCAAS','NeuroCAAS Save']
     breakout = ['Upload','Compute']
-    timelegend = ['Local','NCAP']
+    timelegend = ['Local','NeuroCAAS']
     ## Save to a file because it's easy. 
     costfilename = pipeline+'costlog.txt'
     timefilename = pipeline+'timelog.txt'

@@ -1,0 +1,35 @@
+This directory contains several stacks that should be used for initialization/testing purposes. 
+
+1. resource_roles.json
+This stack describes various permissions-type resources that need to be assigned to AWS resources in order for processing to work properly.  
+This includes:
+IAM role for AWS SSM [required to let ssm run_command use the AWS CLI on remote ec2 instances]
++s3 access
++ec2 access
++ability to create new volumes
+IAM role for AWS Lambda [required to let lambda write to and from buckets]
+IAM role for EC2 [required to let ssm connect to the ec2 instance itself]
+
+2. security_groups.json
+This stack describes the security groups that we use to govern our ec2 instances. 
+The dev version allows access via ssh
+The deploy version does not, restricting access to ssm only. 
+
+3. something something.yaml
+This stack depends upon the 
+cfn-secret-provider github repo developed by binx.io, creating custom resources that allow us to generate ssh keys. 
+Please note that we explicitly DO NOT print the secret key into the global_params_initialized file as we do the identifiers to other resources. DO NOT store your keys in this repo if you intend to push your results to a remote repository. They can be used by bots to harvest bitcoin if you do so.  
+To install cfn, please follow installation instructions here: 
+https://github.com/binxio/cfn-secret-provider
+
+To recover your secret key, please type:
+
+
+aws ssm get-parameter --name /testkeystack/neurocaas/private-dev-key  --with-decryption 
+
+paste the entire "value" field (minus quotes) into a file not under version control, and call the file testkeystack-custom-dev-key-pair.pem. Remember to respect the newline characters.
+
+
+Key generation for resources that you declare  [necessary for developer access to AMIs] via lambda custom resource. 
+
+
