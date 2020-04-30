@@ -176,11 +176,7 @@ class NeuroCaaSTemplate(object):
         raise NotImplementedError
 
     def generate_usergroup(self,affiliatedict):
-        affiliatename = affiliatedict["AffiliateName"]
-        policy = Policy(PolicyDocument=self.customize_userpolicy(affiliatedict),PolicyName = affiliatename+'policy')
-        usergroup = Group("UserGroup"+affiliatename,GroupName = affiliatename+"group",Policies=[policy])
-        usergroup_attached = self.template.add_resource(usergroup)
-        return usergroup_attached
+        raise NotImplementedError
 
     def generate_users(self,affiliatedict):
         ## First get a list of usernames. 
@@ -312,6 +308,13 @@ class DevTemplate(NeuroCaaSTemplate):
         template.add_resource(delresource)
         ## We can add other custom resource initializations in the future
         return template,mkfunction_attached,delfunction_attached
+
+    def generate_usergroup(self,affiliatedict):
+        affiliatename = affiliatedict["AffiliateName"]
+        policy = Policy(PolicyDocument=self.customize_userpolicy(affiliatedict),PolicyName = affiliatename+'policy')
+        usergroup = Group("UserGroup"+affiliatename,GroupName = affiliatename+"group",Policies=[policy])
+        usergroup_attached = self.template.add_resource(usergroup)
+        return usergroup_attached
 
     def add_log_folder(self,affiliatedicts):
         "this has to happen after affiliates are defined"
@@ -497,7 +500,7 @@ class DevTemplate(NeuroCaaSTemplate):
                 Description = 'Main Lambda Function for Serverless',
                 MemorySize = 128,
                 Timeout = self.config["Lambda"]['LambdaConfig']["EXECUTION_TIMEOUT"],
-                Role = 'arn:aws:iam::{accid}:role/{role}'.format(accid = boto3.client('sts').get_caller_identity().get('Account'),role = gpdict['lambdarolename']) #'arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ', ## TODO: Create this in template
+                Role = 'arn:aws:iam::{accid}:role/{role}'.format(accid = boto3.client('sts').get_caller_identity().get('Account'),role = gpdict['lambdarolename']), #'arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ', ## TODO: Create this in template
                 Events= all_events,
                 #Environment = Environment(Variables={'figlambid':Ref(self.figurelamb),'figlambarn':GetAtt(self.figurelamb,'Arn'),'cwrolearn':GetAtt(self.cwrole,'Arn')})
                 Environment = Environment(Variables=lambdaconfig)
@@ -517,7 +520,7 @@ class DevTemplate(NeuroCaaSTemplate):
                 Description = 'Lambda Function logging start/stop for NCAP',
                 MemorySize = 128,
                 Timeout = 90,
-                Role = 'arn:aws:iam::{accid}:role/{role}'.format(accid = boto3.client('sts').get_caller_identity().get('Account'),role = gpdict['lambdarolename'])
+                Role = 'arn:aws:iam::{accid}:role/{role}'.format(accid = boto3.client('sts').get_caller_identity().get('Account'),role = gpdict['lambdarolename']),
                 Environment = Environment(Variables={"BUCKET_NAME":self.config["PipelineName"],
                     "INDIR":self.config['Lambda']['LambdaConfig']['INDIR'],
                     "REGION":self.config["REGION"]
@@ -577,6 +580,14 @@ class WebDevTemplate(NeuroCaaSTemplate):
         self.add_log_folder(affiliatedicts)
         self.figurelamb = self.add_figure_lambda()
         self.add_submit_lambda()
+
+    def generate_usergroup(self,affiliatedict):
+        identifier = "{}".format(self.config["PipelineName"].replace("-",""))
+        affiliatename = affiliatedict["AffiliateName"]
+        policy = Policy(PolicyDocument=self.customize_userpolicy(affiliatedict),PolicyName = affiliatename+'policy')
+        usergroup = Group("UserGroup"+affiliatename+identifier,GroupName = affiliatename+identifier+"group",Policies=[policy])
+        usergroup_attached = self.template.add_resource(usergroup)
+        return usergroup_attached
 
     def initialize_template(self):
         """
@@ -818,7 +829,7 @@ class WebDevTemplate(NeuroCaaSTemplate):
                 MemorySize = 128,
                 Timeout = self.config["Lambda"]['LambdaConfig']["EXECUTION_TIMEOUT"],
                 #Role = 'arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ', ## TODO: Create this in template
-                Role = 'arn:aws:iam::{accid}:role/{role}'.format(accid = boto3.client('sts').get_caller_identity().get('Account'),role = gpdict['lambdarolename'])
+                Role = 'arn:aws:iam::{accid}:role/{role}'.format(accid = boto3.client('sts').get_caller_identity().get('Account'),role = gpdict['lambdarolename']),
                 Events= all_events,
                 #Environment = Environment(Variables={'figlambid':Ref(self.figurelamb),'figlambarn':GetAtt(self.figurelamb,'Arn'),'cwrolearn':GetAtt(self.cwrole,'Arn')})
                 Environment = Environment(Variables=lambdaconfig)
@@ -840,7 +851,7 @@ class WebDevTemplate(NeuroCaaSTemplate):
                 Timeout = 90,
                 #Role = 'arn:aws:iam::739988523141:role/lambda_dataflow', ## TODO: Create this in template
                 #Role = 'arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ',
-                Role = 'arn:aws:iam::{accid}:role/{role}'.format(accid = boto3.client('sts').get_caller_identity().get('Account'),role = gpdict['lambdarolename'])
+                Role = 'arn:aws:iam::{accid}:role/{role}'.format(accid = boto3.client('sts').get_caller_identity().get('Account'),role = gpdict['lambdarolename']),
                 Environment = Environment(Variables={"BUCKET_NAME":self.config["PipelineName"],
                     "INDIR":self.config['Lambda']['LambdaConfig']['INDIR'],
                     "REGION":self.config["REGION"]
@@ -877,6 +888,24 @@ class WebDevTemplate(NeuroCaaSTemplate):
         cwrole_attached = self.template.add_resource(cwrole)
         self.cwrole = cwrole_attached
         return figurelamb
+
+class UserSubtemplate(WebDevTemplate):
+    def __init__(self,filename):
+        self.filename = filename
+        self.config = self.get_config(self.filename)
+        self.iam_resource = boto3.resource('iam',region_name = self.config['Lambda']["LambdaConfig"]["REGION"]) 
+        ## We should get all resources once attached. 
+        self.template,self.mkdirfunc,self.deldirfunc = self.initialize_template()
+        ## Add bucket: 
+        self.bucket = self.add_bucket() 
+        ## Now add affiliates:
+        affiliatedicts = self.config['UXData']['Affiliates']
+        for affdict in affiliatedicts:
+            self.add_affiliate(affdict)
+        self.add_log_folder(affiliatedicts)
+        #self.figurelamb = self.add_figure_lambda()
+        #self.add_submit_lambda()
+
 
 if __name__ == "__main__":
     filename = sys.argv[1]
