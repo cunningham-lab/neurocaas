@@ -1,0 +1,11 @@
+Some documentation for the costs associated with this experiment. 
+
+The support costs for all local pricing (Orig,PowerMatch,Local) were based on the desktop support costs as given in morey & nambiar, which aggregates patterns of pc lifecycle and support costs over a broad range of industries. The support costs are aggregates accross these industries. They are as follows: [433,465,499,539+26,585+59], where the additional costs in the last two years represent out of warranty repair costs. The final comparison given in the paper is the "Powermatch" comparison, which is a workstation that can be found here: https://www.newegg.com/p/1VK-001E-1A6V1 
+
+Orig: the original benchmarking price used to determine feasability (Summer 2019)
+Local: the revised benchmarking price used to make initial version of figures with architecture approximately matched. (February 2020)
+Cluster: AWS TCO calculator cost (February 2020)
+Hard: Considering "Local" cost without support for an even more barebones comparison (February 2020)
+PowerMatch: final workstation benchmarking price with processor power approximately matched. (May 2020)
+
+The cluster costs are given by the AWS TCO calculator. We aggregated the following costs: Total server hardware cost (undiscounted): 10836, acquisition cost of NAS storage: 300, price tag cost of GPU: 1555 (the AWS TCO calculator does not provide this number). We added in the following support costs: storage administration cost (1), server hardware maintenance cost (1625), and IT Labor (135) costs as constant yearly recurring costs.  
