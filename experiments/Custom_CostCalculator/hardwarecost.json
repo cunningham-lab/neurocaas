@@ -1,0 +1,10 @@
+{
+    "pricetag_cost":5000,
+    "support_cost":[null,null,null,null,null],
+    "analysis":"CaImAn, DLC, PMD, LocaNMF, or PMDLocaNMF",
+    "performance":
+    {
+        "size":"small,medium, or large",
+        "analysis_time":null
+    }
+}

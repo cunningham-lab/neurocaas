@@ -4,7 +4,7 @@
     "STAGE":"webdev (default) develop or deploy",
     "Lambda":{
         "CodeUri":"../lambda_repo",
-        "Handler":"submit_start.handler_log_dev",
+        "Handler":"submit_start.handler_develop",
         "Launch":true, 
         "LambdaConfig":{
             "AMI":"instance id",

@@ -1,7 +1,0 @@
-	Upload	Compute	
-8 GB Local	0	2201	
-8 GB NCAP	540	499.0	
-36 GB Local	0	5944.5	
-36 GB NCAP	912	1364.0	
-79 GB Local	0	13044.9	
-79 GB NCAP	2063	3928.0	
