@@ -302,17 +302,19 @@ def plot_cost(pipeline,compute =True):
         filenames = ['batchN.02.00_2.json','batchJ123_2.json','batchJ115_2.json']
         #xlabels = ['8 GB','36 GB','79 GB']
         xlabels = ['8.39 x 1','35.8 x 1','78.7 x 1']
-        ylabels = [0,0.5,1,1.5,2]
+        #ylabels = [0,0.5,1,1.5,2]
+        ylabels = [0,1,2,3,4]
     elif pipeline == 'DLC':
         filenames = ['batch_5.json','batch_10.json','batch_15.json']
         #xlabels = ['1 hr','2 hrs','3 hrs']
         xlabels = ['0.22 x 5', '0.22 x 10','0.22 x 15']
-        ylabels = [0,0.5,1,1.5,2]
+        #ylabels = [0,0.5,1,1.5,2]
+        ylabels = [0,1,2,3,4]
     elif pipeline == "PMDLocaNMF":
         filenames = ['batch_1.json','batch_3.json','batch_5.json']
         #xlabels = ['1 vid','3 vids','5 vids']
         xlabels = ['20.1 x 1','20.1 x 3', '20.1 x 5']
-        ylabels = [0,1.5,3,4.5,6]
+        ylabels = [0,2,4,6,8,10]
         #ylabels = [0,2,4,6,8,13]
         #ylabels = [0,0.5,1,1.5,2]
     else:
@@ -323,8 +325,23 @@ def plot_cost(pipeline,compute =True):
     tablename = os.path.join(pipeline,pipeline+'costlog.txt')
     ## Compute if we are supposed to:
     if compute == True:
-        paths = [os.path.join(pipeline,filename) for filename in filenames]
-        plot_cost_bar_data(paths,xlabels,legend,tablename)
+        if pipeline in ["CaImAn","DLC"]:
+            paths = [os.path.join(pipeline,filename) for filename in filenames]
+            plot_cost_bar_data(paths,xlabels,legend,tablename)
+        elif pipeline == "PMDLocaNMF":
+            pmdpaths = [os.path.join("PMD",filename) for filename in filenames]
+            locapaths = [os.path.join("LocaNMF",filename) for filename in filenames]
+            pmdtablename = os.path.join("PMD","PMD"+'costlog.txt')
+            locatablename = os.path.join("LocaNMF","LocaNMF"+'costlog.txt')
+            plot_cost_bar_data(pmdpaths,xlabels,legend,pmdtablename)
+            plot_cost_bar_data(locapaths,xlabels,legend,locatablename)
+            pmdtable = pd.read_csv("PMD/PMDcostlog.txt",sep ='\t',index_col = 0) 
+            locatable = pd.read_csv("LocaNMF/LocaNMFcostlog.txt",sep ='\t',index_col = 0) 
+            pmdlocatable = pmdtable + locatable
+            pmdlocatable.to_csv("PMDLocaNMF/PMDLocaNMFcostlog.txt",sep = '\t')
+
+    else:
+        pass
 
     ## Load in the data:  
     df = pd.read_csv(tablename,sep = '\t',index_col = 0)
@@ -411,6 +428,7 @@ def plot_time(pipeline,compute= True):
         xlabels = ['0.22 x 5', '0.22 x 10','0.22 x 15']
         timeint = 2400
     elif pipeline == "PMDLocaNMF":
+        compute = False
         filenames = ['batch_1.json','batch_3.json','batch_5.json']
         xlabels = ['20.1 x 1','20.1 x 3', '20.1 x 5']
         timeint = 2800 
@@ -523,28 +541,28 @@ def plot_LCC(pipeline,pricing = "PowerMatch",compute = True):
         xlabels = ['8.39 x 1','35.8 x 1','78.7 x 1']
         ## set up the labeling aces correctly. 
         if pricing == "Orig":
-            maxval = 5 
+            maxval = 25 
         if pricing == "PowerMatch":
-            maxval = 5 
+            maxval = 15 
         if pricing == "Local":
-            maxval = 5 
+            maxval = 25 
         if pricing == "Cluster":
-            maxval = 7 
+            maxval = 18 
         if pricing == "Hard":
-            maxval = 9 
+            maxval = 15
     elif pipeline == 'DLC':
         filenames = ['batch_5.json','batch_10.json','batch_15.json']
         xlabels = ['0.22 x 5', '0.22 x 10','0.22 x 15']
         if pricing == "Orig":
-            maxval = 5
+            maxval = 25
         if pricing == "Local":
-            maxval = 3
+            maxval = 15
         if pricing == "PowerMatch":
-            maxval = 2
+            maxval = 6 
         if pricing == "Cluster":
-            maxval = 2 
+            maxval = 7 
         if pricing == "Hard":
-            maxval = 3
+            maxval = 15
     elif pipeline == "PMDLocaNMF":
         filenames = ['batch_1.json','batch_3.json','batch_5.json']
         xlabels = ['20.1 x 1','20.1 x 3', '20.1 x 5']
@@ -553,11 +571,11 @@ def plot_LCC(pipeline,pricing = "PowerMatch",compute = True):
             upport = [433,465,499,539+26,585+59]
             maxval = 4
         if pricing == "PowerMatch":
-            maxval = 4
+            maxval = 6
         if pricing == "Local":
             maxval = 4 
         if pricing == "Cluster":
-            maxval = 9 
+            maxval = 13 
         if pricing == "Hard":
             maxval = 3 
     else:
@@ -614,13 +632,14 @@ def plot_LCC(pipeline,pricing = "PowerMatch",compute = True):
     years_to_use = [2,4]
     years = ['Realistic','Optimistic']
     for yi,yr in enumerate(years_to_use):
+        yindex= yr -1
         for xi,xl in enumerate(xlabels):
             for li,leg in enumerate(costlegend): 
                 if xi == 1:
-                    datapoint = crossover[yi,xi,li]
+                    datapoint = crossover[yindex,xi,li]
                     ax.barh(ypositions[xi]+offset[yi]+offset_cost[li],width = datapoint,height = height,color = colors[yi][li],label =years[yi]+ ' (vs. '+costlegend[li]+')')
                 else:
-                    datapoint = crossover[yi,xi,li]
+                    datapoint = crossover[yindex,xi,li]
                     ax.barh(ypositions[xi]+offset[yi]+offset_cost[li],width = datapoint,height = height,color = colors[yi][li])
     ax.set_yticks([yp+os+1.9 for yp in ypositions for os in offset])
     for spine in ax.spines.values():
@@ -646,7 +665,7 @@ def plot_LCC(pipeline,pricing = "PowerMatch",compute = True):
 
     ## Now we will set ylabels
     newax.set_yticklabels([xlabel for xlabel in xlabels],size = yticklabel_size)
-    weeks = [50*zi for zi in np.arange(0,maxval+1,np.round((maxval+1)/5).astype('int'))]
+    weeks = [10*zi for zi in np.arange(0,maxval+1,np.round((maxval+1)/5).astype('int'))]
     ax.set_xticks(weeks)
     ax.set_xticklabels(weeks,size = xticklabel_size)
     ax.set_xlabel('Datasets per Week',size = xlabel_size)
@@ -654,7 +673,7 @@ def plot_LCC(pipeline,pricing = "PowerMatch",compute = True):
     lower = [0.755,0.400,0.045]
 
     if pipeline == "CaImAn":
-        legend = ax.legend(prop = {'size': 47},title = 'Hardware Lifetime',loc = "lower right")
+        legend = ax.legend(prop = {'size': 46},title = 'Hardware Lifetime',loc = "lower right")
         legend.get_title().set_fontsize('50')
     else:
         pass
@@ -670,18 +689,8 @@ def plot_LCC(pipeline,pricing = "PowerMatch",compute = True):
         plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisLCC_cluster.png'))
     if pricing == "Hard":
         plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisLCC_hard.png'))
-    ## Calculate the max number of datasets that can be analyzed per size: 
-    print(time_df)
-    for xl in xlabels:
-        local_compute = time_df.loc[xl+' '+'Local']['Compute']
-        ## Number of seconds in a week is: 
-        weeksec = 60*60*24*7
 
-        print(local_compute,weeksec, weeksec/local_compute)
-
-
-
-    return cost_df,tco_cost
+    return crossover 
 
 ## Now get the utilization necessary in order to actually *meet* this crossover.
 def plot_LUC(pipeline,pricing = "PowerMatch"):
@@ -719,11 +728,11 @@ def plot_LUC(pipeline,pricing = "PowerMatch"):
         if pricing == "Orig":
             maxval = 300 
         if pricing == "PowerMatch":
-            maxval = 150
+            maxval = 100
         if pricing == "Local":
             maxval = 200
         if pricing == "Cluster":
-            maxval = 150
+            maxval = 100
         if pricing == "Hard":
             maxval = 200
     elif pipeline == "PMDLocaNMF":
@@ -732,11 +741,11 @@ def plot_LUC(pipeline,pricing = "PowerMatch"):
         if pricing == "Orig":
             maxval = 200
         if pricing == "PowerMatch":
-            maxval =  125
+            maxval =  100
         if pricing == "Local":
-            maxval =  125
+            maxval =  150
         if pricing == "Cluster":
-            maxval = 250
+            maxval = 100
         if pricing == "Hard":
             maxval =  125
     else:
@@ -791,8 +800,10 @@ def plot_LUC(pipeline,pricing = "PowerMatch"):
     fig,ax = plt.subplots(figsize = figure_size)
     years_to_use = [2,4]
     years = ['Realistic','Optimistic']
+    utilization = np.zeros(np.shape(crossover))
 
     for yi,yr in enumerate(years_to_use):
+        yindex = yr-1
         for xi,xl in enumerate(xlabels):
             for li,leg in enumerate(costlegend): 
                 spw = 7*24*60*60
@@ -800,12 +811,12 @@ def plot_LUC(pipeline,pricing = "PowerMatch"):
                 if xi == 1:
                     ## first get out the max number that can be done per week: 
                     ## Now divide by the required: 
-                    datapoint = crossover[yi,xi,li]/dpw*100
+                    datapoint = crossover[yindex,xi,li]/dpw*100
                     ax.barh(ypositions[xi]+offset[yi]+offset_cost[li],width = datapoint,height = height,color = colors[yi][li],label =years[yi]+ ' (vs. '+costlegend[li]+')')
                 else:
-                    datapoint = crossover[yi,xi,li]/dpw*100
+                    datapoint = crossover[yindex,xi,li]/dpw*100
                     ax.barh(ypositions[xi]+offset[yi]+offset_cost[li],width = datapoint,height = height,color = colors[yi][li])
-                print(datapoint, "datapoint value")
+                utilization[yindex,xi,li] = datapoint
     ax.set_yticks([yp+os+1.9 for yp in ypositions for os in offset])
     for spine in ax.spines.values():
         spine.set_visible(False)
@@ -848,11 +859,134 @@ def plot_LUC(pipeline,pricing = "PowerMatch"):
     if pricing == "Hard":
         plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisLUC_hard.png'))
 
+    return utilization 
     
+def getdata_fig4():
+    """
+    Runs all code to generate panels for figure 4. stored in respective "panels" directories of each pipeline. 
+    """
+    pipelines = {"CaImAn":True,"DLC":True,"PMDLocaNMF":False}
+    pipeline_alldata = {"timedata":[],"costdata":[],"LCCdata":[],"LUCdata":[]}
+    for pipeline in pipelines: 
+        ## Plot time bar graphs. 
+        pipeline_alldata["timedata"].append(plot_time(pipeline,compute = pipelines[pipeline]))
+        ## Plot cost bar graphs. 
+        pipeline_alldata["costdata"].append(plot_cost(pipeline,compute = pipelines[pipeline]))
+        ## Plot LCC graphs.  
+        pipeline_alldata["LCCdata"].append(plot_LCC(pipeline))
+        ## Plot LUC graphs. 
+        pipeline_alldata["LUCdata"].append(plot_LUC(pipeline))
+    return pipeline_alldata
+
+def getCustomMetrics(custom_template):
+    """
+    Function to get LCC and LUC data for custom data.  
+    Inputs: 
+    custom_template (str): path to a json file containing custom template information against which to evaluate NeuroCAAS performance. Contains the following fields:    
+       pricetag_cost (int): an integer representing the pricetag cost of your hardware.  
+       support_cost (list): length 5 list representing support cost over the first 5 years of ownership. 
+       analysis (str): the analysis against which to compare. Can be CaImAn, DLC, or PMDLocaNMF.  
+       performance (dict): if you have already run analyses on comparable datasets on your own machine, you can supply the time taken here.    
+    """
+    data = json.load(open(custom_template,"r"))
+
+    ## Which analysis are you comparing against? 
+    pipeline = data["analysis"]
+    assert pipeline in ["CaImAn","DLC","PMDLocaNMF"], "analysis must be one of 'CaImAn','DLC','PMDLocaNMF'" 
+
+    ## First get pricetag and support costs:  
+    cost = data["pricetag_cost"]
+    support = data["support_cost"]
+    if support == "workstation_default":
+        support = [433,465,499,565,644]
+    elif support == "laptop_default": 
+        support = [716,768,824,966,1140]
+    elif support == "cluster_default": 
+        support = json.load(open(os.path.join(pipeline,"costs","Cost_Data_Cluster.json"),"r"))["support_cost"]
+    elif type(support) == list and all([type(entry) == int for entry in support]):
+        pass
+    else:
+        raise TypeError("not a recognized input. Should be 'workstation_default','laptop_default','cluster_default', or a list of integers")
+
+    if pipeline == "CaImAn":
+        filenames = ['batchN.02.00_2.json','batchJ123_2.json','batchJ115_2.json']
+        xlabels = ['8.39 x 1','35.8 x 1','78.7 x 1']
+    elif pipeline == 'DLC':
+        filenames = ['batch_5.json','batch_10.json','batch_15.json']
+        xlabels = ['0.22 x 5', '0.22 x 10','0.22 x 15']
+    elif pipeline == "PMDLocaNMF":
+        filenames = ['batch_1.json','batch_3.json','batch_5.json']
+        xlabels = ['20.1 x 1','20.1 x 3', '20.1 x 5']
+
+
+    ## Now get the relevant NeuroCAAS performance data: 
+    paths = [os.path.join(pipeline,filename) for filename in filenames]
+    ## Additional information w.r.t. plotting:
+    costlegend = ['NeuroCAAS','NeuroCAAS Save']
+    breakout = ['Upload','Compute']
+    timelegend = ['Local','NeuroCAAS']
+    ## Save to a file because it's easy. 
+    costfilename = pipeline+'costlog.txt'
+    timefilename = pipeline+'timelog.txt'
+    ## Load in the data:  
+    cost_df = pd.read_csv(os.path.join(pipeline,costfilename),sep = '\t',index_col = 0)
+    time_df = pd.read_csv(os.path.join(pipeline,timefilename),sep = '\t',index_col = 0)
+
+    if data["performance"] is None:
+
+        ## We want to benchmark at 1,3,5 years: 
+        r = 0.1
+        annuity_rate = lambda n: (1-(1+r)**(-n))/r
+
+        ## Get the total amount   
+        annual_cost = cost/np.array([annuity_rate(ni+1) for ni in range(5)])+np.array(support)
+     
+        ## Now take the cost dataframe and divide by the annual cost (?)
+        tco_cost = annual_cost*(np.arange(5)+1)
+        tco_weekly_tiled = np.tile(annual_cost/52.,len(costlegend)*len(xlabels)).reshape(len(costlegend),len(xlabels),5)
+        ## Take the weekly cost according to tco and divide by dataset price: 
+        LCC = tco_weekly_tiled.T/cost_df.values
+
+        compute = time_df["Compute"]
+        local_compute = np.array([compute["{} Local".format(x)] for x in xlabels])
+        tiled_local_compute = np.repeat(np.repeat(local_compute.reshape(1,local_compute.size,1),5,axis =0),2,axis = 2)
+        normalization = 7*24*60*60/tiled_local_compute
+        LUC = (LCC/normalization*100)
+
+    else:
+        sizedict = {"small":[[0,1],0],"medium":[[2,3],1],"large":[[4,5],2]}
+        size = data["performance"]["size"]
+        assert size in ["small","medium","large"], "size must be one of small, medium or large"
+        cost_df_slice = cost_df.iloc[sizedict[size][1]:sizedict[size][1]+1,:]
+        time_df_slice = time_df.iloc[sizedict[size][0],:]
+
+        ## We want to benchmark at 1,3,5 years: 
+        r = 0.1
+        annuity_rate = lambda n: (1-(1+r)**(-n))/r
+
+        ## Get the total amount   
+        annual_cost = cost/np.array([annuity_rate(ni+1) for ni in range(5)])+np.array(support)
+     
+        ## Now take the cost dataframe and divide by the annual cost (?)
+        tco_cost = annual_cost*(np.arange(5)+1)
+        tco_weekly_tiled = np.tile(annual_cost/52.,len(costlegend)*1).reshape(len(costlegend),1,5)
+        ## Take the weekly cost according to tco and divide by dataset price: 
+        LCC = tco_weekly_tiled.T/cost_df_slice.values
+
+        if data["performance"]["analysis_time"] is None:
+            compute = time_df_slice["Compute"]
+            local_compute = compute["{} Local".format(xlabels[sizedict[size][1]])]
+        elif type(data["performance"]["analysis_time"]) is int: 
+            local_compute = data["performance"]["analysis_time"]
+        else: 
+            raise TypeError("analysis time must be null or an integer. ")
+        LUC = (LCC/(7*24*60*60/local_compute)*100)
+                
+
+    return LCC,LUC
+        
 
 
 
-    return cost_df,tco_cost
-    
 
-    return crossover
+
