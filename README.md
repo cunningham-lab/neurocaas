@@ -1,8 +1,9 @@
-Main repository for the [NeuroCAAS project](neurocaas.com), providing a neuroscience analysis platform using Infrastructure-as-Code (IaC).
+Main repository for the [NeuroCAAS project](http://www.neurocaas.com), providing a neuroscience analysis platform using Infrastructure-as-Code (IaC).
 
 This repository hosts all of the Code that makes up our IaC approach, with structure as described in the paper [Link to pdf here]
 Structure: 
 - paper (material specifically related to the NeuroCAAS paper)
+- docs (documentation and developer guides)
 - media (demo movies, slides, etc.)
 - experiments (benchmarking code for NeuroCAAS on existing algorithms)
 - ncap\_iac (the core code of the project)
