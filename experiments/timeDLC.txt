@@ -1,7 +1,0 @@
-	Upload	Compute	
-1 hr Local	0	6480.0	
-1 hr NCAP	27.92	1296.0	
-2 hrs Local	0	12450.0	
-2 hrs NCAP	46.22	1245.0	
-3 hrs Local	0	18990.0	
-3 hrs NCAP	72.12	1266.0	
