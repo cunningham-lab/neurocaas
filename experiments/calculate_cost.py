@@ -386,7 +386,7 @@ def plot_cost(pipeline,compute =True):
         ax.legend(prop = {'size': 80},loc = 0)
     else: 
         pass
-    plt.savefig(os.path.join(pipeline,pipeline+'AnalysisCost.png'))
+    plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisCost.png'))
 
 
     return df
@@ -495,7 +495,7 @@ def plot_time(pipeline,compute= True):
         ax.legend(prop = {'size': 76},loc = 'upper left')
     else:
         pass
-    plt.savefig(os.path.join(pipeline,pipeline+'AnalysisTime.png'))
+    plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisTime.png'))
     return df
 
 ## Now, more processed metrics 1. A plot that gives the Hardware Cost Crossover.  
@@ -696,15 +696,15 @@ def plot_humans(pipeline,pricing = "PowerMatch",compute = True):
 
 
     if pricing == "Orig":
-        plt.savefig(os.path.join(pipeline,pipeline+'AnalysisTotal.png'))
+        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisTotal.png'))
     if pricing == "PowerMatch":
-        plt.savefig(os.path.join(pipeline,pipeline+'AnalysisTotal_powermatch.png'))
+        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisTotal_powermatch.png'))
     if pricing == "Local":
-        plt.savefig(os.path.join(pipeline,pipeline+'AnalysisTotal_alt.png'))
+        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisTotal_alt.png'))
     if pricing == "Cluster":
-        plt.savefig(os.path.join(pipeline,pipeline+'AnalysisTotal_cluster.png'))
+        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisTotal_cluster.png'))
     if pricing == "Hard":
-        plt.savefig(os.path.join(pipeline,pipeline+'AnalysisTotal_hard.png'))
+        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisTotal_hard.png'))
     ## Calculate the max number of datasets that can be analyzed per size: 
     print(time_df)
     for xl in xlabels:
