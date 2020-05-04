@@ -172,7 +172,7 @@ def plot_cost_bar_data(filepaths,xlabels,legend,filename):
     legend:(list) A list of strings giving the legends for the bar plot groups 
     filename:(string) A string giving the name of the text file we should be saving our results to.   
     """
-    ## Spot instance cost sampling: 
+    ## Spot instance cost sampling as of September 2019. Hardcoded here for reproducibility.  
     CNMFspot1 = 1.536
     CNMFspot6 = 1.996
     CNMFspot = 0.6385
@@ -498,10 +498,10 @@ def plot_time(pipeline,compute= True):
     plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisTime.png'))
     return df
 
-## Now, more processed metrics 1. A plot that gives the Hardware Cost Crossover.  
-def plot_humans(pipeline,pricing = "PowerMatch",compute = True):
+## Now, more processed metrics 1. A plot that gives the Local Cost Crossover.  
+def plot_LCC(pipeline,pricing = "PowerMatch",compute = True):
     """
-    Converts these measures into those that are most meaningful to humans. Uses Wipro whitepaper commissioned by intel in 2010.  
+    Converts the cost into a meaningful comparison (Local Cost Crossover). Uses Wipro whitepaper commissioned by intel in 2010 and the AWS TCO calculator.
     Inputs: 
     pipeline:(string) the name of the pipeline we are analyzing
     pricing:(string) the pricing to use. Options are Orig, Local, and Cluster.  
@@ -514,86 +514,51 @@ def plot_humans(pipeline,pricing = "PowerMatch",compute = True):
     xticklabel_size = 50 
     yticklabel_size = 50 
     assert pricing in ["Orig","PowerMatch","Local","Cluster","Hard"], "input must be one of known quantities" 
+    costdata = json.load(open(os.path.join(pipeline,"costs","Cost_Data_{}.json".format(pricing)),"r"))
+    cost = costdata["pricetag_cost"]
+    support = costdata["support_cost"]
     
     if pipeline == "CaImAn":
         filenames = ['batchN.02.00_2.json','batchJ123_2.json','batchJ115_2.json']
         xlabels = ['8.39 x 1','35.8 x 1','78.7 x 1']
+        ## set up the labeling aces correctly. 
         if pricing == "Orig":
-            ## Also have a baseline cost for computer: 
-            cost = 1599 
-            ## Factor in support cost per year (from wipro whitepaper [morey & nambiar 2010]): 
-            support = [716,768,824,891+75,969+171]
             maxval = 5 
         if pricing == "PowerMatch":
-            cost = 1618
-            ## Factor in support cost per year (from wipro whitepaper [morey & nambiar 2010]): 
-            support = [716,768,824,891+75,969+171]
             maxval = 5 
         if pricing == "Local":
-            ## Also have a baseline cost for computer: 
-            cost = 1539
-            ## Factor in support cost per year (from wipro whitepaper [morey & nambiar 2010]): 
-            support = [716,768,824,891+75,969+171]
             maxval = 5 
         if pricing == "Cluster":
-            ## TCO cost calculator 
-            cost = 1499+1000 # for hardware + storage  
-            ## Factor in support cost per year (from AWS TCO calculator) server maintenance, storage maintenance, : 
-            support = [225+4+135]*5
             maxval = 7 
         if pricing == "Hard":
-            ## Also have a baseline cost for computer: 
-            cost = 1539
-            ## Factor in support cost per year (from wipro whitepaper [morey & nambiar 2010]): 
-            support = [0]*5
             maxval = 9 
     elif pipeline == 'DLC':
         filenames = ['batch_5.json','batch_10.json','batch_15.json']
         xlabels = ['0.22 x 5', '0.22 x 10','0.22 x 15']
         if pricing == "Orig":
-            ## Baseline cost for computer + gpu
-            cost = 700+5000
-            ## Factor in support cost per year (from wipro whitepaper [morey & nambiar 2010]): 
-            support = [433,465,499,539+26,585+59]
             maxval = 5
         if pricing == "Local":
-            cost = 1489+1680# 700+5000
-            support = [433,465,499,539+26,585+59]
             maxval = 3
+        if pricing == "PowerMatch":
+            maxval = 2
         if pricing == "Cluster":
-            ## TCO cost calculator 
-            cost = 1701+400+1680 # for hardware + storage  
-            ## Factor in support cost per year (from AWS TCO calculator) server maintenance, storage maintenance, : 
-            support = [255+2+135]*5
-            maxval = 3 
+            maxval = 2 
         if pricing == "Hard":
-            cost = 1489+1680# 700+5000
-            support = [0]*5
             maxval = 3
     elif pipeline == "PMDLocaNMF":
         filenames = ['batch_1.json','batch_3.json','batch_5.json']
         xlabels = ['20.1 x 1','20.1 x 3', '20.1 x 5']
         compute = False
         if pricing == "Orig":
-            #benchmark desktop: https://www.newegg.com/p/1VK-01UA-000U4 for the PMD processing.  
-            #add in a K80 GPU:
-            cost = 3199+5000 
-            ## Factor in support cost per year (from wipro whitepaper [morey & nambiar 2010]): 
-            support = [433,465,499,539+26,585+59]
+            upport = [433,465,499,539+26,585+59]
+            maxval = 4
+        if pricing == "PowerMatch":
             maxval = 4
         if pricing == "Local":
-            cost = 3979+1680 
-            support = [433,465,499,539+26,585+59]
             maxval = 4 
         if pricing == "Cluster":
-            ## TCO cost calculator 
-            cost = 10836+150+1680 # for hardware + storage  
-            ## Factor in support cost per year (from AWS TCO calculator) server maintenance, storage maintenance, : 
-            support = [1625+1+135]*5
             maxval = 9 
         if pricing == "Hard":
-            cost = 3979+1680 
-            support = [0]*5
             maxval = 3 
     else:
         raise NotImplementedError("This option does not exist yet.")
@@ -696,15 +661,15 @@ def plot_humans(pipeline,pricing = "PowerMatch",compute = True):
 
 
     if pricing == "Orig":
-        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisTotal.png'))
+        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisLCC.png'))
     if pricing == "PowerMatch":
-        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisTotal_powermatch.png'))
+        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisLCC_powermatch.png'))
     if pricing == "Local":
-        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisTotal_alt.png'))
+        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisLCC_alt.png'))
     if pricing == "Cluster":
-        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisTotal_cluster.png'))
+        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisLCC_cluster.png'))
     if pricing == "Hard":
-        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisTotal_hard.png'))
+        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisLCC_hard.png'))
     ## Calculate the max number of datasets that can be analyzed per size: 
     print(time_df)
     for xl in xlabels:
@@ -719,9 +684,9 @@ def plot_humans(pipeline,pricing = "PowerMatch",compute = True):
     return cost_df,tco_cost
 
 ## Now get the utilization necessary in order to actually *meet* this crossover.
-def plot_utilization(pipeline,pricing = "PowerMatch"):
+def plot_LUC(pipeline,pricing = "PowerMatch"):
     """
-    Converts these measures into those that are most meaningful to humans. Uses Wipro whitepaper commissioned by intel in 2010.  
+    Takes LCC, and factors in processing time by considering the effective utilization rate that would be required to achieve them. 
     Inputs: 
     pipeline:(string) the name of the pipeline we are analyzing
     """
@@ -732,87 +697,47 @@ def plot_utilization(pipeline,pricing = "PowerMatch"):
     xticklabel_size = 50 
     yticklabel_size = 50 
     assert pricing in ["Orig","PowerMatch","Local","Cluster","Hard"], "input must be one of known quantities" 
+    costdata = json.load(open(os.path.join(pipeline,"costs","Cost_Data_{}.json".format(pricing)),"r"))
+    cost = costdata["pricetag_cost"]
+    support = costdata["support_cost"]
     if pipeline == "CaImAn":
         filenames = ['batchN.02.00_2.json','batchJ123_2.json','batchJ115_2.json']
         xlabels = ['8.39 x 1','35.8 x 1','78.7 x 1']
         if pricing == "Orig":
-            ## Also have a baseline cost for computer: 
-            cost = 1599 
-            ## Factor in support cost per year (from wipro whitepaper [morey & nambiar 2010]): 
-            support = [716,768,824,891+75,969+171]
             maxval = 200 
         if pricing == "PowerMatch":
-            pass
+            maxval = 100 
         if pricing == "Local":
-            ## Also have a baseline cost for computer: 
-            cost = 1539
-            ## Factor in support cost per year (from wipro whitepaper [morey & nambiar 2010]): 
-            support = [716,768,824,891+75,969+171]
             maxval = 200 
         if pricing == "Cluster":
-            ## TCO cost calculator 
-            cost = 1499+1000 # for hardware + storage  
-            ## Factor in support cost per year (from AWS TCO calculator) server maintenance, storage maintenance, : 
-            support = [225+4+135]*5
-            maxval = 200 
+            maxval = 100 
         if pricing == "Hard":
-            ## Also have a baseline cost for computer: 
-            cost = 1539
-            ## Factor in support cost per year (from wipro whitepaper [morey & nambiar 2010]): 
-            support = [0]*5
-            ## maximum utilization percentage
             maxval = 150 
     elif pipeline == 'DLC':
         filenames = ['batch_5.json','batch_10.json','batch_15.json']
         xlabels = ['0.22 x 5', '0.22 x 10','0.22 x 15']
         if pricing == "Orig":
-            ## Baseline cost for computer + gpu
-            cost = 700+5000
-            ## Factor in support cost per year (from wipro whitepaper [morey & nambiar 2010]): 
-            support = [433,465,499,539+26,585+59]
             maxval = 300 
+        if pricing == "PowerMatch":
+            maxval = 150
         if pricing == "Local":
-            cost = 1489+1680# 700+5000
-            support = [433,465,499,539+26,585+59]
-            ## maximum utilization percentage
             maxval = 200
         if pricing == "Cluster":
-            ## TCO cost calculator 
-            cost = 1701+400+1680 # for hardware + storage  
-            ## Factor in support cost per year (from AWS TCO calculator) server maintenance, storage maintenance, : 
-            support = [255+2+135]*5
-            maxval = 200
+            maxval = 150
         if pricing == "Hard":
-            cost = 1489+1680# 700+5000
-            support = [0]*5
-            ## maximum utilization percentage
             maxval = 200
     elif pipeline == "PMDLocaNMF":
         filenames = ['batch_1.json','batch_3.json','batch_5.json']
         xlabels = ['20.1 x 1','20.1 x 3', '20.1 x 5']
         if pricing == "Orig":
-            #benchmark desktop: https://www.newegg.com/p/1VK-01UA-000U4 for the PMD processing.  
-            #add in a K80 GPU:
-            cost = 3199+5000 
-            ## Factor in support cost per year (from wipro whitepaper [morey & nambiar 2010]): 
-            support = [433,465,499,539+26,585+59]
-            ## maximum utilization percentage
             maxval = 200
+        if pricing == "PowerMatch":
+            maxval =  125
         if pricing == "Local":
-            cost = 3979+1680 
-            support = [433,465,499,539+26,585+59]
-            ## maximum utilization percentage
             maxval =  125
         if pricing == "Cluster":
-            ## TCO cost calculator 
-            cost = 10836+150+1680 # for hardware + storage  
-            ## Factor in support cost per year (from AWS TCO calculator) server maintenance, storage maintenance, : 
-            support = [1625+1+135]*5
             maxval = 250
         if pricing == "Hard":
-            cost = 3979+1680 
-            support = [0]*5
-            ## maximum utilization percentage
             maxval =  125
     else:
         raise NotImplementedError("This option does not exist yet.")
@@ -907,21 +832,21 @@ def plot_utilization(pipeline,pricing = "PowerMatch"):
     ax.set_xticks(percentage)
     ax.set_xticklabels(percentage,size = xticklabel_size)
     ax.set_xlabel('Utilization (%)',size = xlabel_size)
-    ax.axvline(x = 100,color = "black",linestyle = "--")
+    ax.axvline(x = 100,color = "black",linestyle = "--",linewidth = 3)
 
     lower = [0.755,0.400,0.045]
 
     
     if pricing == "Orig":
-        plt.savefig(os.path.join(pipeline,pipeline+'AnalysisUtilization.png'))
+        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisLUC.png'))
     if pricing == "PowerMatch":
-        plt.savefig(os.path.join(pipeline,pipeline+'AnalysisUtilization_powermatch.png'))
+        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisLUC_powermatch.png'))
     if pricing == "Local":
-        plt.savefig(os.path.join(pipeline,pipeline+'AnalysisUtilization_alt.png'))
+        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisLUC_alt.png'))
     if pricing == "Cluster":
-        plt.savefig(os.path.join(pipeline,pipeline+'AnalysisUtilization_cluster.png'))
+        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisLUC_cluster.png'))
     if pricing == "Hard":
-        plt.savefig(os.path.join(pipeline,pipeline+'AnalysisUtilization_hard.png'))
+        plt.savefig(os.path.join(pipeline,"panels",pipeline+'AnalysisLUC_hard.png'))
 
     
 
