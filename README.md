@@ -31,3 +31,5 @@ Future directions:
 - website-based dev portal
 - "super user" API (in code)
 - GUI support 
+
+To run our comparison analysis on your own infrastructure, navigate to the "experiments" directory and follow the directions found in the guide there. 
