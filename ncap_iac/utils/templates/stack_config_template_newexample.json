@@ -3,7 +3,7 @@
     "REGION":"AWS region code (example us-east-1)",
     "STAGE":"webdev (default) develop or deploy",
     "Lambda":{
-        "CodeUri":"../lambda_repo",
+        "CodeUri":"../../protocols",
         "Handler":"submit_start.handler_develop",
         "Launch":true, 
         "LambdaConfig":{
@@ -36,7 +36,7 @@
             "ContactEmail":"NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
         },
         {
-            "AffiliateName":"Developer Group 1",
+            "AffiliateName":"developergroup1",
             "UserNames":["liam","john"],
             "UserInput":true,
             "ContactEmail":"The email we should notify regarding processing status."
