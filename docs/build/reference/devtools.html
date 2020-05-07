@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Developer Tools &#8212; NeuroCAAS 0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="User Profiles" href="userprofiles.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ncap_iac.ncap_blueprints.dev_utils.develop_blueprint">
+<span id="developer-tools"></span><h1>Developer Tools<a class="headerlink" href="#module-ncap_iac.ncap_blueprints.dev_utils.develop_blueprint" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI">
+<em class="property">class </em><code class="sig-prename descclassname">ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.</code><code class="sig-name descname">NeuroCaaSAMI</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncap_iac/ncap_blueprints/dev_utils/develop_blueprint.html#NeuroCaaSAMI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class streamlines the experience of building an ami for a new pipeline, or impriving one within an existing pipeline. It has three main functions:
+1) to launch a development instance from amis associated with a particular algorithm or pipeline,
+2) to test said amis with simulated job submission events, and
+3) to create new images once development instances are stable and ready for deployment.</p>
+<p>This class only allows for one development instance to be launched at a time to encourage responsible usage.</p>
+<p>This class assumes that you have already configured a pipeline, having created a folder for it, and filled out the template with relevant details [not the ami, as this is what we will build here.]</p>
+<p>Inputs:
+path (str): the path to the directory for a given pipeline.</p>
+<p>Example Usage:
+<code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">devenv</span> <span class="pre">=</span> <span class="pre">NeuroCaaSAMI(&quot;../../sam_example_stack/&quot;)</span> <span class="pre">##</span> <span class="pre">Declare</span> <span class="pre">in</span> <span class="pre">reference</span> <span class="pre">to</span> <span class="pre">a</span> <span class="pre">particular</span> <span class="pre">NCAP</span> <span class="pre">pipeline</span>
+<span class="pre">devenv.launch_ami()</span> <span class="pre">##</span> <span class="pre">function</span> <span class="pre">1</span> <span class="pre">referenced</span> <span class="pre">above</span>
+<span class="pre">###</span> <span class="pre">Do</span> <span class="pre">some</span> <span class="pre">development</span> <span class="pre">on</span> <span class="pre">the</span> <span class="pre">remote</span> <span class="pre">instance</span>
+<span class="pre">devenv.submit_job(&quot;/path/to/submit/file&quot;)</span> <span class="pre">##</span> <span class="pre">function</span> <span class="pre">2</span> <span class="pre">referenced</span> <span class="pre">above</span>
+<span class="pre">###</span> <span class="pre">Monitor</span> <span class="pre">the</span> <span class="pre">remote</span> <span class="pre">instance</span> <span class="pre">to</span> <span class="pre">make</span> <span class="pre">sure</span> <span class="pre">that</span> <span class="pre">everything</span> <span class="pre">is</span> <span class="pre">running</span> <span class="pre">as</span> <span class="pre">expected,</span> <span class="pre">outputs</span> <span class="pre">are</span> <span class="pre">returned</span>
+<span class="pre">devenv.create_devami(&quot;new_ami&quot;)</span> <span class="pre">##</span> <span class="pre">function</span> <span class="pre">3</span> <span class="pre">referenced</span> <span class="pre">above</span>
+<span class="pre">devenv.terminate_devinstance()</span> <span class="pre">##</span> <span class="pre">clean</span> <span class="pre">up</span> <span class="pre">after</span> <span class="pre">done</span> <span class="pre">developing</span>
+<span class="pre">`</span></code></p>
+<dl class="py method">
+<dt id="ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.check_clear">
+<code class="sig-name descname">check_clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncap_iac/ncap_blueprints/dev_utils/develop_blueprint.html#NeuroCaaSAMI.check_clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.check_clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function to check if the current instance is live and can be actively developed. Prevents rampant instance propagation. Related to check_running, but not direct negations of each other.</p>
+<p>Outputs:
+(bool): a boolean representing if the current instance is inactive, and can be replaced by an active one.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.check_running">
+<code class="sig-name descname">check_running</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncap_iac/ncap_blueprints/dev_utils/develop_blueprint.html#NeuroCaaSAMI.check_running"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.check_running" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function to check if the instance associated with this object is live.</p>
+<p>Outputs:
+(bool): a boolean representing if the current instance is in the state “running” or not.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.create_devami">
+<code class="sig-name descname">create_devami</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncap_iac/ncap_blueprints/dev_utils/develop_blueprint.html#NeuroCaaSAMI.create_devami"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.create_devami" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to create a new ami from the current development instance.</p>
+<p>Inputs:
+name (str): the name to give to the new ami.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.get_instance_state">
+<code class="sig-name descname">get_instance_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncap_iac/ncap_blueprints/dev_utils/develop_blueprint.html#NeuroCaaSAMI.get_instance_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.get_instance_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks the instance associated with the DevAMI object, and determines its state. Used to maintain a limit of one live instance at a time during development.</p>
+<p>Outputs:
+(dict): a dictionary returning the status of the instance asso</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.job_output">
+<code class="sig-name descname">job_output</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">jobind</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncap_iac/ncap_blueprints/dev_utils/develop_blueprint.html#NeuroCaaSAMI.job_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.job_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>method to get out stdout and stderr from the jobs that were run on the instance.
+Inputs:
+jobind (int): index giving which job we should be paying attention to. Defaults to -1</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.job_status">
+<code class="sig-name descname">job_status</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">jobind</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncap_iac/ncap_blueprints/dev_utils/develop_blueprint.html#NeuroCaaSAMI.job_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.job_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>method to get out stdout and stderr from the jobs that were run on the instance.
+Inputs:
+jobind (int): index giving which job we should be paying attention to. Defaults to -1</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.launch_ami">
+<code class="sig-name descname">launch_ami</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ami</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dataset_size</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncap_iac/ncap_blueprints/dev_utils/develop_blueprint.html#NeuroCaaSAMI.launch_ami"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.launch_ami" title="Permalink to this definition">¶</a></dt>
+<dd><p>Launches an instance from an ami. If ami is not given, launches the default ami of the pipeline as indicated in the stack configuration file. Launches on the instance type given in this same stack configuration file.</p>
+<p>Inputs:
+ami (str): (Optional) if not given, will be the default ami of the path. This has several text options to be maximally useful. 
+[amis recent as of 3/16]
+ubuntu18: ubuntu linux 18.06, 64 bit x86 (ami-07ebfd5b3428b6f4d)
+ubuntu16: ubuntu linux 16.04, 64 bit x86 (ami-08bc77a2c7eb2b1da)
+dlami18: ubuntu 18.06 version 27 (ami-0dbb717f493016a1a)
+dlami16: ubuntu 16.04 version 27 (ami-0a79b70001264b442)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.start_devinstance">
+<code class="sig-name descname">start_devinstance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncap_iac/ncap_blueprints/dev_utils/develop_blueprint.html#NeuroCaaSAMI.start_devinstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.start_devinstance" title="Permalink to this definition">¶</a></dt>
+<dd><p>method to stop the current development instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.stop_devinstance">
+<code class="sig-name descname">stop_devinstance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncap_iac/ncap_blueprints/dev_utils/develop_blueprint.html#NeuroCaaSAMI.stop_devinstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.stop_devinstance" title="Permalink to this definition">¶</a></dt>
+<dd><p>method to stop the current development instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.submit_job">
+<code class="sig-name descname">submit_job</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">submitpath</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncap_iac/ncap_blueprints/dev_utils/develop_blueprint.html#NeuroCaaSAMI.submit_job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.submit_job" title="Permalink to this definition">¶</a></dt>
+<dd><p>Submit a submit file json to a currently active development instance. Will not work if the current instance is not live. Modified to the take config file, and create logging.
+Inputs:
+submitpath:(str) path to a submit.json formatted file.
+Output:
+(str): path to the output directory created by this function.
+(str): path to the data file analyzed by this function. 
+(str): id of the command issued to the instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.submit_job_log">
+<code class="sig-name descname">submit_job_log</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">submitpath</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncap_iac/ncap_blueprints/dev_utils/develop_blueprint.html#NeuroCaaSAMI.submit_job_log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.submit_job_log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inputs:
+submitpath:(str) path to a submit.json formatted file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.terminate_devinstance">
+<code class="sig-name descname">terminate_devinstance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">force</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncap_iac/ncap_blueprints/dev_utils/develop_blueprint.html#NeuroCaaSAMI.terminate_devinstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.terminate_devinstance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to terminate the current development instance.
+Inputs:
+force (bool): if set to true, will terminate even if results have not been saved into an ami.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.update_blueprint">
+<code class="sig-name descname">update_blueprint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ami_id</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">message</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncap_iac/ncap_blueprints/dev_utils/develop_blueprint.html#NeuroCaaSAMI.update_blueprint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.update_blueprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to take more recently developed amis, and assign them to the stack_config_template of the relevant instance, and create a git commit to document this change.</p>
+<p>Inputs: 
+ami_id:(str) the ami id with which to update the blueprint for the pipeline in question. If none is given, defaults to the most recent ami in the ami_hist list. 
+message:(str) (Optional) the message we associate with this particular commit.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">NeuroCAAS</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../develop/installation.html">Installing NeuroCAAS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../develop/quickstart.html">Getting Started with NeuroCAAS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protocols.html">Protocols</a></li>
+<li class="toctree-l1"><a class="reference internal" href="userprofiles.html">User Profiles</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Developer Tools</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="userprofiles.html" title="previous chapter">User Profiles</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Taiga Abe.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/reference/devtools.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

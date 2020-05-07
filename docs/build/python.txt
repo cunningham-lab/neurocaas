@@ -1,0 +1,18 @@
+Undocumented Python objects
+===========================
+ncap_iac.protocols.submit_start
+-------------------------------
+Functions:
+ * respond
+
+Classes:
+ * Submission_Launch -- missing methods:
+
+   - acquire_instance
+   - process_inputs
+   - put_instance_monitor_rule
+   - start_instance
+ * Submission_Launch_folder -- missing methods:
+
+   - process_inputs
+
