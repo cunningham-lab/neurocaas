@@ -1,0 +1,639 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>ncap_iac.ncap_blueprints.dev_utils.develop_blueprint &#8212; NeuroCAAS 0.1 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for ncap_iac.ncap_blueprints.dev_utils.develop_blueprint</h1><div class="highlight"><pre>
+<span></span><span class="c1">## A module to work with AMIs for the purpose of debugging and updating.</span>
+<span class="kn">import</span> <span class="nn">boto3</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+
+<span class="c1">## Get global parameters:</span>
+<span class="n">utildir</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+<span class="n">basedir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">utildir</span><span class="p">))</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span><span class="s2">&quot;global_params_initialized.json&quot;</span><span class="p">))</span> <span class="k">as</span> <span class="n">gp</span><span class="p">:</span>
+    <span class="n">gpdict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">gp</span><span class="p">)</span>
+
+<span class="c1">## New class to develop an ami.</span>
+
+<div class="viewcode-block" id="NeuroCaaSAMI"><a class="viewcode-back" href="../../../../reference/devtools.html#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI">[docs]</a><span class="k">class</span> <span class="nc">NeuroCaaSAMI</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class streamlines the experience of building an ami for a new pipeline, or impriving one within an existing pipeline. It has three main functions:</span>
+<span class="sd">    1) to launch a development instance from amis associated with a particular algorithm or pipeline,</span>
+<span class="sd">    2) to test said amis with simulated job submission events, and</span>
+<span class="sd">    3) to create new images once development instances are stable and ready for deployment.  </span>
+
+<span class="sd">    This class only allows for one development instance to be launched at a time to encourage responsible usage.</span>
+
+<span class="sd">    This class assumes that you have already configured a pipeline, having created a folder for it, and filled out the template with relevant details [not the ami, as this is what we will build here.]   </span>
+
+<span class="sd">    Inputs:</span>
+<span class="sd">    path (str): the path to the directory for a given pipeline.</span>
+
+
+<span class="sd">    Example Usage:</span>
+<span class="sd">    ```python</span>
+<span class="sd">    devenv = NeuroCaaSAMI(&quot;../../sam_example_stack/&quot;) ## Declare in reference to a particular NCAP pipeline</span>
+<span class="sd">    devenv.launch_ami() ## function 1 referenced above</span>
+<span class="sd">    ### Do some development on the remote instance</span>
+<span class="sd">    devenv.submit_job(&quot;/path/to/submit/file&quot;) ## function 2 referenced above</span>
+<span class="sd">    ### Monitor the remote instance to make sure that everything is running as expected, outputs are returned</span>
+<span class="sd">    devenv.create_devami(&quot;new_ami&quot;) ## function 3 referenced above</span>
+<span class="sd">    devenv.terminate_devinstance() ## clean up after done developing</span>
+<span class="sd">    ```</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">path</span><span class="p">):</span>
+        <span class="n">config_filepath</span> <span class="o">=</span> <span class="s1">&#39;stack_config_template.json&#39;</span>
+        <span class="n">config_fullpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">config_filepath</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_filepath</span> <span class="o">=</span> <span class="n">config_filepath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_fullpath</span> <span class="o">=</span> <span class="n">config_fullpath</span>
+        <span class="c1">## Load in:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config_fullpath</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+
+        <span class="c1">## Initialize dev state variables.</span>
+        <span class="c1">## Active instance:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1">## Instance history:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_hist</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1">## Initialize dev history tracking.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1">## Initialize ami creation history tracking.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ami_hist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_saved</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="NeuroCaaSAMI.launch_ami"><a class="viewcode-back" href="../../../../reference/devtools.html#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.launch_ami">[docs]</a>    <span class="k">def</span> <span class="nf">launch_ami</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ami</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span><span class="n">dataset_size</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Launches an instance from an ami. If ami is not given, launches the default ami of the pipeline as indicated in the stack configuration file. Launches on the instance type given in this same stack configuration file.</span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">        ami (str): (Optional) if not given, will be the default ami of the path. This has several text options to be maximally useful. </span>
+<span class="sd">        [amis recent as of 3/16]</span>
+<span class="sd">        ubuntu18: ubuntu linux 18.06, 64 bit x86 (ami-07ebfd5b3428b6f4d)</span>
+<span class="sd">        ubuntu16: ubuntu linux 16.04, 64 bit x86 (ami-08bc77a2c7eb2b1da)</span>
+<span class="sd">        dlami18: ubuntu 18.06 version 27 (ami-0dbb717f493016a1a)</span>
+<span class="sd">        dlami16: ubuntu 16.04 version 27 (ami-0a79b70001264b442)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">## Get ami id</span>
+        <span class="k">if</span> <span class="n">ami</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ami_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Lambda&#39;</span><span class="p">][</span><span class="s1">&#39;LambdaConfig&#39;</span><span class="p">][</span><span class="s1">&#39;AMI&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">ami</span> <span class="o">==</span> <span class="s2">&quot;ubuntu18&quot;</span><span class="p">:</span>
+            <span class="n">ami_id</span> <span class="o">=</span> <span class="s2">&quot;ami-07ebfd5b3428b6f4d&quot;</span>
+        <span class="k">elif</span> <span class="n">ami</span> <span class="o">==</span> <span class="s2">&quot;ubuntu16&quot;</span><span class="p">:</span>
+            <span class="n">ami_id</span> <span class="o">=</span> <span class="s2">&quot;ami-08bc77a2c7eb2b1da&quot;</span>
+        <span class="k">elif</span> <span class="n">ami</span> <span class="o">==</span> <span class="s2">&quot;dlami18&quot;</span><span class="p">:</span>
+            <span class="n">ami_id</span> <span class="o">=</span> <span class="s2">&quot;ami-0dbb717f493016a1a&quot;</span>
+        <span class="k">elif</span> <span class="n">ami</span> <span class="o">==</span> <span class="s2">&quot;dlami16&quot;</span><span class="p">:</span>
+            <span class="n">ami_id</span> <span class="o">=</span> <span class="s2">&quot;ami-0a79b70001264b442&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Let boto3 handle this error when it comes. </span>
+            <span class="n">ami_id</span> <span class="o">=</span> <span class="n">ami</span>
+
+        <span class="c1">## Get default instance type:</span>
+        <span class="n">instance_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Lambda&#39;</span><span class="p">][</span><span class="s1">&#39;LambdaConfig&#39;</span><span class="p">][</span><span class="s1">&#39;INSTANCE_TYPE&#39;</span><span class="p">]</span>
+        <span class="n">ec2_resource</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s1">&#39;ec2&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_clear</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">dataset_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">ec2_resource</span><span class="o">.</span><span class="n">create_instances</span><span class="p">(</span><span class="n">ImageId</span><span class="o">=</span><span class="n">ami_id</span><span class="p">,</span>
+                    <span class="n">InstanceType</span> <span class="o">=</span> <span class="n">instance_type</span><span class="p">,</span>
+                    <span class="n">MinCount</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">MaxCount</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">DryRun</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">KeyName</span> <span class="o">=</span> <span class="s2">&quot;testkeystack-custom-dev-key-pair&quot;</span><span class="p">,</span> 
+                    <span class="c1">#SecurityGroups=[&#39;testsgstack-SecurityGroupDev-1NQJIDBJG16KK&#39;],</span>
+                    <span class="n">SecurityGroups</span><span class="o">=</span><span class="p">[</span><span class="n">gpdict</span><span class="p">[</span><span class="s2">&quot;securitygroupdevname&quot;</span><span class="p">]],</span>
+                    <span class="n">IamInstanceProfile</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s1">&#39;Name&#39;</span><span class="p">:</span><span class="s1">&#39;SSMRole&#39;</span><span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="n">out</span> <span class="o">=</span> <span class="n">ec2_resource</span><span class="o">.</span><span class="n">create_instances</span><span class="p">(</span>
+                    <span class="n">BlockDeviceMappings</span><span class="o">=</span><span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;DeviceName&quot;</span><span class="p">:</span> <span class="s2">&quot;/dev/sda1&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;Ebs&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;DeleteOnTermination&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                                <span class="s2">&quot;VolumeSize&quot;</span><span class="p">:</span><span class="n">dataset_size</span><span class="p">,</span>
+                                <span class="s2">&quot;VolumeType&quot;</span><span class="p">:</span><span class="s2">&quot;gp2&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;Encrypted&quot;</span><span class="p">:</span> <span class="kc">False</span>
+                                <span class="p">}</span>
+                            
+                            <span class="p">}],</span>
+                    <span class="n">ImageId</span><span class="o">=</span><span class="n">ami_id</span><span class="p">,</span>
+                    <span class="n">InstanceType</span><span class="o">=</span><span class="n">instance_type</span><span class="p">,</span>
+                    <span class="n">MinCount</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">MaxCount</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">DryRun</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">KeyName</span><span class="o">=</span><span class="s2">&quot;testkeystack-custom-dev-key-pair&quot;</span><span class="p">,</span>
+                    <span class="n">SecurityGroups</span><span class="o">=</span><span class="p">[</span><span class="n">gpdict</span><span class="p">[</span><span class="s2">&quot;securitygroupdevname&quot;</span><span class="p">]],</span>
+                    <span class="n">IamInstanceProfile</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Name&#39;</span><span class="p">:</span> <span class="s2">&quot;SSMRole&quot;</span><span class="p">}</span>
+                <span class="p">)</span>
+<span class="c1"># Now get the instance id:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1">## Add to the history:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_hist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ami_instance_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span>
+
+        <span class="c1">## Wait until this thing is started:</span>
+        <span class="n">started</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">started</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;current state is: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">))</span>
+
+            <span class="n">started</span> <span class="o">=</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;running&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deployed</span> <span class="o">=</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;running&#39;</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;initializing instance&#39;</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span> <span class="c1">## We need to wait until the instance gets set up.</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="s2">&quot;Instance </span><span class="si">{}</span><span class="s2"> is running&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+        <span class="c1">## Now associate a public ip address:</span>
+        <span class="n">ec2_client</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;ec2&quot;</span><span class="p">)</span>
+
+        <span class="c1">#allocation = ec2_client.allocate_address(Domain=&quot;vpc&quot;)</span>
+        <span class="c1">#response = ec2_client.associate_address(AllocationId=allocation[&quot;AllocationId&quot;],InstanceId=self.instance.instance_id)</span>
+        <span class="c1">#self.ip = allocation[&#39;PublicIp&#39;]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">public_ip_address</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;instance running at </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ip</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_saved</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+<span class="c1"># </span>
+<div class="viewcode-block" id="NeuroCaaSAMI.submit_job"><a class="viewcode-back" href="../../../../reference/devtools.html#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.submit_job">[docs]</a>    <span class="k">def</span> <span class="nf">submit_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">submitpath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Submit a submit file json to a currently active development instance. Will not work if the current instance is not live. Modified to the take config file, and create logging.</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">        submitpath:(str) path to a submit.json formatted file.</span>
+<span class="sd">        Output:</span>
+<span class="sd">        (str): path to the output directory created by this function.</span>
+<span class="sd">        (str): path to the data file analyzed by this function. </span>
+<span class="sd">        (str): id of the command issued to the instance. </span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">## First make sure we have an instance to send to.</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_running</span><span class="p">()</span>
+        <span class="c1">## Now get the submit configuration:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">submitpath</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">submit_config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="c1">## Get the datasets we want to use.</span>
+        <span class="n">data_allname</span> <span class="o">=</span> <span class="n">submit_config</span><span class="p">[</span><span class="s1">&#39;dataname&#39;</span><span class="p">]</span>
+        <span class="n">config_name</span> <span class="o">=</span> <span class="n">submit_config</span><span class="p">[</span><span class="s1">&#39;configname&#39;</span><span class="p">]</span>
+
+        <span class="c1">## Now get the command we want to send properly formatted:</span>
+        <span class="n">command_unformatted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Lambda&#39;</span><span class="p">][</span><span class="s1">&#39;LambdaConfig&#39;</span><span class="p">][</span><span class="s1">&#39;COMMAND&#39;</span><span class="p">]</span>
+        <span class="c1">## Get relevant parameters:</span>
+        <span class="n">bucketname_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;PipelineName&#39;</span><span class="p">]</span>
+        <span class="n">outdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">gpdict</span><span class="p">[</span><span class="s2">&quot;output_directory&quot;</span><span class="p">],</span><span class="s2">&quot;debugjob</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())))</span>
+
+        <span class="c1">## Now get a represetative dataset:</span>
+        <span class="n">s3</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">&quot;s3&quot;</span><span class="p">)</span>
+        <span class="n">bucket</span> <span class="o">=</span> <span class="n">s3</span><span class="o">.</span><span class="n">Bucket</span><span class="p">(</span><span class="n">bucketname_test</span><span class="p">)</span>
+        <span class="n">objgen</span> <span class="o">=</span> <span class="n">bucket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Prefix</span> <span class="o">=</span> <span class="n">data_allname</span><span class="p">)</span>
+        <span class="n">file_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">key</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objgen</span> <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">key</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">!=</span><span class="s2">&quot;/&quot;</span><span class="p">]</span>
+        <span class="n">data_filename</span> <span class="o">=</span> <span class="n">file_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+        <span class="n">command_formatted</span> <span class="o">=</span> <span class="p">[</span><span class="n">command_unformatted</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bucketname_test</span><span class="p">,</span><span class="n">data_filename</span><span class="p">,</span><span class="n">outdir</span><span class="p">,</span><span class="n">config_name</span><span class="p">)]</span>
+        <span class="n">working_directory</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Lambda&#39;</span><span class="p">][</span><span class="s1">&#39;LambdaConfig&#39;</span><span class="p">][</span><span class="s1">&#39;WORKING_DIRECTORY&#39;</span><span class="p">]]</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Lambda&#39;</span><span class="p">][</span><span class="s1">&#39;LambdaConfig&#39;</span><span class="p">][</span><span class="s1">&#39;SSM_TIMEOUT&#39;</span><span class="p">])]</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;sending command: &#39;</span><span class="o">+</span><span class="n">command_formatted</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span><span class="s1">&#39; to instance &#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">)</span>
+        <span class="c1">## Get the ssm client:</span>
+        <span class="n">ssm_client</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s1">&#39;ssm&#39;</span><span class="p">,</span><span class="n">region_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Lambda&#39;</span><span class="p">][</span><span class="s1">&#39;LambdaConfig&#39;</span><span class="p">][</span><span class="s1">&#39;REGION&#39;</span><span class="p">])</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">ssm_client</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span>
+            <span class="n">DocumentName</span><span class="o">=</span><span class="s2">&quot;AWS-RunShellScript&quot;</span><span class="p">,</span> <span class="c1"># One of AWS&#39; preconfigured documents</span>
+            <span class="n">Parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;commands&#39;</span><span class="p">:</span> <span class="n">command_formatted</span><span class="p">,</span>
+                        <span class="s2">&quot;workingDirectory&quot;</span><span class="p">:</span><span class="n">working_directory</span><span class="p">,</span>
+                        <span class="s2">&quot;executionTimeout&quot;</span><span class="p">:</span><span class="n">timeout</span><span class="p">},</span>
+            <span class="n">InstanceIds</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">],</span>
+            <span class="n">OutputS3BucketName</span><span class="o">=</span><span class="n">bucketname_test</span><span class="p">,</span>
+            <span class="n">OutputS3KeyPrefix</span><span class="o">=</span><span class="s2">&quot;debug_direct/&quot;</span>
+        <span class="p">)</span>
+        <span class="n">commandid</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;Command&#39;</span><span class="p">][</span><span class="s1">&#39;CommandId&#39;</span><span class="p">]</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;instance&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">,</span><span class="s2">&quot;time&quot;</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()),</span><span class="s2">&quot;commandid&quot;</span><span class="p">:</span><span class="n">commandid</span><span class="p">,</span><span class="s2">&quot;commandinfo&quot;</span><span class="p">:</span><span class="n">ssm_client</span><span class="o">.</span><span class="n">get_command_invocation</span><span class="p">(</span><span class="n">CommandId</span><span class="o">=</span><span class="n">commandid</span><span class="p">,</span><span class="n">InstanceId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">)})</span>
+        <span class="k">return</span> <span class="n">outdir</span><span class="p">,</span><span class="n">data_filename</span><span class="p">,</span><span class="n">commandid</span></div>
+
+<div class="viewcode-block" id="NeuroCaaSAMI.submit_job_log"><a class="viewcode-back" href="../../../../reference/devtools.html#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.submit_job_log">[docs]</a>    <span class="k">def</span> <span class="nf">submit_job_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">submitpath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">        submitpath:(str) path to a submit.json formatted file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## First make sure we have an instance to send to.</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_running</span><span class="p">()</span>
+        <span class="c1">## Now get the submit configuration:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">submitpath</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">submit_config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="c1">## Get the datasets we want to use.</span>
+        <span class="n">data_allname</span> <span class="o">=</span> <span class="n">submit_config</span><span class="p">[</span><span class="s1">&#39;dataname&#39;</span><span class="p">]</span>
+        <span class="n">config_name</span> <span class="o">=</span> <span class="n">submit_config</span><span class="p">[</span><span class="s1">&#39;configname&#39;</span><span class="p">]</span>
+
+        <span class="c1">## Now get the command we want to send properly formatted:</span>
+        <span class="n">command_unformatted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Lambda&#39;</span><span class="p">][</span><span class="s1">&#39;LambdaConfig&#39;</span><span class="p">][</span><span class="s1">&#39;COMMAND&#39;</span><span class="p">]</span>
+        <span class="c1">## Get relevant parameters:</span>
+        <span class="n">bucketname_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;PipelineName&#39;</span><span class="p">]</span>
+        <span class="n">outdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">gpdict</span><span class="p">[</span><span class="s2">&quot;output_directory&quot;</span><span class="p">],</span><span class="s2">&quot;debugjob</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())))</span>
+
+        <span class="c1">## Now get a represetative dataset:</span>
+        <span class="n">s3</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">&quot;s3&quot;</span><span class="p">)</span>
+        <span class="n">bucket</span> <span class="o">=</span> <span class="n">s3</span><span class="o">.</span><span class="n">Bucket</span><span class="p">(</span><span class="n">bucketname_test</span><span class="p">)</span>
+        <span class="n">objgen</span> <span class="o">=</span> <span class="n">bucket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Prefix</span> <span class="o">=</span> <span class="n">data_allname</span><span class="p">)</span>
+        <span class="n">file_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">key</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objgen</span> <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">key</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">!=</span><span class="s2">&quot;/&quot;</span><span class="p">]</span>
+        <span class="n">data_filename</span> <span class="o">=</span> <span class="n">file_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+        <span class="n">command_formatted</span> <span class="o">=</span> <span class="p">[</span><span class="n">command_unformatted</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bucketname_test</span><span class="p">,</span><span class="n">data_filename</span><span class="p">,</span><span class="n">outdir</span><span class="p">,</span><span class="n">config_name</span><span class="p">)]</span>
+        <span class="n">working_directory</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Lambda&#39;</span><span class="p">][</span><span class="s1">&#39;LambdaConfig&#39;</span><span class="p">][</span><span class="s1">&#39;WORKING_DIRECTORY&#39;</span><span class="p">]]</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Lambda&#39;</span><span class="p">][</span><span class="s1">&#39;LambdaConfig&#39;</span><span class="p">][</span><span class="s1">&#39;SSM_TIMEOUT&#39;</span><span class="p">])]</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;sending command: &#39;</span><span class="o">+</span><span class="n">command_formatted</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span><span class="s1">&#39; to instance &#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">)</span>
+        <span class="c1">## Get the ssm client:</span>
+        <span class="n">ssm_client</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s1">&#39;ssm&#39;</span><span class="p">,</span><span class="n">region_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Lambda&#39;</span><span class="p">][</span><span class="s1">&#39;LambdaConfig&#39;</span><span class="p">][</span><span class="s1">&#39;REGION&#39;</span><span class="p">])</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">ssm_client</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span>
+            <span class="n">DocumentName</span><span class="o">=</span><span class="s2">&quot;AWS-RunShellScript&quot;</span><span class="p">,</span> <span class="c1"># One of AWS&#39; preconfigured documents</span>
+            <span class="n">Parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;commands&#39;</span><span class="p">:</span> <span class="n">command_formatted</span><span class="p">,</span>
+                        <span class="s2">&quot;workingDirectory&quot;</span><span class="p">:</span><span class="n">working_directory</span><span class="p">,</span>
+                        <span class="s2">&quot;executionTimeout&quot;</span><span class="p">:</span><span class="n">timeout</span><span class="p">},</span>
+            <span class="n">InstanceIds</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">],</span>
+            <span class="n">OutputS3BucketName</span><span class="o">=</span><span class="n">bucketname_test</span><span class="p">,</span>
+            <span class="n">OutputS3KeyPrefix</span><span class="o">=</span><span class="s2">&quot;debug_direct/&quot;</span>
+        <span class="p">)</span>
+        <span class="n">commandid</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;Command&#39;</span><span class="p">][</span><span class="s1">&#39;CommandId&#39;</span><span class="p">]</span>
+        <span class="c1">## race condition? </span>
+        <span class="n">s3_resource</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">&quot;s3&quot;</span><span class="p">)</span>
+        <span class="c1">## Now create a job log. </span>
+        <span class="c1">### The below mimics the structure of initialize_datasets_dev that is used by the lambda function. </span>
+        <span class="n">template_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span><span class="s2">&quot;INITIALIZING&quot;</span><span class="p">,</span><span class="s2">&quot;reason&quot;</span><span class="p">:</span><span class="s2">&quot;NONE&quot;</span><span class="p">,</span><span class="s2">&quot;stdout&quot;</span><span class="p">:</span><span class="s2">&quot;not given yet&quot;</span><span class="p">,</span><span class="s2">&quot;stderr&quot;</span><span class="p">:</span><span class="s2">&quot;not given yet&quot;</span><span class="p">,</span><span class="s2">&quot;input&quot;</span><span class="p">:</span><span class="n">data_filename</span><span class="p">,</span><span class="s2">&quot;instance&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">,</span><span class="s2">&quot;command&quot;</span><span class="p">:</span><span class="n">commandid</span><span class="p">}</span>
+        <span class="n">dataset_basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">data_filename</span><span class="p">)</span>
+        <span class="n">dataset_dir</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;(.+)/</span><span class="si">{}</span><span class="s2">/&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gpdict</span><span class="p">[</span><span class="s2">&quot;input_directory&quot;</span><span class="p">]),</span><span class="n">data_filename</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">status_name</span> <span class="o">=</span> <span class="s2">&quot;DATASET_NAME:</span><span class="si">{}</span><span class="s2">_STATUS.txt&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dataset_basename</span><span class="p">)</span>
+        <span class="n">status_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dataset_dir</span><span class="p">,</span><span class="n">outdir</span><span class="p">,</span><span class="n">gpdict</span><span class="p">[</span><span class="s2">&quot;log_directory&quot;</span><span class="p">],</span><span class="n">status_name</span><span class="p">)</span>
+        <span class="n">statusobj</span> <span class="o">=</span> <span class="n">s3_resource</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;PipelineName&#39;</span><span class="p">],</span><span class="n">status_path</span><span class="p">)</span>
+        <span class="n">statusobj</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">Body</span> <span class="o">=</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">template_dict</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;UTF-8&quot;</span><span class="p">))))</span>
+
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;instance&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">,</span><span class="s2">&quot;time&quot;</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()),</span><span class="s2">&quot;commandid&quot;</span><span class="p">:</span><span class="n">commandid</span><span class="p">,</span><span class="s2">&quot;commandinfo&quot;</span><span class="p">:</span><span class="n">ssm_client</span><span class="o">.</span><span class="n">get_command_invocation</span><span class="p">(</span><span class="n">CommandId</span><span class="o">=</span><span class="n">commandid</span><span class="p">,</span><span class="n">InstanceId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">)})</span></div>
+
+<div class="viewcode-block" id="NeuroCaaSAMI.job_status"><a class="viewcode-back" href="../../../../reference/devtools.html#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.job_status">[docs]</a>    <span class="k">def</span> <span class="nf">job_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">jobind</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        method to get out stdout and stderr from the jobs that were run on the instance.</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">        jobind (int): index giving which job we should be paying attention to. Defaults to -1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">### Get the command we will analyze:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">jobind</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">ie</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">ie</span><span class="p">,</span><span class="s2">&quot; index </span><span class="si">{}</span><span class="s2"> does not exist for this object, exiting&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">jobind</span><span class="p">))</span>
+            <span class="k">raise</span>
+        <span class="n">ssm_client</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s1">&#39;ssm&#39;</span><span class="p">,</span><span class="n">region_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Lambda&#39;</span><span class="p">][</span><span class="s1">&#39;LambdaConfig&#39;</span><span class="p">][</span><span class="s1">&#39;REGION&#39;</span><span class="p">])</span>
+        <span class="n">updated</span> <span class="o">=</span> <span class="n">ssm_client</span><span class="o">.</span><span class="n">list_commands</span><span class="p">(</span><span class="n">CommandId</span><span class="o">=</span><span class="n">command</span><span class="p">[</span><span class="s2">&quot;commandid&quot;</span><span class="p">])</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">updated</span><span class="p">[</span><span class="s1">&#39;Commands&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">status</span></div>
+
+<div class="viewcode-block" id="NeuroCaaSAMI.job_output"><a class="viewcode-back" href="../../../../reference/devtools.html#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.job_output">[docs]</a>    <span class="k">def</span> <span class="nf">job_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">jobind</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        method to get out stdout and stderr from the jobs that were run on the instance.</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">        jobind (int): index giving which job we should be paying attention to. Defaults to -1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">### Get the command we will analyze:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">jobind</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">ie</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">ie</span><span class="p">,</span><span class="s2">&quot; index </span><span class="si">{}</span><span class="s2"> does not exist for this object, exiting&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">jobind</span><span class="p">))</span>
+            <span class="k">raise</span>
+        <span class="c1">### Get the s3 resource.</span>
+        <span class="n">s3</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">&quot;s3&quot;</span><span class="p">)</span>
+        <span class="n">bucket</span> <span class="o">=</span> <span class="n">s3</span><span class="o">.</span><span class="n">Bucket</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;PipelineName&quot;</span><span class="p">])</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;debug_direct/&quot;</span><span class="p">,</span><span class="n">command</span><span class="p">[</span><span class="s1">&#39;commandid&#39;</span><span class="p">],</span><span class="n">command</span><span class="p">[</span><span class="s1">&#39;instance&#39;</span><span class="p">],</span><span class="s1">&#39;awsrunShellScript&#39;</span><span class="p">,</span><span class="s1">&#39;0.awsrunShellScript/&#39;</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;stdout&quot;</span><span class="p">:</span><span class="s2">&quot;not loaded&quot;</span><span class="p">,</span><span class="s2">&quot;stderr&quot;</span><span class="p">:</span><span class="s2">&quot;not loaded&quot;</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">keypath</span> <span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">key</span><span class="p">)</span>
+                <span class="n">obj</span> <span class="o">=</span> <span class="n">s3</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;PipelineName&quot;</span><span class="p">],</span><span class="n">keypath</span><span class="p">)</span>
+                <span class="n">output</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">()[</span><span class="s1">&#39;Body&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">output</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> not found. may not be updated yet.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">keypath</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="s1">&#39;stdout&#39;</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="s1">&#39;stderr&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="NeuroCaaSAMI.start_devinstance"><a class="viewcode-back" href="../../../../reference/devtools.html#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.start_devinstance">[docs]</a>    <span class="k">def</span> <span class="nf">start_devinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        method to stop the current development instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_running</span><span class="p">()</span>
+
+        <span class="n">ec2_client</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;ec2&quot;</span><span class="p">,</span><span class="n">region_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Lambda&#39;</span><span class="p">][</span><span class="s1">&#39;LambdaConfig&#39;</span><span class="p">][</span><span class="s1">&#39;REGION&#39;</span><span class="p">])</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">ec2_client</span><span class="o">.</span><span class="n">start_instances</span><span class="p">(</span><span class="n">InstanceIds</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;instance </span><span class="si">{}</span><span class="s2"> is starting&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">))</span>
+        <span class="c1">## Now wait until running.</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;pending&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instance starting: please wait&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">public_ip_address</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instance is now in state: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]))</span></div>
+
+<div class="viewcode-block" id="NeuroCaaSAMI.stop_devinstance"><a class="viewcode-back" href="../../../../reference/devtools.html#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.stop_devinstance">[docs]</a>    <span class="k">def</span> <span class="nf">stop_devinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        method to stop the current development instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_running</span><span class="p">()</span>
+
+        <span class="n">ec2_client</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;ec2&quot;</span><span class="p">,</span><span class="n">region_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Lambda&#39;</span><span class="p">][</span><span class="s1">&#39;LambdaConfig&#39;</span><span class="p">][</span><span class="s1">&#39;REGION&#39;</span><span class="p">])</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">ec2_client</span><span class="o">.</span><span class="n">stop_instances</span><span class="p">(</span><span class="n">InstanceIds</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;instance </span><span class="si">{}</span><span class="s2"> is stopping&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">))</span>
+        <span class="c1">## Now wait until stopped</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;stopping&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instance stopping: please wait&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instance is now in state: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]))</span></div>
+
+<div class="viewcode-block" id="NeuroCaaSAMI.terminate_devinstance"><a class="viewcode-back" href="../../../../reference/devtools.html#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.terminate_devinstance">[docs]</a>    <span class="k">def</span> <span class="nf">terminate_devinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">force</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to terminate the current development instance.</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">        force (bool): if set to true, will terminate even if results have not been saved into an ami.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## Check if ami has been saved:</span>
+        <span class="k">if</span> <span class="n">force</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_saved</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;dev history not saved as ami, will not delete (override with force = True)&quot;</span><span class="p">)</span>
+                <span class="n">proceed</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">proceed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">proceed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">proceed</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">ec2_client</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;ec2&quot;</span><span class="p">,</span><span class="n">region_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Lambda&#39;</span><span class="p">][</span><span class="s1">&#39;LambdaConfig&#39;</span><span class="p">][</span><span class="s1">&#39;REGION&#39;</span><span class="p">])</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">ec2_client</span><span class="o">.</span><span class="n">terminate_instances</span><span class="p">(</span><span class="n">InstanceIds</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instance </span><span class="si">{}</span><span class="s2"> is terminating&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">))</span>
+            <span class="c1">## Now wait until terminated:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;shutting-down&quot;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instances terminating: please wait&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instance is now in state: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]))</span></div>
+
+<div class="viewcode-block" id="NeuroCaaSAMI.create_devami"><a class="viewcode-back" href="../../../../reference/devtools.html#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.create_devami">[docs]</a>    <span class="k">def</span> <span class="nf">create_devami</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to create a new ami from the current development instance.</span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">        name (str): the name to give to the new ami.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">## first get the ec2 client:</span>
+        <span class="n">ec2_client</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;ec2&quot;</span><span class="p">,</span><span class="n">region_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Lambda&#39;</span><span class="p">][</span><span class="s1">&#39;LambdaConfig&#39;</span><span class="p">][</span><span class="s1">&#39;REGION&#39;</span><span class="p">])</span>
+
+        <span class="c1">## Now create an image</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">ec2_client</span><span class="o">.</span><span class="n">create_image</span><span class="p">(</span><span class="n">InstanceId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">,</span><span class="n">Name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span><span class="n">Description</span> <span class="o">=</span> <span class="s2">&quot;AMI created at </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ami_hist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_saved</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NeuroCaaSAMI.update_blueprint"><a class="viewcode-back" href="../../../../reference/devtools.html#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.update_blueprint">[docs]</a>    <span class="k">def</span> <span class="nf">update_blueprint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ami_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to take more recently developed amis, and assign them to the stack_config_template of the relevant instance, and create a git commit to document this change. </span>
+
+<span class="sd">        Inputs: </span>
+<span class="sd">        ami_id:(str) the ami id with which to update the blueprint for the pipeline in question. If none is given, defaults to the most recent ami in the ami_hist list. </span>
+<span class="sd">        message:(str) (Optional) the message we associate with this particular commit. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">## First, get the ami we want to use:</span>
+        <span class="k">if</span> <span class="n">ami_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ami_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ami_hist</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;ImageId&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1">## Now parse the message:</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Not given&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="c1">## now, commit the current version of the stack config template and indicate this as the Parent ID in the template. </span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s2">&quot;git&quot;</span><span class="p">,</span><span class="s2">&quot;add&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">config_fullpath</span><span class="p">])</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s2">&quot;git&quot;</span><span class="p">,</span><span class="s2">&quot;commit&quot;</span><span class="p">,</span><span class="s2">&quot;-m&quot;</span><span class="p">,</span><span class="s2">&quot;automatic commit to document pipeline </span><span class="si">{}</span><span class="s2"> before update at </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_filepath</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()))])</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s2">&quot;git&quot;</span><span class="p">,</span><span class="s2">&quot;push&quot;</span><span class="p">])</span>
+        <span class="n">old_hash</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">([</span><span class="s2">&quot;git&quot;</span><span class="p">,</span><span class="s2">&quot;rev-parse&quot;</span><span class="p">,</span><span class="s2">&quot;HEAD&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;old commit has hash: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">old_hash</span><span class="p">))</span>
+
+        <span class="c1">## now change the config to reflect your most recent ami edits:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;Lambda&quot;</span><span class="p">][</span><span class="s2">&quot;LambdaConfig&quot;</span><span class="p">][</span><span class="s2">&quot;AMI&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ami_id</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Blueprint already up to date, aborting new commit.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;Lambda&quot;</span><span class="p">][</span><span class="s2">&quot;LambdaConfig&quot;</span><span class="p">][</span><span class="s2">&quot;AMI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ami_id</span>
+
+            <span class="c1">## now open and write to the stack config file:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_fullpath</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">configfile</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span><span class="n">configfile</span><span class="p">,</span><span class="n">indent</span> <span class="o">=</span> <span class="mi">4</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Blueprint updated with ami </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ami_id</span><span class="p">))</span>
+            
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s2">&quot;git&quot;</span><span class="p">,</span><span class="s2">&quot;add&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">config_fullpath</span><span class="p">])</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s2">&quot;git&quot;</span><span class="p">,</span><span class="s2">&quot;commit&quot;</span><span class="p">,</span><span class="s2">&quot;-m&quot;</span><span class="p">,</span><span class="s2">&quot;automatic commit to document pipeline </span><span class="si">{}</span><span class="s2"> after update at </span><span class="si">{}</span><span class="s2">. Purpose: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_filepath</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()),</span><span class="n">message</span><span class="p">)])</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s2">&quot;git&quot;</span><span class="p">,</span><span class="s2">&quot;push&quot;</span><span class="p">])</span>
+            <span class="n">new_hash</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">([</span><span class="s2">&quot;git&quot;</span><span class="p">,</span><span class="s2">&quot;rev-parse&quot;</span><span class="p">,</span><span class="s2">&quot;HEAD&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;new commit has hash: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">new_hash</span><span class="p">))</span></div>
+
+
+
+    <span class="c1">## Check if we are clear to deploy another dev instance.</span>
+<div class="viewcode-block" id="NeuroCaaSAMI.get_instance_state"><a class="viewcode-back" href="../../../../reference/devtools.html#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.get_instance_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_instance_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks the instance associated with the DevAMI object, and determines its state. Used to maintain a limit of one live instance at a time during development.</span>
+
+<span class="sd">        Outputs:</span>
+<span class="sd">        (dict): a dictionary returning the status of the instance asso</span>
+
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">state</span></div>
+<div class="viewcode-block" id="NeuroCaaSAMI.check_running"><a class="viewcode-back" href="../../../../reference/devtools.html#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.check_running">[docs]</a>    <span class="k">def</span> <span class="nf">check_running</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A function to check if the instance associated with this object is live.</span>
+
+<span class="sd">        Outputs:</span>
+<span class="sd">        (bool): a boolean representing if the current instance is in the state &quot;running&quot; or not.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">condition</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No instance declared&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;running&quot;</span><span class="p">:</span>
+                <span class="n">condition</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instance </span><span class="si">{}</span><span class="s2"> exists and is active, safe to test&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">condition</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instance </span><span class="si">{}</span><span class="s2"> is </span><span class="si">{}</span><span class="s2">, not safe to test.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">condition</span></div>
+
+<div class="viewcode-block" id="NeuroCaaSAMI.check_clear"><a class="viewcode-back" href="../../../../reference/devtools.html#ncap_iac.ncap_blueprints.dev_utils.develop_blueprint.NeuroCaaSAMI.check_clear">[docs]</a>    <span class="k">def</span> <span class="nf">check_clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A function to check if the current instance is live and can be actively developed. Prevents rampant instance propagation. Related to check_running, but not direct negations of each other.</span>
+
+<span class="sd">        Outputs:</span>
+<span class="sd">        (bool): a boolean representing if the current instance is inactive, and can be replaced by an active one.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">condition</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No instance declared, safe to deploy.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;stopped&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;terminated&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;shutting-down&quot;</span><span class="p">:</span>
+                    <span class="n">condition</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instance </span><span class="si">{}</span><span class="s2"> exists, but is not active, safe to deploy&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">condition</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instance </span><span class="si">{}</span><span class="s2"> is </span><span class="si">{}</span><span class="s2">, not safe to deploy another.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">instance_id</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]))</span>
+
+            <span class="c1">## Handle the case where the instance is terminated and cannot be gotten. </span>
+            <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">atterr</span><span class="p">:</span> 
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">atterr</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;&#39;NoneType&#39; object has no attribute &#39;get&#39;&quot;</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instance is terminated and no trace exists&quot;</span><span class="p">)</span>
+                    <span class="n">condition</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unknown error. Try again. &quot;</span><span class="p">)</span>
+                    <span class="n">condition</span> <span class="o">=</span> <span class="kc">False</span>
+                
+
+        <span class="k">return</span> <span class="n">condition</span></div></div>
+
+
+
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">NeuroCAAS</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../develop/installation.html">Installing NeuroCAAS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../develop/quickstart.html">Getting Started with NeuroCAAS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/protocols.html">Protocols</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/userprofiles.html">User Profiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/devtools.html">Developer Tools</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Taiga Abe.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
