@@ -1,0 +1,10 @@
+{
+    "mode":"train",
+    "traindata":{
+        "trainpath": "{NEUROCAASPATH}/inputs/data-reaching/",
+        "configpath": "{NEUROCAASPATH}inputs/myconfig.py"
+    },
+    "__dataset_size__":null,
+    "__duration__":null
+
+}

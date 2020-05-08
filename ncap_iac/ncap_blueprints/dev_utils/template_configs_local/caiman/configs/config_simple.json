@@ -1,0 +1,22 @@
+{
+"fitting_mode": "fit",
+"component_eval":true,
+"param_mode": "simple",
+"param_dict": "{NEUROCAASPATH}/inputs/test/param_pickle",
+"params": {
+    "fr":30,
+    "decay_time":0.4,
+    "p":1,
+    "nb":2,
+    "merge_thr":0.8,
+    "rf":null,
+    "stride":10,
+    "K":30,
+    "gSig":[5,5],
+    "method_init":"greedy_roi",
+    "ssub":2,
+    "tsub":3
+    },
+"__dataset_size__":null,
+"__duration__":null
+}

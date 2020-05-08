@@ -1,7 +1,7 @@
 {
     "PipelineName": "dlc-ncap-stable",
     "REGION": "us-east-1",
-    "STAGE": "webdev",
+    "STAGE": "develop",
     "Lambda": {
         "CodeUri": "../../protocols",
         "Handler": "submit_start.handler_develop",
@@ -85,6 +85,16 @@
                 "AffiliateName": "hillmanlabdlcdevelop",
                 "UserNames": [
                     "hillmanlabaccount"
+                ],
+                "PipelinePath": "",
+                "PipelineDir": "trackingfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
+            },
+            {
+                "AffiliateName": "henlabdlcdevelop",
+                "UserNames": [
+                    "sl2993"
                 ],
                 "PipelinePath": "",
                 "PipelineDir": "trackingfolder",

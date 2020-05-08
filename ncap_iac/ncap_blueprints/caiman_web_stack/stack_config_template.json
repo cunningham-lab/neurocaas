@@ -77,6 +77,16 @@
                 "PipelineDir": "trackingfolder",
                 "UserInput": true,
                 "ContactEmail": "The email we should notify regarding processing status."
+            },
+            {
+                "AffiliateName": "reviewers",
+                "UserNames": [
+                    "editornn"
+                ],
+                "PipelinePath": "",
+                "PipelineDir": "trackingfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
             }
         ]
     }

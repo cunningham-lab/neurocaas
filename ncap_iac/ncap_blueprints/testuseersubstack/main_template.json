@@ -1,0 +1,14 @@
+{
+    "Transform": "AWS::Serverless-2016-10-31",
+    "Resources":{
+        "UserSubStack":
+        {
+            "Type":"AWS::CloudFormation::Stack",
+            "Properties":{
+            "TemplateURL":"https://s3.amazonaws.com/neurocaas-user-substacks/compiled_packaged_user_subtemplate.yaml"
+            }
+        }
+    }
+
+
+}

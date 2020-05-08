@@ -1,0 +1,34 @@
+### Required Parameters -- If absent, an error will occur
+
+## FOV Dimensions -- Note, provided sataset should be stored as a (fov_height, fov_width, num_frames) ndarray
+fov_height: 80
+fov_width: 800
+num_frames: 2886
+
+## Block Dimensions -- Note, FOV dimensions must be evenly divisible by corresponding block dimension
+block_height: 40
+block_width: 40
+
+## Thresholding Parameters -- Note, if absent simulations will be used to determine these. 
+##                            Can be provided explicitly in order to boost efficiency by removing 
+##                            need to repeat the same simulations for every dataset analyzed.
+#spatial_thresh:
+#temporal_thresh:
+
+### Optional Parameters -- If absent, default values (shown in comments) will be used
+
+## Basic Preprocessing Options
+#background_rank: 0  # Positive Integer To Remove a rank 'n' background prior to pmd
+#center: false  # Whether or not to perform pixel-wise median centering prior to pmd
+#scale: true  # Whether or not to perform pixel-wise noise standardization prior to pmd
+
+## Internal PMD Parameters -- These are included for developer debugging. Users should not need to modify or provide these.
+#consec_failures: 3
+#max_components: 50
+#max_iters_init: 40
+#max_iters_main: 10
+#overlapping: true
+#d_sub: 1
+#t_sub: 1
+#tol: 0.005
+

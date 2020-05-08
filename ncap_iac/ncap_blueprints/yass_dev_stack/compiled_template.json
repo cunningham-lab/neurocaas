@@ -404,7 +404,7 @@
                 "Description": "Main Lambda Function for Serverless",
                 "Environment": {
                     "Variables": {
-                        "AMI": "ami-030791add8d4bc977",
+                        "AMI": "ami-078ef04c178d5eca2",
                         "COMMAND": "ls; cd ../../../../home/ubuntu; ncap_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
                         "CONFIG": "config.yaml",
                         "CONFIGDIR": "configs",
@@ -442,7 +442,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "3a54cf3093db5f4fe4bd5acdef4ec168055767a8\n"
+                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
                     }
                 },
                 "Events": {
@@ -597,7 +597,7 @@
                 "Description": "Deletes Objects from S3",
                 "Environment": {
                     "Variables": {
-                        "AMI": "ami-030791add8d4bc977",
+                        "AMI": "ami-078ef04c178d5eca2",
                         "COMMAND": "ls; cd ../../../../home/ubuntu; ncap_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
                         "CONFIG": "config.yaml",
                         "CONFIGDIR": "configs",
@@ -635,7 +635,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "3a54cf3093db5f4fe4bd5acdef4ec168055767a8\n"
+                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
                     }
                 },
                 "Handler": "helper.handler_deldir",
@@ -701,7 +701,7 @@
                 "Description": "Puts Objects in S3",
                 "Environment": {
                     "Variables": {
-                        "AMI": "ami-030791add8d4bc977",
+                        "AMI": "ami-078ef04c178d5eca2",
                         "COMMAND": "ls; cd ../../../../home/ubuntu; ncap_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
                         "CONFIG": "config.yaml",
                         "CONFIGDIR": "configs",
@@ -739,7 +739,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "3a54cf3093db5f4fe4bd5acdef4ec168055767a8\n"
+                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
                     }
                 },
                 "Handler": "helper.handler_mkdir",

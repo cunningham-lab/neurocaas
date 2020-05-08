@@ -373,7 +373,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "5866ee54d48a0a4dce7f2e1edf5db0052d5049d8\n"
+                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
                     }
                 },
                 "Events": {
@@ -523,7 +523,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "5866ee54d48a0a4dce7f2e1edf5db0052d5049d8\n"
+                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
                     }
                 },
                 "Handler": "helper.handler_deldir",
@@ -627,7 +627,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "5866ee54d48a0a4dce7f2e1edf5db0052d5049d8\n"
+                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
                     }
                 },
                 "Handler": "helper.handler_mkdir",
@@ -678,9 +678,9 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
-        "UserGroupcunninghamlabEPIdevelop": {
+        "UserGroupcunninghamlabEPIdevelopepincapstable": {
             "Properties": {
-                "GroupName": "cunninghamlabEPIdevelopgroup",
+                "GroupName": "cunninghamlabEPIdevelopepincapstablegroup",
                 "Policies": [
                     {
                         "PolicyDocument": {
@@ -783,9 +783,9 @@
             },
             "Type": "AWS::IAM::Group"
         },
-        "UserGroupexamplegroup2EPIdevelop": {
+        "UserGroupexamplegroup2EPIdevelopepincapstable": {
             "Properties": {
-                "GroupName": "examplegroup2EPIdevelopgroup",
+                "GroupName": "examplegroup2EPIdevelopepincapstablegroup",
                 "Policies": [
                     {
                         "PolicyDocument": {
@@ -891,7 +891,7 @@
         "cunninghamlabEPIdevelopUserNet": {
             "Properties": {
                 "GroupName": {
-                    "Ref": "UserGroupcunninghamlabEPIdevelop"
+                    "Ref": "UserGroupcunninghamlabEPIdevelopepincapstable"
                 },
                 "Users": [
                     "jpccosyneus-east-1",
@@ -904,7 +904,7 @@
         "examplegroup2EPIdevelopUserNet": {
             "Properties": {
                 "GroupName": {
-                    "Ref": "UserGroupexamplegroup2EPIdevelop"
+                    "Ref": "UserGroupexamplegroup2EPIdevelopepincapstable"
                 },
                 "Users": [
                     "jpccosyneus-east-1",

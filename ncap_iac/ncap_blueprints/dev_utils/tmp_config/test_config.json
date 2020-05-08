@@ -1,0 +1,9 @@
+{
+    "mode":"test",
+    "modeldata":{
+	    "modelpath": "/inputs/reachingJan30-trainset95shuffle1/",
+            "configpath": "/inputs/myconfig_analysis_template.py"
+        },
+    "__dataset_size__":null,
+    "__duration__":null
+}
