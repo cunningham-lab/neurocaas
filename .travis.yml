@@ -1,9 +1,14 @@
 language: python
 python:
-    - 3.6
+- 3.6
 install:
-    - pip install -r requirements.txt
+- pip install -r requirements.txt
 before_script:
-    - sudo apt-get install jq
+- sudo apt-get install jq
 script:
-    - echo "test goes here"
+- echo "test goes here"
+env:
+  global:
+  - AWS_DEFAULT_REGION="us-east-1"
+  - secure: WIRs4LVFiwfkf30VNjhQBl1M34szhecz37wMAqu4opihFNru/d3c9V7+yKHemRi/RTAlihSqewTQ4hGHkDCVjXjTcq7auZEiJffkLHPbCMa+X2cfmYIZMQgznrDyTaTZcYFj7EPs3101nfHxMVXsL1mZnQ3TzMYZdCqd2M6AEw7LCDQkI7BIcBXK+8FI1Jgf4evIn/zUhoxC1HUYP0aMpBwZLhtvuTQWQsNrBkwctxMN6Ev+0u13IBVx5/h00sAEZPaWeFnjDJHIlW3jVg6wXcJ+w2XXHWfnKDd1yGrp9px/ocpKqFYL3zZkGZSlqV8KSLQz+VlemgOF5Yyy8CcZS9mD4KOclHzf04YzKrUnihcePgRsdnN026JUtqszPsd+wamfz/Ru1HE3qOqLDi32BB8QjAxkcoozB/EAuW6XkY8elCueOSic23YrtlKRbFI5Z+BHv5IHGrFbYAFPHhG61FzUo9xYlIq/vFhnhSMr+1XjZv2T0ASiqj9ltAFqdf1b315aUOuD4td4YxDDXsFvRUjYyQrQ1Y+twGCadKiEtPIRcwT36ADf8Rsj+oGanldGH66UfT4LiOcMXGpRGVsw7yp/KkfXAIOELjf3DXn4cMTa9KkwFHD4XrAIWLam8ygHkjkIXHa8QhufKZhIheFQu/l7lKvDRP6w8sWGV8eXv5A=
+  - secure: btfFZBySWYtt8VMs2kyUlsJhyzTEzyGHYQ/XVjAKh+JRl6y7jjZ30Jsy8ZfO1cr2rLQE7f9cP9Mp1szxVWsonwmLHrj6asJdol6yLdjA3Da6KCLGCZwxVOZhOwW/ky/C1pYreOcwZtcpuF4l0dgTY6nZZq8TdPquKXXxFJdCdh7xW00wdbD7CBTa+b+dF11/WMUo3fbnN3oOB3yf4yr4pY5jNZAULed/pWObURDpTysfi5nPsBm+4f4tdRztGyUqNW9CDsKkZLhu7wLqN0iP20aFaJEACMuJ9ZHS5LcqjQHDHnrS6YsmxWCUnb5Z98gMs4gL4thUhM8AxY6mxjFv3o3RZstZUgYL6X75iYfT6Otb1zNY6eL3i6xKAjva0y12FTGK5wXq50q8fLc9vzD94+h9RMaCawZ9w3pVYqiy6oR1GjYkBBIiXzASx27IGfU+9uPr5ixwp/mBIm6yqsyOpHvu/c5MCWeAo2u+a0UmZhZs8phkQTd24Xl56Cx7MMOXLfZQp3KQwHKTxWm5q5Tr2DKISeSct/e8Ld/xuJjK1cmp4ngBPp9lFEAsNll9jHMaW9lcwEOqF5f1stg3fbDwANuu/Tz+t/kQVxQlJQsYWp7NwZLjYvZyVxTDdzHfOT3FSzU2215HFUX3WWmLxK1j6TacMjIASK9XEzZiOJm5yXU=
