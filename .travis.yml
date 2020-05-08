@@ -7,3 +7,4 @@ before_script:
     - sudo apt-get install jq
 script:
     - echo "test goes here"
+    - sam validate
