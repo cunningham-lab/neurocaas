@@ -620,7 +620,11 @@ def process_upload_dev(bucket_name, key,time):
     key: absolute path to created object within bucket.
     bucket: name of the bucket within which the upload occurred.
     time: the time at which the upload event happened. 
+    
+    Outputs:
+    (int) error code
     """
+    exitcode = 99
 
     ## Conditionals for different deploy configurations: 
     ## First check if we are launching a new instance or starting an existing one. 
@@ -665,7 +669,9 @@ def process_upload_dev(bucket_name, key,time):
             submission.process_inputs()
             print("writing to log")
             submission.logger.write()
-        except:
+            ## should be a success at this point. 
+            exitcode = 0
+        except Exception as e:
             e=sys.exc_info()[0]
             submission.logger.append("encountered error while setting up: {}. Shutting down instances.".format(e))
             submission.logger.write()
@@ -674,6 +680,7 @@ def process_upload_dev(bucket_name, key,time):
 
     else:
         pass
+    return exitcode
 
 ## New 2/11: for disjoint data and upload buckets. 
 def process_upload_deploy(bucket_name, key,time):
@@ -716,31 +723,21 @@ def process_upload_deploy(bucket_name, key,time):
     submission.inputlogger.write()
     submission.submitlogger.write()
     
-def handler_log_dev(event,context):
-    """
-    Newest version of handler that logs outputs to a subfolder of the result folder that is indexed by the job submission date and the submit name.
-    """
-    
-    for record in event['Records']:
-        time = record['eventTime']
-        bucket_name = record['s3']['bucket']['name']
-        key = record['s3']['object']['key']
-        print("handler_params",bucket_name,key,time)
-        print(event,context,'event, context')
-        process_upload_log_dev(bucket_name, key, time);
-
+## Actual lambda handlers. 
 def handler_develop(event,context):
     """
     Newest version of handler that logs outputs to a subfolder of the result folder that is indexed by the job submission date and the submit name.
     """
-    
     for record in event['Records']:
         time = record['eventTime']
         bucket_name = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
-        print("handler_params",bucket_name,key,time)
-        print(event,context,'event, context')
-        process_upload_dev(bucket_name, key, time);
+        #print("handler_params",bucket_name,key,time)
+        #print(event,context,'event, context')
+        exitcode = process_upload_dev(bucket_name, key, time);
+        print("processing returned exit code {}".format(exitcode))
+    return exitcode 
+
 
 def handler_deploy(event,context):
     """
