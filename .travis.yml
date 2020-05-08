@@ -8,6 +8,7 @@ before_script:
 script:
 - echo "test goes here"
 - echo $(aws configure list)
+- bash test_lambda.sh
 env:
   global:
   - AWS_DEFAULT_REGION="us-east-1"
