@@ -9,7 +9,9 @@ before_script:
 script:
 - echo "test goes here"
 - echo $(aws configure list)
-- bash test_lambda.sh
+- cd ncap_iac/ncap_blueprints
+- bash iac_utils/build.sh epi_web_stack 
+- bash iac_utils/test_main.sh epi_web_stack 
 env:
   global:
   - AWS_DEFAULT_REGION="us-east-1"
