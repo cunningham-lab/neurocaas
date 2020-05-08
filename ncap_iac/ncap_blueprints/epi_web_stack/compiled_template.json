@@ -1,0 +1,919 @@
+{
+    "Resources": {
+        "BaseFoldercunninghamlab": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "epi-ncap-web",
+                "DirName": "cunninghamlab",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "BaseFolderexamplegroup2": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "epi-ncap-web",
+                "DirName": "examplegroup2",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "CWPermissions": {
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Ref": "FigLambda"
+                },
+                "Principal": "events.amazonaws.com"
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "CloudWatchBusRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "events.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "CloudwatchBusPolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "CloudwatchBusPolicy": {
+            "Properties": {
+                "Description": {
+                    "Fn::Join": [
+                        " ",
+                        [
+                            "Base Policy for all lambda function roles in",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "events:*",
+                            "Effect": "Allow",
+                            "Resource": "*",
+                            "Sid": "CloudWatchEventsFullAccess"
+                        },
+                        {
+                            "Action": "iam:PassRole",
+                            "Effect": "Allow",
+                            "Resource": "arn:aws:iam::*:role/AWS_Events_Invoke_Targets",
+                            "Sid": "IAMPassRoleForCloudWatchEvents"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::IAM::ManagedPolicy"
+        },
+        "ConfigFoldercunninghamlab": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFoldercunninghamlab"
+            ],
+            "Properties": {
+                "BucketName": "epi-ncap-web",
+                "DirName": "configs",
+                "Path": "cunninghamlab/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "ConfigFolderexamplegroup2": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderexamplegroup2"
+            ],
+            "Properties": {
+                "BucketName": "epi-ncap-web",
+                "DirName": "configs",
+                "Path": "examplegroup2/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "DeleteCustomResource": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "epi-ncap-web",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "FigLambda": {
+            "Properties": {
+                "CodeUri": "../../protocols",
+                "Description": "Lambda Function logging start/stop for NCAP",
+                "Environment": {
+                    "Variables": {
+                        "BUCKET_NAME": "epi-ncap-web",
+                        "INDIR": "inputs",
+                        "REGION": "us-east-1"
+                    }
+                },
+                "Events": {},
+                "Handler": "log.monitor_updater",
+                "MemorySize": 128,
+                "Role": "arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ",
+                "Runtime": "python3.6",
+                "Timeout": 90
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "FignameLogGroup": {
+            "Properties": {
+                "LogGroupName": {
+                    "Fn::Sub": "/aws/lambda/${FigLambda}"
+                }
+            },
+            "Type": "AWS::Logs::LogGroup"
+        },
+        "InFoldercunninghamlab": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFoldercunninghamlab"
+            ],
+            "Properties": {
+                "BucketName": "epi-ncap-web",
+                "DirName": "inputs",
+                "Path": "cunninghamlab/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "InFolderexamplegroup2": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderexamplegroup2"
+            ],
+            "Properties": {
+                "BucketName": "epi-ncap-web",
+                "DirName": "inputs",
+                "Path": "examplegroup2/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LambdaBaseRole": {
+            "Properties": {
+                "Description": {
+                    "Fn::Join": [
+                        " ",
+                        [
+                            "Base Policy for all lambda function roles in",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "logs:CreateLogGroup",
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": "arn:aws:logs:*:*:*"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::IAM::ManagedPolicy"
+        },
+        "LogFolder": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "epi-ncap-web",
+                "DirName": "logs",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderactive": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "epi-ncap-web",
+                "DirName": "active",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFoldercunninghamlab": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "epi-ncap-web",
+                "DirName": "cunninghamlab",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderdebug": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "epi-ncap-web",
+                "DirName": "debugepi-ncap-web",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderexamplegroup2": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "epi-ncap-web",
+                "DirName": "examplegroup2",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "MainLambda": {
+            "Properties": {
+                "CodeUri": "../../protocols",
+                "Description": "Main Lambda Function for Serverless",
+                "Environment": {
+                    "Variables": {
+                        "AMI": "ami-0530d6b24ef36874d",
+                        "COMMAND": "ls; cd /home/ubuntu; ncap_remote/run_mock.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
+                        "CONFIG": "config.yaml",
+                        "CONFIGDIR": "configs",
+                        "DEPLOY_LIMIT": 100,
+                        "EXECUTION_TIMEOUT": 180,
+                        "IAM_ROLE": "SSMRole",
+                        "INDIR": "inputs",
+                        "INSTANCE_TYPE": "t2.micro",
+                        "KEY_NAME": "testkeystack-custom-dev-key-pair",
+                        "LAUNCH": true,
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MAXCOST": 100,
+                        "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
+                        "SHUTDOWN_BEHAVIOR": "terminate",
+                        "SSM_TIMEOUT": 172000,
+                        "SUBMITDIR": "submissions",
+                        "WORKING_DIRECTORY": "~/bin",
+                        "cwrolearn": {
+                            "Fn::GetAtt": [
+                                "CloudWatchBusRole",
+                                "Arn"
+                            ]
+                        },
+                        "figlambarn": {
+                            "Fn::GetAtt": [
+                                "FigLambda",
+                                "Arn"
+                            ]
+                        },
+                        "figlambid": {
+                            "Ref": "FigLambda"
+                        },
+                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
+                    }
+                },
+                "Events": {
+                    "BucketEventcunninghamlab": {
+                        "Properties": {
+                            "Bucket": {
+                                "Ref": "PipelineMainBucket"
+                            },
+                            "Events": [
+                                "s3:ObjectCreated:*"
+                            ],
+                            "Filter": {
+                                "S3Key": {
+                                    "Rules": [
+                                        {
+                                            "Name": "prefix",
+                                            "Value": "cunninghamlab/submissions"
+                                        },
+                                        {
+                                            "Name": "suffix",
+                                            "Value": "submit.json"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "Type": "S3"
+                    },
+                    "BucketEventexamplegroup2": {
+                        "Properties": {
+                            "Bucket": {
+                                "Ref": "PipelineMainBucket"
+                            },
+                            "Events": [
+                                "s3:ObjectCreated:*"
+                            ],
+                            "Filter": {
+                                "S3Key": {
+                                    "Rules": [
+                                        {
+                                            "Name": "prefix",
+                                            "Value": "examplegroup2/submissions"
+                                        },
+                                        {
+                                            "Name": "suffix",
+                                            "Value": "submit.json"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "Type": "S3"
+                    }
+                },
+                "Handler": "submit_start.handler_develop",
+                "MemorySize": 128,
+                "Role": "arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ",
+                "Runtime": "python3.6",
+                "Timeout": 180
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "OutFoldercunninghamlab": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFoldercunninghamlab"
+            ],
+            "Properties": {
+                "BucketName": "epi-ncap-web",
+                "DirName": "results",
+                "Path": "cunninghamlab/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "OutFolderexamplegroup2": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderexamplegroup2"
+            ],
+            "Properties": {
+                "BucketName": "epi-ncap-web",
+                "DirName": "results",
+                "Path": "examplegroup2/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "PipelineMainBucket": {
+            "Properties": {
+                "AccessControl": "Private",
+                "BucketName": "epi-ncap-web"
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "S3DelObjectFunction": {
+            "Properties": {
+                "CodeUri": "../../protocols",
+                "Description": "Deletes Objects from S3",
+                "Environment": {
+                    "Variables": {
+                        "AMI": "ami-0530d6b24ef36874d",
+                        "COMMAND": "ls; cd /home/ubuntu; ncap_remote/run_mock.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
+                        "CONFIG": "config.yaml",
+                        "CONFIGDIR": "configs",
+                        "DEPLOY_LIMIT": 100,
+                        "EXECUTION_TIMEOUT": 180,
+                        "IAM_ROLE": "SSMRole",
+                        "INDIR": "inputs",
+                        "INSTANCE_TYPE": "t2.micro",
+                        "KEY_NAME": "testkeystack-custom-dev-key-pair",
+                        "LAUNCH": true,
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MAXCOST": 100,
+                        "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
+                        "SHUTDOWN_BEHAVIOR": "terminate",
+                        "SSM_TIMEOUT": 172000,
+                        "SUBMITDIR": "submissions",
+                        "WORKING_DIRECTORY": "~/bin",
+                        "cwrolearn": {
+                            "Fn::GetAtt": [
+                                "CloudWatchBusRole",
+                                "Arn"
+                            ]
+                        },
+                        "figlambarn": {
+                            "Fn::GetAtt": [
+                                "FigLambda",
+                                "Arn"
+                            ]
+                        },
+                        "figlambid": {
+                            "Ref": "FigLambda"
+                        },
+                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
+                    }
+                },
+                "Handler": "helper.handler_deldir",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "S3MakePathRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "S3MakePathRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "LambdaBaseRole"
+                    }
+                ],
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "s3:DeleteObject",
+                                        "s3:ListBucket",
+                                        "s3:PutObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "write_s3_policy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "S3PutObjectFunction": {
+            "Properties": {
+                "CodeUri": "../../protocols",
+                "Description": "Puts Objects in S3",
+                "Environment": {
+                    "Variables": {
+                        "AMI": "ami-0530d6b24ef36874d",
+                        "COMMAND": "ls; cd /home/ubuntu; ncap_remote/run_mock.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
+                        "CONFIG": "config.yaml",
+                        "CONFIGDIR": "configs",
+                        "DEPLOY_LIMIT": 100,
+                        "EXECUTION_TIMEOUT": 180,
+                        "IAM_ROLE": "SSMRole",
+                        "INDIR": "inputs",
+                        "INSTANCE_TYPE": "t2.micro",
+                        "KEY_NAME": "testkeystack-custom-dev-key-pair",
+                        "LAUNCH": true,
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MAXCOST": 100,
+                        "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
+                        "SHUTDOWN_BEHAVIOR": "terminate",
+                        "SSM_TIMEOUT": 172000,
+                        "SUBMITDIR": "submissions",
+                        "WORKING_DIRECTORY": "~/bin",
+                        "cwrolearn": {
+                            "Fn::GetAtt": [
+                                "CloudWatchBusRole",
+                                "Arn"
+                            ]
+                        },
+                        "figlambarn": {
+                            "Fn::GetAtt": [
+                                "FigLambda",
+                                "Arn"
+                            ]
+                        },
+                        "figlambid": {
+                            "Ref": "FigLambda"
+                        },
+                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
+                    }
+                },
+                "Handler": "helper.handler_mkdir",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "S3MakePathRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "SubmitFoldercunninghamlab": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFoldercunninghamlab"
+            ],
+            "Properties": {
+                "BucketName": "epi-ncap-web",
+                "DirName": "submissions",
+                "Path": "cunninghamlab/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "SubmitFolderexamplegroup2": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderexamplegroup2"
+            ],
+            "Properties": {
+                "BucketName": "epi-ncap-web",
+                "DirName": "submissions",
+                "Path": "examplegroup2/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "UserGroupcunninghamlabepincapweb": {
+            "Properties": {
+                "GroupName": "cunninghamlabepincapwebgroup",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "s3:GetBucketLocation",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor0"
+                                },
+                                {
+                                    "Action": "s3:HeadBucket",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor3"
+                                },
+                                {
+                                    "Action": "s3:ListAllMyBuckets",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor1"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringEquals": {
+                                            "s3:delimiter": [
+                                                "/"
+                                            ],
+                                            "s3:prefix": [
+                                                "",
+                                                "cunninghamlab/",
+                                                "cunninghamlab/inputs",
+                                                "cunninghamlab/results",
+                                                "logs",
+                                                "cunninghamlab/submissions",
+                                                "cunninghamlab/configs",
+                                                "cunninghamlab/inputs/",
+                                                "cunninghamlab/results/",
+                                                "cunninghamlab/submissions/",
+                                                "cunninghamlab/configs/"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::epi-ncap-web"
+                                    ],
+                                    "Sid": "ListBucket"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringLike": {
+                                            "s3:prefix": [
+                                                "cunninghamlab/inputs/*",
+                                                "cunninghamlab/results/*",
+                                                "cunninghamlab/configs/*",
+                                                "cunninghamlab/submissions/*"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::epi-ncap-web"
+                                    ],
+                                    "Sid": "ListSubBucket"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::epi-ncap-web/cunninghamlab/inputs/*",
+                                        "arn:aws:s3:::epi-ncap-web/cunninghamlab/configs/*",
+                                        "arn:aws:s3:::epi-ncap-web/cunninghamlab/submissions/*"
+                                    ],
+                                    "Sid": "Inputfolderwrite"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::epi-ncap-web/cunninghamlab/results/*",
+                                        "arn:aws:s3:::epi-ncap-web/cunninghamlab/configs/*"
+                                    ],
+                                    "Sid": "Outputfolderwrite"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "cunninghamlabpolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Group"
+        },
+        "UserGroupexamplegroup2epincapweb": {
+            "Properties": {
+                "GroupName": "examplegroup2epincapwebgroup",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "s3:GetBucketLocation",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor0"
+                                },
+                                {
+                                    "Action": "s3:HeadBucket",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor3"
+                                },
+                                {
+                                    "Action": "s3:ListAllMyBuckets",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor1"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringEquals": {
+                                            "s3:delimiter": [
+                                                "/"
+                                            ],
+                                            "s3:prefix": [
+                                                "",
+                                                "examplegroup2/",
+                                                "examplegroup2/inputs",
+                                                "examplegroup2/results",
+                                                "logs",
+                                                "examplegroup2/submissions",
+                                                "examplegroup2/configs",
+                                                "examplegroup2/inputs/",
+                                                "examplegroup2/results/",
+                                                "examplegroup2/submissions/",
+                                                "examplegroup2/configs/"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::epi-ncap-web"
+                                    ],
+                                    "Sid": "ListBucket"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringLike": {
+                                            "s3:prefix": [
+                                                "examplegroup2/inputs/*",
+                                                "examplegroup2/results/*",
+                                                "examplegroup2/configs/*",
+                                                "examplegroup2/submissions/*"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::epi-ncap-web"
+                                    ],
+                                    "Sid": "ListSubBucket"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::epi-ncap-web/examplegroup2/inputs/*",
+                                        "arn:aws:s3:::epi-ncap-web/examplegroup2/configs/*",
+                                        "arn:aws:s3:::epi-ncap-web/examplegroup2/submissions/*"
+                                    ],
+                                    "Sid": "Inputfolderwrite"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::epi-ncap-web/examplegroup2/results/*",
+                                        "arn:aws:s3:::epi-ncap-web/examplegroup2/configs/*"
+                                    ],
+                                    "Sid": "Outputfolderwrite"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "examplegroup2policy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Group"
+        },
+        "cunninghamlabUserNet": {
+            "Properties": {
+                "GroupName": {
+                    "Ref": "UserGroupcunninghamlabepincapweb"
+                },
+                "Users": [
+                    "jpccosyneus-east-1",
+                    "srbcosyneus-east-1",
+                    "tacosyneus-east-1"
+                ]
+            },
+            "Type": "AWS::IAM::UserToGroupAddition"
+        },
+        "examplegroup2UserNet": {
+            "Properties": {
+                "GroupName": {
+                    "Ref": "UserGroupexamplegroup2epincapweb"
+                },
+                "Users": [
+                    "jpccosyneus-east-1",
+                    "srbcosyneus-east-1",
+                    "tacosyneus-east-1"
+                ]
+            },
+            "Type": "AWS::IAM::UserToGroupAddition"
+        }
+    },
+    "Transform": "AWS::Serverless-2016-10-31"
+}

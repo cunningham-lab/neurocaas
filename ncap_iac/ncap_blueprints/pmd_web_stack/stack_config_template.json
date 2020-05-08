@@ -16,7 +16,7 @@
             "IAM_ROLE": "SSMRole",
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
             "WORKING_DIRECTORY": "~/bin",
-            "COMMAND": "cd /home/ubuntu/; ncap_remote/run_pmd_main.sh \"{}\" \"{}\" \"{}\" \"{}\"",
+            "COMMAND": "cd /home/ubuntu/; ncap_remote/run_pmd_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
             "SHUTDOWN_BEHAVIOR": "terminate",
             "CONFIG": "config.yaml",
             "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
@@ -38,6 +38,16 @@
                 ],
                 "UserInput": true,
                 "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
+            },
+            {
+                "AffiliateName": "reviewers",
+                "UserNames": [
+                    "editornn"
+                ],
+                "PipelinePath": "",
+                "PipelineDir": "trackingfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
             },
             {
                 "AffiliateName": "developergroup1",

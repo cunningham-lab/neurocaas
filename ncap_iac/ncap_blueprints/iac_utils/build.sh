@@ -67,4 +67,4 @@ fi
 cd $PIPEDIR
 echo $ncaprootdir "rootdir"
 
-sam build -t compiled_template.json -m "$ncaprootdir"/protocols/requirements.txt
+sam build -t compiled_template.json -m "$ncaprootdir"/protocols/requirements.txt --use-container

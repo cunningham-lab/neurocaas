@@ -29,22 +29,24 @@ cd $ncaprootdir/utils
 stage=$(jq ".STAGE" "$PIPEDIR"/stack_config_template.json ) 
 stagestr=$(echo $stage | tr -d '"')
 echo $stagestr
-if [ "$stagestr" == "develop" ] 
-then 
-    echo "development version."
-    python dev_builder.py $PIPEDIR/stack_config_template.json 
-elif [ "$stagestr" == "webdev" ]
-then
-    echo "web development version."
-    python webdev_builder.py $PIPEDIR/stack_config_template.json 
-elif [ "$stagestr" == "deploy" ]
-then
-    echo "deployment version."
-    python deploy_builder.py $PIPEDIR/stack_config_template.json 
-else
-    echo "not a valid option, ending"
-    exit 1
-fi 
+python dev_builder.py $PIPEDIR/stack_config_template.json "$stagestr"
+#if [ "$stagestr" == "develop" ] 
+#
+#then 
+#    echo "development version."
+#    python dev_builder.py $PIPEDIR/stack_config_template.json 
+#elif [ "$stagestr" == "webdev" ]
+#then
+#    echo "web development version."
+#    python webdev_builder.py $PIPEDIR/stack_config_template.json 
+#elif [ "$stagestr" == "deploy" ]
+#then
+#    echo "deployment version."
+#    python deploy_builder.py $PIPEDIR/stack_config_template.json 
+#else
+#    echo "not a valid option, ending"
+#    exit 1
+#fi 
 # TODO bring up locanmf so this can get resolved. 
 ####
 ###### Run different deployment scripts based on version:
@@ -66,7 +68,7 @@ fi
 ## We need to navigate to the pipeline directory because we have a relative path in our compilation code. 
 cd $PIPEDIR
 
-sam build -t compiled_template.json -m "$ncaprootdir"/protocols/requirements.txt
+sam build -t compiled_template.json -m "$ncaprootdir"/protocols/requirements.txt --use-container
 
 sam package --s3-bucket ctnsampackages --output-template-file compiled_packaged.yaml
 

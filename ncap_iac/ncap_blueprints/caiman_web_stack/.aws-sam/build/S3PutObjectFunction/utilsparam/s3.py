@@ -1,6 +1,7 @@
 import os
 import datetime
 import json
+import yaml
 
 import boto3
 from botocore.errorfactory import ClientError
@@ -89,6 +90,13 @@ def load_json(bucket_name, key):
     json_content = json.loads(raw_content)
     ## Transfer type 
     return json_content 
+
+def load_yaml(bucket_name, key):
+    """ """
+    file_object = s3_resource.Object(bucket_name, key)
+    raw_content = file_object.get()['Body'].read().decode('utf-8')
+    yaml_content = yaml.safe_load(raw_content)
+    return yaml_content
 
 def extract_files(bucket_name,prefix,ext = None):
     """

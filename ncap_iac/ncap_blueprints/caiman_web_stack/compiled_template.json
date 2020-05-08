@@ -45,6 +45,21 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
+        "BaseFolderreviewers": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "reviewers",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
         "BaseFolderwooleylab": {
             "DependsOn": "PipelineMainBucket",
             "Properties": {
@@ -183,6 +198,24 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
+        "ConfigFolderreviewers": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderreviewers"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "configs",
+                "Path": "reviewers/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
         "ConfigFolderwooleylab": {
             "DependsOn": [
                 "PipelineMainBucket",
@@ -287,6 +320,24 @@
                 "BucketName": "caiman-ncap-web",
                 "DirName": "inputs",
                 "Path": "peterkagroup/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "InFolderreviewers": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderreviewers"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "inputs",
+                "Path": "reviewers/",
                 "ServiceToken": {
                     "Fn::GetAtt": [
                         "S3PutObjectFunction",
@@ -449,6 +500,24 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
+        "LogFolderreviewers": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "reviewers",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
         "LogFolderwooleylab": {
             "DependsOn": [
                 "PipelineMainBucket",
@@ -511,7 +580,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "7790858029530a4b396a569dd1f0136216313e3f\n"
+                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
                     }
                 },
                 "Events": {
@@ -579,6 +648,31 @@
                                         {
                                             "Name": "prefix",
                                             "Value": "peterkagroup/submissions"
+                                        },
+                                        {
+                                            "Name": "suffix",
+                                            "Value": "submit.json"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "Type": "S3"
+                    },
+                    "BucketEventreviewers": {
+                        "Properties": {
+                            "Bucket": {
+                                "Ref": "PipelineMainBucket"
+                            },
+                            "Events": [
+                                "s3:ObjectCreated:*"
+                            ],
+                            "Filter": {
+                                "S3Key": {
+                                    "Rules": [
+                                        {
+                                            "Name": "prefix",
+                                            "Value": "reviewers/submissions"
                                         },
                                         {
                                             "Name": "suffix",
@@ -678,6 +772,24 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
+        "OutFolderreviewers": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderreviewers"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "results",
+                "Path": "reviewers/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
         "OutFolderwooleylab": {
             "DependsOn": [
                 "PipelineMainBucket",
@@ -747,7 +859,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "7790858029530a4b396a569dd1f0136216313e3f\n"
+                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
                     }
                 },
                 "Handler": "helper.handler_deldir",
@@ -851,7 +963,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "7790858029530a4b396a569dd1f0136216313e3f\n"
+                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
                     }
                 },
                 "Handler": "helper.handler_mkdir",
@@ -911,6 +1023,24 @@
                 "BucketName": "caiman-ncap-web",
                 "DirName": "submissions",
                 "Path": "peterkagroup/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "SubmitFolderreviewers": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderreviewers"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "submissions",
+                "Path": "reviewers/",
                 "ServiceToken": {
                     "Fn::GetAtt": [
                         "S3PutObjectFunction",
@@ -1253,6 +1383,111 @@
             },
             "Type": "AWS::IAM::Group"
         },
+        "UserGroupreviewerscaimanncapweb": {
+            "Properties": {
+                "GroupName": "reviewerscaimanncapwebgroup",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "s3:GetBucketLocation",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor0"
+                                },
+                                {
+                                    "Action": "s3:HeadBucket",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor3"
+                                },
+                                {
+                                    "Action": "s3:ListAllMyBuckets",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor1"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringEquals": {
+                                            "s3:delimiter": [
+                                                "/"
+                                            ],
+                                            "s3:prefix": [
+                                                "",
+                                                "reviewers/",
+                                                "reviewers/inputs",
+                                                "reviewers/results",
+                                                "logs",
+                                                "reviewers/submissions",
+                                                "reviewers/configs",
+                                                "reviewers/inputs/",
+                                                "reviewers/results/",
+                                                "reviewers/submissions/",
+                                                "reviewers/configs/"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web"
+                                    ],
+                                    "Sid": "ListBucket"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringLike": {
+                                            "s3:prefix": [
+                                                "reviewers/inputs/*",
+                                                "reviewers/results/*",
+                                                "reviewers/configs/*",
+                                                "reviewers/submissions/*"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web"
+                                    ],
+                                    "Sid": "ListSubBucket"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web/reviewers/inputs/*",
+                                        "arn:aws:s3:::caiman-ncap-web/reviewers/configs/*",
+                                        "arn:aws:s3:::caiman-ncap-web/reviewers/submissions/*"
+                                    ],
+                                    "Sid": "Inputfolderwrite"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web/reviewers/results/*",
+                                        "arn:aws:s3:::caiman-ncap-web/reviewers/configs/*"
+                                    ],
+                                    "Sid": "Outputfolderwrite"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "reviewerspolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Group"
+        },
         "UserGroupwooleylabcaimanncapweb": {
             "Properties": {
                 "GroupName": "wooleylabcaimanncapwebgroup",
@@ -1391,6 +1626,17 @@
                     "dspus-east-1",
                     "va2371us-east-1",
                     "ioc2104us-east-1"
+                ]
+            },
+            "Type": "AWS::IAM::UserToGroupAddition"
+        },
+        "reviewersUserNet": {
+            "Properties": {
+                "GroupName": {
+                    "Ref": "UserGroupreviewerscaimanncapweb"
+                },
+                "Users": [
+                    "editornnus-east-1"
                 ]
             },
             "Type": "AWS::IAM::UserToGroupAddition"

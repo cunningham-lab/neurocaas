@@ -1,0 +1,644 @@
+Resources:
+  BaseFolderdebuggers:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: locanmf-ncap-web
+      DirName: debuggers
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  BaseFolderdevelopergroup1:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: locanmf-ncap-web
+      DirName: developergroup1
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  CWPermissions:
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: FigLambda
+      Principal: events.amazonaws.com
+    Type: AWS::Lambda::Permission
+  CloudWatchBusRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - events.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - Ref: CloudwatchBusPolicy
+    Type: AWS::IAM::Role
+  CloudwatchBusPolicy:
+    Properties:
+      Description:
+        Fn::Join:
+        - ' '
+        - - Base Policy for all lambda function roles in
+          - Ref: AWS::StackName
+      PolicyDocument:
+        Statement:
+        - Action: events:*
+          Effect: Allow
+          Resource: '*'
+          Sid: CloudWatchEventsFullAccess
+        - Action: iam:PassRole
+          Effect: Allow
+          Resource: arn:aws:iam::*:role/AWS_Events_Invoke_Targets
+          Sid: IAMPassRoleForCloudWatchEvents
+        Version: '2012-10-17'
+    Type: AWS::IAM::ManagedPolicy
+  ConfigFolderdebuggers:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderdebuggers
+    Properties:
+      BucketName: locanmf-ncap-web
+      DirName: configs
+      Path: debuggers/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  ConfigFolderdevelopergroup1:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderdevelopergroup1
+    Properties:
+      BucketName: locanmf-ncap-web
+      DirName: configs
+      Path: developergroup1/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  DeleteCustomResource:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: locanmf-ncap-web
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  FigLambda:
+    Properties:
+      CodeUri: s3://ctnsampackages/44a16ae8f8176a412c3015bc3ad8dde9
+      Description: Lambda Function logging start/stop for NCAP
+      Environment:
+        Variables:
+          BUCKET_NAME: locanmf-ncap-web
+          INDIR: inputs
+          REGION: us-east-1
+      Events: {}
+      Handler: log.monitor_updater
+      MemorySize: 128
+      Role: arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ
+      Runtime: python3.6
+      Timeout: 90
+    Type: AWS::Serverless::Function
+  FignameLogGroup:
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/${FigLambda}
+    Type: AWS::Logs::LogGroup
+  InFolderdebuggers:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderdebuggers
+    Properties:
+      BucketName: locanmf-ncap-web
+      DirName: inputs
+      Path: debuggers/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  InFolderdevelopergroup1:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderdevelopergroup1
+    Properties:
+      BucketName: locanmf-ncap-web
+      DirName: inputs
+      Path: developergroup1/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LambdaBaseRole:
+    Properties:
+      Description:
+        Fn::Join:
+        - ' '
+        - - Base Policy for all lambda function roles in
+          - Ref: AWS::StackName
+      PolicyDocument:
+        Statement:
+        - Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Effect: Allow
+          Resource: arn:aws:logs:*:*:*
+        Version: '2012-10-17'
+    Type: AWS::IAM::ManagedPolicy
+  LogFolder:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: locanmf-ncap-web
+      DirName: logs
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LogFolderactive:
+    DependsOn:
+    - PipelineMainBucket
+    - LogFolder
+    Properties:
+      BucketName: locanmf-ncap-web
+      DirName: active
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LogFolderdebug:
+    DependsOn:
+    - PipelineMainBucket
+    - LogFolder
+    Properties:
+      BucketName: locanmf-ncap-web
+      DirName: debuglocanmf-ncap-web
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LogFolderdebuggers:
+    DependsOn:
+    - PipelineMainBucket
+    - LogFolder
+    Properties:
+      BucketName: locanmf-ncap-web
+      DirName: debuggers
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LogFolderdevelopergroup1:
+    DependsOn:
+    - PipelineMainBucket
+    - LogFolder
+    Properties:
+      BucketName: locanmf-ncap-web
+      DirName: developergroup1
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  MainLambda:
+    Properties:
+      CodeUri: s3://ctnsampackages/a51d48f00b9626b95af4d463a7a93ede
+      Description: Main Lambda Function for Serverless
+      Environment:
+        Variables:
+          AMI: ami-045a06840714f63d8
+          COMMAND: cd /home/ubuntu/; neurocaas_remote/run_main.sh {} {} {} {}; . ncap_remote/ncap_utils/workflow.sh;
+            cleanup
+          CONFIG: config.yaml
+          CONFIGDIR: configs
+          DEPLOY_LIMIT: 100
+          EXECUTION_TIMEOUT: 180
+          IAM_ROLE: SSMRole
+          INDIR: inputs
+          INSTANCE_TYPE: p2.xlarge
+          KEY_NAME: testkeystack-custom-dev-key-pair
+          LAUNCH: true
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MAXCOST: '300'
+          MISSING_CONFIG_ERROR: We need a config file to analyze data.
+          MONITOR: true
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3
+          SHUTDOWN_BEHAVIOR: terminate
+          SSM_TIMEOUT: 172000
+          SUBMITDIR: submissions
+          WORKING_DIRECTORY: ~/bin
+          cwrolearn:
+            Fn::GetAtt:
+            - CloudWatchBusRole
+            - Arn
+          figlambarn:
+            Fn::GetAtt:
+            - FigLambda
+            - Arn
+          figlambid:
+            Ref: FigLambda
+          versionid: '542fc7590087d9d57d88429c2f859b49ae5d53b0
+
+            '
+      Events:
+        BucketEventdebuggers:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: debuggers/submissions
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
+        BucketEventdevelopergroup1:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: developergroup1/submissions
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
+      Handler: submit_start.handler_develop
+      MemorySize: 128
+      Role: arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ
+      Runtime: python3.6
+      Timeout: 180
+    Type: AWS::Serverless::Function
+  OutFolderdebuggers:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderdebuggers
+    Properties:
+      BucketName: locanmf-ncap-web
+      DirName: results
+      Path: debuggers/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  OutFolderdevelopergroup1:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderdevelopergroup1
+    Properties:
+      BucketName: locanmf-ncap-web
+      DirName: results
+      Path: developergroup1/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  PipelineMainBucket:
+    Properties:
+      AccessControl: Private
+      BucketName: locanmf-ncap-web
+    Type: AWS::S3::Bucket
+  S3DelObjectFunction:
+    Properties:
+      CodeUri: s3://ctnsampackages/e4f15d623bf4cec4e8461757bc088477
+      Description: Deletes Objects from S3
+      Environment:
+        Variables:
+          AMI: ami-045a06840714f63d8
+          COMMAND: cd /home/ubuntu/; neurocaas_remote/run_main.sh {} {} {} {}; . ncap_remote/ncap_utils/workflow.sh;
+            cleanup
+          CONFIG: config.yaml
+          CONFIGDIR: configs
+          DEPLOY_LIMIT: 100
+          EXECUTION_TIMEOUT: 180
+          IAM_ROLE: SSMRole
+          INDIR: inputs
+          INSTANCE_TYPE: p2.xlarge
+          KEY_NAME: testkeystack-custom-dev-key-pair
+          LAUNCH: true
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MAXCOST: '300'
+          MISSING_CONFIG_ERROR: We need a config file to analyze data.
+          MONITOR: true
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3
+          SHUTDOWN_BEHAVIOR: terminate
+          SSM_TIMEOUT: 172000
+          SUBMITDIR: submissions
+          WORKING_DIRECTORY: ~/bin
+          cwrolearn:
+            Fn::GetAtt:
+            - CloudWatchBusRole
+            - Arn
+          figlambarn:
+            Fn::GetAtt:
+            - FigLambda
+            - Arn
+          figlambid:
+            Ref: FigLambda
+          versionid: '542fc7590087d9d57d88429c2f859b49ae5d53b0
+
+            '
+      Handler: helper.handler_deldir
+      Role:
+        Fn::GetAtt:
+        - S3MakePathRole
+        - Arn
+      Runtime: python3.6
+      Timeout: 30
+    Type: AWS::Serverless::Function
+  S3MakePathRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - Ref: LambdaBaseRole
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - s3:DeleteObject
+            - s3:ListBucket
+            - s3:PutObject
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: write_s3_policy
+    Type: AWS::IAM::Role
+  S3PutObjectFunction:
+    Properties:
+      CodeUri: s3://ctnsampackages/8752fb6e194771368b2b790cf46154fd
+      Description: Puts Objects in S3
+      Environment:
+        Variables:
+          AMI: ami-045a06840714f63d8
+          COMMAND: cd /home/ubuntu/; neurocaas_remote/run_main.sh {} {} {} {}; . ncap_remote/ncap_utils/workflow.sh;
+            cleanup
+          CONFIG: config.yaml
+          CONFIGDIR: configs
+          DEPLOY_LIMIT: 100
+          EXECUTION_TIMEOUT: 180
+          IAM_ROLE: SSMRole
+          INDIR: inputs
+          INSTANCE_TYPE: p2.xlarge
+          KEY_NAME: testkeystack-custom-dev-key-pair
+          LAUNCH: true
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MAXCOST: '300'
+          MISSING_CONFIG_ERROR: We need a config file to analyze data.
+          MONITOR: true
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3
+          SHUTDOWN_BEHAVIOR: terminate
+          SSM_TIMEOUT: 172000
+          SUBMITDIR: submissions
+          WORKING_DIRECTORY: ~/bin
+          cwrolearn:
+            Fn::GetAtt:
+            - CloudWatchBusRole
+            - Arn
+          figlambarn:
+            Fn::GetAtt:
+            - FigLambda
+            - Arn
+          figlambid:
+            Ref: FigLambda
+          versionid: '542fc7590087d9d57d88429c2f859b49ae5d53b0
+
+            '
+      Handler: helper.handler_mkdir
+      Role:
+        Fn::GetAtt:
+        - S3MakePathRole
+        - Arn
+      Runtime: python3.6
+      Timeout: 30
+    Type: AWS::Serverless::Function
+  SubmitFolderdebuggers:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderdebuggers
+    Properties:
+      BucketName: locanmf-ncap-web
+      DirName: submissions
+      Path: debuggers/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  SubmitFolderdevelopergroup1:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderdevelopergroup1
+    Properties:
+      BucketName: locanmf-ncap-web
+      DirName: submissions
+      Path: developergroup1/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  UserGroupdebuggerslocanmfncapweb:
+    Properties:
+      GroupName: debuggerslocanmfncapwebgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - debuggers/
+                - debuggers/inputs
+                - debuggers/results
+                - logs
+                - debuggers/submissions
+                - debuggers/configs
+                - debuggers/inputs/
+                - debuggers/results/
+                - debuggers/submissions/
+                - debuggers/configs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::locanmf-ncap-web
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - debuggers/inputs/*
+                - debuggers/results/*
+                - debuggers/configs/*
+                - debuggers/submissions/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::locanmf-ncap-web
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::locanmf-ncap-web/debuggers/inputs/*
+            - arn:aws:s3:::locanmf-ncap-web/debuggers/configs/*
+            - arn:aws:s3:::locanmf-ncap-web/debuggers/submissions/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::locanmf-ncap-web/debuggers/results/*
+            - arn:aws:s3:::locanmf-ncap-web/debuggers/configs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: debuggerspolicy
+    Type: AWS::IAM::Group
+  UserGroupdevelopergroup1locanmfncapweb:
+    Properties:
+      GroupName: developergroup1locanmfncapwebgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - developergroup1/
+                - developergroup1/inputs
+                - developergroup1/results
+                - logs
+                - developergroup1/submissions
+                - developergroup1/configs
+                - developergroup1/inputs/
+                - developergroup1/results/
+                - developergroup1/submissions/
+                - developergroup1/configs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::locanmf-ncap-web
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - developergroup1/inputs/*
+                - developergroup1/results/*
+                - developergroup1/configs/*
+                - developergroup1/submissions/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::locanmf-ncap-web
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::locanmf-ncap-web/developergroup1/inputs/*
+            - arn:aws:s3:::locanmf-ncap-web/developergroup1/configs/*
+            - arn:aws:s3:::locanmf-ncap-web/developergroup1/submissions/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::locanmf-ncap-web/developergroup1/results/*
+            - arn:aws:s3:::locanmf-ncap-web/developergroup1/configs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: developergroup1policy
+    Type: AWS::IAM::Group
+  debuggersUserNet:
+    Properties:
+      GroupName:
+        Ref: UserGroupdebuggerslocanmfncapweb
+      Users:
+      - ta2507us-east-1
+    Type: AWS::IAM::UserToGroupAddition
+  developergroup1UserNet:
+    Properties:
+      GroupName:
+        Ref: UserGroupdevelopergroup1locanmfncapweb
+      Users:
+      - ta2507us-east-1
+    Type: AWS::IAM::UserToGroupAddition
+Transform: AWS::Serverless-2016-10-31

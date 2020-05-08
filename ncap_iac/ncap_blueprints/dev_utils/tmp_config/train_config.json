@@ -1,0 +1,10 @@
+{
+    "mode":"train",
+    "traindata":{
+        "trainpath": "/inputs/data-reaching/",
+        "configpath": "inputs/myconfig.py"
+    },
+    "__dataset_size__":null,
+    "__duration__":null
+
+}

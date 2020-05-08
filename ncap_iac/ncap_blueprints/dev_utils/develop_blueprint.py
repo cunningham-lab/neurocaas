@@ -109,7 +109,7 @@ class NeuroCaaSAMI(object):
                     IamInstanceProfile={
                         'Name':'SSMRole'})
         else: 
-            instances = ec2_resource.create_instances(
+            out = ec2_resource.create_instances(
                     BlockDeviceMappings=[
                         {
                             "DeviceName": "/dev/sda1",

@@ -45,6 +45,21 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
+        "BaseFolderhenlabdlcdevelop": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "dlc-ncap-stable",
+                "DirName": "henlabdlcdevelop",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
         "BaseFolderhillmanlabdlcdevelop": {
             "DependsOn": "PipelineMainBucket",
             "Properties": {
@@ -213,6 +228,24 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
+        "ConfigFolderhenlabdlcdevelop": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderhenlabdlcdevelop"
+            ],
+            "Properties": {
+                "BucketName": "dlc-ncap-stable",
+                "DirName": "configs",
+                "Path": "henlabdlcdevelop/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
         "ConfigFolderhillmanlabdlcdevelop": {
             "DependsOn": [
                 "PipelineMainBucket",
@@ -353,6 +386,24 @@
                 "BucketName": "dlc-ncap-stable",
                 "DirName": "inputs",
                 "Path": "ctnncapdevdlcdevelop/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "InFolderhenlabdlcdevelop": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderhenlabdlcdevelop"
+            ],
+            "Properties": {
+                "BucketName": "dlc-ncap-stable",
+                "DirName": "inputs",
+                "Path": "henlabdlcdevelop/",
                 "ServiceToken": {
                     "Fn::GetAtt": [
                         "S3PutObjectFunction",
@@ -551,6 +602,24 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
+        "LogFolderhenlabdlcdevelop": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "dlc-ncap-stable",
+                "DirName": "henlabdlcdevelop",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
         "LogFolderhillmanlabdlcdevelop": {
             "DependsOn": [
                 "PipelineMainBucket",
@@ -611,11 +680,11 @@
                 "Description": "Main Lambda Function for Serverless",
                 "Environment": {
                     "Variables": {
-                        "AMI": "ami-0c0a57494a92dda83",
+                        "AMI": "ami-08908548fb646cbcc",
                         "COMMAND": "ls; cd /home/ubuntu; ncap_remote/dlc_rc.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
                         "CONFIG": "config.yaml",
                         "CONFIGDIR": "configs",
-                        "DEPLOY_LIMIT": 100,
+                        "DEPLOY_LIMIT": 300,
                         "EXECUTION_TIMEOUT": 180,
                         "IAM_ROLE": "SSMRole",
                         "INDIR": "inputs",
@@ -624,7 +693,7 @@
                         "LAUNCH": true,
                         "LOGDIR": "logs",
                         "LOGFILE": "lambda_log.txt",
-                        "MAXCOST": 300,
+                        "MAXCOST": 100,
                         "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
                         "MONITOR": true,
                         "OUTDIR": "results",
@@ -649,7 +718,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "3a54cf3093db5f4fe4bd5acdef4ec168055767a8\n"
+                        "versionid": "f575b32be9e72288ee50ee99218966c1080d5ae8\n"
                     }
                 },
                 "Events": {
@@ -717,6 +786,31 @@
                                         {
                                             "Name": "prefix",
                                             "Value": "ctnncapdevdlcdevelop/submissions"
+                                        },
+                                        {
+                                            "Name": "suffix",
+                                            "Value": "submit.json"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "Type": "S3"
+                    },
+                    "BucketEventhenlabdlcdevelop": {
+                        "Properties": {
+                            "Bucket": {
+                                "Ref": "PipelineMainBucket"
+                            },
+                            "Events": [
+                                "s3:ObjectCreated:*"
+                            ],
+                            "Filter": {
+                                "S3Key": {
+                                    "Rules": [
+                                        {
+                                            "Name": "prefix",
+                                            "Value": "henlabdlcdevelop/submissions"
                                         },
                                         {
                                             "Name": "suffix",
@@ -866,6 +960,24 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
+        "OutFolderhenlabdlcdevelop": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderhenlabdlcdevelop"
+            ],
+            "Properties": {
+                "BucketName": "dlc-ncap-stable",
+                "DirName": "results",
+                "Path": "henlabdlcdevelop/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
         "OutFolderhillmanlabdlcdevelop": {
             "DependsOn": [
                 "PipelineMainBucket",
@@ -933,11 +1045,11 @@
                 "Description": "Deletes Objects from S3",
                 "Environment": {
                     "Variables": {
-                        "AMI": "ami-0c0a57494a92dda83",
+                        "AMI": "ami-08908548fb646cbcc",
                         "COMMAND": "ls; cd /home/ubuntu; ncap_remote/dlc_rc.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
                         "CONFIG": "config.yaml",
                         "CONFIGDIR": "configs",
-                        "DEPLOY_LIMIT": 100,
+                        "DEPLOY_LIMIT": 300,
                         "EXECUTION_TIMEOUT": 180,
                         "IAM_ROLE": "SSMRole",
                         "INDIR": "inputs",
@@ -946,7 +1058,7 @@
                         "LAUNCH": true,
                         "LOGDIR": "logs",
                         "LOGFILE": "lambda_log.txt",
-                        "MAXCOST": 300,
+                        "MAXCOST": 100,
                         "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
                         "MONITOR": true,
                         "OUTDIR": "results",
@@ -971,7 +1083,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "3a54cf3093db5f4fe4bd5acdef4ec168055767a8\n"
+                        "versionid": "f575b32be9e72288ee50ee99218966c1080d5ae8\n"
                     }
                 },
                 "Handler": "helper.handler_deldir",
@@ -1037,11 +1149,11 @@
                 "Description": "Puts Objects in S3",
                 "Environment": {
                     "Variables": {
-                        "AMI": "ami-0c0a57494a92dda83",
+                        "AMI": "ami-08908548fb646cbcc",
                         "COMMAND": "ls; cd /home/ubuntu; ncap_remote/dlc_rc.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
                         "CONFIG": "config.yaml",
                         "CONFIGDIR": "configs",
-                        "DEPLOY_LIMIT": 100,
+                        "DEPLOY_LIMIT": 300,
                         "EXECUTION_TIMEOUT": 180,
                         "IAM_ROLE": "SSMRole",
                         "INDIR": "inputs",
@@ -1050,7 +1162,7 @@
                         "LAUNCH": true,
                         "LOGDIR": "logs",
                         "LOGFILE": "lambda_log.txt",
-                        "MAXCOST": 300,
+                        "MAXCOST": 100,
                         "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
                         "MONITOR": true,
                         "OUTDIR": "results",
@@ -1075,7 +1187,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "3a54cf3093db5f4fe4bd5acdef4ec168055767a8\n"
+                        "versionid": "f575b32be9e72288ee50ee99218966c1080d5ae8\n"
                     }
                 },
                 "Handler": "helper.handler_mkdir",
@@ -1135,6 +1247,24 @@
                 "BucketName": "dlc-ncap-stable",
                 "DirName": "submissions",
                 "Path": "ctnncapdevdlcdevelop/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "SubmitFolderhenlabdlcdevelop": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderhenlabdlcdevelop"
+            ],
+            "Properties": {
+                "BucketName": "dlc-ncap-stable",
+                "DirName": "submissions",
+                "Path": "henlabdlcdevelop/",
                 "ServiceToken": {
                     "Fn::GetAtt": [
                         "S3PutObjectFunction",
@@ -1513,6 +1643,111 @@
             },
             "Type": "AWS::IAM::Group"
         },
+        "UserGrouphenlabdlcdevelop": {
+            "Properties": {
+                "GroupName": "henlabdlcdevelopgroup",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "s3:GetBucketLocation",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor0"
+                                },
+                                {
+                                    "Action": "s3:HeadBucket",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor3"
+                                },
+                                {
+                                    "Action": "s3:ListAllMyBuckets",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor1"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringEquals": {
+                                            "s3:delimiter": [
+                                                "/"
+                                            ],
+                                            "s3:prefix": [
+                                                "",
+                                                "henlabdlcdevelop/",
+                                                "henlabdlcdevelop/inputs",
+                                                "henlabdlcdevelop/results",
+                                                "logs",
+                                                "henlabdlcdevelop/submissions",
+                                                "henlabdlcdevelop/configs",
+                                                "henlabdlcdevelop/inputs/",
+                                                "henlabdlcdevelop/results/",
+                                                "henlabdlcdevelop/submissions/",
+                                                "henlabdlcdevelop/configs/"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::dlc-ncap-stable"
+                                    ],
+                                    "Sid": "ListBucket"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringLike": {
+                                            "s3:prefix": [
+                                                "henlabdlcdevelop/inputs/*",
+                                                "henlabdlcdevelop/results/*",
+                                                "henlabdlcdevelop/configs/*",
+                                                "henlabdlcdevelop/submissions/*"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::dlc-ncap-stable"
+                                    ],
+                                    "Sid": "ListSubBucket"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::dlc-ncap-stable/henlabdlcdevelop/inputs/*",
+                                        "arn:aws:s3:::dlc-ncap-stable/henlabdlcdevelop/configs/*",
+                                        "arn:aws:s3:::dlc-ncap-stable/henlabdlcdevelop/submissions/*"
+                                    ],
+                                    "Sid": "Inputfolderwrite"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::dlc-ncap-stable/henlabdlcdevelop/results/*",
+                                        "arn:aws:s3:::dlc-ncap-stable/henlabdlcdevelop/configs/*"
+                                    ],
+                                    "Sid": "Outputfolderwrite"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "henlabdlcdeveloppolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Group"
+        },
         "UserGrouphillmanlabdlcdevelop": {
             "Properties": {
                 "GroupName": "hillmanlabdlcdevelopgroup",
@@ -1861,6 +2096,17 @@
                 },
                 "Users": [
                     "ta2507us-east-1"
+                ]
+            },
+            "Type": "AWS::IAM::UserToGroupAddition"
+        },
+        "henlabdlcdevelopUserNet": {
+            "Properties": {
+                "GroupName": {
+                    "Ref": "UserGrouphenlabdlcdevelop"
+                },
+                "Users": [
+                    "sl2993us-east-1"
                 ]
             },
             "Type": "AWS::IAM::UserToGroupAddition"

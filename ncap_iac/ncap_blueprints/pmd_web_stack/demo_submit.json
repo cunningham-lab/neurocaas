@@ -1,0 +1,7 @@
+{
+    "dataname": "debuggers/inputs/demoMovie.npy",
+    "configname":"debuggers/configs/config.yaml",
+    "instance_type": "m5.16xlarge",
+    "timestamp": "05_05_20_1_23"
+
+}

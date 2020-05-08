@@ -78,7 +78,7 @@ class Submission_dev():
         ## a logger for the submit area.  
         self.logger = utilsparams3.JobLogger_demo(self.bucket_name, self.jobpath)
         self.logger.append("Unique analysis version id: {}".format(os.environ['versionid'].split("\n")[0]))
-        self.logger.append("Initializing {} analysis".format(bucket_name))
+        self.logger.append("Initializing EPI analysis: Parameter search for 2D LDS.")
         self.logger.write()
         ########################
         ## Now parse the rest of the file. 
@@ -115,12 +115,13 @@ class Submission_dev():
             ## Now raise an exception to halt processing, because this is a catastrophic error.  
             raise ValueError(os.environ["MISSING_CONFIG_ERROR"])
 
-        self.logger.append("{b} analysis request detected with dataset {d}, config file {c}. Reading {b} blueprint.".format(b = bucket_name,d = self.data_name,c = self.config_name))
+        self.logger.append("EPI analysis request detected with dataset {}, config file {}. Reading EPI blueprint.".format(self.data_name,self.config_name))
         self.logger.write()
         ########################## 
         ## Check for the existence of the corresponding data and config in s3. 
         ## Check that we have the actual data in the bucket.  
         exists_errmsg = "INPUT ERROR: S3 Bucket does not contain {}"
+        print(self.bucket_name,self.data_name,"bucket and data naem")
         if not utilsparams3.exists(self.bucket_name,self.data_name): 
             msg = exists_errmsg.format(self.data_name)
             self.logger.append(msg)
@@ -181,7 +182,7 @@ class Submission_dev():
             self.logger.write()
             validjob = True
         elif cost >= budget:
-            message = "COST ERROR: Incurred cost so far: ${}. Over budget (${}), cancelling job. Contact administrator.".format(cost,budget)
+            message = "Incurred cost so far: ${}. Over budget (${}), cancelling job. Contact administrator.".format(cost,budget)
             self.logger.append(message)
             self.logger.write()
             validjob = False
@@ -220,7 +221,7 @@ class Submission_dev():
         if active +nb_instances < int(os.environ['DEPLOY_LIMIT']):
             pass
         else:
-            self.logger.append("RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Contact administrator.")
+            self.logger.append("RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NeuroCAAS admin")
             raise ValueError("Instance requests greater than pipeline bandwidth")
         
 
@@ -237,7 +238,7 @@ class Submission_dev():
         try:
             assert len(instances) > 0
         except AssertionError:
-            logger.append("RESOURCE ERROR: AWS capacity reached. Contact administrator.")
+            logger.append("instances not launched. AWS capacity reached. Please contact NeuroCAAS admin.")
             raise
 
         self.instances = instances
@@ -276,7 +277,7 @@ class Submission_dev():
             instances=self.instances,
             logger=[]#self.logger
         )
-        self.logger.append("Created {n} immutable analysis environments".format(n = len(self.filenames)))
+        self.logger.append("Created {} EPI infrastructures with 4 cpus, 16 GB memory ".format(len(self.filenames)))
 
     def process_inputs(self):
         """ Initiates Processing On Previously Acquired EC2 Instance. This version requires that you include a config (fourth) argument """
@@ -296,6 +297,17 @@ class Submission_dev():
         ## Should we vectorize the log here? 
         outpath_full = os.path.join(os.environ['OUTDIR'],self.jobname)
 
+        #[self.logger.append("Starting analysis with parameter set {}, dataset {}".format(
+        #    f+1,
+        #    filename
+        #    )
+        #) for f,filename in enumerate(self.filenames)]
+        #[self.logger.append("Starting analysis with parameter set {}: {}".format(
+        #    f+1,
+        #    os.environ['COMMAND'].format(
+        #        self.bucket_name, filename, outpath_full, self.config_name
+        #    )
+        #)) for f,filename in enumerate(self.filenames)]
         print([os.environ['COMMAND'].format(
               self.bucket_name, filename, outpath_full, self.config_name
               ) for filename in self.filenames],"command send")
@@ -310,15 +322,15 @@ class Submission_dev():
                 log_path=os.path.join(self.jobpath,'internal_ec2_logs')
                 )
             self.logger.initialize_datasets_dev(filename,self.instances[f].instance_id,response["Command"]["CommandId"])
-            self.logger.append("Starting analysis {} with dataset {}".format(f+1,os.path.basename(filename)))
+            self.logger.append("Starting analysis {} with parameter set {}".format(f+1,os.path.basename(filename)))
             self.logger.write()
-        self.logger.append("All jobs submitted. See per-dataset logs for detailed updates from the command line.")
+        self.logger.append("All jobs submitted. Processing...")
 
 
     ## Declare rules to monitor the states of these instances.  
     def put_instance_monitor_rule(self): 
         """ For multiple datasets."""
-        self.logger.append("Setting up monitoring for all analyses...") 
+        self.logger.append("Setting up monitoring on all instances.") 
         ruledata,rulename = utilsparamevents.put_instances_rule(self.instances,self.jobname)
         arn = ruledata['RuleArn']
         ## Now attach it to the given target

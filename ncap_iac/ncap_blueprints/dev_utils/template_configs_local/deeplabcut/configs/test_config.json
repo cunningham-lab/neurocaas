@@ -1,0 +1,9 @@
+{
+    "mode":"test",
+    "modeldata":{
+	    "modelpath": "{NEUROCAASPATH}/inputs/reachingJan30-trainset95shuffle1/",
+            "configpath": "{NEUROCAASPATH}/inputs/myconfig_analysis_template.py"
+        },
+    "__dataset_size__":null,
+    "__duration__":null
+}

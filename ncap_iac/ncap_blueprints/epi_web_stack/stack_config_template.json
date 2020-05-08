@@ -1,0 +1,59 @@
+{
+    "PipelineName": "epi-ncap-web",
+    "REGION": "us-east-1",
+    "STAGE": "webdev",
+    "Lambda": {
+        "CodeUri": "../../protocols",
+        "Handler": "submit_start.handler_develop",
+        "PostCodeUri": "../../protocols",
+        "PostHandler": "postprocess.epipostprocess",
+        "Launch": true,
+        "LambdaConfig": {
+            "AMI": "ami-0530d6b24ef36874d",
+            "INSTANCE_TYPE": "t2.micro",
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
+            "IAM_ROLE": "SSMRole",
+            "KEY_NAME": "testkeystack-custom-dev-key-pair",
+            "WORKING_DIRECTORY": "~/bin",
+            "COMMAND": "ls; cd /home/ubuntu; ncap_remote/run_mock.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
+            "SHUTDOWN_BEHAVIOR": "terminate",
+            "CONFIG": "config.yaml",
+            "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+            "EXECUTION_TIMEOUT": 180,
+            "SSM_TIMEOUT": 172000,
+            "LAUNCH": true,
+            "LOGFILE": "lambda_log.txt",
+            "DEPLOY_LIMIT": 100,
+            "MAXCOST": 100,
+            "MONITOR": true,
+            "OUTDIR": "results",
+            "INDIR": "inputs",
+            "LOGDIR": "logs"
+        }
+    },
+    "UXData": {
+        "Affiliates": [
+            {
+                "AffiliateName": "cunninghamlab",
+                "UserNames": [
+                    "jpccosyne",
+                    "srbcosyne",
+                    "tacosyne"
+                ],
+                "UserInput": true,
+                "ContactEmail": "tgabe94@gmail.com"
+            },
+            {
+                "AffiliateName": "examplegroup2",
+                "UserNames": [
+                    "jpccosyne",
+                    "srbcosyne",
+                    "tacosyne"
+                ],
+                "UserInput": true,
+                "ContactEmail": "tgabe94@gmail.com"
+            }
+        ]
+    }
+}
