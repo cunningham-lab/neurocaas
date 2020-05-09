@@ -1,20 +1,21 @@
 language: python
 python:
 - 3.6
-sudo: required
 env:
   global:
   - AWS_DEFAULT_REGION="us-east-1"
   - secure: WIRs4LVFiwfkf30VNjhQBl1M34szhecz37wMAqu4opihFNru/d3c9V7+yKHemRi/RTAlihSqewTQ4hGHkDCVjXjTcq7auZEiJffkLHPbCMa+X2cfmYIZMQgznrDyTaTZcYFj7EPs3101nfHxMVXsL1mZnQ3TzMYZdCqd2M6AEw7LCDQkI7BIcBXK+8FI1Jgf4evIn/zUhoxC1HUYP0aMpBwZLhtvuTQWQsNrBkwctxMN6Ev+0u13IBVx5/h00sAEZPaWeFnjDJHIlW3jVg6wXcJ+w2XXHWfnKDd1yGrp9px/ocpKqFYL3zZkGZSlqV8KSLQz+VlemgOF5Yyy8CcZS9mD4KOclHzf04YzKrUnihcePgRsdnN026JUtqszPsd+wamfz/Ru1HE3qOqLDi32BB8QjAxkcoozB/EAuW6XkY8elCueOSic23YrtlKRbFI5Z+BHv5IHGrFbYAFPHhG61FzUo9xYlIq/vFhnhSMr+1XjZv2T0ASiqj9ltAFqdf1b315aUOuD4td4YxDDXsFvRUjYyQrQ1Y+twGCadKiEtPIRcwT36ADf8Rsj+oGanldGH66UfT4LiOcMXGpRGVsw7yp/KkfXAIOELjf3DXn4cMTa9KkwFHD4XrAIWLam8ygHkjkIXHa8QhufKZhIheFQu/l7lKvDRP6w8sWGV8eXv5A=
   - secure: btfFZBySWYtt8VMs2kyUlsJhyzTEzyGHYQ/XVjAKh+JRl6y7jjZ30Jsy8ZfO1cr2rLQE7f9cP9Mp1szxVWsonwmLHrj6asJdol6yLdjA3Da6KCLGCZwxVOZhOwW/ky/C1pYreOcwZtcpuF4l0dgTY6nZZq8TdPquKXXxFJdCdh7xW00wdbD7CBTa+b+dF11/WMUo3fbnN3oOB3yf4yr4pY5jNZAULed/pWObURDpTysfi5nPsBm+4f4tdRztGyUqNW9CDsKkZLhu7wLqN0iP20aFaJEACMuJ9ZHS5LcqjQHDHnrS6YsmxWCUnb5Z98gMs4gL4thUhM8AxY6mxjFv3o3RZstZUgYL6X75iYfT6Otb1zNY6eL3i6xKAjva0y12FTGK5wXq50q8fLc9vzD94+h9RMaCawZ9w3pVYqiy6oR1GjYkBBIiXzASx27IGfU+9uPr5ixwp/mBIm6yqsyOpHvu/c5MCWeAo2u+a0UmZhZs8phkQTd24Xl56Cx7MMOXLfZQp3KQwHKTxWm5q5Tr2DKISeSct/e8Ld/xuJjK1cmp4ngBPp9lFEAsNll9jHMaW9lcwEOqF5f1stg3fbDwANuu/Tz+t/kQVxQlJQsYWp7NwZLjYvZyVxTDdzHfOT3FSzU2215HFUX3WWmLxK1j6TacMjIASK9XEzZiOJm5yXU=
   - secure: Gl8eqEetgNhO24C2ET236OQfOHAHSnFihioJ61pzE3XQ5X0O2At3zGTQLAJPPvtreBSw0C0yxA3ECuyhqLT+gntqVyPKBUPmxh0FoODj6qE9rkRpj24tio2eKm2kAH06BCN/uYIbZbhIzBr/KnErLnQa4tlZOpPe81KmltEMhCAaO8mMHmHMn5Ud+swKCK9kQ/3PMxaG4uCTeR7MyycveBPCD2f+K6biFO/Q1xExlb0lrprGgfr1/DJyz4a9BgDeXA6LBs4gKEQ/UzO06l1Qw1RRL5zqcIlZ+oE4zruM8dGH8C+mMlLfW5UporVN5/HMLPKPHopY9tgOZAmRlSVbS8DYsS3FwE+0J21q5VFoGfhmYTLHQL03EdfMenewxjGia/yuicfRDePzmMG3IN7lGtyJ44dULLU7BWbcFYBZ2o1b4EcNmDHBJwlwOr1EwOQLuI2Vtey10UJB4wEWf5nUpefuto0Caurwo0GGCSAhajrc4VPqCcLrHS6uzbYP/I5z1RJj3vUtJsD+IowFl5Mo6zw3GL/97nJIZLFcsz8jWoxU2/j+FqzjExrBg3mG55n9zsDvhnJb1bwFEPZwuIEvHvHLXYzouxqNfrf7UvDpSetfJ0osK9M0EvRV1QysJNN19uz7breK+LKqx7U0PPbBxq0hMr+kXoGFMgALaM8nFYw=
+  - secure: e5Y58DwhoZj4+QGMH6lpqxmPYQCWyzssT2mFE9B/eKmnZj3L2zhII1v8wM257LzAF4Gj56N7zGYnLbDyGFJMJJTZhpJWLiaBtcuwavfk06cyJYCeToCj4AhMxI+YL3q/FKk5kBepOEFWaT6eQFFQRg9nIAp0lTWVTyUC+azK0jHOtxqbYsupQ0VTDbJG7+ikLkpKZ4NFgayJjWHzjLK7JJX45AGjfO8vJCtxPiERAgIuF8Zr6348qeIHxSsrSmBXQpxI+7A7H1O2YZLfCceUljLLyK9oqBVu3KYzXCOZ/D0mxZIVCXE+qP4AaFdptZ8WuUWZh7ivKSX4GIpgwDhYuKOx82Q6fZWM+gHNeWm0pBWelXNmtxbNwahXBUE45/sOn0PBwcjRv9zBkOIvZhbSdu+0E/v9bi2hnQ+okG0qUfpf7e3O7mOvK/Kuy5AcFc/QDd9i5j6XmMz/s/S4eGqpvUcpp2c3gtV/JuvX3qevuGbULYDfyoEXRFhz3rn/H4BgwAamZdXHr+IsXtHpEHIOHu9VxmC9x8Gl+WdGi24HXoPZocNlOBNQ1J4/EjeYVeF6IPqkYIsmrWv469zlh1I422Pv+Z81a9Yzo3UcH794DDUzknWXhhzYe/d4Ae3ycEmwgAJu49qBPl1zeeL+mw3yBlI33EO18eJlbwClqlDmwbk=
+  - secure: WhvS9Uu0rDlFiWwlwI2tCkLl2bHWkU+4K0MQXTSScmgVQjW2T0DJwjW/jF45WPjG9Wuxx896EwK4SfYXQV/YLKH3RDY5nAqn0Fs/zj2FbDYPOk0AalWsYS/aiigZHsrgS6lA1LHOgeA+0bZWSa2DynjWPrJ4/XUTkaJ5YyQRIzsMrhpq7qPrhfkqaT19Y21xJ2ilnML0rchU+zR9i4S+iza1AA92rSb2NQ2F4EGYNIcXMsYyJsdnEpiSZkL6B5r+vP8FsVmY7/y+VWGtt8pP2e6peujuTjz64rxR4+14FVqvIG07WmKnSlWRXiIAFhw1Kv6Oyw2XzfFh1mg2htJYPpGp4Ze03wwJjR8RjSUWybCHt4QtNTG+MP2cO7phgVf0Yr3a7JgorT+ueYAjvqevXmCqjQ3MehIn/+2AbAABRC6xGyhuQMaKx9AtNZmcVRLPTDgonmrq8SOA1dhdUu3WHNvjql2oOSRXNzqo4sPFLb96rrofSM0hQvzbd2l5u+nY1VAYSd5n7gfdjQYAZ1MWQI6u4y8UgzW8VLmL3dkvlPsGjtHbR5sOQbHukQBBAYCQpqbFwCUY/kgG+FOTeLjUS4BslIF2e+IQV5TBHm4vDL9aMliS0Ba8xF+S6RqTjQkuwPhR9ir/BkKQ4TlwBCCvi5KMRnapVlndcpfVEWqHWOM=
 addons:
   apt:
     packages:
-      - libcurl4-openssl-dev
-      - libelf-dev
-      - libdw-dev
-      - cmake
+    - libcurl4-openssl-dev
+    - libelf-dev
+    - libdw-dev
+    - cmake
 jobs:
   include:
   - stage: test
@@ -25,19 +26,13 @@ jobs:
     - sudo apt-get install jq
     script:
     - echo $(aws configure list)
-    - bash test_lambda.sh
+      #- bash test_lambda.sh
     - bash <(curl -s https://codecov.io/bash)
-    after_success: |
-      wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz &&
-      tar xzf master.tar.gz &&
-      cd kcov-master &&
-      mkdir build &&
-      cd build &&
-      cmake .. &&
-      make &&
-      sudo make install &&
-      cd ../.. &&
-      rm -rf kcov-master &&
-      mkdir -p coverage &&
-      kcov coverage script.sh &&
-      bash <(curl -s https://codecov.io/bash) 
+    - AWS_ACCESS_KEY_ID=$ACCESS_KEY_USER
+    - AWS_SECRET_ACCESS_KEY=$SECRET_KEY_USER
+    - echo $(aws configure list)
+    after_success: "wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz
+      &&\ntar xzf master.tar.gz &&\ncd kcov-master &&\nmkdir build &&\ncd build &&\ncmake
+      .. &&\nmake &&\nsudo make install &&\ncd ../.. &&\nrm -rf kcov-master &&\nmkdir
+      -p coverage &&\nkcov coverage script.sh &&\nbash <(curl -s https://codecov.io/bash)
+      \n"
