@@ -8,7 +8,6 @@ before_script:
 - sudo apt-get install jq
 script:
 - echo $(aws configure list)
-- echo again
 - bash test_lambda.sh
 env:
   global:
