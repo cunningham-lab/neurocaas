@@ -18,6 +18,14 @@ if __name__ == "__main__":
     if path[-1] == "/":
         path = path[:-1]
     stackname = os.path.basename(path)
+    
+    ## see if there's a destination we're supposed to send these to: 
+    try:
+        out_dest = sys.argv[2]
+    except IndexError:
+        print("destination not given, reverting to default defined on local machine.")
+        out_dest = "/Users/taigaabe/ncap_user_creds/"
+
     ## Get information from the config file:
     config = json.load(open(os.path.join(path,"user_config_template.json")))
     region = config["Lambda"]["LambdaConfig"]["REGION"]
@@ -46,7 +54,6 @@ if __name__ == "__main__":
             user_dict[SecretAccess[0]]["Secret Access Key"] = out["OutputValue"]
 
     ## Now let's write out to a csv: 
-    out_dest = "/Users/taigaabe/ncap_user_creds/"
     path_prefix = "NCAP_KEY_AUTO_{}.csv"
     save_path = os.path.join(out_dest,stackname)
     if not os.path.exists(save_path):
