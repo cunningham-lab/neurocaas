@@ -136,6 +136,7 @@ class NeuroCaaSTemplate(object):
         raise NotImplementedError
 
     def attach_users(self,affiliatedict):
+        print(affiliatedict,"affiliatedict")
         ## First get a list of usernames. 
         users = affiliatedict['UserNames']
         affiliatename = affiliatedict['AffiliateName']
@@ -154,6 +155,7 @@ class NeuroCaaSTemplate(object):
                 affiliate_usernames.append(user_local)
             except Exception as e: 
                 print("Error adding User {}, please evaluate".format(user),e)
+                raise
 
         return affiliate_users,affiliate_usernames
 
@@ -915,16 +917,21 @@ if __name__ == "__main__":
     ## utemp = UserTemplate(filename)
     ## with open(dirname+"/"+"compiled_users.json","w") as f: 
         #print(utemp.template.to_json(),file = f)
+    print(mode,"mode")
     if mode == "develop":
+        print("develop mode")
         ## Construct a development mode pipeline.  
         temp =DevTemplate(filename)
         with open(dirname+'/'+'compiled_template.json','w') as f:
             print(temp.template.to_json(),file = f)
     elif mode == "webdev":
+        print("webdev mode")
         ## Construct a web development mode pipeline. Standardizes user group handling for neatness. 
         temp =WebDevTemplate(filename)
         with open(dirname+'/'+'compiled_template.json','w') as f:
             print(temp.template.to_json(),file = f)
+    else:
+        print("mode {} not implemented yet or does not exist.".format(mode))
 
     ## 
 
