@@ -2,6 +2,8 @@
 set -e 
 source "$(dirname $0)"/paths.sh
 rootpath=$(dirname $(dirname $(get_abs_filename "$0" )))
+
+mkdir "$(dirname $rootpath)"/ncap_user_creds
 userdirname="ciuserstack"
 cd $rootpath/ncap_iac/user_profiles;
 bash iac_utils/configure.sh "$userdirname"
