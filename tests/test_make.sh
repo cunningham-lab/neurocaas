@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e 
 source "$(dirname $0)"/paths.sh
 rootpath=$(dirname $(dirname $(get_abs_filename "$0" )))
 userdirname="ciuserstack"
