@@ -16,7 +16,7 @@ if __name__ == "__main__":
     d["Records"][0]["s3"]["bucket"]["name"] = dirname
     d["Records"][0]["s3"]["bucket"]["arn"] = arn
 
-    d["Records"][0]["s3"]["object"]["key"] = os.path.join(groupname,"testdir","submit.json")
+    d["Records"][0]["s3"]["object"]["key"] = os.path.join(groupname,"submissions","submit.json")
 
     with open(os.path.join(dirname,"test_resources/s3_putevent.json"),'w') as f:
         json.dump(d,f,indent =4)

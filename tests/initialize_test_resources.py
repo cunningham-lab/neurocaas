@@ -25,7 +25,7 @@ if __name__ == "__main__":
     dataset = {"field":"values"}
     dname = "dataset1.json"
     dname_localpath = os.path.join(dirname,"test_resources",dname)
-    dname_remotepath = os.path.join(groupname,"testdir",dname)
+    dname_remotepath = os.path.join(groupname,"inputs",dname)
     with open(dname_localpath,"w") as f:
         json.dump(dataset,f,indent =4)
     s3client.put_object(Body = dname_localpath,
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     config = {"__duration__":10,"__dataset_size__":10}
     cname = "config.json"
     cname_localpath = os.path.join(dirname,"test_resources",cname)
-    cname_remotepath = os.path.join(groupname,"testdir",cname)
+    cname_remotepath = os.path.join(groupname,"configs",cname)
     with open(os.path.join(dirname,"test_resources",cname),'w') as f:
         json.dump(config,f,indent =4)
     s3client.put_object(Body = cname_localpath,
@@ -49,7 +49,7 @@ if __name__ == "__main__":
               "timestamp":str(datetime.datetime.now()).replace(" ","T")} 
     sname = "submit.json"
     sname_localpath = os.path.join(dirname,"test_resources",sname)
-    sname_remotepath = os.path.join(groupname,"testdir",sname)
+    sname_remotepath = os.path.join(groupname,"submissions",sname)
     with open(os.path.join(dirname,"test_resources",sname),'w') as f:
         json.dump(submit,f,indent =4)
     s3client.put_object(Body = sname_localpath,
