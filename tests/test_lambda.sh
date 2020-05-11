@@ -1,6 +1,9 @@
 #!/bin/bash
+set -e 
+source "$(dirname $0)"/paths.sh
+rootpath=$(dirname $(dirname $(get_abs_filename "$0" )))
 
-cd ../ncap_iac/ncap_blueprints/
+cd $rootpath/ncap_iac/ncap_blueprints 
 
 statusbuild=$(bash iac_utils/build.sh epi_web_stack)
 statustest=$(bash iac_utils/test_main.sh epi_web_stack)

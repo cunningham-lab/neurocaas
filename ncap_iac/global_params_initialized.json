@@ -1,0 +1,12 @@
+{
+  "input_directory": "inputs",
+  "output_directory": "results",
+  "log_directory": "logs",
+  "config_directory": "configs",
+  "submission_directory": "submissions",
+  "lambdarolename": "testutilsstack-LambdaRole-1I7AHKZQN6WOJ",
+  "ssmrolename": "testutilsstack-SSMRole-1GG0BKY7GL634",
+  "ec2rolename": "testutilsstack-EC2Role-1B7WX6SACQEWF",
+  "securitygroupdevname": "testsgstack-SecurityGroupDev-1NQJIDBJG16KK",
+  "securitygroupdeployname": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3"
+}
