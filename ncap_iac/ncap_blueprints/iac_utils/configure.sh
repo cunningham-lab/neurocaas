@@ -35,6 +35,6 @@ cp ../utils/simevents/s3_putevent.json "$ncaprootdir"/ncap_blueprints/"$1"/test_
 cp ../utils/simevents/{cloudwatch_startevent.json,cloudwatch_termevent.json} "$ncaprootdir"/ncap_blueprints/"$1"/test_resources/
 cp ../utils/templates/{computereport_1234567.json,computereport_2345678.json} "$ncaprootdir"/ncap_blueprints/"$1"/test_resources/ 
 
-git add "$ncaprootdir"/ncap_blueprints/"$1"/ 
-git commit -m "automatic commit: deployed pipeline '$1'" 
-git push
+#git add "$ncaprootdir"/ncap_blueprints/"$1"/ 
+#git commit -m "automatic commit: deployed pipeline '$1'" 
+#git push
