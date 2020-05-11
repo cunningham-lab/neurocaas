@@ -15,13 +15,15 @@ fi
 
 set -e 
 source "$(dirname $0)"/paths.sh
+
 rootpath=$(dirname $(dirname $(get_abs_filename "$0" )))
 
 ## First, set up the user and analysis stacks you will use to underlie future tests.
-#userdirname="ciuserstack"
-#analysisdirname="cianalysisstack"
 
 ## User stack setup:
+
+## Make a directory to store creds for later steps. 
+mkdir "$(dirname $rootpath)"/ncap_user_creds
 cd $rootpath/ncap_iac/user_profiles;
 bash iac_utils/configure.sh "$userdirname"
 
