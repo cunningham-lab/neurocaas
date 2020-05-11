@@ -8,6 +8,7 @@ if __name__ == "__main__":
     with open(os.path.join(dirname,"user_config_template.json"),'r') as f:
         d = json.load(f)
     print(d["UXData"]["Affiliates"][0])
+    d["UXData"]["Affiliates"] = [d["UXData"]["Affiliates"][0]]
     d["UXData"]["Affiliates"][0]["AffiliateName"] = "traviscitestgroup"
     d["UXData"]["Affiliates"][0]["UserNames"] = ["ciuser1","ciuser2"] 
     print(d)
