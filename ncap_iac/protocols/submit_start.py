@@ -676,7 +676,7 @@ def process_upload_dev(bucket_name, key,time):
             submission.logger.append("encountered error while setting up: {}. Shutting down instances.".format(e))
             submission.logger.write()
             [inst.terminate() for inst in instances]
-            print("encountered setup error: shutting down.")
+            print("encountered setup error: {}. shutting down.".format(e))
 
     else:
         pass
