@@ -27,11 +27,13 @@ mkdir "$(dirname $rootpath)"/ncap_user_creds
 cd $rootpath/ncap_iac/user_profiles;
 bash iac_utils/configure.sh "$userdirname"
 
+## Initialize it with the info you would like
 python $rootpath/tests/initialize_test_user.py "$userdirname"
 
 bash iac_utils/deploy.sh "$userdirname"
 
 ## Analysis stack setup 
+cd $rootpath/ncap_iac/ncap_blueprints
 bash iac_utils/configure.sh "$analysisdirname"
 
 ## Initialize it with the info you would like
@@ -40,7 +42,6 @@ python $rootpath/tests/initialize_test_analysis.py "$analysisdirname"
 bash iac_utils/fulldeploy.sh "$analysisdirname"
 
 ## Now run tests:
-cd $rootpath/ncap_iac/ncap_blueprints
 
 statusbuild=$(bash iac_utils/build.sh epi_web_stack)
 statustest=$(bash iac_utils/test_main.sh epi_web_stack)
