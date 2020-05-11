@@ -28,8 +28,8 @@ if __name__ == "__main__":
     dname_remotepath = os.path.join(groupname,"inputs",dname)
     with open(dname_localpath,"w") as f:
         json.dump(dataset,f,indent =4)
-    s3client.put_object(Body = dname_localpath,
-            Bucket=dirname,
+    s3client.put_object(Body = open(dname_localpath,"rb"),
+            Bucket=bucket,
             Key=dname_remotepath)
 
     ## make a config file
@@ -37,10 +37,10 @@ if __name__ == "__main__":
     cname = "config.json"
     cname_localpath = os.path.join(dirname,"test_resources",cname)
     cname_remotepath = os.path.join(groupname,"configs",cname)
-    with open(os.path.join(dirname,"test_resources",cname),'w') as f:
+    with open(dname_localpath,"w") as f:
         json.dump(config,f,indent =4)
-    s3client.put_object(Body = cname_localpath,
-            Bucket=dirname,
+    s3client.put_object(Body = open(cname_localpath,"rb"),
+            Bucket=bucket,
             Key=cname_remotepath)
 
     ## make a submit file 
@@ -50,9 +50,9 @@ if __name__ == "__main__":
     sname = "submit.json"
     sname_localpath = os.path.join(dirname,"test_resources",sname)
     sname_remotepath = os.path.join(groupname,"submissions",sname)
-    with open(os.path.join(dirname,"test_resources",sname),'w') as f:
+    with open(sname_localpath,"w") as f:
         json.dump(submit,f,indent =4)
-    s3client.put_object(Body = sname_localpath,
-            Bucket=dirname,
+    s3client.put_object(Body = open(sname_localpath,"rb"),
+            Bucket=bucket,
             Key=sname_remotepath)
 
