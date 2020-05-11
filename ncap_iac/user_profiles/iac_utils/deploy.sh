@@ -24,7 +24,7 @@ python user_maker.py "$PIPEDIR"/user_config_template.json
 
 cd "$PIPEDIR"
 
-sam build -t compiled_users.json -m $ncaprootdir/protocols/requirements.txt
+sam build -t compiled_users.json -m $ncaprootdir/protocols/requirements.txt --use-container
 
 sam package --s3-bucket ctnsampackages --output-template-file compiled_users.yaml
 
@@ -32,6 +32,6 @@ sam deploy --template-file compiled_users.yaml --stack-name $PIPENAME --capabili
 
 ## Added February 4th:
 cd $ncaprootdir/utils
-python export_credentials.py $PIPEDIR 
+python export_credentials.py $PIPEDIR "../../../ncap_user_creds/"
 
 ########
