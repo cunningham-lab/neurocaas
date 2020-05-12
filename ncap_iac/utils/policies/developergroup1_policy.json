@@ -24,22 +24,22 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web"
+        "arn:aws:s3:::citestpipeline"
       ],
       "Condition": {
         "StringEquals": {
           "s3:prefix": [
             "",
-            "debuggers/",
-            "debuggers/inputs",
-            "debuggers/results",
+            "developergroup1/",
+            "developergroup1/inputs",
+            "developergroup1/results",
             "logs",
-            "debuggers/submissions",
-            "debuggers/configs",
-            "debuggers/inputs/",
-            "debuggers/results/",
-            "debuggers/submissions/",
-            "debuggers/configs/"
+            "developergroup1/submissions",
+            "developergroup1/configs",
+            "developergroup1/inputs/",
+            "developergroup1/results/",
+            "developergroup1/submissions/",
+            "developergroup1/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -52,15 +52,15 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web"
+        "arn:aws:s3:::citestpipeline"
       ],
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "debuggers/inputs/*",
-            "debuggers/results/*",
-            "debuggers/configs/*",
-            "debuggers/submissions/*"
+            "developergroup1/inputs/*",
+            "developergroup1/results/*",
+            "developergroup1/configs/*",
+            "developergroup1/submissions/*"
           ]
         }
       }
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/inputs/*",
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/configs/*",
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/submissions/*"
+        "arn:aws:s3:::citestpipeline/developergroup1/inputs/*",
+        "arn:aws:s3:::citestpipeline/developergroup1/configs/*",
+        "arn:aws:s3:::citestpipeline/developergroup1/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/results/*",
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/configs/*"
+        "arn:aws:s3:::citestpipeline/developergroup1/results/*",
+        "arn:aws:s3:::citestpipeline/developergroup1/configs/*"
       ]
     }
   ]

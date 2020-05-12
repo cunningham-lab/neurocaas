@@ -24,22 +24,22 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web"
+        "arn:aws:s3:::epi-ncap-web"
       ],
       "Condition": {
         "StringEquals": {
           "s3:prefix": [
             "",
-            "debuggers/",
-            "debuggers/inputs",
-            "debuggers/results",
+            "cunninghamlab/",
+            "cunninghamlab/inputs",
+            "cunninghamlab/results",
             "logs",
-            "debuggers/submissions",
-            "debuggers/configs",
-            "debuggers/inputs/",
-            "debuggers/results/",
-            "debuggers/submissions/",
-            "debuggers/configs/"
+            "cunninghamlab/submissions",
+            "cunninghamlab/configs",
+            "cunninghamlab/inputs/",
+            "cunninghamlab/results/",
+            "cunninghamlab/submissions/",
+            "cunninghamlab/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -52,15 +52,15 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web"
+        "arn:aws:s3:::epi-ncap-web"
       ],
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "debuggers/inputs/*",
-            "debuggers/results/*",
-            "debuggers/configs/*",
-            "debuggers/submissions/*"
+            "cunninghamlab/inputs/*",
+            "cunninghamlab/results/*",
+            "cunninghamlab/configs/*",
+            "cunninghamlab/submissions/*"
           ]
         }
       }
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/inputs/*",
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/configs/*",
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/submissions/*"
+        "arn:aws:s3:::epi-ncap-web/cunninghamlab/inputs/*",
+        "arn:aws:s3:::epi-ncap-web/cunninghamlab/configs/*",
+        "arn:aws:s3:::epi-ncap-web/cunninghamlab/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/results/*",
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/configs/*"
+        "arn:aws:s3:::epi-ncap-web/cunninghamlab/results/*",
+        "arn:aws:s3:::epi-ncap-web/cunninghamlab/configs/*"
       ]
     }
   ]
