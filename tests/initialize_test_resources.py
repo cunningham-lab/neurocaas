@@ -37,7 +37,7 @@ if __name__ == "__main__":
     cname = "config.json"
     cname_localpath = os.path.join(dirname,"test_resources",cname)
     cname_remotepath = os.path.join(groupname,"configs",cname)
-    with open(dname_localpath,"w") as f:
+    with open(cname_localpath,"w") as f:
         json.dump(config,f,indent =4)
     s3client.put_object(Body = open(cname_localpath,"rb"),
             Bucket=bucket,
