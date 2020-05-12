@@ -85,17 +85,26 @@ def mv(bucket_name,pathfrom,pathto):
 
 def load_json(bucket_name, key):
     """ """
-    file_object = s3_resource.Object(bucket_name, key)
-    raw_content = file_object.get()['Body'].read().decode('utf-8')
-    json_content = json.loads(raw_content)
+    try:
+        file_object = s3_resource.Object(bucket_name, key)
+        raw_content = file_object.get()['Body'].read().decode('utf-8')
+        json_content = json.loads(raw_content)
+    except ValueError as ve:
+        print("Error loading config file. Error is: {}".format(ve))
+        raise ValueError
+
     ## Transfer type 
     return json_content 
 
 def load_yaml(bucket_name, key):
     """ """
-    file_object = s3_resource.Object(bucket_name, key)
-    raw_content = file_object.get()['Body'].read().decode('utf-8')
-    yaml_content = yaml.safe_load(raw_content)
+    try:
+        file_object = s3_resource.Object(bucket_name, key)
+        raw_content = file_object.get()['Body'].read().decode('utf-8')
+        yaml_content = yaml.safe_load(raw_content)
+    except ValueError as ve:
+        print("Error loading config file. Error is: {}".format(ve))
+        raise ValueError
     return yaml_content
 
 def extract_files(bucket_name,prefix,ext = None):
