@@ -645,16 +645,16 @@ def process_upload_dev(bucket_name, key,time):
             submission.compute_volumesize()
             print("writing to log")
             submission.logger.write()
-            instances=submission.acquire_instances()
-            ## From here on out, if something goes wrong we will terminate all created instances.
         except: 
             e=sys.exc_info()[0]
             submission.logger.append("encountered error while initializing job {}.".format(e))
             submission.logger.write()
-            print("encountered initialization error: {}. shutting down.".format(e))
+            print("encountered initialization error: {}. shutting down job manager.".format(e))
             return exitcode
 
         try:
+            ## From here on out, if something goes wrong we will terminate all created instances.
+            instances=submission.acquire_instances()
             print('writing to log')
             submission.logger.write()
             print("starting up cost logging.")
@@ -681,7 +681,7 @@ def process_upload_dev(bucket_name, key,time):
             exitcode = 0
         except Exception as e:
             e=sys.exc_info()[0]
-            submission.logger.append("encountered error while setting up immutable analysis environments: {}. Shutting down instances.".format(e))
+            submission.logger.append("encountered error while setting up immutable analysis environments: {}. Shutting down job manager and instances.".format(e))
             submission.logger.write()
             [inst.terminate() for inst in instances]
             print("encountered setup error: {}. shutting down.".format(e))
