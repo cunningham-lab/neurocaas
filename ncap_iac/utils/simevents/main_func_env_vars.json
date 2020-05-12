@@ -1,13 +1,13 @@
 {
     "MainLambda":{
-        "AMI": "ami-0887103890d4198a1",
+        "AMI": "ami-061f98a1f90c0d6fd",
         "REGION": "us-east-1",
         "INSTANCE_TYPE": "t2.micro",
         "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
         "IAM_ROLE": "SSMRole",
         "KEY_NAME": "testkeystack-custom-dev-key-pair",
-        "WORKING_DIRECTORY":"~/bin",
-        "COMMAND":"cd /home/ec2-user; bin/run.sh \"{}\" \"{}\" \"{}\"",
+        "WORKING_DIRECTORY":"/home/ubuntu",
+        "COMMAND":"cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
         "SHUTDOWN_BEHAVIOR": "terminate",
         "CONFIG": "config.yaml",
         "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
