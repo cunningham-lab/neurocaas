@@ -32,6 +32,7 @@ jq --arg secgroup $secgroup '.Lambda.LambdaConfig.SECURITY_GROUPS = $secgroup' "
 # Also copy in testing materials: 
 cp ../utils/templates/exampledevsubmit.json "$ncaprootdir"/ncap_blueprints/"$1"/test_resources/exampledevsubmit.json
 cp ../utils/simevents/s3_putevent.json "$ncaprootdir"/ncap_blueprints/"$1"/test_resources/s3_putevent.json
+cp ../utils/simevents/main_func_env_vars.json "$ncaprootdir"/ncap_blueprints/"$1"/test_resources/main_func_env_vars.json
 cp ../utils/simevents/{cloudwatch_startevent.json,cloudwatch_termevent.json} "$ncaprootdir"/ncap_blueprints/"$1"/test_resources/
 cp ../utils/templates/{computereport_1234567.json,computereport_2345678.json} "$ncaprootdir"/ncap_blueprints/"$1"/test_resources/ 
 
