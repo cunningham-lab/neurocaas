@@ -29,6 +29,6 @@ sam package --s3-bucket ctnsampackages --output-template-file compiled_packaged.
 
 sam deploy --template-file compiled_packaged.yaml --stack-name $PIPENAME --capabilities CAPABILITY_NAMED_IAM
 
-aws s3 cp test_resources/computereport_1234567.json s3://$PIPENAME/logs/debug"$PIPENAME"/
-aws s3 cp test_resources/computereport_2345678.json s3://$PIPENAME/logs/debug"$PIPENAME"/
-aws s3 sync test_resources/ s3://$PIPENAME//test_resources
+aws s3 cp test_resources/computereport_1234567.json s3://$PIPENAME/logs/debug/
+aws s3 cp test_resources/computereport_2345678.json s3://$PIPENAME/logs/debug/
+#aws s3 sync test_resources/ s3://$PIPENAME//test_resources
