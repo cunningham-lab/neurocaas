@@ -24,22 +24,22 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web"
+        "arn:aws:s3:::neurocaasusertest"
       ],
       "Condition": {
         "StringEquals": {
           "s3:prefix": [
             "",
-            "debuggers/",
-            "debuggers/inputs",
-            "debuggers/results",
+            "othergroup/",
+            "othergroup/inputs",
+            "othergroup/results",
             "logs",
-            "debuggers/submissions",
-            "debuggers/configs",
-            "debuggers/inputs/",
-            "debuggers/results/",
-            "debuggers/submissions/",
-            "debuggers/configs/"
+            "othergroup/submissions",
+            "othergroup/configs",
+            "othergroup/inputs/",
+            "othergroup/results/",
+            "othergroup/submissions/",
+            "othergroup/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -52,15 +52,15 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web"
+        "arn:aws:s3:::neurocaasusertest"
       ],
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "debuggers/inputs/*",
-            "debuggers/results/*",
-            "debuggers/configs/*",
-            "debuggers/submissions/*"
+            "othergroup/inputs/*",
+            "othergroup/results/*",
+            "othergroup/configs/*",
+            "othergroup/submissions/*"
           ]
         }
       }
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/inputs/*",
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/configs/*",
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/submissions/*"
+        "arn:aws:s3:::neurocaasusertest/othergroup/inputs/*",
+        "arn:aws:s3:::neurocaasusertest/othergroup/configs/*",
+        "arn:aws:s3:::neurocaasusertest/othergroup/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/results/*",
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/configs/*"
+        "arn:aws:s3:::neurocaasusertest/othergroup/results/*",
+        "arn:aws:s3:::neurocaasusertest/othergroup/configs/*"
       ]
     }
   ]

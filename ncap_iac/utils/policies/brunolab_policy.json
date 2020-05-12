@@ -24,7 +24,7 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web"
+        "arn:aws:s3:::dlc-ncap-web"
       ],
       "Condition": {
         "StringEquals": {
@@ -52,7 +52,7 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web"
+        "arn:aws:s3:::dlc-ncap-web"
       ],
       "Condition": {
         "StringLike": {
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/brunolab/inputs/*",
-        "arn:aws:s3:::caiman-ncap-web/brunolab/configs/*",
-        "arn:aws:s3:::caiman-ncap-web/brunolab/submissions/*"
+        "arn:aws:s3:::dlc-ncap-web/brunolab/inputs/*",
+        "arn:aws:s3:::dlc-ncap-web/brunolab/configs/*",
+        "arn:aws:s3:::dlc-ncap-web/brunolab/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/brunolab/results/*",
-        "arn:aws:s3:::caiman-ncap-web/brunolab/configs/*"
+        "arn:aws:s3:::dlc-ncap-web/brunolab/results/*",
+        "arn:aws:s3:::dlc-ncap-web/brunolab/configs/*"
       ]
     }
   ]

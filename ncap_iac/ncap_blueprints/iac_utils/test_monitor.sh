@@ -18,7 +18,9 @@ PIPEDIR=$(get_abs_filename "$1")
 ## This can give us the stack name: 
 cd $PIPEDIR
 
+
+
 ## Test main lambda function
 aws s3 cp test_resources/i-1234567890abcdef0.json s3://epi-ncap-stable/logs/active/
-sam local invoke FigLambda --event test_resources/cloudwatch_startevent.json -n ../../utils/simevents/main_func_env_vars.json 
-sam local invoke FigLambda --event test_resources/cloudwatch_termevent.json -n ../../utils/simevents/main_func_env_vars.json 
+sam local invoke FigLambda --event test_resources/cloudwatch_startevent.json -n test_resources/main_func_env_vars.json 
+sam local invoke FigLambda --event test_resources/cloudwatch_termevent.json -n test_resources/main_func_env_vars.json 

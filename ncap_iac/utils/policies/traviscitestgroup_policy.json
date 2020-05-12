@@ -24,22 +24,22 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web"
+        "arn:aws:s3:::cianalysisstack"
       ],
       "Condition": {
         "StringEquals": {
           "s3:prefix": [
             "",
-            "debuggers/",
-            "debuggers/inputs",
-            "debuggers/results",
+            "traviscitestgroup/",
+            "traviscitestgroup/inputs",
+            "traviscitestgroup/results",
             "logs",
-            "debuggers/submissions",
-            "debuggers/configs",
-            "debuggers/inputs/",
-            "debuggers/results/",
-            "debuggers/submissions/",
-            "debuggers/configs/"
+            "traviscitestgroup/submissions",
+            "traviscitestgroup/configs",
+            "traviscitestgroup/inputs/",
+            "traviscitestgroup/results/",
+            "traviscitestgroup/submissions/",
+            "traviscitestgroup/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -52,15 +52,15 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web"
+        "arn:aws:s3:::cianalysisstack"
       ],
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "debuggers/inputs/*",
-            "debuggers/results/*",
-            "debuggers/configs/*",
-            "debuggers/submissions/*"
+            "traviscitestgroup/inputs/*",
+            "traviscitestgroup/results/*",
+            "traviscitestgroup/configs/*",
+            "traviscitestgroup/submissions/*"
           ]
         }
       }
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/inputs/*",
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/configs/*",
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/submissions/*"
+        "arn:aws:s3:::cianalysisstack/traviscitestgroup/inputs/*",
+        "arn:aws:s3:::cianalysisstack/traviscitestgroup/configs/*",
+        "arn:aws:s3:::cianalysisstack/traviscitestgroup/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/results/*",
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/configs/*"
+        "arn:aws:s3:::cianalysisstack/traviscitestgroup/results/*",
+        "arn:aws:s3:::cianalysisstack/traviscitestgroup/configs/*"
       ]
     }
   ]

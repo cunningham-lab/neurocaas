@@ -24,22 +24,22 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web"
+        "arn:aws:s3:::dlc-ncap-stable"
       ],
       "Condition": {
         "StringEquals": {
           "s3:prefix": [
             "",
-            "debuggers/",
-            "debuggers/inputs",
-            "debuggers/results",
+            "henlabdlcdevelop/",
+            "henlabdlcdevelop/inputs",
+            "henlabdlcdevelop/results",
             "logs",
-            "debuggers/submissions",
-            "debuggers/configs",
-            "debuggers/inputs/",
-            "debuggers/results/",
-            "debuggers/submissions/",
-            "debuggers/configs/"
+            "henlabdlcdevelop/submissions",
+            "henlabdlcdevelop/configs",
+            "henlabdlcdevelop/inputs/",
+            "henlabdlcdevelop/results/",
+            "henlabdlcdevelop/submissions/",
+            "henlabdlcdevelop/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -52,15 +52,15 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web"
+        "arn:aws:s3:::dlc-ncap-stable"
       ],
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "debuggers/inputs/*",
-            "debuggers/results/*",
-            "debuggers/configs/*",
-            "debuggers/submissions/*"
+            "henlabdlcdevelop/inputs/*",
+            "henlabdlcdevelop/results/*",
+            "henlabdlcdevelop/configs/*",
+            "henlabdlcdevelop/submissions/*"
           ]
         }
       }
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/inputs/*",
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/configs/*",
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/submissions/*"
+        "arn:aws:s3:::dlc-ncap-stable/henlabdlcdevelop/inputs/*",
+        "arn:aws:s3:::dlc-ncap-stable/henlabdlcdevelop/configs/*",
+        "arn:aws:s3:::dlc-ncap-stable/henlabdlcdevelop/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/results/*",
-        "arn:aws:s3:::locanmf-ncap-web/debuggers/configs/*"
+        "arn:aws:s3:::dlc-ncap-stable/henlabdlcdevelop/results/*",
+        "arn:aws:s3:::dlc-ncap-stable/henlabdlcdevelop/configs/*"
       ]
     }
   ]
