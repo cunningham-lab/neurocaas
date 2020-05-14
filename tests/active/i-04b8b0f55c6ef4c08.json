@@ -1,0 +1,11 @@
+{
+  "instance-id": "i-04b8b0f55c6ef4c08",
+  "instance-type": "t2.micro",
+  "spot": true,
+  "price": 0.006,
+  "databucket": "cianalysispermastack",
+  "datapath": "traviscipermagroup/inputs/dataset1.json",
+  "jobpath": "traviscipermagroup/results/job__cianalysispermastack_2020-05-14T20:57:59.677023",
+  "start": null,
+  "end": null
+}

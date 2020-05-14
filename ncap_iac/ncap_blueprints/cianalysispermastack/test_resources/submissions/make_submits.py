@@ -9,9 +9,9 @@ if __name__ == "__main__":
     input_succeeds = [True,True,True,False,False]
     ## Declare configs.
     configs = os.listdir("../configs")
-    configs.append("config_fake.json")
     print(configs)
     config_succeeds = [name != "config_broken.json" for name in configs]
+    configs.append("config_fake.json")
     config_succeeds.append(False)
 
     ## We will code these numerically and include a path to the s3 group. Include a success or failure code with each to indicate what the test result should be.   

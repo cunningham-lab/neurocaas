@@ -79,10 +79,10 @@ class Submission_dev():
         ## Create a logging object and write to it. 
         ## a logger for the submit area.  
         self.logger = utilsparams3.JobLogger_demo(self.bucket_name, self.jobpath)
-        msg = "Unique analysis version id: {}".format(os.environ['versionid'].split("\n")[0])
+        msg = "[Job Manager] Job submission detected. Unique analysis version id: {}".format(os.environ['versionid'].split("\n")[0])
         self.logger.append(msg)
         self.logger.printlatest()
-        msg = "Initializing analysis."
+        msg = "  [Internal (init)] Initializing job manager."
         self.logger.append(msg)
         self.logger.printlatest()
         self.logger.write()
@@ -91,7 +91,7 @@ class Submission_dev():
         try:
             self.instance_type = submit_file['instance_type'] # TODO default option from config
         except KeyError as ke: 
-            msg = "Using default instance type {} from config file".format(os.environ["INSTANCE_TYPE"])
+            msg = "  [Internal (init)] Using default instance type {} from config file.".format(os.environ["INSTANCE_TYPE"])
             self.instance_type = os.environ["INSTANCE_TYPE"]
             # Log this message 
             self.logger.append(msg)
@@ -99,7 +99,7 @@ class Submission_dev():
             self.logger.write()
 
         ## Check that we have a dataname field:
-        submit_errmsg = "INPUT ERROR: Submit file does not contain field {}, needed to analyze data."
+        submit_errmsg = "  [Internal (init)] INPUT ERROR: Submit file does not contain field {}, needed to analyze data."
         try: 
             self.data_name = submit_file['dataname'] # TODO validate extensions 
         except KeyError as ke:
@@ -122,14 +122,16 @@ class Submission_dev():
             ## Now raise an exception to halt processing, because this is a catastrophic error.  
             raise ValueError(os.environ["MISSING_CONFIG_ERROR"])
 
-        msg = "Analysis request detected with dataset(s): {}, config file {}. Reading analysis blueprint.".format(self.data_name,self.config_name)
+        msg = "  [Internal (init)] Analysis request with dataset(s): {}, config file {}".format(self.data_name,self.config_name)
         self.logger.append(msg)
         self.logger.printlatest()
         self.logger.write()
-        ########################## 
-        ## Check for the existence of the corresponding data and config in s3. 
-        ## Check that we have the actual data in the bucket.  
-        exists_errmsg = "INPUT ERROR: S3 Bucket does not contain {}"
+
+    def check_existence(self):
+        """
+        Check for the existence of the corresponding data and config in s3. 
+        """
+        exists_errmsg = "  [Internal (check_existence)] INPUT ERROR: S3 Bucket does not contain {}"
         if type(self.data_name) is str:
             check_data_exists = utilsparams3.exists(self.bucket_name,self.data_name)
         elif type(self.data_name) is list:
@@ -196,13 +198,13 @@ class Submission_dev():
         budget = float(os.environ["MAXCOST"])
 
         if cost < budget:
-            message = "Incurred cost so far: ${}. Remaining budget: ${}".format(cost,budget-cost)
+            message = "  [Internal (get_costmonitoring)] Incurred cost so far: ${}. Remaining budget: ${}".format(cost,budget-cost)
             self.logger.append(message)
             self.logger.printlatest()
             self.logger.write()
             validjob = True
         elif cost >= budget:
-            message = "Incurred cost so far: ${}. Over budget (${}), cancelling job. Contact administrator.".format(cost,budget)
+            message = "  [Internal (get_costmonitoring)] Incurred cost so far: ${}. Over budget (${}), cancelling job. Contact administrator.".format(cost,budget)
             self.logger.append(message)
             self.logger.printlatest()
             self.logger.write()
@@ -222,15 +224,21 @@ class Submission_dev():
 
         try:
             self.jobduration = passed_config["__duration__"]
+            self.logger.append("  [Internal (parse_config)] parameter __duration__ given: {}".format(self.jobduration))
+            self.logger.printlatest()
+            self.logger.write()
         except KeyError:
-            self.logger.append("parameter __duration__ not given, proceeding with standard compute launch.")
+            self.logger.append("  [Internal (parse_config)] parameter __duration__ not given, proceeding with standard compute launch.")
             self.logger.printlatest()
             self.logger.write()
             self.jobduration = None
         try:
             self.jobsize = passed_config["__dataset_size__"]
+            self.logger.append("  [Internal (parse_config)] parameter __dataset_size__ given: {}".format(self.jobsize))
+            self.logger.printlatest()
+            self.logger.write()
         except KeyError:
-            self.logger.append("parameter __dataset_size__ is not given, proceeding with standard compute launch." )
+            self.logger.append("  [Internal (parse_config)] parameter __dataset_size__ is not given, proceeding with standard storage." )
             self.logger.printlatest()
             self.logger.write()
             self.jobsize = None
@@ -248,7 +256,7 @@ class Submission_dev():
         if active +nb_instances < int(os.environ['DEPLOY_LIMIT']):
             pass
         else:
-            self.logger.append("RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NeuroCAAS admin")
+            self.logger.append("  [Internal (acquire_instances)] RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NeuroCAAS admin")
             self.logger.printlatest()
             self.logger.write()
             raise ValueError("Instance requests greater than pipeline bandwidth")
@@ -267,10 +275,10 @@ class Submission_dev():
         try:
             assert len(instances) > 0
         except AssertionError:
-            self.logger.append("instances not launched. AWS capacity reached. Please contact NeuroCAAS admin.")
+            self.logger.append("  [Internal (acquire_instances)] RESOURCE ERROR: Instances not launched. AWS capacity reached. Please contact NeuroCAAS admin.")
             self.logger.printlatest()
             self.logger.write()
-            raise
+            raise AssertionError
 
         self.instances = instances
         return instances
@@ -306,7 +314,7 @@ class Submission_dev():
             instances=self.instances,
             logger=[]#self.logger
         )
-        self.logger.append("Created {} immutable analysis environments".format(len(self.filenames)))
+        self.logger.append("  [Internal (start_instance)] Created {} immutable analysis environments".format(len(self.filenames)))
         self.logger.printlatest()
         self.logger.write()
 
@@ -315,7 +323,7 @@ class Submission_dev():
         try: 
             os.environ['COMMAND'].format("a","b","c","d")
         except IndexError as ie:
-            msg = "not enough arguments in the COMMAND argument."
+            msg = "  [Internal (process_inputs)] INPUT ERROR: not enough arguments in the COMMAND argument."
             self.logger.append(msg)
             self.logger.printlatest()
             self.logger.write()
@@ -339,10 +347,10 @@ class Submission_dev():
                 log_path=os.path.join(self.jobpath,'internal_ec2_logs')
                 )
             self.logger.initialize_datasets_dev(filename,self.instances[f].instance_id,response["Command"]["CommandId"])
-            self.logger.append("Starting analysis {} with parameter set {}".format(f+1,os.path.basename(filename)))
+            self.logger.append("  [Internal (process_inputs)] Starting analysis {} with parameter set {}".format(f+1,os.path.basename(filename)))
             self.logger.printlatest()
             self.logger.write()
-        self.logger.append("All jobs submitted. Processing...")
+        self.logger.append("  [Internal (process_inputs)] All jobs submitted. Processing...")
 
 
     ## Declare rules to monitor the states of these instances.  
@@ -632,87 +640,116 @@ def process_upload_dev(bucket_name, key,time):
     """
     exitcode = 99
 
-    ## Conditionals for different deploy configurations: 
-    ## First check if we are launching a new instance or starting an existing one. 
-    ## NOTE: IN LAMBDA,  JSON BOOLEANS ARE CONVERTED TO STRING
-    if os.environ['LAUNCH'] == 'true':
-        ## Now check how many datasets we have
-        submission = Submission_dev(bucket_name, key, time)
-    elif os.environ["LAUNCH"] == 'false':
-        raise NotImplementedError("This option not available for configs. ")
-    print("acquiring")
+    donemessage = "[Job Manager] {s}: DONE" 
+    awserrormessage = "[Job Manager] {s}: AWS ERROR. {e}. shutting down job manager"
+    internalerrormessage = "[Job Manager] {s}: INTERNAL ERROR. {e}. shutting down job manager"
 
-    valid = submission.get_costmonitoring()
+    
+    ## Step 1: Initialization. Most basic checking for submit file. If this fails, will not generate a certificate. 
+    step = "STEP 1/4 (Initialization)"
+    try:
+        if os.environ['LAUNCH'] == 'true':
+            ## Now check how many datasets we have
+            submission = Submission_dev(bucket_name, key, time)
+        elif os.environ["LAUNCH"] == 'false':
+            raise NotImplementedError("This option not available for configs. ")
+        submission.logger.append(donemessage.format(s = step))
+        submission.logger.printlatest()
+        submission.logger.write()
+    except ClientError as ce:
+        e = ce.response["Error"]
+        print(awserrormessage.format(s= step,e = e))
+        return exitcode
+    except Exception as e: 
+        print(internalerrormessage.format(s= step,e = e))
+        return exitcode
 
-    if valid:
-        try:
-            submission.parse_config()
-            print("computing volumesize")
-            submission.compute_volumesize()
-            print("writing to log")
-            submission.logger.write()
-        except ClientError as ce:
-            e = ce.response["Error"]
-            submission.logger.append("encountered error while initializing job {}.".format(e))
-            submission.logger.write()
-            print("encountered initialization error: {}. shutting down job manager.".format(e))
-            return exitcode
-        except: 
-            e=sys.exc_info()[0]
-            submission.logger.append("encountered error while initializing job {}.".format(e))
-            submission.logger.write()
-            print("encountered initialization error: {}. shutting down job manager.".format(e))
-            return exitcode
+    ## Step 2: Validation. If we the data does not exist, or we are over cost limit, this will fail.
+    step = "STEP 2/4 (Validation)"
+    try:
+        submission.check_existence()
+        valid = submission.get_costmonitoring()
+        assert valid
+        submission.logger.append(donemessage.format(s = step))
+        submission.logger.printlatest()
+        submission.logger.write()
+    except AssertionError as e:
+        e = "Error: Job is not covered by budget. Contact NeuroCAAS administrator."
+        submission.logger.append(internalerrormessage.format(s= step,e = e))
+        submission.logger.printlatest()
+        submission.logger.write()
+        return exitcode
+    except ClientError as ce:
+        e = ce.response["Error"]
+        submission.logger.append(awserrormessage.format(s = step,e = e))
+        submission.logger.printlatest()
+        submission.logger.write()
+        return exitcode
+    except Exception as e: 
+        e=sys.exc_info()[0]
+        submission.logger.append(internalerrormessage.format(s = step,e = e))
+        submission.logger.printlatest()
+        submission.logger.write()
+        return exitcode
 
-        try:
-            ## From here on out, if something goes wrong we will terminate all created instances.
-            instances=submission.acquire_instances()
-            print('writing to log')
-            submission.logger.printlatest()
-            submission.logger.write()
-            print("starting up cost logging.")
-            jobs = submission.log_jobs()
-            print("logging")
-            submission.logger.printlatest()
-            submission.logger.write()
-            ## NOTE: IN LAMBDA,  JSON BOOLEANS ARE CONVERTED TO STRING
-            if os.environ["MONITOR"] == "true":
-                print('setting up monitor')
-                submission.put_instance_monitor_rule()
-            elif os.environ["MONITOR"] == "false":
-                print("skipping monitor")
-            print('writing to log')
-            submission.logger.printlatest()
-            submission.logger.write()
-            print('starting instances')
-            submission.start_instance()
-            print('writing to log')
-            submission.logger.printlatest()
-            submission.logger.write()
-            print('sending jobs')
-            submission.process_inputs()
-            print("writing to log")
-            submission.logger.printlatest()
-            submission.logger.write()
-            ## should be a success at this point. 
-            exitcode = 0
-        except ClientError as ce:
-            e = ce.response["Error"]
-            submission.logger.append("encountered error while setting up immutable analysis environments: {}. Shutting down job manager and instances.".format(e))
-            submission.logger.write()
-            [utilsparams3.delete_active_monitorlog(submission.bucket_name,inst.id) for inst in instances]
-            [inst.terminate() for inst in instances]
-            print("encountered setup error: {}. shutting down.".format(e))
+    # Step 3: Setup: Getting the volumesize, hardware specs of immutable analysis environments. 
+    step = "STEP 3/4 (Environment Setup)"
+    try:
+        submission.parse_config()
+        submission.compute_volumesize()
+        submission.logger.append(donemessage.format(s = step))
+        submission.logger.printlatest()
+        submission.logger.write()
+    except ClientError as ce:
+        e = ce.response["Error"]
+        submission.logger.append(awserrormessage.format(s = step,e = e))
+        submission.logger.printlatest()
+        submission.logger.write()
+        return exitcode
+    except: 
+        e=sys.exc_info()[0]
+        submission.logger.append(internalerrormessage.format(s = step,e = e))
+        submission.logger.printlatest()
+        submission.logger.write()
+        return exitcode
+    
+    # Step 4: Processing: Creating the immutable analysis environments, sending the commands to them. 
+    step = "STEP 4/4 (Initialize Processing)"
+    try:
+        ## From here on out, if something goes wrong we will terminate all created instances.
+        instances=submission.acquire_instances()
+        submission.logger.printlatest()
+        submission.logger.write()
+        jobs = submission.log_jobs()
+        submission.logger.printlatest()
+        submission.logger.write()
+        ## NOTE: IN LAMBDA,  JSON BOOLEANS ARE CONVERTED TO STRING
+        if os.environ["MONITOR"] == "true":
+            submission.put_instance_monitor_rule()
+        elif os.environ["MONITOR"] == "false":
+            submission.append("  [Internal (monitoring)] Skipping monitor")
+        submission.logger.write()
+        submission.start_instance()
+        submission.logger.write()
+        submission.process_inputs()
+        submission.logger.append(donemessage.format(s = step))
+        submission.logger.printlatest()
+        submission.logger.write()
+        ## should be a success at this point. 
+        exitcode = 0
+    except ClientError as ce:
+        e = ce.response["Error"]
+        [utilsparams3.delete_active_monitorlog(submission.bucket_name,"{}.json".format(inst.id)) for inst in instances]
+        [inst.terminate() for inst in instances]
+        submission.logger.append(awserrormessage.format(s = step,e = e))
+        submission.logger.printlatest()
+        submission.logger.write()
+    except Exception as e:
+        [inst.terminate() for inst in instances]
+        submission.logger.append(internalerrormessage.format(s = step,e = e))
+        submission.logger.printlatest()
+        submission.logger.write()
 
-        except Exception as e:
-            submission.logger.append("encountered error while setting up immutable analysis environments: {}. Shutting down job manager and instances.".format(e))
-            submission.logger.printlatest()
-            submission.logger.write()
-            [inst.terminate() for inst in instances]
-            print("encountered setup error: {}. shutting down.".format(e))
-
-    else:
-        pass
     return exitcode
 
 ## New 2/11: for disjoint data and upload buckets. 
