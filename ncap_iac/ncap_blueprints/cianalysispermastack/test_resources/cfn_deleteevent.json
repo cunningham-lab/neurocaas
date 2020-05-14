@@ -1,0 +1,14 @@
+{
+  "RequestType": "Delete",
+  "ResponseURL": "https://cloudformation-custom-resource-response-useast1.s3.amazonaws.com/arn%3Aaws%3Acloudformation%3Aus-east-1%3A739988523141%3Astack/cianalysispermastack/d5b74220-952f-11ea-ac4b-0aa554d91bcc%7CDeleteCustomResource%7C44acc938-b0fc-4e64-a356-cb7a5b720dcd?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20200513T154609Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7199&X-Amz-Credential=AKIA6L7Q4OWTTDPGOFMG%2F20200513%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=21e3d7dfd8aa723b0c894c9d8a4cc7f74e230b4c5ce7625ede86054f67920675",
+  "StackId": "arn:aws:cloudformation:us-east-1:123456789012:stack/MyStack/guid",
+  "RequestId": "unique id for this create request",
+  "ResourceType": "Custom::TestResource",
+  "LogicalResourceId": "MyTestResource",
+  "ResourceProperties": {
+    "StackName": "cianalysispermastack",
+    "BucketName": "cicustomresourcetestbucket",
+    "Path": "",
+    "DirName": "testmakedir"
+  }
+}

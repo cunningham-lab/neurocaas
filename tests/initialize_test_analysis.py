@@ -38,6 +38,8 @@ if __name__ == "__main__":
     envdict["MainLambda"]["REGION"] = d["REGION"]
     envdict["MainLambda"]["INSTANCE_TYPE"] = d["Lambda"]["LambdaConfig"]["INSTANCE_TYPE"]
     envdict["MainLambda"]["COMMAND"] = d["Lambda"]["LambdaConfig"]["COMMAND"]
+    envdict["FigLambda"]["BUCKET_NAME"] = d["PipelineName"]
+    envdict["FigLambda"]["REGION"] = d["Lambda"]["LambdaConfig"]["REGION"] 
 
     with open(os.path.join(dirname,"test_resources","main_func_env_vars.json"),"w") as env:
         json.dump(envdict,env,indent=4)

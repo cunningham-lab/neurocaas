@@ -1,6 +1,8 @@
 language: python
 python:
 - 3.6
+
+cache: pip
 env:
   global:
   - userdirname="ciuserstack"
@@ -28,10 +30,9 @@ jobs:
     - sudo apt-get install jq
     script:
     - echo $(aws configure list)
-    - bash tests/test_deploy.sh
+    - bash tests/test_permastack.sh
     after_script:
-    - bash tests/test_cleanup.sh
-
+      #- bash tests/test_cleanup.sh
     - bash <(curl -s https://codecov.io/bash)
       #    - AWS_ACCESS_KEY_ID=$ACCESS_KEY_USER
       #    - AWS_SECRET_ACCESS_KEY=$SECRET_KEY_USER

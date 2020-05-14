@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import traceback
+from botocore.exceptions import ClientError
 import re
 from datetime import datetime
 
@@ -78,8 +79,12 @@ class Submission_dev():
         ## Create a logging object and write to it. 
         ## a logger for the submit area.  
         self.logger = utilsparams3.JobLogger_demo(self.bucket_name, self.jobpath)
-        self.logger.append("Unique analysis version id: {}".format(os.environ['versionid'].split("\n")[0]))
-        self.logger.append("Initializing analysis.")
+        msg = "Unique analysis version id: {}".format(os.environ['versionid'].split("\n")[0])
+        self.logger.append(msg)
+        self.logger.printlatest()
+        msg = "Initializing analysis."
+        self.logger.append(msg)
+        self.logger.printlatest()
         self.logger.write()
         ########################
         ## Now parse the rest of the file. 
@@ -90,6 +95,7 @@ class Submission_dev():
             self.instance_type = os.environ["INSTANCE_TYPE"]
             # Log this message 
             self.logger.append(msg)
+            self.logger.printlatest()
             self.logger.write()
 
         ## Check that we have a dataname field:
@@ -98,9 +104,9 @@ class Submission_dev():
             self.data_name = submit_file['dataname'] # TODO validate extensions 
         except KeyError as ke:
 
-            print(submit_errmsg.format(ke))
             ## Write to logger
             self.logger.append(submit_errmsg.format(ke))
+            self.logger.printlatest()
             self.logger.write()
             ## Now raise an exception to halt processing, because this is a catastrophic error.  
             raise ValueError("Missing data name to analyze")
@@ -109,15 +115,16 @@ class Submission_dev():
             self.config_name = submit_file["configname"] 
             self.logger.assign_config(self.config_name)
         except KeyError as ke:
-            print(submit_errmsg.format(ke))
             ## Write to logger
             self.logger.append(submit_errmsg.format(ke))
+            self.logger.printlatest()
             self.logger.write()
             ## Now raise an exception to halt processing, because this is a catastrophic error.  
             raise ValueError(os.environ["MISSING_CONFIG_ERROR"])
 
-        self.logger.append("Analysis request detected with dataset(s): {}, config file {}. Reading analysis blueprint.".format(self.data_name,self.config_name))
-
+        msg = "Analysis request detected with dataset(s): {}, config file {}. Reading analysis blueprint.".format(self.data_name,self.config_name)
+        self.logger.append(msg)
+        self.logger.printlatest()
         self.logger.write()
         ########################## 
         ## Check for the existence of the corresponding data and config in s3. 
@@ -133,11 +140,13 @@ class Submission_dev():
         if not check_data_exists: 
             msg = exists_errmsg.format(self.data_name)
             self.logger.append(msg)
+            self.logger.printlatest()
             self.logger.write()
             raise ValueError("dataname given does not exist in bucket.")
         elif not utilsparams3.exists(self.bucket_name,self.config_name): 
             msg = exists_errmsg.format(self.config_name)
             self.logger.append(msg)
+            self.logger.printlatest()
             self.logger.write()
             raise ValueError("configname given does not exist in bucket.")
         ###########################
@@ -189,11 +198,13 @@ class Submission_dev():
         if cost < budget:
             message = "Incurred cost so far: ${}. Remaining budget: ${}".format(cost,budget-cost)
             self.logger.append(message)
+            self.logger.printlatest()
             self.logger.write()
             validjob = True
         elif cost >= budget:
             message = "Incurred cost so far: ${}. Over budget (${}), cancelling job. Contact administrator.".format(cost,budget)
             self.logger.append(message)
+            self.logger.printlatest()
             self.logger.write()
             validjob = False
         return validjob
@@ -213,12 +224,14 @@ class Submission_dev():
             self.jobduration = passed_config["__duration__"]
         except KeyError:
             self.logger.append("parameter __duration__ not given, proceeding with standard compute launch.")
+            self.logger.printlatest()
             self.logger.write()
             self.jobduration = None
         try:
             self.jobsize = passed_config["__dataset_size__"]
         except KeyError:
             self.logger.append("parameter __dataset_size__ is not given, proceeding with standard compute launch." )
+            self.logger.printlatest()
             self.logger.write()
             self.jobsize = None
 
@@ -236,6 +249,8 @@ class Submission_dev():
             pass
         else:
             self.logger.append("RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NeuroCAAS admin")
+            self.logger.printlatest()
+            self.logger.write()
             raise ValueError("Instance requests greater than pipeline bandwidth")
         
 
@@ -252,7 +267,9 @@ class Submission_dev():
         try:
             assert len(instances) > 0
         except AssertionError:
-            logger.append("instances not launched. AWS capacity reached. Please contact NeuroCAAS admin.")
+            self.logger.append("instances not launched. AWS capacity reached. Please contact NeuroCAAS admin.")
+            self.logger.printlatest()
+            self.logger.write()
             raise
 
         self.instances = instances
@@ -290,18 +307,17 @@ class Submission_dev():
             logger=[]#self.logger
         )
         self.logger.append("Created {} immutable analysis environments".format(len(self.filenames)))
+        self.logger.printlatest()
+        self.logger.write()
 
     def process_inputs(self):
         """ Initiates Processing On Previously Acquired EC2 Instance. This version requires that you include a config (fourth) argument """
-        print(self.bucket_name,'bucket name')
-        print(self.filenames,'filenames')
-        print(os.environ['OUTDIR'],'outdir')
-        print(os.environ['COMMAND'],'command')
         try: 
             os.environ['COMMAND'].format("a","b","c","d")
         except IndexError as ie:
             msg = "not enough arguments in the COMMAND argument."
             self.logger.append(msg)
+            self.logger.printlatest()
             self.logger.write()
             raise ValueError("Not the correct format for arguments.")
      
@@ -309,17 +325,6 @@ class Submission_dev():
         ## Should we vectorize the log here? 
         outpath_full = os.path.join(os.environ['OUTDIR'],self.jobname)
 
-        #[self.logger.append("Starting analysis with parameter set {}, dataset {}".format(
-        #    f+1,
-        #    filename
-        #    )
-        #) for f,filename in enumerate(self.filenames)]
-        #[self.logger.append("Starting analysis with parameter set {}: {}".format(
-        #    f+1,
-        #    os.environ['COMMAND'].format(
-        #        self.bucket_name, filename, outpath_full, self.config_name
-        #    )
-        #)) for f,filename in enumerate(self.filenames)]
         print([os.environ['COMMAND'].format(
               self.bucket_name, filename, outpath_full, self.config_name
               ) for filename in self.filenames],"command send")
@@ -335,6 +340,7 @@ class Submission_dev():
                 )
             self.logger.initialize_datasets_dev(filename,self.instances[f].instance_id,response["Command"]["CommandId"])
             self.logger.append("Starting analysis {} with parameter set {}".format(f+1,os.path.basename(filename)))
+            self.logger.printlatest()
             self.logger.write()
         self.logger.append("All jobs submitted. Processing...")
 
@@ -645,6 +651,12 @@ def process_upload_dev(bucket_name, key,time):
             submission.compute_volumesize()
             print("writing to log")
             submission.logger.write()
+        except ClientError as ce:
+            e = ce.response["Error"]
+            submission.logger.append("encountered error while initializing job {}.".format(e))
+            submission.logger.write()
+            print("encountered initialization error: {}. shutting down job manager.".format(e))
+            return exitcode
         except: 
             e=sys.exc_info()[0]
             submission.logger.append("encountered error while initializing job {}.".format(e))
@@ -656,10 +668,12 @@ def process_upload_dev(bucket_name, key,time):
             ## From here on out, if something goes wrong we will terminate all created instances.
             instances=submission.acquire_instances()
             print('writing to log')
+            submission.logger.printlatest()
             submission.logger.write()
             print("starting up cost logging.")
-            submission.log_jobs()
+            jobs = submission.log_jobs()
             print("logging")
+            submission.logger.printlatest()
             submission.logger.write()
             ## NOTE: IN LAMBDA,  JSON BOOLEANS ARE CONVERTED TO STRING
             if os.environ["MONITOR"] == "true":
@@ -668,20 +682,31 @@ def process_upload_dev(bucket_name, key,time):
             elif os.environ["MONITOR"] == "false":
                 print("skipping monitor")
             print('writing to log')
+            submission.logger.printlatest()
             submission.logger.write()
             print('starting instances')
             submission.start_instance()
             print('writing to log')
+            submission.logger.printlatest()
             submission.logger.write()
             print('sending jobs')
             submission.process_inputs()
             print("writing to log")
+            submission.logger.printlatest()
             submission.logger.write()
             ## should be a success at this point. 
             exitcode = 0
-        except Exception as e:
-            e=sys.exc_info()[0]
+        except ClientError as ce:
+            e = ce.response["Error"]
             submission.logger.append("encountered error while setting up immutable analysis environments: {}. Shutting down job manager and instances.".format(e))
+            submission.logger.write()
+            [utilsparams3.delete_active_monitorlog(submission.bucket_name,"{}.json".format(inst.id)) for inst in instances]
+            [inst.terminate() for inst in instances]
+            print("encountered setup error: {}. shutting down.".format(e))
+
+        except Exception as e:
+            submission.logger.append("encountered error while setting up immutable analysis environments: {}. Shutting down job manager and instances.".format(e))
+            submission.logger.printlatest()
             submission.logger.write()
             [inst.terminate() for inst in instances]
             print("encountered setup error: {}. shutting down.".format(e))
@@ -756,6 +781,4 @@ def handler_deploy(event,context):
         time = record['eventTime']
         bucket_name = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
-        print("handler_params",bucket_name,key,time)
-        print(event,context,'event, context')
         process_upload_deploy(bucket_name, key, time);
