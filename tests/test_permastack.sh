@@ -14,7 +14,7 @@ python $rootpath/tests/initialize_test_resources.py "$analysisdirname" "$testgro
 
 python $rootpath/tests/initialize_test_submit.py "$analysisdirname" "$testgroupid"
 statusbuild=$(bash iac_utils/build.sh $analysisdirname)
-statustest=$(bash iac_utils/test_main.sh $analysisdirname)
+statustest=$(bash iac_utils/test_main_multievent.sh $analysisdirname "condition_2_2_s3_putevent.json")
 #newtest=$(bash iac_utils/test_monitor.sh $analysisdirname)
 
 if [ $statustest -eq 0 ]
