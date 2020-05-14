@@ -12,9 +12,9 @@
         "CONFIG": "config.yaml",
         "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
         "EXECUTION_TIMEOUT": 360,
-        "cwrolearn": "arn:aws:iam::739988523141:role/caiman-ncap-CloudWatchBusRole-1RUXFZTS0DOK0",
-        "figlambarn": "arn:aws:lambda:us-east-1:739988523141:function:caiman-ncap-FigLambda-PHVQWETPZ0IY",
-        "figlambid": "caiman-ncap-FigLambda-PHVQWETPZ0IY"
+        "cwrolearn": "arn:aws:iam::739988523141:role/cianalysispermastack-CloudWatchBusRole-17NQYYWHU41PX",
+        "figlambarn": "arn:aws:lambda:us-east-1:739988523141:function:cianalysispermastack-FigLambda-WAJE7D03XDRC",
+        "figlambid": "cianalysispermastack-FigLambda-WAJE7D03XDRC"
     },
     "FigLambda": {
         "BUCKET_NAME": "cianalysispermastack",
