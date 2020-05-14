@@ -15,7 +15,7 @@ python $rootpath/tests/initialize_test_resources.py "$analysisdirname" "$testgro
 python $rootpath/tests/initialize_test_submit.py "$analysisdirname" "$testgroupid"
 statusbuild=$(bash iac_utils/build.sh $analysisdirname)
 buildcode=$?
-statustest=$(bash iac_utils/test_main_multievent.sh $analysisdirname "condition_1_1_s3_putevent.json")
+statustest=$(bash iac_utils/test_main_multievent.sh "$analysisdirname" "$eventfile")
 testcode=$?
 #newtest=$(bash iac_utils/test_monitor.sh $analysisdirname)
 echo "start line: the statustest code is: $testcode .this is from outside the statustest"
