@@ -213,7 +213,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '7d16cc7f207f956d0907389c93f3f601efd30295
+          versionid: 'f01a91922b266066c6f7dbdd747b7ff0bb556110
 
             '
       Events:
@@ -295,7 +295,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '7d16cc7f207f956d0907389c93f3f601efd30295
+          versionid: 'f01a91922b266066c6f7dbdd747b7ff0bb556110
 
             '
       Handler: helper.handler_deldir
@@ -371,7 +371,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '7d16cc7f207f956d0907389c93f3f601efd30295
+          versionid: 'f01a91922b266066c6f7dbdd747b7ff0bb556110
 
             '
       Handler: helper.handler_mkdir
