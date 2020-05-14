@@ -26,8 +26,8 @@ exitcode=$(sam local invoke MainLambda --event $testpath -n test_resources/main_
 
 expectedcode=$(jq .code $testpath)
 
-echo $exitcode 
-echo $expectedcode
+echo $exitcode "exitcode in multievent"
+echo $expectedcode "expectedcode in multievent"
 
 if [ $exitcode -eq $expectedcode ]
 then
