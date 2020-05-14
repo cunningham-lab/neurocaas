@@ -635,14 +635,27 @@ def process_upload_dev(bucket_name, key,time):
     ## Conditionals for different deploy configurations: 
     ## First check if we are launching a new instance or starting an existing one. 
     ## NOTE: IN LAMBDA,  JSON BOOLEANS ARE CONVERTED TO STRING
-    if os.environ['LAUNCH'] == 'true':
-        ## Now check how many datasets we have
-        submission = Submission_dev(bucket_name, key, time)
-    elif os.environ["LAUNCH"] == 'false':
-        raise NotImplementedError("This option not available for configs. ")
-    print("acquiring")
+    try:
+        if os.environ['LAUNCH'] == 'true':
+            ## Now check how many datasets we have
+            submission = Submission_dev(bucket_name, key, time)
+        elif os.environ["LAUNCH"] == 'false':
+            raise NotImplementedError("This option not available for configs. ")
+        print("acquiring")
 
-    valid = submission.get_costmonitoring()
+        valid = submission.get_costmonitoring()
+    except ClientError as ce:
+        e = ce.response["Error"]
+        submission.logger.append("encountered error while initializing job {}.".format(e))
+        submission.logger.write()
+        print("encountered initialization error: {}. shutting down job manager.".format(e))
+        return exitcode
+    except: 
+        e=sys.exc_info()[0]
+        submission.logger.append("encountered error while initializing job {}.".format(e))
+        submission.logger.write()
+        print("encountered initialization error: {}. shutting down job manager.".format(e))
+        return exitcode
 
     if valid:
         try:
