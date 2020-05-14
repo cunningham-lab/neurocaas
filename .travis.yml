@@ -7,8 +7,6 @@ env:
   matrix:
   - eventfile="condition_0_0_s3_putevent.json"
   - eventfile="condition_0_1_s3_putevent.json"
-  - eventfile="condition_0_2_s3_putevent.json"
-  - eventfile="condition_1_2_s3_putevent.json"
   global:
   - userdirname="ciuserstack"
   - analysisdirname="cianalysisstack"
@@ -35,14 +33,15 @@ before_script:
 - sudo apt-get install jq
 script:
 - bash tests/test_permastack.sh $eventfile
-after_script:
-  #- bash tests/test_cleanup.sh
-- bash <(curl -s https://codecov.io/bash)
-  #    - AWS_ACCESS_KEY_ID=$ACCESS_KEY_USER
-  #    - AWS_SECRET_ACCESS_KEY=$SECRET_KEY_USER
-  #    - echo $(aws configure list)
-after_success: "wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz
-  &&\ntar xzf master.tar.gz &&\ncd kcov-master &&\nmkdir build &&\ncd build &&\ncmake
-  .. &&\nmake &&\nsudo make install &&\ncd ../.. &&\nrm -rf kcov-master &&\nmkdir
-  -p coverage &&\nkcov coverage script.sh &&\nbash <(curl -s https://codecov.io/bash)
-  \n"
+## After script to get code coverage. 
+  #after_script:
+  #  #- bash tests/test_cleanup.sh
+  #- bash <(curl -s https://codecov.io/bash)
+  #  #    - AWS_ACCESS_KEY_ID=$ACCESS_KEY_USER
+  #  #    - AWS_SECRET_ACCESS_KEY=$SECRET_KEY_USER
+  #  #    - echo $(aws configure list)
+  #after_success: "wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz
+  #  &&\ntar xzf master.tar.gz &&\ncd kcov-master &&\nmkdir build &&\ncd build &&\ncmake
+  #  .. &&\nmake &&\nsudo make install &&\ncd ../.. &&\nrm -rf kcov-master &&\nmkdir
+  #  -p coverage &&\nkcov coverage script.sh &&\nbash <(curl -s https://codecov.io/bash)
+  #  \n"
