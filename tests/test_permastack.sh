@@ -14,15 +14,17 @@ python $rootpath/tests/initialize_test_resources.py "$analysisdirname" "$testgro
 
 python $rootpath/tests/initialize_test_submit.py "$analysisdirname" "$testgroupid"
 statusbuild=$(bash iac_utils/build.sh $analysisdirname)
-ls iac_utils
-statustest=$(bash iac_utils/test_main_multievent.sh $analysisdirname "condition_2_2_s3_putevent.json")
+buildcode=$?
+statustest=$(bash iac_utils/test_main_multievent.sh $analysisdirname "condition_1_1_s3_putevent.json")
+testcode=$?
 #newtest=$(bash iac_utils/test_monitor.sh $analysisdirname)
+echo "start line: the statustest code is: $testcode .this is from outside the statustest"
 
-if [ $statustest -eq 0 ]
+if [ $testcode -eq 0 ]
 then
     code=0
 else
-    echo $statustest
+    echo $testcode
     code=99
 fi
 echo $code
