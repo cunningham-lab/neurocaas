@@ -4,6 +4,9 @@ python:
 
 cache: pip
 env:
+  matrix:
+  - eventfile="condition_0_0_s3_putevent.json"
+  - eventfile="condition_0_1_s3_putevent.json"
   global:
   - userdirname="ciuserstack"
   - analysisdirname="cianalysisstack"
@@ -24,9 +27,6 @@ addons:
 jobs:
   include:
   - stage: test
-    env:
-    - eventfile="condition_0_0_s3_putevent.json"
-    - eventfile="condition_0_1_s3_putevent.json"
     install:
     - pip install -r requirements.txt
     - pip install aws-sam-cli
