@@ -7,3 +7,9 @@ For AWS RESOURCE tests: we need to use the unittest.mock module. I have made a t
 More thoughts: 
 - eventually, we should move up the tests into the global testim module where the travis tests are stored, unless it's a real pain to move them based on package structure/import paths. 
 - this is an exciting path going forwards- writing these tests should be one thing you do more going forwards now that the most annoying aspects are figured out.  
+
+Links: 
+# stubber: 
+https://botocore.amazonaws.com/v1/documentation/api/latest/reference/stubber.html
+# mocks:
+https://docs.python.org/3/library/unittest.mock.html#unittest.mock.patch

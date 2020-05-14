@@ -1,0 +1,14 @@
+{
+  "RequestType": "Create",
+  "ResponseURL": "https://cloudformation-custom-resource-response-useast1.s3.amazonaws.com/arn%3Aaws%3Acloudformation%3Aus-east-1%3A739988523141%3Astack/cianalysispermastack/d5b74220-952f-11ea-ac4b-0aa554d91bcc%7CLogFolderactive%7C20646d81-b202-49e5-86a9-f2a0c0389bd6?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20200513T154608Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIA6L7Q4OWTTDPGOFMG%2F20200513%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=11a4fe2030e0a6a463b0b8e5dd8b783758e5ce5093c00190b6a1030e26277097",
+  "StackId": "arn:aws:cloudformation:us-east-1:123456789012:stack/MyStack/guid",
+  "RequestId": "unique id for this create request",
+  "ResourceType": "Custom::TestResource",
+  "LogicalResourceId": "MyTestResource",
+  "ResourceProperties": {
+    "StackName": "cianalysispermastack",
+    "BucketName": "cicustomresourcetestbucket",
+    "Path": "",
+    "DirName": "testmakedir/"
+  }
+}
