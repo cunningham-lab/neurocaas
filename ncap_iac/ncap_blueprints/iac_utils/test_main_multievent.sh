@@ -1,4 +1,5 @@
 #!/bin/bash
+## Note this file is for internal testing of lambda functions, and references main_func_env_vars, a CtN AWS account specific resource. 
 ### Script that automates the testing of submission lambda functions 
 set -e
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -18,10 +19,19 @@ PIPEDIR=$(get_abs_filename "$1")
 ## This can give us the stack name: 
 cd $PIPEDIR
 
-stackname=$(jq .PipelineName stack_config_template.json | sed 's/"//g')
+testpath="$PIPEDIR/test_resources/putevents/$2"
 
 ## Test main lambda function
-aws s3 cp test_resources/i-1234567890abcdef0.json s3://"$stackname"/logs/active/
+exitcode=$(sam local invoke MainLambda --event $testpath -n test_resources/main_func_env_vars.json)
 
-sam local invoke FigLambda --template .aws-sam/build/template.yaml --event test_resources/cloudwatch_startevent.json -n test_resources/main_func_env_vars.json 
-sam local invoke FigLambda --template .aws-sam/build/template.yaml --event test_resources/cloudwatch_termevent.json -n test_resources/main_func_env_vars.json 
+expectedcode=$(jq .code $testpath)
+
+echo $exitcode 
+echo $expectedcode
+
+if [ $exitcode -eq $expectedcode ]
+then
+    exit 0
+else 
+    exit 99
+fi
