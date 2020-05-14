@@ -7,6 +7,8 @@ env:
   matrix:
   - eventfile="condition_0_0_s3_putevent.json"
   - eventfile="condition_0_1_s3_putevent.json"
+  - eventfile="condition_0_2_s3_putevent.json"
+  - eventfile="condition_1_2_s3_putevent.json"
   global:
   - userdirname="ciuserstack"
   - analysisdirname="cianalysisstack"
