@@ -67,7 +67,7 @@ class Submission_dev():
             ## KEY: Now set up logging in the input folder too: 
         except KeyError as ke:
             ## Now raise an exception to halt processing, because this is a catastrophic error.  
-            raise ValueError("Missing timestamp when data was uploaded.")
+            raise ValueError("[JOB TERMINATE REASON] 'timestamp' field not given in submit.json file.")
 
         ## Initialize s3 directory for this job. 
         self.jobname = "job_{}_{}_{}".format(submit_name,bucket_name,self.timestamp)
@@ -114,7 +114,7 @@ class Submission_dev():
             self.logger.printlatest()
             self.logger.write()
             ## Now raise an exception to halt processing, because this is a catastrophic error.  
-            raise ValueError("Missing data name to analyze")
+            raise ValueError("[JOB TERMINATE REASON] 'dataname' field not given in submit.json file")
 
         try:
             self.config_name = submit_file["configname"] 
@@ -125,7 +125,7 @@ class Submission_dev():
             self.logger.printlatest()
             self.logger.write()
             ## Now raise an exception to halt processing, because this is a catastrophic error.  
-            raise ValueError(os.environ["MISSING_CONFIG_ERROR"])
+            raise ValueError("[JOB TERMINATE REASON] 'configname' field not given in submit.json file")
 
         msg = "        [Internal (init)] Analysis request with dataset(s): {}, config file {}".format(self.data_name,self.config_name)
         self.logger.append(msg)
@@ -142,20 +142,20 @@ class Submission_dev():
         elif type(self.data_name) is list:
             check_data_exists = all([utilsparams3.exists(self.bucket_name,name) for name in self.data_name])
         else:
-            raise TypeError("dataname should be string or list.")
+            raise TypeError("[JOB TERMINATE REASON] 'dataname' field is not the right type. Should be string or list.")
 
         if not check_data_exists: 
             msg = exists_errmsg.format(self.data_name)
             self.logger.append(msg)
             self.logger.printlatest()
             self.logger.write()
-            raise ValueError("dataname given does not exist in bucket.")
+            raise ValueError("[JOB TERMINATE REASON] 'dataname' field refers to data that cannot be found. Be sure this is a full path to the data, without the bucket name.")
         elif not utilsparams3.exists(self.bucket_name,self.config_name): 
             msg = exists_errmsg.format(self.config_name)
             self.logger.append(msg)
             self.logger.printlatest()
             self.logger.write()
-            raise ValueError("configname given does not exist in bucket.")
+            raise ValueError("[JOB TERMINATE REASON] 'configname' field refers to a configuration file that cannot be found. Be sure this is a fill path to the data, without the bucket name.")
         ###########################
 
         ## Now get the actual paths to relevant data from the foldername: 
@@ -163,7 +163,7 @@ class Submission_dev():
             self.filenames = utilsparams3.extract_files(self.bucket_name,self.data_name,ext = None) 
         elif type(self.data_name) is list:
             self.filenames = self.data_name
-        assert len(self.filenames) > 0, "we must have data to analyze."
+        assert len(self.filenames) > 0, "[JOB TERMINATE REASON] The folder indicated is empty, or does not contain analyzable data."
 
     def get_costmonitoring(self):
         """
@@ -172,7 +172,7 @@ class Submission_dev():
         """
         ## first get the path to the log folder we should be looking at. 
         group_name = self.path
-        assert len(group_name) > 0; "group_name must exist."
+        assert len(group_name) > 0; "[JOB TERMINATE REASON] Can't locate the group that triggered analysis, making it impossible to determine incurred cost."
         logfolder_path = "logs/{}/".format(group_name) 
         full_reportpath = os.path.join(logfolder_path,"i-")
         ## now get all of the computereport filenames: 
@@ -264,9 +264,8 @@ class Submission_dev():
             self.logger.append("        [Internal (acquire_instances)] RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NeuroCAAS admin.")
             self.logger.printlatest()
             self.logger.write()
-            raise ValueError("Instance requests greater than pipeline bandwidth")
+            raise ValueError("[JOB TERMINATE REASON] Instance requests greater than pipeline bandwidth. Too many simultaneously deployed analyses.")
         
-
         instances = utilsparamec2.launch_new_instances(
         instance_type=self.instance_type, 
         ami=os.environ['AMI'],
@@ -283,7 +282,7 @@ class Submission_dev():
             self.logger.append("        [Internal (acquire_instances)] RESOURCE ERROR: Instances not launched. AWS capacity reached. Please contact NeuroCAAS admin.")
             self.logger.printlatest()
             self.logger.write()
-            raise AssertionError
+            raise AssertionError("[JOB TERMINATE REASON] Instance requests greater than pipeline bandwidth (base AWS capacity). Too many simultaneously deployed analyses")
 
         self.instances = instances
         return instances
@@ -333,7 +332,7 @@ class Submission_dev():
             self.logger.append(msg)
             self.logger.printlatest()
             self.logger.write()
-            raise ValueError("Not the correct format for arguments.")
+            raise ValueError("[JOB TERMINATE REASON] Not the correct format for arguments. Protocols for job manager are misformatted.")
      
 
         ## Should we vectorize the log here? 
@@ -362,7 +361,7 @@ class Submission_dev():
     ## Declare rules to monitor the states of these instances.  
     def put_instance_monitor_rule(self): 
         """ For multiple datasets."""
-        self.logger.append("        [Internal (put_instance_monitor_rule)] Setting up monitoring on all instances.") 
+        self.logger.append("        [Internal (put_instance_monitor_rule)] Setting up monitoring on all instances...") 
         ruledata,rulename = utilsparamevents.put_instances_rule(self.instances,self.jobname)
         self.rulename = rulename
         self.ruledata = ruledata
