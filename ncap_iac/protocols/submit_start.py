@@ -736,7 +736,6 @@ def process_upload_dev(bucket_name, key,time):
         submission.start_instance()
         submission.logger.write()
         submission.process_inputs()
-        raise ClientError(error_response = {"Error":{"Code":"InvalidInstanceId"}},operation_name = "getInstance")
         submission.logger.append(donemessage.format(s = step))
         submission.logger.printlatest()
         submission.logger.write()
