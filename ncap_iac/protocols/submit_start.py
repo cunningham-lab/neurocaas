@@ -256,7 +256,7 @@ class Submission_dev():
         if active +nb_instances < int(os.environ['DEPLOY_LIMIT']):
             pass
         else:
-            self.logger.append("  [Internal (acquire_instances)] RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NeuroCAAS admin")
+            self.logger.append("  [Internal (acquire_instances)] RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NeuroCAAS admin.")
             self.logger.printlatest()
             self.logger.write()
             raise ValueError("Instance requests greater than pipeline bandwidth")
@@ -301,6 +301,7 @@ class Submission_dev():
             log["price"] = utilsparampricing.price_instance(instance)
             log["databucket"] = self.bucket_name
             log["datapath"] = self.data_name 
+            log["configpath"] = self.config_name
             log["jobpath"] = self.jobpath
             log["start"] = None
             log["end"] = None
@@ -314,7 +315,7 @@ class Submission_dev():
             instances=self.instances,
             logger=[]#self.logger
         )
-        self.logger.append("  [Internal (start_instance)] Created {} immutable analysis environments".format(len(self.filenames)))
+        self.logger.append("  [Internal (start_instance)] Created {} immutable analysis environments.".format(len(self.filenames)))
         self.logger.printlatest()
         self.logger.write()
 
@@ -614,6 +615,7 @@ class Submission_deploy():
               self.input_bucket_name, filename, outpath_full, self.config_name
               ) for filename in self.filenames],"command sent")
 
+        print(self.instances)
         for f,filename in enumerate(self.filenames):
             response = utilsparamssm.execute_commands_on_linux_instances(
                 commands=[os.environ['COMMAND'].format(
@@ -643,8 +645,8 @@ def process_upload_dev(bucket_name, key,time):
     exitcode = 99
 
     donemessage = "[Job Manager] {s}: DONE" 
-    awserrormessage = "[Job Manager] {s}: AWS ERROR. {e}. shutting down job manager"
-    internalerrormessage = "[Job Manager] {s}: INTERNAL ERROR. {e}. shutting down job manager"
+    awserrormessage = "[Job Manager] {s}: AWS ERROR. {e}. shutting down job manager."
+    internalerrormessage = "[Job Manager] {s}: INTERNAL ERROR. {e}. shutting down job manager."
 
     
     ## Step 1: Initialization. Most basic checking for submit file. If this fails, will not generate a certificate. 
@@ -729,11 +731,12 @@ def process_upload_dev(bucket_name, key,time):
         if os.environ["MONITOR"] == "true":
             submission.put_instance_monitor_rule()
         elif os.environ["MONITOR"] == "false":
-            submission.append("  [Internal (monitoring)] Skipping monitor")
+            submission.append("  [Internal (monitoring)] Skipping monitor.")
         submission.logger.write()
         submission.start_instance()
         submission.logger.write()
         submission.process_inputs()
+        raise ClientError(error_response = {"Error":{"Code":"InvalidInstanceId"}},operation_name = "getInstance")
         submission.logger.append(donemessage.format(s = step))
         submission.logger.printlatest()
         submission.logger.write()
@@ -741,17 +744,39 @@ def process_upload_dev(bucket_name, key,time):
         exitcode = 0
     except ClientError as ce:
         e = ce.response["Error"]
+        ## We occasianally get "Invalid Instance Id calls due to AWS side errors."
         if e["Code"] == "InvalidInstanceId":
-            e = "AWS Communication Error. Please Try Again."
-        ## In this case we need to delete the monitor log: 
-        [utilsparams3.delete_active_monitorlog(submission.bucket_name,"{}.json".format(inst.id)) for inst in instances]
-        ## We also need to delete the monitor rule:
-        utilsparamevents.full_delete_rule(submission.rulename)
-        ## We finally need to terminate the relevant instances:  
-        [inst.terminate() for inst in instances]
+            e = "Transient AWS Communication Error. Please Try Again"
         submission.logger.append(awserrormessage.format(s = step,e = e))
         submission.logger.printlatest()
         submission.logger.write()
+        ## We need to separately attempt all of the relevant cleanup steps. 
+        try:
+            ## In this case we need to delete the monitor log: 
+            [utilsparams3.delete_active_monitorlog(submission.bucket_name,"{}.json".format(inst.id)) for inst in instances]
+        except Exception as se:
+            message = "While cleaning up from AWS Error, another error occured: {}".format(se)
+            submission.logger.append(internalerrormessage.format(s = step,e = message))
+            submission.logger.printlatest()
+            submission.logger.write()
+        try:
+            ## We also need to delete the monitor rule:
+            utilsparamevents.full_delete_rule(submission.rulename)
+        except Exception as se:
+            message = "While cleaning up from AWS Error, another error occured: {}".format(se)
+            submission.logger.append(internalerrormessage.format(s = step,e = message))
+            submission.logger.printlatest()
+            submission.logger.write()
+        ## We finally need to terminate the relevant instances:  
+        for inst in instances: 
+            try:
+                inst.terminate()
+            except Exception as se:
+                message = "While cleaning up from AWS Error, another error occured: {}".format(se)
+                submission.logger.append(internalerrormessage.format(s = step,e = message))
+                submission.logger.printlatest()
+                submission.logger.write()
+                continue
     except Exception as e:
         [inst.terminate() for inst in instances]
         submission.logger.append(internalerrormessage.format(s = step,e = e))
