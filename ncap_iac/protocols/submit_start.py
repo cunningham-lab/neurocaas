@@ -746,7 +746,7 @@ def process_upload_dev(bucket_name, key,time):
         submission.logger.append(donemessage.format(s = step))
         submission.logger.printlatest()
         submission.logger.write()
-        submssion.logger.initialize_monitor()
+        submission.logger.initialize_monitor()
         ## should be a success at this point. 
         exitcode = 0
     except ClientError as ce:
