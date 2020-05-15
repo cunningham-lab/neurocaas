@@ -82,7 +82,12 @@ class Submission_dev():
         msg = "[Job Manager] Job submission detected. Unique analysis version id: {}".format(os.environ['versionid'].split("\n")[0])
         self.logger.append(msg)
         self.logger.printlatest()
-        msg = "  [Internal (init)] Initializing job manager."
+        self.logger.write()
+        msg = "[Job Manager] Job id: {}".format(self.timestamp)
+        self.logger.append(msg)
+        self.logger.printlatest()
+        self.logger.write()
+        msg = "        [Internal (init)] Initializing job manager."
         self.logger.append(msg)
         self.logger.printlatest()
         self.logger.write()
@@ -91,7 +96,7 @@ class Submission_dev():
         try:
             self.instance_type = submit_file['instance_type'] # TODO default option from config
         except KeyError as ke: 
-            msg = "  [Internal (init)] Using default instance type {} from config file.".format(os.environ["INSTANCE_TYPE"])
+            msg = "        [Internal (init)] Using default instance type {} from config file.".format(os.environ["INSTANCE_TYPE"])
             self.instance_type = os.environ["INSTANCE_TYPE"]
             # Log this message 
             self.logger.append(msg)
@@ -99,7 +104,7 @@ class Submission_dev():
             self.logger.write()
 
         ## Check that we have a dataname field:
-        submit_errmsg = "  [Internal (init)] INPUT ERROR: Submit file does not contain field {}, needed to analyze data."
+        submit_errmsg = "        [Internal (init)] INPUT ERROR: Submit file does not contain field {}, needed to analyze data."
         try: 
             self.data_name = submit_file['dataname'] # TODO validate extensions 
         except KeyError as ke:
@@ -122,7 +127,7 @@ class Submission_dev():
             ## Now raise an exception to halt processing, because this is a catastrophic error.  
             raise ValueError(os.environ["MISSING_CONFIG_ERROR"])
 
-        msg = "  [Internal (init)] Analysis request with dataset(s): {}, config file {}".format(self.data_name,self.config_name)
+        msg = "        [Internal (init)] Analysis request with dataset(s): {}, config file {}".format(self.data_name,self.config_name)
         self.logger.append(msg)
         self.logger.printlatest()
         self.logger.write()
@@ -131,7 +136,7 @@ class Submission_dev():
         """
         Check for the existence of the corresponding data and config in s3. 
         """
-        exists_errmsg = "  [Internal (check_existence)] INPUT ERROR: S3 Bucket does not contain {}"
+        exists_errmsg = "        [Internal (check_existence)] INPUT ERROR: S3 Bucket does not contain {}"
         if type(self.data_name) is str:
             check_data_exists = utilsparams3.exists(self.bucket_name,self.data_name)
         elif type(self.data_name) is list:
@@ -198,13 +203,13 @@ class Submission_dev():
         budget = float(os.environ["MAXCOST"])
 
         if cost < budget:
-            message = "  [Internal (get_costmonitoring)] Incurred cost so far: ${}. Remaining budget: ${}".format(cost,budget-cost)
+            message = "        [Internal (get_costmonitoring)] Incurred cost so far: ${}. Remaining budget: ${}".format(cost,budget-cost)
             self.logger.append(message)
             self.logger.printlatest()
             self.logger.write()
             validjob = True
         elif cost >= budget:
-            message = "  [Internal (get_costmonitoring)] Incurred cost so far: ${}. Over budget (${}), cancelling job. Contact administrator.".format(cost,budget)
+            message = "        [Internal (get_costmonitoring)] Incurred cost so far: ${}. Over budget (${}), cancelling job. Contact administrator.".format(cost,budget)
             self.logger.append(message)
             self.logger.printlatest()
             self.logger.write()
@@ -224,21 +229,21 @@ class Submission_dev():
 
         try:
             self.jobduration = passed_config["__duration__"]
-            self.logger.append("  [Internal (parse_config)] parameter __duration__ given: {}".format(self.jobduration))
+            self.logger.append("        [Internal (parse_config)] parameter __duration__ given: {}".format(self.jobduration))
             self.logger.printlatest()
             self.logger.write()
         except KeyError:
-            self.logger.append("  [Internal (parse_config)] parameter __duration__ not given, proceeding with standard compute launch.")
+            self.logger.append("        [Internal (parse_config)] parameter __duration__ not given, proceeding with standard compute launch.")
             self.logger.printlatest()
             self.logger.write()
             self.jobduration = None
         try:
             self.jobsize = passed_config["__dataset_size__"]
-            self.logger.append("  [Internal (parse_config)] parameter __dataset_size__ given: {}".format(self.jobsize))
+            self.logger.append("        [Internal (parse_config)] parameter __dataset_size__ given: {}".format(self.jobsize))
             self.logger.printlatest()
             self.logger.write()
         except KeyError:
-            self.logger.append("  [Internal (parse_config)] parameter __dataset_size__ is not given, proceeding with standard storage." )
+            self.logger.append("        [Internal (parse_config)] parameter __dataset_size__ is not given, proceeding with standard storage." )
             self.logger.printlatest()
             self.logger.write()
             self.jobsize = None
@@ -256,7 +261,7 @@ class Submission_dev():
         if active +nb_instances < int(os.environ['DEPLOY_LIMIT']):
             pass
         else:
-            self.logger.append("  [Internal (acquire_instances)] RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NeuroCAAS admin.")
+            self.logger.append("        [Internal (acquire_instances)] RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NeuroCAAS admin.")
             self.logger.printlatest()
             self.logger.write()
             raise ValueError("Instance requests greater than pipeline bandwidth")
@@ -275,7 +280,7 @@ class Submission_dev():
         try:
             assert len(instances) > 0
         except AssertionError:
-            self.logger.append("  [Internal (acquire_instances)] RESOURCE ERROR: Instances not launched. AWS capacity reached. Please contact NeuroCAAS admin.")
+            self.logger.append("        [Internal (acquire_instances)] RESOURCE ERROR: Instances not launched. AWS capacity reached. Please contact NeuroCAAS admin.")
             self.logger.printlatest()
             self.logger.write()
             raise AssertionError
@@ -315,7 +320,7 @@ class Submission_dev():
             instances=self.instances,
             logger=[]#self.logger
         )
-        self.logger.append("  [Internal (start_instance)] Created {} immutable analysis environments.".format(len(self.filenames)))
+        self.logger.append("        [Internal (start_instance)] Created {} immutable analysis environments.".format(len(self.filenames)))
         self.logger.printlatest()
         self.logger.write()
 
@@ -324,7 +329,7 @@ class Submission_dev():
         try: 
             os.environ['COMMAND'].format("a","b","c","d")
         except IndexError as ie:
-            msg = "  [Internal (process_inputs)] INPUT ERROR: not enough arguments in the COMMAND argument."
+            msg = "        [Internal (process_inputs)] INPUT ERROR: not enough arguments in the COMMAND argument."
             self.logger.append(msg)
             self.logger.printlatest()
             self.logger.write()
@@ -348,10 +353,10 @@ class Submission_dev():
                 log_path=os.path.join(self.jobpath,'internal_ec2_logs')
                 )
             self.logger.initialize_datasets_dev(filename,self.instances[f].instance_id,response["Command"]["CommandId"])
-            self.logger.append("  [Internal (process_inputs)] Starting analysis {} with parameter set {}".format(f+1,os.path.basename(filename)))
+            self.logger.append("        [Internal (process_inputs)] Starting analysis {} with parameter set {}".format(f+1,os.path.basename(filename)))
             self.logger.printlatest()
             self.logger.write()
-        self.logger.append("  [Internal (process_inputs)] All jobs submitted. Processing...")
+        self.logger.append("        [Internal (process_inputs)] All jobs submitted. Processing...")
 
 
     ## Declare rules to monitor the states of these instances.  
@@ -731,7 +736,7 @@ def process_upload_dev(bucket_name, key,time):
         if os.environ["MONITOR"] == "true":
             submission.put_instance_monitor_rule()
         elif os.environ["MONITOR"] == "false":
-            submission.append("  [Internal (monitoring)] Skipping monitor.")
+            submission.append("        [Internal (monitoring)] Skipping monitor.")
         submission.logger.write()
         submission.start_instance()
         submission.logger.write()
