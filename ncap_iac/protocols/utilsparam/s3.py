@@ -122,6 +122,17 @@ def extract_files(bucket_name,prefix,ext = None):
 
     return file_list 
 
+def write_endfile(bucketname,resultpath):
+    """
+    Given the name of a bucket and a path to a result directory, writes an "end.txt" file to that bucket.
+    """
+    bucket = s3_resource.Bucket(bucketname)
+    bucket.put_object(
+            Key = os.path.join(resultpath,"process_results","end.txt"),
+            Body = bytes("end of analysis marker".encode('UTF-8'))
+            )
+
+
 def write_active_monitorlog(bucketname,name,log):
     """
     Given the name of a bucket, writes an active monitoring log to that bucket.  
@@ -389,6 +400,18 @@ class JobLogger_demo(Logger):
         encoded_text = "\n".join(self._logs).encode("utf-8")
         #self.writeobj.put(Body = (bytes(json.dumps("\n".join(self._logs)).encode("UTF-8"))))
         self.writeobj.put(Body = encoded_text)
+
+    def initialize_monitor(self):
+        """
+        To be run last, after all processing is done. Gets the information about acquired datasets and uses them to start up a monitor  
+        """
+        dataset_template = "DATANAME: {n} | STATUS: {s} | TIME: {t} | LAST COMMAND: {r}"
+        datasets_init = [dataset_template.format(n = dset, s = self._datasets[dset]["status"], t = str(datetime.datetime.now()), r = self._datasets[dset]["reason"]) for dset in self._datasets]
+        template_start = ["PER ENVIRONMENT MONITORING:","================"]
+        template_end = ["================","Once jobs start, these logs will be updated regularly.","DATANAME: the path to the dataset being analyzed in an immutable analysis environment.","STATUS: the status of the script running analysis. Can be INITIALIZING, IN PROGRESS, SUCCESS, or FAILED", "TIME: The time when this log was last updated.", "LAST COMMAND: The last command that ran successfully.","For more information, see DATASET_NAME_ files for stdout and stderr output."]
+        full_log_list = template_start+datasets_init+template_end
+        full_log_init = "\n".join(self._logs+full_log_list).encode("utf-8")
+        self.writeobj.put(Body = full_log_init)
 
 #def check_for_config(upload, config):
 #    """ """
