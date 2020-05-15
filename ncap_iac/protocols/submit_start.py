@@ -650,8 +650,8 @@ def process_upload_dev(bucket_name, key,time):
     exitcode = 99
 
     donemessage = "[Job Manager] {s}: DONE" 
-    awserrormessage = "[Job Manager] {s}: AWS ERROR. {e}. shutting down job manager."
-    internalerrormessage = "[Job Manager] {s}: INTERNAL ERROR. {e}. shutting down job manager."
+    awserrormessage = "[Job Manager] {s}: AWS ERROR. {e}\n[Job Manager] Shutting down job."
+    internalerrormessage = "[Job Manager] {s}: INTERNAL ERROR. {e}\n[Job Manager] Shutting down job."
 
     
     ## Step 1: Initialization. Most basic checking for submit file. If this fails, will not generate a certificate. 
