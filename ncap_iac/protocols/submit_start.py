@@ -714,12 +714,14 @@ def process_upload_dev(bucket_name, key,time):
         submission.logger.append(awserrormessage.format(s = step,e = e))
         submission.logger.printlatest()
         submission.logger.write()
+        utilsparams3.write_endfile(submission.bucket_name,submission.jobpath)
         return exitcode
     except Exception: 
         e = traceback.format_exc()
         submission.logger.append(internalerrormessage.format(s = step,e = e))
         submission.logger.printlatest()
         submission.logger.write()
+        utilsparams3.write_endfile(submission.bucket_name,submission.jobpath)
         return exitcode
     
     # Step 4: Processing: Creating the immutable analysis environments, sending the commands to them. 
@@ -744,6 +746,7 @@ def process_upload_dev(bucket_name, key,time):
         submission.logger.append(donemessage.format(s = step))
         submission.logger.printlatest()
         submission.logger.write()
+        submssion.logger.initialize_monitor()
         ## should be a success at this point. 
         exitcode = 0
     except ClientError as ce:
