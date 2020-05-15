@@ -61,7 +61,7 @@ def start_instances_if_stopped(instances, logger):
                     print("unhandled error, quitting")
                     logger.append("        [Utils] unhandled error during job start, quitting")
                     logger.write()
-                    raise
+                    raise Exception("[JOB TERMINATE REASON] Unhandled error communicating with AWS. Contact NeuroCAAS admin.")
     time.sleep(60)
     logger.append("        [Utils] Instances Initialized")
 
@@ -103,7 +103,7 @@ def launch_new_instances(instance_type, ami, logger, number, add_size, duration 
     else:
         logger.append("        [Utils] duration parameter is not valid. Must be an integer representing max number of minutes expected.")
         logger.write()
-        raise ValueError("duration not valid.")
+        raise ValueError("[JOB TERMINATE REASON] Given __duration__ parameter is not valid. Must be an integer, giving the maximum time expected in minutes.")
 
     ## Now parse the dataset size and figure if we should diverge from default behavior. 
 
@@ -196,8 +196,8 @@ def launch_new_instances(instance_type, ami, logger, number, add_size, duration 
                     InstanceInitiatedShutdownBehavior=os.environ['SHUTDOWN_BEHAVIOR']
                 )
             else:
-                logger.append("        [Utils] unhandled error while launching save instances. contact admin.")
-                raise ValueError("Unhandled exception")
+                logger.append("        [Utils] unhandled error while launching save instances. contact NeuroCAAS admin.")
+                raise ValueError("[JOB TERMINATE REASON] Unhandled exception")
 
     [logger.append("        [Utils] New instance {} created!".format(instances[i])) for i in range(number)]
     logger.write()
