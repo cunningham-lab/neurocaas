@@ -362,7 +362,7 @@ class Submission_dev():
     ## Declare rules to monitor the states of these instances.  
     def put_instance_monitor_rule(self): 
         """ For multiple datasets."""
-        self.logger.append("Setting up monitoring on all instances.") 
+        self.logger.append("        [Internal (put_instance_monitor_rule)] Setting up monitoring on all instances.") 
         ruledata,rulename = utilsparamevents.put_instances_rule(self.instances,self.jobname)
         self.rulename = rulename
         self.ruledata = ruledata
@@ -669,7 +669,8 @@ def process_upload_dev(bucket_name, key,time):
         e = ce.response["Error"]
         print(awserrormessage.format(s= step,e = e))
         return exitcode
-    except Exception as e: 
+    except Exception: 
+        e = traceback.format_exc()
         print(internalerrormessage.format(s= step,e = e))
         return exitcode
 
@@ -694,8 +695,8 @@ def process_upload_dev(bucket_name, key,time):
         submission.logger.printlatest()
         submission.logger.write()
         return exitcode
-    except Exception as e: 
-        e=sys.exc_info()[0]
+    except Exception: 
+        e = traceback.format_exc()
         submission.logger.append(internalerrormessage.format(s = step,e = e))
         submission.logger.printlatest()
         submission.logger.write()
@@ -715,8 +716,8 @@ def process_upload_dev(bucket_name, key,time):
         submission.logger.printlatest()
         submission.logger.write()
         return exitcode
-    except: 
-        e=sys.exc_info()[0]
+    except Exception: 
+        e = traceback.format_exc()
         submission.logger.append(internalerrormessage.format(s = step,e = e))
         submission.logger.printlatest()
         submission.logger.write()
@@ -758,7 +759,8 @@ def process_upload_dev(bucket_name, key,time):
         try:
             ## In this case we need to delete the monitor log: 
             [utilsparams3.delete_active_monitorlog(submission.bucket_name,"{}.json".format(inst.id)) for inst in instances]
-        except Exception as se:
+        except Exception:
+            se = traceback.format_exc()
             message = "While cleaning up from AWS Error, another error occured: {}".format(se)
             submission.logger.append(internalerrormessage.format(s = step,e = message))
             submission.logger.printlatest()
@@ -766,7 +768,8 @@ def process_upload_dev(bucket_name, key,time):
         try:
             ## We also need to delete the monitor rule:
             utilsparamevents.full_delete_rule(submission.rulename)
-        except Exception as se:
+        except Exception:
+            se = traceback.format_exc()
             message = "While cleaning up from AWS Error, another error occured: {}".format(se)
             submission.logger.append(internalerrormessage.format(s = step,e = message))
             submission.logger.printlatest()
@@ -775,13 +778,15 @@ def process_upload_dev(bucket_name, key,time):
         for inst in instances: 
             try:
                 inst.terminate()
-            except Exception as se:
+            except Exception:
+                se = traceback.format_exc()
                 message = "While cleaning up from AWS Error, another error occured: {}".format(se)
                 submission.logger.append(internalerrormessage.format(s = step,e = message))
                 submission.logger.printlatest()
                 submission.logger.write()
                 continue
-    except Exception as e:
+    except Exception:
+        e = traceback.format_exc()
         [inst.terminate() for inst in instances]
         submission.logger.append(internalerrormessage.format(s = step,e = e))
         submission.logger.printlatest()
