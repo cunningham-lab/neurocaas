@@ -358,6 +358,8 @@ class Submission_dev():
         """ For multiple datasets."""
         self.logger.append("Setting up monitoring on all instances.") 
         ruledata,rulename = utilsparamevents.put_instances_rule(self.instances,self.jobname)
+        self.rulename = rulename
+        self.ruledata = ruledata
         arn = ruledata['RuleArn']
         ## Now attach it to the given target
         targetdata = utilsparamevents.put_instance_target(rulename) 
@@ -739,7 +741,13 @@ def process_upload_dev(bucket_name, key,time):
         exitcode = 0
     except ClientError as ce:
         e = ce.response["Error"]
+        if e["Code"] == "InvalidInstanceId":
+            e = "AWS Communication Error. Please Try Again."
+        ## In this case we need to delete the monitor log: 
         [utilsparams3.delete_active_monitorlog(submission.bucket_name,"{}.json".format(inst.id)) for inst in instances]
+        ## We also need to delete the monitor rule:
+        utilsparamevents.full_delete_rule(submission.rulename)
+        ## We finally need to terminate the relevant instances:  
         [inst.terminate() for inst in instances]
         submission.logger.append(awserrormessage.format(s = step,e = e))
         submission.logger.printlatest()
