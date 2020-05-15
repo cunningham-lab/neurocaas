@@ -8,11 +8,6 @@ source "$(dirname $0)"/paths.sh
 rootpath=$(dirname $(dirname $(get_abs_filename "$0" )))
 cd $rootpath/ncap_iac/ncap_blueprints/
 
-
-## upload useful resources to the user's area.
-python $rootpath/tests/initialize_test_resources.py "$analysisdirname" "$testgroupid"
-
-python $rootpath/tests/initialize_test_submit.py "$analysisdirname" "$testgroupid"
 statusbuild=$(bash iac_utils/build.sh $analysisdirname)
 buildcode=$?
 statustest=$(bash iac_utils/test_main_multievent.sh "$analysisdirname" "$1")
