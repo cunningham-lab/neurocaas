@@ -279,9 +279,9 @@ Resources:
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
-          AMI: ami-0d658210cb34e37a8
+          AMI: ami-073929039808eca5f
           COMMAND: ls; cd /home/ubuntu; neurocaas_remote/run_main.sh "{}" "{}" "{}"
-            "{}" "neurocaas_remote/epi/run_epi_internal.sh"; . ncap_remote/ncap_utils/workflow.sh;
+            "{}" "neurocaas_remote/epi/run_epi_internal.sh"; . neurocaas_remote/ncap_utils/workflow.sh;
             cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
@@ -289,7 +289,7 @@ Resources:
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: SSMRole
           INDIR: inputs
-          INSTANCE_TYPE: t2.micro
+          INSTANCE_TYPE: m5.xlarge
           KEY_NAME: testkeystack-custom-dev-key-pair
           LAUNCH: true
           LOGDIR: logs
@@ -314,7 +314,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: 'dee05dc8f92df18444d58569774baa98d3de0971
+          versionid: 'ec467c5433d6b159483d9ec2d64e3a61b182d02f
 
             '
       Events:
@@ -416,9 +416,9 @@ Resources:
       Description: Deletes Objects from S3
       Environment:
         Variables:
-          AMI: ami-0d658210cb34e37a8
+          AMI: ami-073929039808eca5f
           COMMAND: ls; cd /home/ubuntu; neurocaas_remote/run_main.sh "{}" "{}" "{}"
-            "{}" "neurocaas_remote/epi/run_epi_internal.sh"; . ncap_remote/ncap_utils/workflow.sh;
+            "{}" "neurocaas_remote/epi/run_epi_internal.sh"; . neurocaas_remote/ncap_utils/workflow.sh;
             cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
@@ -426,7 +426,7 @@ Resources:
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: SSMRole
           INDIR: inputs
-          INSTANCE_TYPE: t2.micro
+          INSTANCE_TYPE: m5.xlarge
           KEY_NAME: testkeystack-custom-dev-key-pair
           LAUNCH: true
           LOGDIR: logs
@@ -451,7 +451,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: 'dee05dc8f92df18444d58569774baa98d3de0971
+          versionid: 'ec467c5433d6b159483d9ec2d64e3a61b182d02f
 
             '
       Handler: helper.handler_deldir
@@ -493,9 +493,9 @@ Resources:
       Description: Puts Objects in S3
       Environment:
         Variables:
-          AMI: ami-0d658210cb34e37a8
+          AMI: ami-073929039808eca5f
           COMMAND: ls; cd /home/ubuntu; neurocaas_remote/run_main.sh "{}" "{}" "{}"
-            "{}" "neurocaas_remote/epi/run_epi_internal.sh"; . ncap_remote/ncap_utils/workflow.sh;
+            "{}" "neurocaas_remote/epi/run_epi_internal.sh"; . neurocaas_remote/ncap_utils/workflow.sh;
             cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
@@ -503,7 +503,7 @@ Resources:
           EXECUTION_TIMEOUT: 180
           IAM_ROLE: SSMRole
           INDIR: inputs
-          INSTANCE_TYPE: t2.micro
+          INSTANCE_TYPE: m5.xlarge
           KEY_NAME: testkeystack-custom-dev-key-pair
           LAUNCH: true
           LOGDIR: logs
@@ -528,7 +528,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: 'dee05dc8f92df18444d58569774baa98d3de0971
+          versionid: 'ec467c5433d6b159483d9ec2d64e3a61b182d02f
 
             '
       Handler: helper.handler_mkdir
