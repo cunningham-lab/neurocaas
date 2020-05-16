@@ -409,7 +409,7 @@ class JobLogger_demo(Logger):
         datasets_init = [dataset_template.format(n = dset, s = self._datasets[dset]["status"], t = str(datetime.datetime.now()), r = self._datasets[dset]["reason"]) for dset in self._datasets]
         template_start = ["PER ENVIRONMENT MONITORING:","================"]
         #template_end = ["================","Once jobs start, these logs will be updated regularly.","DATANAME: the path to the dataset being analyzed in an immutable analysis environment.","STATUS: the status of the script running analysis. Can be INITIALIZING, IN PROGRESS, SUCCESS, or FAILED", "TIME: The time when this log was last updated.", "LAST COMMAND: The last command that ran successfully.","For more information, see DATASET_NAME: files for stdout and stderr output.","++++++++++++++++++ ","JOB MONITOR LOG"]
-        template_end = ["================","Once jobs start, these logs will be updated regularly.","For more information, see DATASET_NAME: files for stdout and stderr output.","++++++++++++++++++ ","JOB MONITOR LOG:"]
+        template_end = ["================","Once jobs start, these logs will be updated regularly.","For more information, see DATASET_NAME: files for stdout and stderr output.","++++++++++++++++++ ","JOB MANAGER SETUP LOG:"]
         full_log_list = template_start+datasets_init+template_end
         full_log_init = "\n".join(full_log_list+self._logs).encode("utf-8")
         self.writeobj.put(Body = full_log_init)
