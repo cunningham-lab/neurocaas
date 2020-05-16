@@ -42,28 +42,36 @@ def start_instances_if_stopped(instances, logger):
         
         # Check & Report Status
         state = instance.state['Name']
-        logger.append("        [Utils] Instance State: {}...".format(state))
+        logger.append("        [Utils] Instance {} State: {}...".format(instance.id,state))
         
         # If not running, run:
         if state != 'running':
             try:
                 logger.append("        [Utils] Starting Instance...")
+                logger.write()
                 instance.start()
                 instance.wait_until_running()
-                logger.append('Instance started!')
+                logger.append('        [Utils] Instance started!')
+                logger.write()
             except botocore.exceptions.ClientError as e:
                 if e.response["Error"]["Code"] == "UnsupportedOperation":
-                    logger.append("        [Utils] Spot Instance, cannot be started manually. .")
+                    logger.append("        [Utils] Spot Instance, cannot be started manually. Waiting...")
+                    logger.write()
                     ##TODO: figure out if you have to wait for this additionally. 
                     instance.wait_until_running()
-                    logger.append('Instance started!')
+                    logger.append('        [Utils] Instance started!')
+                    logger.write()
                 else:
                     print("unhandled error, quitting")
                     logger.append("        [Utils] unhandled error during job start, quitting")
                     logger.write()
                     raise Exception("[JOB TERMINATE REASON] Unhandled error communicating with AWS. Contact NeuroCAAS admin.")
+        else:
+            logger.append("        [Utils] Instance already running.")
+            logger.write()
     time.sleep(60)
-    logger.append("        [Utils] Instances Initialized")
+    logger.append("        [Utils] All Instances Initialized.")
+    logger.write()
 
 def launch_new_instance(instance_type, ami, logger):
     """ Script To Launch New Instance From Image """
