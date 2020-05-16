@@ -87,6 +87,16 @@
                 "PipelineDir": "trackingfolder",
                 "UserInput": true,
                 "ContactEmail": "The email we should notify regarding processing status."
+            },
+            {
+                "AffiliateName": "examplegroup2",
+                "UserNames": [
+                    "jpccosyne",
+                    "srbcosyne",
+                    "tacosyne"
+                ],
+                "UserInput": true,
+                "ContactEmail": "tgabe94@gmail.com"
             }
         ]
     }
