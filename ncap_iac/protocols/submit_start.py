@@ -83,10 +83,11 @@ class Submission_dev():
         self.logger.append(msg)
         self.logger.printlatest()
         self.logger.write()
-        msg = "Job ID: {}\n".format(self.timestamp)
+        msg = "JOB ID: {}".format(self.timestamp)
         self.logger.append(msg)
         self.logger.printlatest()
         self.logger.write()
+        self.logger._logs.append("\n ")
         msg = "        [Internal (init)] Initializing job manager."
         self.logger.append(msg)
         self.logger.printlatest()
