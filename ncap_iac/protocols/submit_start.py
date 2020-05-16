@@ -88,6 +88,10 @@ class Submission_dev():
         self.logger.printlatest()
         self.logger.write()
         self.logger._logs.append("\n ")
+        msg = "[Job Manager] Detected new job: starting up."
+        self.logger.append(msg)
+        self.logger.printlatest()
+        self.logger.write()
         msg = "        [Internal (init)] Initializing job manager."
         self.logger.append(msg)
         self.logger.printlatest()
