@@ -438,7 +438,6 @@ class NeuroCaaSAMI(object):
         ## now, commit the current version of the stack config template and indicate this as the Parent ID in the template. 
         subprocess.call(["git","add",self.config_fullpath])
         subprocess.call(["git","commit","-m","automatic commit to document pipeline {} before update at {}".format(self.config_filepath,str(datetime.datetime.now()))])
-        subprocess.call(["git","push"])
         old_hash = subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8")
         print("old commit has hash: {}".format(old_hash))
 
@@ -455,7 +454,6 @@ class NeuroCaaSAMI(object):
             
             subprocess.call(["git","add",self.config_fullpath])
             subprocess.call(["git","commit","-m","automatic commit to document pipeline {} after update at {}. Purpose: {}".format(self.config_filepath,str(datetime.datetime.now()),message)])
-            subprocess.call(["git","push"])
             new_hash = subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8")
             print("new commit has hash: {}".format(new_hash))
 
