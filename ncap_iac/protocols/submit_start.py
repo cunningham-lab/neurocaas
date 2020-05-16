@@ -79,7 +79,7 @@ class Submission_dev():
         ## Create a logging object and write to it. 
         ## a logger for the submit area.  
         self.logger = utilsparams3.JobLogger_demo(self.bucket_name, self.jobpath)
-        msg = "START TIME: {}".format(str(self.logger.basetime)[:-4])
+        msg = "REQUEST START TIME: {} (GMT)".format(str(self.logger.basetime)[:-4])
         self.logger.append(msg)
         self.logger.printlatest()
         self.logger.write()
@@ -326,7 +326,7 @@ class Submission_dev():
         """ Starts new instances if stopped. We write a special loop for this one because we only need a single 60 second pause for all the intances, not one for each in serial. Specialized certificate messages. """
         utilsparamec2.start_instances_if_stopped(
             instances=self.instances,
-            logger=[]#self.logger
+            logger=self.logger
         )
         self.logger.append("        [Internal (start_instance)] Created {} immutable analysis environments.".format(len(self.filenames)))
         self.logger.printlatest()
