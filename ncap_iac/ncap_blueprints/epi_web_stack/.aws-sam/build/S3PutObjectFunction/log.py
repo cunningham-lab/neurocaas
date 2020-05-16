@@ -28,8 +28,7 @@ except Exception as e:
 
 
 
-## Function to take output of cloudwatch events and write to figure file. 
-
+## Lambda function to cleanup after all processing is done. Importantly also sends the signal back to the user that the job has been completed. 
 
 
 ## Strip the event of relevant information.  
@@ -88,7 +87,7 @@ def monitor_updater(event,context):
             if statechange == "shutting-down":
                 utilsparams3.mv(bucket_name,current_job_log,completed_job_log)
                 timepkg.sleep(5)
-                ## Now check if we can delete this rule:
+                ## Now check if we can delete this rule and send the end signal to the user:
                 rulename = "Monitor{}".format(jobname)
                 instances_under_rule = utilsparamevents.get_monitored_instances(rulename) 
                 condition = [utilsparams3.exists(bucket_name,os.path.join("logs","active","{}.json".format(inst))) for inst in instances_under_rule]
@@ -96,6 +95,7 @@ def monitor_updater(event,context):
                 if not any(condition):
                     ## get the target:
                     response = utilsparamevents.full_delete_rule(rulename)
+                    terminated = utilsparams3.write_endfile(log["databucket"],log["jobpath"])
                     
                 else:
                     pass
