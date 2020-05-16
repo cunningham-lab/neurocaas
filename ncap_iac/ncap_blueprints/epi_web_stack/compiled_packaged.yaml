@@ -21,6 +21,17 @@ Resources:
         - S3PutObjectFunction
         - Arn
     Type: AWS::CloudFormation::CustomResource
+  BaseFolderreviewers:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: epi-ncap-web
+      DirName: reviewers
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   CWPermissions:
     Properties:
       Action: lambda:InvokeFunction
@@ -87,6 +98,19 @@ Resources:
         - S3PutObjectFunction
         - Arn
     Type: AWS::CloudFormation::CustomResource
+  ConfigFolderreviewers:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderreviewers
+    Properties:
+      BucketName: epi-ncap-web
+      DirName: configs
+      Path: reviewers/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   DeleteCustomResource:
     DependsOn: PipelineMainBucket
     Properties:
@@ -98,7 +122,7 @@ Resources:
     Type: AWS::CloudFormation::CustomResource
   FigLambda:
     Properties:
-      CodeUri: s3://ctnsampackages/aede0e9a3fe522cc511dd757eb5ec899
+      CodeUri: s3://ctnsampackages/93809ffcb2edf4829792a074b660ea02
       Description: Lambda Function logging start/stop for NCAP
       Environment:
         Variables:
@@ -138,6 +162,19 @@ Resources:
       BucketName: epi-ncap-web
       DirName: inputs
       Path: examplegroup2/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  InFolderreviewers:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderreviewers
+    Properties:
+      BucketName: epi-ncap-web
+      DirName: inputs
+      Path: reviewers/
       ServiceToken:
         Fn::GetAtt:
         - S3PutObjectFunction
@@ -223,15 +260,29 @@ Resources:
         - S3PutObjectFunction
         - Arn
     Type: AWS::CloudFormation::CustomResource
+  LogFolderreviewers:
+    DependsOn:
+    - PipelineMainBucket
+    - LogFolder
+    Properties:
+      BucketName: epi-ncap-web
+      DirName: reviewers
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   MainLambda:
     Properties:
-      CodeUri: s3://ctnsampackages/c00028c93991480e5dba303fd66d0c3f
+      CodeUri: s3://ctnsampackages/d4bf6a29435003f0f84aa66b80c0f9ff
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
-          AMI: ami-0530d6b24ef36874d
-          COMMAND: ls; cd /home/ubuntu; ncap_remote/run_mock.sh "{}" "{}" "{}" "{}";
-            . ncap_remote/ncap_utils/workflow.sh; cleanup
+          AMI: ami-0d658210cb34e37a8
+          COMMAND: ls; cd /home/ubuntu; neurocaas_remote/run_main.sh "{}" "{}" "{}"
+            "{}" "neurocaas_remote/epi/run_epi_internal.sh"; . ncap_remote/ncap_utils/workflow.sh;
+            cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
           DEPLOY_LIMIT: 100
@@ -243,7 +294,7 @@ Resources:
           LAUNCH: true
           LOGDIR: logs
           LOGFILE: lambda_log.txt
-          MAXCOST: 100
+          MAXCOST: 300
           MISSING_CONFIG_ERROR: We need a config file to analyze data.
           MONITOR: true
           OUTDIR: results
@@ -263,7 +314,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '542fc7590087d9d57d88429c2f859b49ae5d53b0
+          versionid: 'dee05dc8f92df18444d58569774baa98d3de0971
 
             '
       Events:
@@ -292,6 +343,20 @@ Resources:
                 Rules:
                 - Name: prefix
                   Value: examplegroup2/submissions
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
+        BucketEventreviewers:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: reviewers/submissions
                 - Name: suffix
                   Value: submit.json
           Type: S3
@@ -327,6 +392,19 @@ Resources:
         - S3PutObjectFunction
         - Arn
     Type: AWS::CloudFormation::CustomResource
+  OutFolderreviewers:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderreviewers
+    Properties:
+      BucketName: epi-ncap-web
+      DirName: results
+      Path: reviewers/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
   PipelineMainBucket:
     Properties:
       AccessControl: Private
@@ -334,13 +412,14 @@ Resources:
     Type: AWS::S3::Bucket
   S3DelObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/9d32d5c8ea5671b2e366710268b66f6b
+      CodeUri: s3://ctnsampackages/2e2fe3dc7f751d9289c2e0ca70377320
       Description: Deletes Objects from S3
       Environment:
         Variables:
-          AMI: ami-0530d6b24ef36874d
-          COMMAND: ls; cd /home/ubuntu; ncap_remote/run_mock.sh "{}" "{}" "{}" "{}";
-            . ncap_remote/ncap_utils/workflow.sh; cleanup
+          AMI: ami-0d658210cb34e37a8
+          COMMAND: ls; cd /home/ubuntu; neurocaas_remote/run_main.sh "{}" "{}" "{}"
+            "{}" "neurocaas_remote/epi/run_epi_internal.sh"; . ncap_remote/ncap_utils/workflow.sh;
+            cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
           DEPLOY_LIMIT: 100
@@ -352,7 +431,7 @@ Resources:
           LAUNCH: true
           LOGDIR: logs
           LOGFILE: lambda_log.txt
-          MAXCOST: 100
+          MAXCOST: 300
           MISSING_CONFIG_ERROR: We need a config file to analyze data.
           MONITOR: true
           OUTDIR: results
@@ -372,7 +451,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '542fc7590087d9d57d88429c2f859b49ae5d53b0
+          versionid: 'dee05dc8f92df18444d58569774baa98d3de0971
 
             '
       Handler: helper.handler_deldir
@@ -410,13 +489,14 @@ Resources:
     Type: AWS::IAM::Role
   S3PutObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/b0b184078565abd61e40d30092fe3461
+      CodeUri: s3://ctnsampackages/6ced1d940564d9747089524835d6de31
       Description: Puts Objects in S3
       Environment:
         Variables:
-          AMI: ami-0530d6b24ef36874d
-          COMMAND: ls; cd /home/ubuntu; ncap_remote/run_mock.sh "{}" "{}" "{}" "{}";
-            . ncap_remote/ncap_utils/workflow.sh; cleanup
+          AMI: ami-0d658210cb34e37a8
+          COMMAND: ls; cd /home/ubuntu; neurocaas_remote/run_main.sh "{}" "{}" "{}"
+            "{}" "neurocaas_remote/epi/run_epi_internal.sh"; . ncap_remote/ncap_utils/workflow.sh;
+            cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
           DEPLOY_LIMIT: 100
@@ -428,7 +508,7 @@ Resources:
           LAUNCH: true
           LOGDIR: logs
           LOGFILE: lambda_log.txt
-          MAXCOST: 100
+          MAXCOST: 300
           MISSING_CONFIG_ERROR: We need a config file to analyze data.
           MONITOR: true
           OUTDIR: results
@@ -448,7 +528,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '542fc7590087d9d57d88429c2f859b49ae5d53b0
+          versionid: 'dee05dc8f92df18444d58569774baa98d3de0971
 
             '
       Handler: helper.handler_mkdir
@@ -480,6 +560,19 @@ Resources:
       BucketName: epi-ncap-web
       DirName: submissions
       Path: examplegroup2/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  SubmitFolderreviewers:
+    DependsOn:
+    - PipelineMainBucket
+    - BaseFolderreviewers
+    Properties:
+      BucketName: epi-ncap-web
+      DirName: submissions
+      Path: reviewers/
       ServiceToken:
         Fn::GetAtt:
         - S3PutObjectFunction
@@ -627,6 +720,77 @@ Resources:
           Version: '2012-10-17'
         PolicyName: examplegroup2policy
     Type: AWS::IAM::Group
+  UserGroupreviewersepincapweb:
+    Properties:
+      GroupName: reviewersepincapwebgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - reviewers/
+                - reviewers/inputs
+                - reviewers/results
+                - logs
+                - reviewers/submissions
+                - reviewers/configs
+                - reviewers/inputs/
+                - reviewers/results/
+                - reviewers/submissions/
+                - reviewers/configs/
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::epi-ncap-web
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - reviewers/inputs/*
+                - reviewers/results/*
+                - reviewers/configs/*
+                - reviewers/submissions/*
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::epi-ncap-web
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::epi-ncap-web/reviewers/inputs/*
+            - arn:aws:s3:::epi-ncap-web/reviewers/configs/*
+            - arn:aws:s3:::epi-ncap-web/reviewers/submissions/*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - arn:aws:s3:::epi-ncap-web/reviewers/results/*
+            - arn:aws:s3:::epi-ncap-web/reviewers/configs/*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName: reviewerspolicy
+    Type: AWS::IAM::Group
   cunninghamlabUserNet:
     Properties:
       GroupName:
@@ -644,5 +808,12 @@ Resources:
       - jpccosyneus-east-1
       - srbcosyneus-east-1
       - tacosyneus-east-1
+    Type: AWS::IAM::UserToGroupAddition
+  reviewersUserNet:
+    Properties:
+      GroupName:
+        Ref: UserGroupreviewersepincapweb
+      Users:
+      - editornnus-east-1
     Type: AWS::IAM::UserToGroupAddition
 Transform: AWS::Serverless-2016-10-31

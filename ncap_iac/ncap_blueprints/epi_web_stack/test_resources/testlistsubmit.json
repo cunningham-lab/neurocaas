@@ -1,7 +1,7 @@
 {
-    "dataname": ["examplegroup2EPIdevelop/inputs/datafile.txt","examplegroup2EPIdevelop/inputs/datafile.txt","examplegroup2EPIdevelop/inputs/dataset1.txt"],
-    "configname": "examplegroup2EPIdevelop/configs/configsize.json",
+    "dataname": ["examplegroup2/inputs/datafile.txt","examplegroup2/inputs/datafile.txt"],
+    "configname": "examplegroup2/configs/configsize.json",
     "instance_type": "t2.micro",
-    "timestamp": "444:444:4564"
+    "timestamp": "444:444:460"
 }
 
