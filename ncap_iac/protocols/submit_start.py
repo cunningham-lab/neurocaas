@@ -79,11 +79,11 @@ class Submission_dev():
         ## Create a logging object and write to it. 
         ## a logger for the submit area.  
         self.logger = utilsparams3.JobLogger_demo(self.bucket_name, self.jobpath)
-        msg = "[Job Manager] Job submission detected. Unique analysis version id: {}".format(os.environ['versionid'].split("\n")[0])
+        msg = "ANALYSIS VERSION ID: {}".format(os.environ['versionid'].split("\n")[0])
         self.logger.append(msg)
         self.logger.printlatest()
         self.logger.write()
-        msg = "[Job Manager] Job id: {}".format(self.timestamp)
+        msg = "Job ID: {}\n".format(self.timestamp)
         self.logger.append(msg)
         self.logger.printlatest()
         self.logger.write()
