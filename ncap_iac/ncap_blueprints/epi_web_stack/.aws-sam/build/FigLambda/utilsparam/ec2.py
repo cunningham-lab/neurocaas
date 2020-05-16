@@ -16,7 +16,7 @@ volume_available_waiter = ec2_client.get_waiter('volume_available')
 def get_instance(instanceid,logger):
     """ Gets the instance given an instance id.  """
     instance = ec2_resource.Instance(instanceid)
-    logger.append("Acquiring instance with id {}".format(instanceid))
+    logger.append("        [Utils] Acquiring instance with id {}".format(instanceid))
 
     return instance
 
@@ -25,11 +25,11 @@ def start_instance_if_stopped(instance, logger):
     
     # Check & Report Status
     state = instance.state['Name']
-    logger.append("Instance State: {}...".format(state))
+    logger.append("        [Utils] Instance State: {}...".format(state))
     
     # If not running, run:
     if state != 'running':
-        logger.append("Starting Instance...")
+        logger.append("        [Utils] Starting Instance...")
         instance.start()
         instance.wait_until_running()
         time.sleep(60)
@@ -42,32 +42,32 @@ def start_instances_if_stopped(instances, logger):
         
         # Check & Report Status
         state = instance.state['Name']
-        logger.append("Instance State: {}...".format(state))
+        logger.append("        [Utils] Instance State: {}...".format(state))
         
         # If not running, run:
         if state != 'running':
             try:
-                logger.append("Starting Instance...")
+                logger.append("        [Utils] Starting Instance...")
                 instance.start()
                 instance.wait_until_running()
                 logger.append('Instance started!')
             except botocore.exceptions.ClientError as e:
                 if e.response["Error"]["Code"] == "UnsupportedOperation":
-                    logger.append("Spot Instance, cannot be started manually. .")
+                    logger.append("        [Utils] Spot Instance, cannot be started manually. .")
                     ##TODO: figure out if you have to wait for this additionally. 
                     instance.wait_until_running()
                     logger.append('Instance started!')
                 else:
                     print("unhandled error, quitting")
-                    logger.append("unhandled error during job start, quitting")
+                    logger.append("        [Utils] unhandled error during job start, quitting")
                     logger.write()
-                    raise
+                    raise Exception("[JOB TERMINATE REASON] Unhandled error communicating with AWS. Contact NeuroCAAS admin.")
     time.sleep(60)
-    logger.append("Instances Initialized")
+    logger.append("        [Utils] Instances Initialized")
 
 def launch_new_instance(instance_type, ami, logger):
     """ Script To Launch New Instance From Image """
-    logger.append("Acquiring new {} instance from {} ...".format(instance_type, ami))
+    logger.append("        [Utils] Acquiring new {} instance from {} ...".format(instance_type, ami))
     
     instances = ec2_resource.create_instances(
         ImageId=ami,
@@ -79,7 +79,7 @@ def launch_new_instance(instance_type, ami, logger):
         SecurityGroups=[os.environ['SECURITY_GROUPS']],
         InstanceInitiatedShutdownBehavior=os.environ['SHUTDOWN_BEHAVIOR']
     )
-    logger.append("New instance {} created!".format(instances[0]))
+    logger.append("        [Utils] New instance {} created!".format(instances[0]))
     return instances[0]
 
 def launch_new_instances(instance_type, ami, logger, number, add_size, duration = None):
@@ -87,7 +87,7 @@ def launch_new_instances(instance_type, ami, logger, number, add_size, duration 
     If duration parameter is specified, will launch the appropriate cost instance
     If number parameter is specified, will try to launch the requested number of instances. If not available, then will return none. 
     """
-    logger.append("Acquiring new {} instances from {} ...".format(instance_type, ami))
+    logger.append("        [Utils] Acquiring new {} instances from {} ...".format(instance_type, ami))
 
     ## First parse the duration and figure out if there's anything we can do for it. 
     ## The duration should be given as the max number of minutes the job is expected to take. 
@@ -101,9 +101,9 @@ def launch_new_instances(instance_type, ami, logger, number, add_size, duration 
     elif duration is None:
         spot_duration = None
     else:
-        logger.append("duration parameter is not valid. Must be an integer representing max number of minutes expected.")
+        logger.append("        [Utils] duration parameter is not valid. Must be an integer representing max number of minutes expected.")
         logger.write()
-        raise ValueError("duration not valid.")
+        raise ValueError("[JOB TERMINATE REASON] Given __duration__ parameter is not valid. Must be an integer, giving the maximum time expected in minutes.")
 
     ## Now parse the dataset size and figure if we should diverge from default behavior. 
 
@@ -112,7 +112,7 @@ def launch_new_instances(instance_type, ami, logger, number, add_size, duration 
     ## Now we will take the parsed duration and use it to launch instances.  
     
     if spot_duration is None:
-        logger.append("save not available (duration not given or greater than 6 hours). Launching standard instance.")
+        logger.append("        [Utils] save not available (duration not given or greater than 6 hours). Launching standard instance.")
         logger.write()
         response = ec2_client.describe_images(ImageIds = [os.environ["AMI"]])
         root = response["Images"][0]["RootDeviceName"]
@@ -139,7 +139,7 @@ def launch_new_instances(instance_type, ami, logger, number, add_size, duration 
         )
 
     else:
-        logger.append("reserving save instance with for {} minutes".format(spot_duration))
+        logger.append("        [Utils] reserving save instance with for {} minutes".format(spot_duration))
         marketoptions = {"MarketType":'spot',
                 "SpotOptions":{
                     "SpotInstanceType":"one-time",
@@ -172,7 +172,7 @@ def launch_new_instances(instance_type, ami, logger, number, add_size, duration 
             )
         except botocore.exceptions.ClientError as e:
             if e.response["Error"]["Code"] == "InsufficientInstanceCapacity":
-                logger.append("save not available (beyond available aws capacity). Launching standard instance.")
+                logger.append("        [Utils] save not available (beyond available aws capacity). Launching standard instance.")
                 logger.write()
                 instances = ec2_resource.create_instances(
                     BlockDeviceMappings=[
@@ -196,10 +196,10 @@ def launch_new_instances(instance_type, ami, logger, number, add_size, duration 
                     InstanceInitiatedShutdownBehavior=os.environ['SHUTDOWN_BEHAVIOR']
                 )
             else:
-                logger.append("unhandled error while launching save instances. contact admin.")
-                raise ValueError("Unhandled exception")
+                logger.append("        [Utils] unhandled error while launching save instances. contact NeuroCAAS admin.")
+                raise ValueError("[JOB TERMINATE REASON] Unhandled exception")
 
-    [logger.append("New instance {} created!".format(instances[i])) for i in range(number)]
+    [logger.append("        [Utils] New instance {} created!".format(instances[i])) for i in range(number)]
     logger.write()
     return instances
 

@@ -17,6 +17,8 @@ except Exception as e:
 
 def handler_mkdir(event,context):
     responseData = {}
+    print(event,"event")
+    print(context,"context")
     ## Get properties: 
     try:
         if event['RequestType'] == 'Create':
@@ -41,6 +43,8 @@ def handler_mkdir(event,context):
 
 def handler_deldir(event, context):
     responseData = {}
+    print(event,"event")
+    print(context,"context")
     try:
         if event['RequestType'] == 'Delete':
             bucket = event['ResourceProperties']['BucketName']
