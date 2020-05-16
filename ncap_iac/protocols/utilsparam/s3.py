@@ -325,6 +325,7 @@ class JobLogger_demo(Logger):
         self.basepath = path
         ## Declare the object you will write to: 
         self.writeobj = s3_resource.Object(bucket_name,self.path)
+        self.basetime = datetime.datetime.now()
         self._logs = []
         self._datasets = {}
         self._config = {}
@@ -386,7 +387,7 @@ class JobLogger_demo(Logger):
     def append(self, string):
         """ """
         self._logs.append(
-                string + "\n\t\t\t [log time: {}]".format(str(datetime.datetime.now())[:-4]) 
+                string + "\t [duration: {}]".format(str(datetime.datetime.now()-self.basetime)[:-4]) 
         )
     def printlatest(self):
         """ print the most recent item appended to logs. """
