@@ -387,7 +387,7 @@ class JobLogger_demo(Logger):
     def append(self, string):
         """ """
         self._logs.append(
-                string + "\t [duration: {}]".format(str(datetime.datetime.now()-self.basetime)[:-4]) 
+                string + "\t [+{}]".format(str(datetime.datetime.now()-self.basetime)[:-4]) 
         )
     def printlatest(self):
         """ print the most recent item appended to logs. """
