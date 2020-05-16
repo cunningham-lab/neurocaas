@@ -16,7 +16,7 @@
             "IAM_ROLE": "SSMRole",
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
             "WORKING_DIRECTORY": "~/bin",
-            "COMMAND": "ls; cd /home/ubuntu; ncap_remote/run_mock.sh \"{}\" \"{}\" \"{}\" \"{}\";",
+            "COMMAND": "ls; cd /home/ubuntu; ncap_remote/run_mock.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
             "SHUTDOWN_BEHAVIOR": "terminate",
             "CONFIG": "config.yaml",
             "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
@@ -43,6 +43,16 @@
                 ],
                 "UserInput": true,
                 "ContactEmail": "tgabe94@gmail.com"
+            },
+            {
+                "AffiliateName": "reviewers",
+                "UserNames": [
+                    "editornn"
+                ],
+                "PipelinePath": "",
+                "PipelineDir": "trackingfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
             },
             {
                 "AffiliateName": "examplegroup2",
