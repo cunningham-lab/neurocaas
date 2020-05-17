@@ -25,7 +25,7 @@
             "LAUNCH": true,
             "LOGFILE": "lambda_log.txt",
             "DEPLOY_LIMIT": 300,
-            "MAXCOST": 100,
+            "MAXCOST": 300,
             "MONITOR": true,
             "LOGDIR": "logs",
             "OUTDIR": "results",
