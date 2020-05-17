@@ -38,6 +38,16 @@
                 "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
             },
             {
+                "AffiliateName": "reviewers",
+                "UserNames": [
+                    "editornn"
+                ],
+                "PipelinePath": "",
+                "PipelineDir": "trackingfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
+            },
+            {
                 "AffiliateName": "developergroup1",
                 "UserNames": [
                     "ta2507"
