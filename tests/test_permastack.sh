@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
+## This is a test of the "MainLambda" function as contained in the ncap_iac/protocols/submit_start.py module. It makes use of a permanently built stack (cianalysispermastack), and will use the FigLambda function there as part of its testing. Note that a semi-exhaustive set of 30 test cases for this function is contained in the "envs" section of the .travis.yml file above. This is a nice building block to assure that the main lambda function is correctly functioning.  
+
 analysisdirname=cianalysispermastack
 testgroupid=traviscipermagroup
 
