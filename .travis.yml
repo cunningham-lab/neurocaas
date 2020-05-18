@@ -59,10 +59,10 @@ stages:
 install:
   - pip install -r requirements.txt
   - pip install aws-sam-cli
-  - apt-get -y libcurl4-openssl-dev
-  - apt-get -y libelf-dev
-  - apt-get -y libdw-dev
-  - apt-get -y cmake
+  - apt-get libcurl4-openssl-dev
+  - apt-get libelf-dev
+  - apt-get libdw-dev
+  - apt-get cmake
 before_script:
   - sudo apt-get install jq
 script:
