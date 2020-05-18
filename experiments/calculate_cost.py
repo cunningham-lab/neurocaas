@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 import json
+import yaml
 import matplotlib.pyplot as plt
 
 ## First get difference between two times, given as a list of lists. 
@@ -888,7 +889,7 @@ def getCustomMetrics(custom_template):
        analysis (str): the analysis against which to compare. Can be CaImAn, DLC, or PMDLocaNMF.  
        performance (dict): if you have already run analyses on comparable datasets on your own machine, you can supply the time taken here.    
     """
-    data = json.load(open(custom_template,"r"))
+    data = yaml.safe_load(open(custom_template,"r"))
 
     ## Which analysis are you comparing against? 
     pipeline = data["analysis"]

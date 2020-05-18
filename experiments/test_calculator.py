@@ -3,8 +3,8 @@ import numpy as np
 import calculate_cost
 
 ## Test the custom cost calculator against the baseline cost calculators. 
-path = "Custom_CostCalculator/test_templates"
-pathtemplate = "hardwarecost{a}_{b}.json"
+path = "Custom_CostFiles/test_templates"
+pathtemplate = "hardwarecost{a}_{b}.yaml"
 analyses = ["CaImAn","DLC","PMDLocaNMF"]
 prices = ["workstation","cluster"]
 caimanworkstation = os.path.join(path,"hardwarecostCaImAn_workstation.json") 

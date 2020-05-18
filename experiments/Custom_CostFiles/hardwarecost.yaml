@@ -1,0 +1,14 @@
+# Template file for custom cost calculation. Represents the case where you HAVE run the data that we compare against on your own system,
+# and have analysis time numbers that you would like to benchmark against. 
+
+analysis: CaImAn ## Can be CaImAn, DLC, or PMDLocaNMF corresponding to figures that we produced. 
+
+performance: ## If you timed you own data analysis, provide info for how you did so here. If you would like to assume the same timings provided in the paper, leave this field as null (see other example file)  
+  analysis_time: 1000 ## The time in seconds it took to complete analysis.  
+  size: small ## Can be "small", "medium", or "large", corresponding to the three different dataset sizes that we analyzed in the paper. See paper for details on these dataset specs. 
+
+## Price tag cost of local hardware in US Dollars 
+pricetag_cost: 2499 
+
+## Cost of supporting hardware over 5 years. Can be a list (see other example file), or the defaults used in the paper (choose "cluster default" for default support costs from the AWS TCO calculator, "workstation_default" for default desktop computer support costs, or "laptop_default" for default laptop computer support costs).
+support_cost: cluster_default    
