@@ -56,7 +56,6 @@ stages:
   - experiments
   - test 
 jobs:
-  include:
   - stage: experiments
     install:
       - pip install -r requirements_experiments.txt
