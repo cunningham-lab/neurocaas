@@ -304,7 +304,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "f01a91922b266066c6f7dbdd747b7ff0bb556110\n"
+                        "versionid": "a736b837a149fedbf5819e9890f102f817fa146c\n"
                     }
                 },
                 "Events": {
@@ -411,7 +411,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "f01a91922b266066c6f7dbdd747b7ff0bb556110\n"
+                        "versionid": "a736b837a149fedbf5819e9890f102f817fa146c\n"
                     }
                 },
                 "Handler": "helper.handler_deldir",
@@ -515,7 +515,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "f01a91922b266066c6f7dbdd747b7ff0bb556110\n"
+                        "versionid": "a736b837a149fedbf5819e9890f102f817fa146c\n"
                     }
                 },
                 "Handler": "helper.handler_mkdir",

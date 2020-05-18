@@ -15,6 +15,21 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
+        "BaseFolderexamplegroup2": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "examplegroup2",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
         "BaseFolderorigdevs": {
             "DependsOn": "PipelineMainBucket",
             "Properties": {
@@ -162,6 +177,24 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
+        "ConfigFolderexamplegroup2": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderexamplegroup2"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "configs",
+                "Path": "examplegroup2/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
         "ConfigFolderorigdevs": {
             "DependsOn": [
                 "PipelineMainBucket",
@@ -284,6 +317,24 @@
                 "BucketName": "caiman-ncap-web",
                 "DirName": "inputs",
                 "Path": "brunolab/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "InFolderexamplegroup2": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderexamplegroup2"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "inputs",
+                "Path": "examplegroup2/",
                 "ServiceToken": {
                     "Fn::GetAtt": [
                         "S3PutObjectFunction",
@@ -464,6 +515,24 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
+        "LogFolderexamplegroup2": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "examplegroup2",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
         "LogFolderorigdevs": {
             "DependsOn": [
                 "PipelineMainBucket",
@@ -542,8 +611,8 @@
                 "Description": "Main Lambda Function for Serverless",
                 "Environment": {
                     "Variables": {
-                        "AMI": "ami-0c03d5ceacec4a53f",
-                        "COMMAND": "ls; cd /home/ubuntu; ncap_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
+                        "AMI": "ami-0a59408ccd583cfa1",
+                        "COMMAND": "ls; cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\" \"neurocaas_remote/caiman/run_caiman.sh\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
                         "CONFIG": "config.yaml",
                         "CONFIGDIR": "configs",
                         "DEPLOY_LIMIT": 100,
@@ -580,7 +649,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
+                        "versionid": "1ef4dcc1c36e661446152865d18abf8663e2a683\n"
                     }
                 },
                 "Events": {
@@ -598,6 +667,31 @@
                                         {
                                             "Name": "prefix",
                                             "Value": "brunolab/submissions"
+                                        },
+                                        {
+                                            "Name": "suffix",
+                                            "Value": "submit.json"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "Type": "S3"
+                    },
+                    "BucketEventexamplegroup2": {
+                        "Properties": {
+                            "Bucket": {
+                                "Ref": "PipelineMainBucket"
+                            },
+                            "Events": [
+                                "s3:ObjectCreated:*"
+                            ],
+                            "Filter": {
+                                "S3Key": {
+                                    "Rules": [
+                                        {
+                                            "Name": "prefix",
+                                            "Value": "examplegroup2/submissions"
                                         },
                                         {
                                             "Name": "suffix",
@@ -736,6 +830,24 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
+        "OutFolderexamplegroup2": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderexamplegroup2"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "results",
+                "Path": "examplegroup2/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
         "OutFolderorigdevs": {
             "DependsOn": [
                 "PipelineMainBucket",
@@ -821,8 +933,8 @@
                 "Description": "Deletes Objects from S3",
                 "Environment": {
                     "Variables": {
-                        "AMI": "ami-0c03d5ceacec4a53f",
-                        "COMMAND": "ls; cd /home/ubuntu; ncap_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
+                        "AMI": "ami-0a59408ccd583cfa1",
+                        "COMMAND": "ls; cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\" \"neurocaas_remote/caiman/run_caiman.sh\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
                         "CONFIG": "config.yaml",
                         "CONFIGDIR": "configs",
                         "DEPLOY_LIMIT": 100,
@@ -859,7 +971,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
+                        "versionid": "1ef4dcc1c36e661446152865d18abf8663e2a683\n"
                     }
                 },
                 "Handler": "helper.handler_deldir",
@@ -925,8 +1037,8 @@
                 "Description": "Puts Objects in S3",
                 "Environment": {
                     "Variables": {
-                        "AMI": "ami-0c03d5ceacec4a53f",
-                        "COMMAND": "ls; cd /home/ubuntu; ncap_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
+                        "AMI": "ami-0a59408ccd583cfa1",
+                        "COMMAND": "ls; cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\" \"neurocaas_remote/caiman/run_caiman.sh\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
                         "CONFIG": "config.yaml",
                         "CONFIGDIR": "configs",
                         "DEPLOY_LIMIT": 100,
@@ -963,7 +1075,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
+                        "versionid": "1ef4dcc1c36e661446152865d18abf8663e2a683\n"
                     }
                 },
                 "Handler": "helper.handler_mkdir",
@@ -987,6 +1099,24 @@
                 "BucketName": "caiman-ncap-web",
                 "DirName": "submissions",
                 "Path": "brunolab/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "SubmitFolderexamplegroup2": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderexamplegroup2"
+            ],
+            "Properties": {
+                "BucketName": "caiman-ncap-web",
+                "DirName": "submissions",
+                "Path": "examplegroup2/",
                 "ServiceToken": {
                     "Fn::GetAtt": [
                         "S3PutObjectFunction",
@@ -1168,6 +1298,111 @@
                             "Version": "2012-10-17"
                         },
                         "PolicyName": "brunolabpolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Group"
+        },
+        "UserGroupexamplegroup2caimanncapweb": {
+            "Properties": {
+                "GroupName": "examplegroup2caimanncapwebgroup",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "s3:GetBucketLocation",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor0"
+                                },
+                                {
+                                    "Action": "s3:HeadBucket",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor3"
+                                },
+                                {
+                                    "Action": "s3:ListAllMyBuckets",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor1"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringEquals": {
+                                            "s3:delimiter": [
+                                                "/"
+                                            ],
+                                            "s3:prefix": [
+                                                "",
+                                                "examplegroup2/",
+                                                "examplegroup2/inputs",
+                                                "examplegroup2/results",
+                                                "logs",
+                                                "examplegroup2/submissions",
+                                                "examplegroup2/configs",
+                                                "examplegroup2/inputs/",
+                                                "examplegroup2/results/",
+                                                "examplegroup2/submissions/",
+                                                "examplegroup2/configs/"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web"
+                                    ],
+                                    "Sid": "ListBucket"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringLike": {
+                                            "s3:prefix": [
+                                                "examplegroup2/inputs/*",
+                                                "examplegroup2/results/*",
+                                                "examplegroup2/configs/*",
+                                                "examplegroup2/submissions/*"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web"
+                                    ],
+                                    "Sid": "ListSubBucket"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web/examplegroup2/inputs/*",
+                                        "arn:aws:s3:::caiman-ncap-web/examplegroup2/configs/*",
+                                        "arn:aws:s3:::caiman-ncap-web/examplegroup2/submissions/*"
+                                    ],
+                                    "Sid": "Inputfolderwrite"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::caiman-ncap-web/examplegroup2/results/*",
+                                        "arn:aws:s3:::caiman-ncap-web/examplegroup2/configs/*"
+                                    ],
+                                    "Sid": "Outputfolderwrite"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "examplegroup2policy"
                     }
                 ]
             },
@@ -1602,6 +1837,19 @@
                     "rb2604us-east-1",
                     "sb4096us-east-1",
                     "dk2643us-east-1"
+                ]
+            },
+            "Type": "AWS::IAM::UserToGroupAddition"
+        },
+        "examplegroup2UserNet": {
+            "Properties": {
+                "GroupName": {
+                    "Ref": "UserGroupexamplegroup2caimanncapweb"
+                },
+                "Users": [
+                    "jpccosyneus-east-1",
+                    "srbcosyneus-east-1",
+                    "tacosyneus-east-1"
                 ]
             },
             "Type": "AWS::IAM::UserToGroupAddition"

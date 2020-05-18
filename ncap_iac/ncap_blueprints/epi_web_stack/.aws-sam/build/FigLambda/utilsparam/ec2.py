@@ -42,28 +42,38 @@ def start_instances_if_stopped(instances, logger):
         
         # Check & Report Status
         state = instance.state['Name']
-        logger.append("        [Utils] Instance State: {}...".format(state))
+        logger.append("        [Utils] Instance {} State: {}...".format(instance.id,state))
         
         # If not running, run:
         if state != 'running':
             try:
                 logger.append("        [Utils] Starting Instance...")
+                logger.write()
                 instance.start()
                 instance.wait_until_running()
-                logger.append('Instance started!')
+                logger.append('        [Utils] Instance started!')
+                logger.write()
             except botocore.exceptions.ClientError as e:
                 if e.response["Error"]["Code"] == "UnsupportedOperation":
-                    logger.append("        [Utils] Spot Instance, cannot be started manually. .")
+                    logger.append("        [Utils] Spot Instance, cannot be started manually. Waiting...")
+                    logger.write()
                     ##TODO: figure out if you have to wait for this additionally. 
                     instance.wait_until_running()
-                    logger.append('Instance started!')
+                    logger.append('        [Utils] Instance started!')
+                    logger.write()
                 else:
                     print("unhandled error, quitting")
                     logger.append("        [Utils] unhandled error during job start, quitting")
                     logger.write()
                     raise Exception("[JOB TERMINATE REASON] Unhandled error communicating with AWS. Contact NeuroCAAS admin.")
+        else:
+            logger.append("        [Utils] Instance already running.")
+            logger.write()
+    logger.append("        [Utils] Initializing instances. This could take a moment...")
+    logger.write()
     time.sleep(60)
-    logger.append("        [Utils] Instances Initialized")
+    logger.append("        [Utils] All Instances Initialized.")
+    logger.write()
 
 def launch_new_instance(instance_type, ami, logger):
     """ Script To Launch New Instance From Image """
@@ -139,7 +149,7 @@ def launch_new_instances(instance_type, ami, logger, number, add_size, duration 
         )
 
     else:
-        logger.append("        [Utils] reserving save instance with for {} minutes".format(spot_duration))
+        logger.append("        [Utils] Reserving save instance for {} minutes".format(spot_duration))
         marketoptions = {"MarketType":'spot',
                 "SpotOptions":{
                     "SpotInstanceType":"one-time",
@@ -172,7 +182,7 @@ def launch_new_instances(instance_type, ami, logger, number, add_size, duration 
             )
         except botocore.exceptions.ClientError as e:
             if e.response["Error"]["Code"] == "InsufficientInstanceCapacity":
-                logger.append("        [Utils] save not available (beyond available aws capacity). Launching standard instance.")
+                logger.append("        [Utils] Save not available (beyond available aws capacity). Launching standard instance.")
                 logger.write()
                 instances = ec2_resource.create_instances(
                     BlockDeviceMappings=[

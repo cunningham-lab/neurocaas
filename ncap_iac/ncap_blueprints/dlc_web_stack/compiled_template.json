@@ -90,6 +90,21 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
+        "BaseFolderreviewers": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "dlc-ncap-web",
+                "DirName": "reviewers",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
         "BaseFoldersawtelllab": {
             "DependsOn": "PipelineMainBucket",
             "Properties": {
@@ -282,6 +297,24 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
+        "ConfigFolderreviewers": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderreviewers"
+            ],
+            "Properties": {
+                "BucketName": "dlc-ncap-web",
+                "DirName": "configs",
+                "Path": "reviewers/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
         "ConfigFoldersawtelllab": {
             "DependsOn": [
                 "PipelineMainBucket",
@@ -440,6 +473,24 @@
                 "BucketName": "dlc-ncap-web",
                 "DirName": "inputs",
                 "Path": "origdevs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "InFolderreviewers": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderreviewers"
+            ],
+            "Properties": {
+                "BucketName": "dlc-ncap-web",
+                "DirName": "inputs",
+                "Path": "reviewers/",
                 "ServiceToken": {
                     "Fn::GetAtt": [
                         "S3PutObjectFunction",
@@ -656,6 +707,24 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
+        "LogFolderreviewers": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "dlc-ncap-web",
+                "DirName": "reviewers",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
         "LogFoldersawtelllab": {
             "DependsOn": [
                 "PipelineMainBucket",
@@ -680,8 +749,8 @@
                 "Description": "Main Lambda Function for Serverless",
                 "Environment": {
                     "Variables": {
-                        "AMI": "ami-08908548fb646cbcc",
-                        "COMMAND": "ls; cd /home/ubuntu; ncap_remote/dlc_rc.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
+                        "AMI": "ami-012a58e3790f17887",
+                        "COMMAND": "ls; cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\" \"neurocaas_remote/dlc/run_dlc.sh\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
                         "CONFIG": "config.yaml",
                         "CONFIGDIR": "configs",
                         "DEPLOY_LIMIT": 300,
@@ -718,7 +787,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
+                        "versionid": "a1bed3619c41a86c0e8e6aa5ed1922ae1de65ee4\n"
                     }
                 },
                 "Events": {
@@ -872,6 +941,31 @@
                         },
                         "Type": "S3"
                     },
+                    "BucketEventreviewers": {
+                        "Properties": {
+                            "Bucket": {
+                                "Ref": "PipelineMainBucket"
+                            },
+                            "Events": [
+                                "s3:ObjectCreated:*"
+                            ],
+                            "Filter": {
+                                "S3Key": {
+                                    "Rules": [
+                                        {
+                                            "Name": "prefix",
+                                            "Value": "reviewers/submissions"
+                                        },
+                                        {
+                                            "Name": "suffix",
+                                            "Value": "submit.json"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "Type": "S3"
+                    },
                     "BucketEventsawtelllab": {
                         "Properties": {
                             "Bucket": {
@@ -1014,6 +1108,24 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
+        "OutFolderreviewers": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderreviewers"
+            ],
+            "Properties": {
+                "BucketName": "dlc-ncap-web",
+                "DirName": "results",
+                "Path": "reviewers/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
         "OutFoldersawtelllab": {
             "DependsOn": [
                 "PipelineMainBucket",
@@ -1045,8 +1157,8 @@
                 "Description": "Deletes Objects from S3",
                 "Environment": {
                     "Variables": {
-                        "AMI": "ami-08908548fb646cbcc",
-                        "COMMAND": "ls; cd /home/ubuntu; ncap_remote/dlc_rc.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
+                        "AMI": "ami-012a58e3790f17887",
+                        "COMMAND": "ls; cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\" \"neurocaas_remote/dlc/run_dlc.sh\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
                         "CONFIG": "config.yaml",
                         "CONFIGDIR": "configs",
                         "DEPLOY_LIMIT": 300,
@@ -1083,7 +1195,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
+                        "versionid": "a1bed3619c41a86c0e8e6aa5ed1922ae1de65ee4\n"
                     }
                 },
                 "Handler": "helper.handler_deldir",
@@ -1149,8 +1261,8 @@
                 "Description": "Puts Objects in S3",
                 "Environment": {
                     "Variables": {
-                        "AMI": "ami-08908548fb646cbcc",
-                        "COMMAND": "ls; cd /home/ubuntu; ncap_remote/dlc_rc.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
+                        "AMI": "ami-012a58e3790f17887",
+                        "COMMAND": "ls; cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\" \"neurocaas_remote/dlc/run_dlc.sh\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
                         "CONFIG": "config.yaml",
                         "CONFIGDIR": "configs",
                         "DEPLOY_LIMIT": 300,
@@ -1187,7 +1299,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "542fc7590087d9d57d88429c2f859b49ae5d53b0\n"
+                        "versionid": "a1bed3619c41a86c0e8e6aa5ed1922ae1de65ee4\n"
                     }
                 },
                 "Handler": "helper.handler_mkdir",
@@ -1301,6 +1413,24 @@
                 "BucketName": "dlc-ncap-web",
                 "DirName": "submissions",
                 "Path": "origdevs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "SubmitFolderreviewers": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFolderreviewers"
+            ],
+            "Properties": {
+                "BucketName": "dlc-ncap-web",
+                "DirName": "submissions",
+                "Path": "reviewers/",
                 "ServiceToken": {
                     "Fn::GetAtt": [
                         "S3PutObjectFunction",
@@ -1958,6 +2088,111 @@
             },
             "Type": "AWS::IAM::Group"
         },
+        "UserGroupreviewersdlcncapweb": {
+            "Properties": {
+                "GroupName": "reviewersdlcncapwebgroup",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "s3:GetBucketLocation",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor0"
+                                },
+                                {
+                                    "Action": "s3:HeadBucket",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor3"
+                                },
+                                {
+                                    "Action": "s3:ListAllMyBuckets",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor1"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringEquals": {
+                                            "s3:delimiter": [
+                                                "/"
+                                            ],
+                                            "s3:prefix": [
+                                                "",
+                                                "reviewers/",
+                                                "reviewers/inputs",
+                                                "reviewers/results",
+                                                "logs",
+                                                "reviewers/submissions",
+                                                "reviewers/configs",
+                                                "reviewers/inputs/",
+                                                "reviewers/results/",
+                                                "reviewers/submissions/",
+                                                "reviewers/configs/"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::dlc-ncap-web"
+                                    ],
+                                    "Sid": "ListBucket"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringLike": {
+                                            "s3:prefix": [
+                                                "reviewers/inputs/*",
+                                                "reviewers/results/*",
+                                                "reviewers/configs/*",
+                                                "reviewers/submissions/*"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::dlc-ncap-web"
+                                    ],
+                                    "Sid": "ListSubBucket"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::dlc-ncap-web/reviewers/inputs/*",
+                                        "arn:aws:s3:::dlc-ncap-web/reviewers/configs/*",
+                                        "arn:aws:s3:::dlc-ncap-web/reviewers/submissions/*"
+                                    ],
+                                    "Sid": "Inputfolderwrite"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::dlc-ncap-web/reviewers/results/*",
+                                        "arn:aws:s3:::dlc-ncap-web/reviewers/configs/*"
+                                    ],
+                                    "Sid": "Outputfolderwrite"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "reviewerspolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Group"
+        },
         "UserGroupsawtelllabdlcncapweb": {
             "Properties": {
                 "GroupName": "sawtelllabdlcncapwebgroup",
@@ -2130,6 +2365,17 @@
                 "Users": [
                     "mmathisus-east-1",
                     "amathisus-east-1"
+                ]
+            },
+            "Type": "AWS::IAM::UserToGroupAddition"
+        },
+        "reviewersUserNet": {
+            "Properties": {
+                "GroupName": {
+                    "Ref": "UserGroupreviewersdlcncapweb"
+                },
+                "Users": [
+                    "editornnus-east-1"
                 ]
             },
             "Type": "AWS::IAM::UserToGroupAddition"

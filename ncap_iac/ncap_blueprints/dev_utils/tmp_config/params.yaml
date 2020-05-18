@@ -1,0 +1,44 @@
+##################################################################################################################
+## PARAMETERS THAT YOU SHOULD CHANGE
+##################################################################################################################
+# Names of variables in the inputdatafile
+denoised_temporal_name : 'Vc'
+denoised_spatial_name : 'Uc'
+brainmask_name : 'brainmask'
+
+# maxrank = how many max components per brain region. Set maxrank to around 4 for regular dataset.
+maxrank : 4
+
+# min_pixels = minimum number of pixels in Allen map for it to be considered a brain region
+# default min_pixels = 100
+min_pixels : 100
+
+# loc_thresh = Localization threshold, i.e. percentage of area restricted to be inside the 'Allen boundary'
+# default loc_thresh = 80
+loc_thresh : 80
+
+# r2_thresh = Fraction of variance in the data to capture with LocaNMF
+# default r2_thresh = 0.99
+r2_thresh : 0.99
+
+##################################################################################################################
+## PARAMETERS THAT YOU SHOULD PROBABLY NOT CHANGE (unless you know what you're doing)
+##################################################################################################################
+# maxiter_hals = Number of iterations in innermost loop (HALS). Keeping this low provides a sort of regularization.
+maxiter_hals : 20
+
+# maxiter_lambda = Number of iterations for the lambda loop. Keep this high for finding a good solution.
+maxiter_lambda : 300
+
+# lambda_step = Amount to multiply lambda after every lambda iteration. 
+# lambda_init = initial value of lambda. Keep this low.
+# lambda_{i+1}=lambda_i*lambda_step. lambda_0=lambda_init.
+lambda_step : 1.35
+lambda_init : 0.000001
+##################################################################################################################
+## NEUROCAAS PARAMETERS
+##################################################################################################################
+## Path to the atlas you will use to analyze data: 
+atlas_path: 'debuggers/inputs/atlas.mat'
+__duration__: 30
+__dataset_size__: 300

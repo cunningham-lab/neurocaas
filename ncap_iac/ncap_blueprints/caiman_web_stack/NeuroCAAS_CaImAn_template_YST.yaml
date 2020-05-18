@@ -1,0 +1,67 @@
+# Template configuration file for CaImAn (Giovannucci et al. 2019)
+# This analysis requires workflow parameters, to determine what steps should be applied to data and compute parameters, to determine how that data should be analyzed. 
+
+# CaImAn Workflow Parameters
+# ++++++++++++++++++++++++++
+
+# COMPONENT EVAL: If true, CaImAn will evaluate the results of fitting, and remove detected false positives according to given Compute Parameters. 
+# Component Evaluation will be run once, after fitting or refitting according to the fitting_mode parameter. 
+# Type: BOOL
+component_eval: true
+
+# FITTING MODE: How many times to fit the data. 
+# Using "fit" will fit the data once, using "refit" will perform a second round of model fitting using the results of the first fit as initialization. 
+# Values: "fit" or "refit"
+# Type: STRING
+fitting_mode: fit
+
+# CaImAn Compute Parameters
+# +++++++++++++++++++++++++
+
+# PARAM MODE: The way that parameters will be passed to the analysis. 
+# if "simple", analysis will read parameters directly from the "params" field. 
+# If "advanced", analysis will from a saved parameter dictionary. 
+# Values: "simple" or "advanced"
+# Type: STRING
+param_mode: simple
+
+# PARAMS: The parameters used to analyze CaImAn, given inline. The fields here are the most critical for analysis via CaImAn, that should be changed per dataset. 
+# Other parameters will be set to defaults unless you list them below. 
+# For more information on available parameters, see https://caiman.readthedocs.io/en/master/Getting_Started.html#parameters
+params:
+  K: 10 # expected number of components per patch. 
+  decay_time: 0.75 # half size of patches in pixels
+  fr: 10 # frame rate (fps)
+  gSig: # expected half-size of neurons in pixels (rows x columns) [interpreted as a list, [5,5]]
+  - 5
+  - 5
+  merge_thr: 0.8 # merge threshold of components 
+  method_init: greedy_roi # method to use for initialization. Greedy roi = 2 photon, corr_pnr = 1 photon, sparse_nmf = dendritic/axonal
+  nb: 2 # number of global background components.
+  p: 1 # order of autoregressive model.
+  rf: 15 # half size of patches in pixels
+  ssub: 2 # spatial subsampling during initialization
+  stride: 10 # overlap between patches in pixels
+  tsub:  # temporal subsampling during initialization. 
+
+# PARAM DICT: 
+# If param_mode is "advanced", parameters are provided via a dictionary. This dictionary is assumed to be obtained from the params.to_dict() method, which has then been saved via pickle. 
+# Upload the pickled dictionary to the datasets area, and provide the name of it here: 
+# Values: Paths
+# Type: STRING
+param_dict: 'reviewers/inputs/param_pickle' # do not change the path, just substitute the actual name of your data for "param_pickle"
+
+# NeuroCAAS Parameters:
+# ++++++++++++++++++++
+
+# DURATION: You can specify the duration parameter if you know how long the job will last to trigger a NeuroCAAS Save job. 
+# This will cost around half of a standard job, and the instance will terminate once the given time limit is reached, whether or not analysis is complete.
+# Units: Minutes 
+# Type: INTEGER.
+"__duration__": 30
+
+# DATASET SIZE: You can specify the dataset_size parameter if your dataset is large, and you know you will need extra storage space in the immutable analysis environment.
+# This space will be added onto the existing size of the instance.
+# Units: GB
+# Type: INTEGER
+"__dataset_size__": 300

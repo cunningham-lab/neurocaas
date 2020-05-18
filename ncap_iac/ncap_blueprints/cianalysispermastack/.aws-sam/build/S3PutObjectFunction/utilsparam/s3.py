@@ -90,8 +90,7 @@ def load_json(bucket_name, key):
         raw_content = file_object.get()['Body'].read().decode('utf-8')
         json_content = json.loads(raw_content)
     except ValueError as ve:
-        print("Error loading config file. Error is: {}".format(ve))
-        raise ValueError
+        raise ValueError("[JOB TERMINATE REASON] Could not load config file. From parser: {}".format(ve))
 
     ## Transfer type 
     return json_content 
@@ -103,8 +102,7 @@ def load_yaml(bucket_name, key):
         raw_content = file_object.get()['Body'].read().decode('utf-8')
         yaml_content = yaml.safe_load(raw_content)
     except ValueError as ve:
-        print("Error loading config file. Error is: {}".format(ve))
-        raise ValueError
+        raise ValueError("[JOB TERMINATE REASON] Could not load config file. From parser: {}".format(ve))
     return yaml_content
 
 def extract_files(bucket_name,prefix,ext = None):
@@ -123,6 +121,17 @@ def extract_files(bucket_name,prefix,ext = None):
         file_list = [obj.key for obj in objgen if obj.key[-1] != "/" and obj.key.split(".")[-1] == ext]
 
     return file_list 
+
+def write_endfile(bucketname,resultpath):
+    """
+    Given the name of a bucket and a path to a result directory, writes an "end.txt" file to that bucket.
+    """
+    bucket = s3_resource.Bucket(bucketname)
+    bucket.put_object(
+            Key = os.path.join(resultpath,"process_results","end.txt"),
+            Body = bytes("end of analysis marker".encode('UTF-8'))
+            )
+
 
 def write_active_monitorlog(bucketname,name,log):
     """
@@ -169,10 +178,10 @@ def update_monitorlog(bucketname,name,status,time):
     except ClientError as e:
         if e.response["Error"]["Code"] == "NoSuchKey":
             print("log {} does not exist".format(key))
-            raise
+            raise Exception("[JOB TERMINATE REASON] active log could not be found in folder.")
         else:
             print("unhandled exception.")
-            raise
+            raise Exception("[JOB TERMINATE REASON] Unhandled exception while retrieving data. Contact NeuroCAAS admin.")
 
     return log
 

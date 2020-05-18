@@ -279,7 +279,7 @@ Resources:
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
-          AMI: ami-0b5faeda5f7322438
+          AMI: ami-08097305f435c1cc4
           COMMAND: ls; cd /home/ubuntu; neurocaas_remote/run_main.sh "{}" "{}" "{}"
             "{}" "neurocaas_remote/epi/run_epi_internal.sh"; . neurocaas_remote/ncap_utils/workflow.sh;
             cleanup
@@ -314,7 +314,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: 'f0b354c6acef7cb77a61b21f752d1818b9c58d41
+          versionid: '1fbc87d790d77a901a40c149926efc76af6dd211
 
             '
       Events:
@@ -416,7 +416,7 @@ Resources:
       Description: Deletes Objects from S3
       Environment:
         Variables:
-          AMI: ami-0b5faeda5f7322438
+          AMI: ami-08097305f435c1cc4
           COMMAND: ls; cd /home/ubuntu; neurocaas_remote/run_main.sh "{}" "{}" "{}"
             "{}" "neurocaas_remote/epi/run_epi_internal.sh"; . neurocaas_remote/ncap_utils/workflow.sh;
             cleanup
@@ -451,7 +451,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: 'f0b354c6acef7cb77a61b21f752d1818b9c58d41
+          versionid: '1fbc87d790d77a901a40c149926efc76af6dd211
 
             '
       Handler: helper.handler_deldir
@@ -493,7 +493,7 @@ Resources:
       Description: Puts Objects in S3
       Environment:
         Variables:
-          AMI: ami-0b5faeda5f7322438
+          AMI: ami-08097305f435c1cc4
           COMMAND: ls; cd /home/ubuntu; neurocaas_remote/run_main.sh "{}" "{}" "{}"
             "{}" "neurocaas_remote/epi/run_epi_internal.sh"; . neurocaas_remote/ncap_utils/workflow.sh;
             cleanup
@@ -528,7 +528,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: 'f0b354c6acef7cb77a61b21f752d1818b9c58d41
+          versionid: '1fbc87d790d77a901a40c149926efc76af6dd211
 
             '
       Handler: helper.handler_mkdir

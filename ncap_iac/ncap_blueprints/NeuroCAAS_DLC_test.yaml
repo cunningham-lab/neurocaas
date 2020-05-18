@@ -1,0 +1,35 @@
+# Template configuration file for DeepLabCut (Mathis et al. 2018), analyzing new videos. 
+# IMPORTANT: The inputs selected with this config file should be videos. 
+# All other information (models, parameters) should be specified with paths in this file. 
+
+# DeepLabCut Parameters:
+# +++++++++++++++++++++
+# MODE: the phase of analysis to run. 
+# Used to specify whether we will be training a new network on labeled images (train)
+# or to perform pose tracking on a new video with a pre-trained network (test)
+# Values: "test" or "train"
+# Type: STRING
+mode: test
+
+# MODELDATA: the data that will be used to configure analysis of videos. 
+# Provided as two paths: one to the DeepLabCut configuration file used to analyze this data, and another 
+# to a model folder provided as output from a DeepLabCut training routine. 
+# See https://github.com/AlexEMG/DeepLabCut/tree/1.11 for more information on how these files are configured.
+modeldata:
+  # CONFIGPATH: make sure that the video file format matches the dataset you will be selecting. 
+  configpath: reviewers/inputs/myconfig_analysis_template.py # Do not change path, only change the basename when uploading new data.
+  modelpath: reviewers/inputs/reachingJan30-trainset95shuffle1/ # Do not change path, only change the basename when uploading new data. Can be uploaded directly from a training job. 
+
+# NeuroCAAS Parameters:
+# ++++++++++++++++++++
+# DURATION: You can specify the duration parameter if you know how long the job will last to trigger a NeuroCAAS Save job. 
+# This will cost around half of a standard job if reserved duration instances are available, and the instance will terminate once the given time limit is reached, whether or not analysis is complete.
+# Units: Minutes 
+# Type: INTEGER.
+"__duration__": 30
+
+# DATASET SIZE: You can specify the dataset_size parameter if your dataset is large, and you know you will need extra storage space in the immutable analysis environment.
+# This space will be added onto the existing size of the instance.
+# Units: GB
+# Type: INTEGER
+"__dataset_size__": 300

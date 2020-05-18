@@ -279,9 +279,9 @@ Resources:
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
-          AMI: ami-021135eec3b08cf86
-          COMMAND: cd /home/ubuntu/; ncap_remote/run_pmd_main.sh "{}" "{}" "{}" "{}";
-            . ncap_remote/ncap_utils/workflow.sh; cleanup
+          AMI: ami-01ccdd0b056ee85ea
+          COMMAND: cd /home/ubuntu/; neurocaas_remote/run_main_pmd.sh "{}" "{}" "{}"
+            "{}"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
           DEPLOY_LIMIT: 100
@@ -313,7 +313,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '542fc7590087d9d57d88429c2f859b49ae5d53b0
+          versionid: '93fb3d061850e1f2d26962712ce7774dc5a2d6df
 
             '
       Events:
@@ -415,9 +415,9 @@ Resources:
       Description: Deletes Objects from S3
       Environment:
         Variables:
-          AMI: ami-021135eec3b08cf86
-          COMMAND: cd /home/ubuntu/; ncap_remote/run_pmd_main.sh "{}" "{}" "{}" "{}";
-            . ncap_remote/ncap_utils/workflow.sh; cleanup
+          AMI: ami-01ccdd0b056ee85ea
+          COMMAND: cd /home/ubuntu/; neurocaas_remote/run_main_pmd.sh "{}" "{}" "{}"
+            "{}"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
           DEPLOY_LIMIT: 100
@@ -449,7 +449,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '542fc7590087d9d57d88429c2f859b49ae5d53b0
+          versionid: '93fb3d061850e1f2d26962712ce7774dc5a2d6df
 
             '
       Handler: helper.handler_deldir
@@ -491,9 +491,9 @@ Resources:
       Description: Puts Objects in S3
       Environment:
         Variables:
-          AMI: ami-021135eec3b08cf86
-          COMMAND: cd /home/ubuntu/; ncap_remote/run_pmd_main.sh "{}" "{}" "{}" "{}";
-            . ncap_remote/ncap_utils/workflow.sh; cleanup
+          AMI: ami-01ccdd0b056ee85ea
+          COMMAND: cd /home/ubuntu/; neurocaas_remote/run_main_pmd.sh "{}" "{}" "{}"
+            "{}"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
           DEPLOY_LIMIT: 100
@@ -525,7 +525,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '542fc7590087d9d57d88429c2f859b49ae5d53b0
+          versionid: '93fb3d061850e1f2d26962712ce7774dc5a2d6df
 
             '
       Handler: helper.handler_mkdir

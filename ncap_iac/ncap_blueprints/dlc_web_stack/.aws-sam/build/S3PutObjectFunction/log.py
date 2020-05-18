@@ -28,8 +28,7 @@ except Exception as e:
 
 
 
-## Function to take output of cloudwatch events and write to figure file. 
-
+## Lambda function to cleanup after all processing is done. Importantly also sends the signal back to the user that the job has been completed. 
 
 
 ## Strip the event of relevant information.  
@@ -60,39 +59,55 @@ def monitor_updater(event,context):
     ## 3. Now figure out if this is an "running" or "shutting-down" statechange. "
     ## 4. accordingly, either update the log [running] or update the log and move it to the appropriate folder [given by the log contents.]
     ## Include exception handling for the case where one of the fields is not completed. 
-    time = event['time']
-    instanceid = event['detail']['instance-id']
-    logname = "{}.json".format(instanceid)
-    statechange = event['detail']['state']
-    bucket_name = os.environ["BUCKET_NAME"]
-    
-    if statechange in ["running","shutting-down"]:
-        print(logname)
-        print(utilsparams3.ls_name(bucket_name,"logs/active/"))
-        log = utilsparams3.update_monitorlog(bucket_name,logname,statechange,time) 
-        path_to_data = log["datapath"]
-        jobname = os.path.basename(log["jobpath"]).replace(":","_") ## Monitoring names cannot have 
-        groupname = re.findall('.+?(?=/'+os.environ["INDIR"]+')',path_to_data)[0]
-        ## Log name for the group that make this job: 
-        current_job_log = os.path.join("logs","active",logname)
-        completed_job_log =  os.path.join("logs",groupname,logname)
-        if statechange == "shutting-down":
-            utilsparams3.mv(bucket_name,current_job_log,completed_job_log)
-            timepkg.sleep(5)
-            ## Now check if we can delete this rule:
-            rulename = "Monitor{}".format(jobname)
-            instances_under_rule = utilsparamevents.get_monitored_instances(rulename) 
-            condition = [utilsparams3.exists(bucket_name,os.path.join("logs","active","{}.json".format(inst))) for inst in instances_under_rule]
-            ## Delete the rule
-            if not any(condition):
-                ## get the target:
-                response = utilsparamevents.full_delete_rule(rulename)
-                
+    try: 
+        print(event)
+        print(context)
+        time = event['time']
+        instanceid = event['detail']['instance-id']
+        logname = "{}.json".format(instanceid)
+        statechange = event['detail']['state']
+        bucket_name = os.environ["BUCKET_NAME"]
+        
+        if statechange in ["running","shutting-down"]:
+            log = utilsparams3.update_monitorlog(bucket_name,logname,statechange,time) 
+            if type(log["datapath"]) is str:
+                path_to_data = log["datapath"]
+            elif type(log["datapath"]) is list:
+                assert type(log["datapath"][0]) == str
+                path_to_data = log["datapath"][0]
             else:
-                pass
+                print("datapath type unsupported, exiting.")
+            jobname = os.path.basename(log["jobpath"]).replace(":","_") ## Monitoring names cannot have 
 
-    else:
-        print("unhandled state change. quitting")
-        raise ValueError("statechange {} not expected".format(statechange))
+            print(path_to_data,"path_to_data")
+            groupname = re.findall('.+?(?=/'+os.environ["INDIR"]+')',path_to_data)[0]
+            ## Log name for the group that make this job: 
+            current_job_log = os.path.join("logs","active",logname)
+            completed_job_log =  os.path.join("logs",groupname,logname)
+            if statechange == "shutting-down":
+                utilsparams3.mv(bucket_name,current_job_log,completed_job_log)
+                timepkg.sleep(5)
+                ## Now check if we can delete this rule and send the end signal to the user:
+                rulename = "Monitor{}".format(jobname)
+                instances_under_rule = utilsparamevents.get_monitored_instances(rulename) 
+                condition = [utilsparams3.exists(bucket_name,os.path.join("logs","active","{}.json".format(inst))) for inst in instances_under_rule]
+                ## Delete the rule
+                if not any(condition):
+                    ## get the target:
+                    response = utilsparamevents.full_delete_rule(rulename)
+                    terminated = utilsparams3.write_endfile(log["databucket"],log["jobpath"])
+                    
+                else:
+                    pass
+
+        else:
+            print("unhandled state change. quitting")
+            raise ValueError("statechange {} not expected".format(statechange))
+        exitcode = 0 
+    except Exception as e:
+        print("error: {}".format(e))
+        exitcode = 99 
+    return exitcode
+        
 
 

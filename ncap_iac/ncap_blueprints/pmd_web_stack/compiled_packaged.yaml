@@ -122,7 +122,7 @@ Resources:
     Type: AWS::CloudFormation::CustomResource
   FigLambda:
     Properties:
-      CodeUri: s3://ctnsampackages/f39355a5dca2ac61136b1f0142a93e63
+      CodeUri: s3://ctnsampackages/9f30cce50a3deaee0b7251c105da4505
       Description: Lambda Function logging start/stop for NCAP
       Environment:
         Variables:
@@ -275,13 +275,13 @@ Resources:
     Type: AWS::CloudFormation::CustomResource
   MainLambda:
     Properties:
-      CodeUri: s3://ctnsampackages/4674ad0d3b9de958c12174d109513ba2
+      CodeUri: s3://ctnsampackages/6bca0fb73ee7cd5c1b3742ed7c5a4068
       Description: Main Lambda Function for Serverless
       Environment:
         Variables:
-          AMI: ami-021135eec3b08cf86
-          COMMAND: cd /home/ubuntu/; ncap_remote/run_pmd_main.sh "{}" "{}" "{}" "{}";
-            . ncap_remote/ncap_utils/workflow.sh; cleanup
+          AMI: ami-01ccdd0b056ee85ea
+          COMMAND: cd /home/ubuntu/; neurocaas_remote/run_main_pmd.sh "{}" "{}" "{}"
+            "{}"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
           DEPLOY_LIMIT: 100
@@ -313,7 +313,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '542fc7590087d9d57d88429c2f859b49ae5d53b0
+          versionid: '93fb3d061850e1f2d26962712ce7774dc5a2d6df
 
             '
       Events:
@@ -411,13 +411,13 @@ Resources:
     Type: AWS::S3::Bucket
   S3DelObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/f300dac993f4164526841f5ea5342477
+      CodeUri: s3://ctnsampackages/26ddd7fbe2cb580194e8e7c6b5e52dcd
       Description: Deletes Objects from S3
       Environment:
         Variables:
-          AMI: ami-021135eec3b08cf86
-          COMMAND: cd /home/ubuntu/; ncap_remote/run_pmd_main.sh "{}" "{}" "{}" "{}";
-            . ncap_remote/ncap_utils/workflow.sh; cleanup
+          AMI: ami-01ccdd0b056ee85ea
+          COMMAND: cd /home/ubuntu/; neurocaas_remote/run_main_pmd.sh "{}" "{}" "{}"
+            "{}"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
           DEPLOY_LIMIT: 100
@@ -449,7 +449,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '542fc7590087d9d57d88429c2f859b49ae5d53b0
+          versionid: '93fb3d061850e1f2d26962712ce7774dc5a2d6df
 
             '
       Handler: helper.handler_deldir
@@ -487,13 +487,13 @@ Resources:
     Type: AWS::IAM::Role
   S3PutObjectFunction:
     Properties:
-      CodeUri: s3://ctnsampackages/89fe948a8e829a81c7e7987b85521c44
+      CodeUri: s3://ctnsampackages/8c6c6722fb8d21754e234cf4923e3438
       Description: Puts Objects in S3
       Environment:
         Variables:
-          AMI: ami-021135eec3b08cf86
-          COMMAND: cd /home/ubuntu/; ncap_remote/run_pmd_main.sh "{}" "{}" "{}" "{}";
-            . ncap_remote/ncap_utils/workflow.sh; cleanup
+          AMI: ami-01ccdd0b056ee85ea
+          COMMAND: cd /home/ubuntu/; neurocaas_remote/run_main_pmd.sh "{}" "{}" "{}"
+            "{}"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup
           CONFIG: config.yaml
           CONFIGDIR: configs
           DEPLOY_LIMIT: 100
@@ -525,7 +525,7 @@ Resources:
             - Arn
           figlambid:
             Ref: FigLambda
-          versionid: '542fc7590087d9d57d88429c2f859b49ae5d53b0
+          versionid: '93fb3d061850e1f2d26962712ce7774dc5a2d6df
 
             '
       Handler: helper.handler_mkdir
