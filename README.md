@@ -15,7 +15,16 @@ Structure:
     - utils (utilities to compile the above code into the corresponding infrastructure. Interfaces with troposphere and the AWS CLI)
 
 To Run Experiments: 
-You will need to install the dependencies found in the requirements_experiments.txt file in order to run experiments and compare NeuroCAAS to your own infrastructure. We recommend doing so in a [conda](https://www.anaconda.com) virtual environment. 
+You will need to install the dependencies found in the requirements_experiments.txt file in order to run experiments and compare NeuroCAAS to your own infrastructure. We recommend doing so in a [conda](https://www.anaconda.com) virtual environment. Once you have installed conda, check your installation by running:
+
+'''
+conda list
+'''
+
+Then create a new environment as follows: 
+'''
+conda create -n neurocaas_experiments python=3.6
+'''
 
 To Develop: 
 
