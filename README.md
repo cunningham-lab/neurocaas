@@ -51,7 +51,17 @@ python recreate_figure4.py
 Pngs showing cost and time analyses will be stored in the "panels" subdirectory within each analysis. The files suffixed "Cost", "Time", "LCC_powermatch", and "LUC_powermatch" are those shown in the submitted figure. 
 The source code to generate these analyses and figures can be found in the "calculate_cost" module, called by the "getdata_fig4" function.
 
-To Develop: 
+You can generate the data for custom versions of Figure 4 by filling out a custom cost file. See experiments/Custom_CostFiles/hardwarecost.yaml and experiments/Custom_CostFiles/hardwarecost2.yaml for annotated examples. 
+Once you have filled out a cost file, you can run it by executing the following commands: 
+
+```
+cd /path/to/local/repo/neurocaas/experiments
+python generate_customcomparison.py /path/to/your/costfile.yaml
+```
+
+
+### To Develop: 
+See the guide at neurocaas/docs/NeuroCAAS_Developer_Guide.pdf
 
 Coming soon:
 - SSM [link]
