@@ -52,7 +52,7 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::pmd-ncap-web"
+        "arn:aws:s3:::locanmf-ncap-web"
       ],
       "Condition": {
         "StringLike": {
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::pmd-ncap-web/debuggers/inputs/*",
-        "arn:aws:s3:::pmd-ncap-web/debuggers/configs/*",
-        "arn:aws:s3:::pmd-ncap-web/debuggers/submissions/*"
+        "arn:aws:s3:::locanmf-ncap-web/debuggers/inputs/*",
+        "arn:aws:s3:::locanmf-ncap-web/debuggers/configs/*",
+        "arn:aws:s3:::locanmf-ncap-web/debuggers/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::pmd-ncap-web/debuggers/results/*",
-        "arn:aws:s3:::pmd-ncap-web/debuggers/configs/*"
+        "arn:aws:s3:::locanmf-ncap-web/debuggers/results/*",
+        "arn:aws:s3:::locanmf-ncap-web/debuggers/configs/*"
       ]
     }
   ]

@@ -52,7 +52,7 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::pmd-ncap-web"
+        "arn:aws:s3:::citestpipeline"
       ],
       "Condition": {
         "StringLike": {
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::pmd-ncap-web/developergroup1/inputs/*",
-        "arn:aws:s3:::pmd-ncap-web/developergroup1/configs/*",
-        "arn:aws:s3:::pmd-ncap-web/developergroup1/submissions/*"
+        "arn:aws:s3:::citestpipeline/developergroup1/inputs/*",
+        "arn:aws:s3:::citestpipeline/developergroup1/configs/*",
+        "arn:aws:s3:::citestpipeline/developergroup1/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::pmd-ncap-web/developergroup1/results/*",
-        "arn:aws:s3:::pmd-ncap-web/developergroup1/configs/*"
+        "arn:aws:s3:::citestpipeline/developergroup1/results/*",
+        "arn:aws:s3:::citestpipeline/developergroup1/configs/*"
       ]
     }
   ]

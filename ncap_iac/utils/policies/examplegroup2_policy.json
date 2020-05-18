@@ -52,7 +52,7 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web"
+        "arn:aws:s3:::epi-ncap-web"
       ],
       "Condition": {
         "StringLike": {
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/examplegroup2/inputs/*",
-        "arn:aws:s3:::caiman-ncap-web/examplegroup2/configs/*",
-        "arn:aws:s3:::caiman-ncap-web/examplegroup2/submissions/*"
+        "arn:aws:s3:::epi-ncap-web/examplegroup2/inputs/*",
+        "arn:aws:s3:::epi-ncap-web/examplegroup2/configs/*",
+        "arn:aws:s3:::epi-ncap-web/examplegroup2/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/examplegroup2/results/*",
-        "arn:aws:s3:::caiman-ncap-web/examplegroup2/configs/*"
+        "arn:aws:s3:::epi-ncap-web/examplegroup2/results/*",
+        "arn:aws:s3:::epi-ncap-web/examplegroup2/configs/*"
       ]
     }
   ]
