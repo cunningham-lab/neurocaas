@@ -14,14 +14,10 @@ Structure:
     - protocols (code representing job management coordination analysis pipelines and users.)
     - utils (utilities to compile the above code into the corresponding infrastructure. Interfaces with troposphere and the AWS CLI)
 
+To Run Experiments: 
+You will need to install the dependencies found in the requirements_experiments.txt file in order to run experiments and compare NeuroCAAS to your own infrastructure. We recommend doing so in a [conda](https://www.anaconda.com) virtual environment. 
 
-*Requires:*
-
-- AWS CLI (configured with AWS Account)
-- AWS SAM CLI
-- Troposphere (python package)
-- Boto3 (python package)
-- jq (json parser)
+To Develop: 
 
 Coming soon:
 - SSM [link]
