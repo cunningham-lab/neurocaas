@@ -1,0 +1,12 @@
+# Template file for custom cost calculation. Represents the case where you HAVE NOT run the data that we compare against on your own system and would 
+# like to assume the timings that we calculated locally in our paper. 
+
+analysis: CaImAn ## Can be CaImAn, DLC, or PMDLocaNMF corresponding to figures that we produced. 
+
+performance: null ## If you timed you own data analysis, provide info for how you did so here (see other example file). If you would like to assume the same timings provided in the paper, leave this field as null.  
+
+## Price tag cost of local hardware in US Dollars 
+pricetag_cost: 2499 
+
+## Cost of supporting hardware over 5 years. Can be a list, or the defaults used in the paper (see other example file). 
+support_cost: [0,0,0,0,0]    
