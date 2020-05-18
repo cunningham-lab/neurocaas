@@ -66,6 +66,10 @@ jobs:
     install:
       - pip install -r requirements.txt
       - pip install aws-sam-cli
+      - apt-get -y libcurl4-openssl-dev
+      - apt-get -y libelf-dev
+      - apt-get -y libdw-dev
+      - apt-get -y cmake
     before_script:
       - sudo apt-get install jq
     script:
