@@ -1,0 +1,26 @@
+{
+    "UXData":{
+    "Affiliates":[
+        {
+            "AffiliateName":"henlabncapuser",
+            "UserNames":["sl2993"],
+            "Pipelines":["dlc"],
+            "PipelineDir":["dlc"],
+            "ContactEmail":"The email that we should notify regarding processing status."
+        }
+    ]
+    },
+    "Lambda":{
+        "LambdaConfig":{
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS":"Type of instance to launch.",
+            "IAM_ROLE":"iam role with ssm and s3 access",
+            "EXECUTION_TIMEOUT":"172800",
+            "LOGDIR":"logs",
+            "OUTDIR":"results",
+            "INDIR":"inputs",
+            "LOGFILE":"lambda_log.txt",
+            "MONITOR":true
+        }
+    }
+}

@@ -69,6 +69,8 @@ def start_instances_if_stopped(instances, logger):
         else:
             logger.append("        [Utils] Instance already running.")
             logger.write()
+    logger.append("        [Utils] Initializing instances. This could take a moment...")
+    logger.write()
     time.sleep(60)
     logger.append("        [Utils] All Instances Initialized.")
     logger.write()
@@ -147,7 +149,7 @@ def launch_new_instances(instance_type, ami, logger, number, add_size, duration 
         )
 
     else:
-        logger.append("        [Utils] reserving save instance with for {} minutes".format(spot_duration))
+        logger.append("        [Utils] Reserving save instance for {} minutes".format(spot_duration))
         marketoptions = {"MarketType":'spot',
                 "SpotOptions":{
                     "SpotInstanceType":"one-time",
@@ -180,7 +182,7 @@ def launch_new_instances(instance_type, ami, logger, number, add_size, duration 
             )
         except botocore.exceptions.ClientError as e:
             if e.response["Error"]["Code"] == "InsufficientInstanceCapacity":
-                logger.append("        [Utils] save not available (beyond available aws capacity). Launching standard instance.")
+                logger.append("        [Utils] Save not available (beyond available aws capacity). Launching standard instance.")
                 logger.write()
                 instances = ec2_resource.create_instances(
                     BlockDeviceMappings=[
