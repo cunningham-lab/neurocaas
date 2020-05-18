@@ -56,17 +56,17 @@ jobs:
   include:
   - stage: experiments
     install:
-    - pip install -r requirements_experiments.txt
+      - pip install -r requirements_experiments.txt
     script:
-    - bash tests/test_experiments.sh
+      - bash tests/test_experiments.sh
   - stage: test
     install:
-    - pip install -r requirements.txt
-    - pip install aws-sam-cli
+      - pip install -r requirements.txt
+      - pip install aws-sam-cli
     before_script:
-    - sudo apt-get install jq
+      - sudo apt-get install jq
     script:
-    - bash tests/test_permastack.sh $eventfile
+      - bash tests/test_permastack.sh $eventfile
 ## After script to get code coverage. 
   #after_script:
   #  #- bash tests/test_cleanup.sh
