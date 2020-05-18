@@ -52,6 +52,9 @@ addons:
     - libelf-dev
     - libdw-dev
     - cmake
+stages:
+  - experiments
+  - test 
 jobs:
   include:
   - stage: experiments
