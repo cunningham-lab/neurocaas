@@ -52,27 +52,40 @@ env:
     #    - libelf-dev
     #    - libdw-dev
     #    - cmake
+    #
 stages:
   - experiments
-  - test 
+  - test
+install:
+  - pip install -r requirements.txt
+  - pip install aws-sam-cli
+  - apt-get -y libcurl4-openssl-dev
+  - apt-get -y libelf-dev
+  - apt-get -y libdw-dev
+  - apt-get -y cmake
+before_script:
+  - sudo apt-get install jq
+script:
+  - bash tests/test_permastack.sh $eventfile
+
 jobs:
-  - stage: experiments
-    install:
-      - pip install -r requirements_experiments.txt
-    script:
-      - bash tests/test_experiments.sh
-  - stage: test
-    install:
-      - pip install -r requirements.txt
-      - pip install aws-sam-cli
-      - apt-get -y libcurl4-openssl-dev
-      - apt-get -y libelf-dev
-      - apt-get -y libdw-dev
-      - apt-get -y cmake
-    before_script:
-      - sudo apt-get install jq
-    script:
-      - bash tests/test_permastack.sh $eventfile
+- stage: experiments
+  install:
+    - pip install -r requirements_experiments.txt
+  script:
+    - bash tests/test_experiments.sh
+      #- stage: tester
+      #  install:
+      #    - pip install -r requirements.txt
+      #    - pip install aws-sam-cli
+      #    - apt-get -y libcurl4-openssl-dev
+      #    - apt-get -y libelf-dev
+      #    - apt-get -y libdw-dev
+      #    - apt-get -y cmake
+      #  before_script:
+      #    - sudo apt-get install jq
+      #  script:
+      #    - bash tests/test_permastack.sh $eventfile
 ## After script to get code coverage. 
   #after_script:
   #  #- bash tests/test_cleanup.sh
