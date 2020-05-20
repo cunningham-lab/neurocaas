@@ -105,7 +105,8 @@
             {
                 "AffiliateName": "reviewers",
                 "UserNames": [
-                    "editornn"
+                    "editornn",
+                    "reviewersnn"
                 ],
                 "PipelinePath": "",
                 "PipelineDir": "trackingfolder",
