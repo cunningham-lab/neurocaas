@@ -132,6 +132,8 @@ dmypy.json
 # Build files: 
 ncap_iac/ncap_blueprints/*/.aws-sam/build
 ncap_iac/user_profiles/*/.aws-sam/build
+ncap_iac/ncap_blueprints/*/compiled_users.json
+ncap_iac/ncap_blueprints/*/compiled_users.yaml
 ncap_iac/user_profiles/*/compiled_users.json
 ncap_iac/user_profiles/*/compiled_users.yaml
 paper/README.txt
