@@ -130,4 +130,10 @@ dmypy.json
 
 
 # Build files: 
-ncap_iac/ncap_blueprints/*.aws_sam/build
+ncap_iac/ncap_blueprints/*/.aws-sam/build
+ncap_iac/user_profiles/*/.aws-sam/build
+ncap_iac/user_profiles/*/compiled_users.json
+ncap_iac/user_profiles/*/compiled_users.yaml
+paper/README.txt
+paper/README.pdf
+paper/NeuroCAAS_manuscript_5_19_final.pdf
