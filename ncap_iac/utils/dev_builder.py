@@ -1,4 +1,4 @@
-from troposphere import Ref,Parameter,GetAtt,Template,Output,Join,Sub,AWS_STACK_NAME,AWS_REGION
+from troposphere import Ref,Parameter,GetAtt,Template,Output,Join,Split,Sub,AWS_STACK_NAME,AWS_REGION
 from troposphere.s3 import Bucket,Rules,S3Key,Filter
 from troposphere.iam import User,Group,Policy,ManagedPolicy,LoginProfile,AccessKey,UserToGroupAddition,Role
 from troposphere.serverless import Function,Environment
@@ -941,7 +941,7 @@ class UserParametrizedtemplate(WebDevTemplate):
                 Type = "String")
         UserNames = Parameter("UserNames",
                 Description="List of the users in this group who should be added to this group.",
-                Type = "CommaDelimitedList")
+                Type = "String")
 
         ## Attach parameter
         NameAttached = self.template.add_parameter(Name)
@@ -953,6 +953,192 @@ class UserParametrizedtemplate(WebDevTemplate):
 
         return affiliatedict_params
 
+    def add_affiliate_folder(self,affiliatename):
+        ## Declare depends on resources: 
+        bucketname = 'PipelineMainBucket'
+        basefoldername = "AffiliateTemplateBaseFolder" 
+        ## Retrieve lambda function and role: 
+        ## We will declare three custom resources per affiliate: 
+        basemake = CustomResource(basefoldername,
+                                  ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                  BucketName = self.config['PipelineName'],
+                                  Path = "",
+                                  DirName = affiliatename,
+                                  DependsOn = bucketname)
+        basefolder = self.template.add_resource(basemake)
+
+        ## Designate cfn resource names for each: 
+        basenames = ["InFolder","OutFolder","SubmitFolder","ConfigFolder"]
+        dirnamekeys = ["INDIR","OUTDIR","SUBMITDIR","CONFIGDIR"]
+        pairs = {b:d for b,d in zip(basenames,dirnamekeys)}
+        for key in pairs:
+            cfn_name = key+"AffiliateTemplate"
+            make = CustomResource(cfn_name,
+                                      ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                      BucketName = self.config['PipelineName'],
+                                      Path = Join("",[affiliatename,'/']),
+                                      DirName = self.config['Lambda']['LambdaConfig'][pairs[key]],
+                                      DependsOn = [bucketname,basefoldername])
+            folder = self.template.add_resource(make)
+
+    def customize_userpolicy(self,affiliatedict):
+        bucketname = self.config['PipelineName']
+        affiliatename = affiliatedict["AffiliateName"]
+        indir = self.config['Lambda']['LambdaConfig']['INDIR']
+        outdir = self.config['Lambda']['LambdaConfig']['OUTDIR']
+        logdir = self.config['Lambda']['LambdaConfig']['LOGDIR']
+        subdir = self.config['Lambda']['LambdaConfig']['SUBMITDIR']
+        condir = self.config['Lambda']['LambdaConfig']['CONFIGDIR']
+        ## First get the template policy 
+        with open('policies/iam_user_base_policy_doc.json','r') as f:
+            obj = json.load(f)
+        ## The following policies are not iterated for readability:
+        ## Give LIST permissions for the affiliate folder and subdirectories.  
+        obj["Statement"].append({
+            'Sid': 'ListBucket',
+            'Effect': 'Allow',
+            'Action': 's3:ListBucket',
+            'Resource': ['arn:aws:s3:::'+bucketname],
+            'Condition':{'StringEquals':{'s3:prefix':['',
+                Join("",[affiliatename,'/']),
+                Join("",[affiliatename,'/',indir]),
+                Join("",[affiliatename,'/',outdir]),
+                logdir,
+                Join("",[affiliatename,'/',subdir]),
+                Join("",[affiliatename,'/',condir]),
+                Join("",[affiliatename,'/',indir,'/']),
+                Join("",[affiliatename,'/',outdir,'/']),
+                Join("",[affiliatename,'/',subdir,'/']),
+                Join("",[affiliatename,'/',condir,'/'])
+            ],'s3:delimiter':['/']}}})
+        ## Give LIST permissions within all subdirectories too. 
+        obj["Statement"].append({
+            'Sid': "ListSubBucket",
+            'Effect': 'Allow',
+            'Action': 's3:ListBucket',
+            'Resource': ['arn:aws:s3:::'+bucketname],
+            'Condition':{'StringLike':{'s3:prefix':[
+                Join("",[affiliatename,'/',indir,'/*']),
+                Join("",[affiliatename,'/',outdir,'/*']),
+                Join("",[affiliatename,'/',condir,'/*']),
+                Join("",[affiliatename,'/',subdir,'/*'])
+            ]}}})
+        ## Give PUT, and DELETE permissions for the input, config, and submit subdirectories: 
+        obj["Statement"].append({
+            'Sid': 'Inputfolderwrite',
+            'Effect': 'Allow',
+            'Action': ['s3:PutObject','s3:DeleteObject'],
+            'Resource': [
+                         Join("",['arn:aws:s3:::',bucketname,'/',affiliatename,'/',indir,'/*']),
+                         Join("",['arn:aws:s3:::',bucketname,'/',affiliatename,'/',condir,'/*']),
+                         Join("",['arn:aws:s3:::',bucketname,'/',affiliatename,'/',subdir,'/*'])
+                         ]
+             })
+        
+        ## Give GET, and DELETE permissions for the output, config and log subdirectory: 
+        obj["Statement"].append({
+           'Sid': 'Outputfolderwrite',
+            'Effect': 'Allow',
+            'Action': ['s3:GetObject','s3:DeleteObject'],
+            'Resource': [
+                         Join("",['arn:aws:s3:::',bucketname,'/',affiliatename,'/',outdir,'/*']),
+                         Join("",['arn:aws:s3:::',bucketname,'/',affiliatename,'/',condir,'/*']),
+                         ]
+             })
+        #with open(Join("",['policies/',affiliatename,'_policy.json']),'w') as fw: 
+        #    json.dump(obj,fw,indent = 2)
+        return obj
+
+    def generate_usergroup(self,affiliatedict):
+        identifier = "{}".format(self.config["PipelineName"].replace("-",""))
+        affiliatename = affiliatedict["AffiliateName"]
+        policy = Policy(PolicyDocument=self.customize_userpolicy(affiliatedict),PolicyName = Join("",[affiliatename,'policy']))
+        usergroup = Group("UserGroupAffiliateTemplate"+identifier,GroupName = Join("",[affiliatename,identifier,"group"]),Policies=[policy])
+        usergroup_attached = self.template.add_resource(usergroup)
+        return usergroup_attached
+
+    def attach_users(self,affiliatedict):
+        print(affiliatedict,"affiliatedict")
+        ## First get a list of usernames. 
+        users = affiliatedict['UserNames']
+        affiliatename = affiliatedict['AffiliateName']
+        ## Initialize list of users: 
+        affiliate_users = []
+        affiliate_usernames = []
+        err = 0
+        for user in users:
+            try:
+                # Filter for existing: we only want to treat users who have already been declared elsewhere. 
+                ## Get the internal user name filtered by region:
+                user_local = user+self.config["Lambda"]["LambdaConfig"]["REGION"]
+                self.iam_resource.User(user_local).create_date
+                print("User {} exists, adding to group".format(user))
+                affiliate_users.append(self.iam_resource.User(user_local))
+                affiliate_usernames.append(user_local)
+            except Exception as e: 
+                print("Error adding User {}, please evaluate".format(user),e)
+                raise
+
+        return affiliate_users,affiliate_usernames
+
+    def add_affiliate_usernet(self,affiliatedict):
+        ## Four steps here: 
+        ## 1. Customize a user policy for this particular pipeline. 
+        ## 2. Generate a user group with that policy. 
+        ## 3. Attach users with credentials. 
+        ## 4. Add users to group.  
+        ## A method that customizes the json policy (see attached) to the particular affiliation name. 
+        ## 1 and 2
+        group = self.generate_usergroup(affiliatedict)
+        ## 3 
+        ## Note: this filters in the case where users are predefined elsewhere. 
+        #users,usernames  = self.attach_users(affiliatedict)
+        ## 4 
+        users_attached = self.template.add_resource(UserToGroupAddition('AffiliateTemplate'+'UserNet',GroupName = Ref(group),Users = Split(",",affiliatedict["UserNames"])))
+
+    def add_log_folder(self,affiliatedicts):
+        "this has to happen after affiliates are defined"
+        bucketname = 'PipelineMainBucket'
+        logfoldername = "LogFolder"
+
+        ## A log folder to keep track of all resource monitoring across all users.  
+        logmake = CustomResource(logfoldername,
+                                 ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                 BucketName = self.config['PipelineName'],
+                                 Path = "",
+                                 DirName = self.config['Lambda']['LambdaConfig']['LOGDIR'],
+                                 DependsOn = bucketname)
+        logfolder = self.template.add_resource(logmake)
+
+        ## Make an "active jobs" subfolder within: 
+        logactivemake = CustomResource(logfoldername+"active",
+                                 ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                 BucketName = self.config['PipelineName'],
+                                 Path = self.config['Lambda']['LambdaConfig']['LOGDIR']+'/',
+                                 DirName = "active",
+                                 DependsOn = [bucketname,logfoldername])
+        logactivefolder = self.template.add_resource(logactivemake)
+
+        ## Make a folder for each affiliate so they can be assigned completed jobs too. 
+        for affdict in affiliatedicts:
+            print(affdict,"dict here")
+            affiliatename = affdict["AffiliateName"]
+            logaffmake = CustomResource(logfoldername+"AffiliateTemplate",
+                                     ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                     BucketName = self.config['PipelineName'],
+                                     Path = self.config['Lambda']['LambdaConfig']['LOGDIR']+'/',
+                                     DirName = affiliatename,
+                                     DependsOn = [bucketname,logfoldername])
+            logafffolder = self.template.add_resource(logaffmake)
+
+        ## Finally, make a "debug" folder that will always exist: 
+        logdebugmake = CustomResource(logfoldername+"debug",
+                                     ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                     BucketName = self.config['PipelineName'],
+                                     Path = self.config['Lambda']['LambdaConfig']['LOGDIR']+'/',
+                                     DirName = "debug"+self.config["PipelineName"],
+                                     DependsOn = [bucketname,logfoldername])
+        logdebugfolder = self.template.add_resource(logdebugmake)
 
 if __name__ == "__main__":
     filename = sys.argv[1]
