@@ -1,4 +1,4 @@
-from troposphere import Ref,GetAtt,Template,Output,Join,Sub,AWS_STACK_NAME,AWS_REGION
+from troposphere import Ref,Parameter,GetAtt,Template,Output,Join,Sub,AWS_STACK_NAME,AWS_REGION
 from troposphere.s3 import Bucket,Rules,S3Key,Filter
 from troposphere.iam import User,Group,Policy,ManagedPolicy,LoginProfile,AccessKey,UserToGroupAddition,Role
 from troposphere.serverless import Function,Environment
@@ -907,6 +907,51 @@ class UserSubtemplate(WebDevTemplate):
         self.add_log_folder(affiliatedicts)
         #self.figurelamb = self.add_figure_lambda()
         #self.add_submit_lambda()
+
+## Make a parametrized version of the user template.  
+class UserParametrizedtemplate(WebDevTemplate):
+    def __init__(self,filename):
+        self.filename = filename
+        self.config = self.get_config(self.filename)
+        self.iam_resource = boto3.resource('iam',region_name = self.config['Lambda']["LambdaConfig"]["REGION"]) 
+        ## We should get all resources once attached. 
+        self.template,self.mkdirfunc,self.deldirfunc = self.initialize_template()
+        affdict_params = self.add_affiliate_parameters()
+        ## Add bucket: 
+        self.bucket = self.add_bucket() 
+        ## Now add affiliates:
+        self.add_affiliate(affdict_params)
+        self.add_log_folder([affdict_params])
+
+    ## Parameter addition function:
+    def add_affiliate_parameters(self):
+        """Function to add parameters to a user subtemplate. A generator for the substack template for only one user group.
+
+        Arguments:
+        self: (object)
+              The neurocaas blueprint. Should be initialized by calling the initialize_template() method. 
+        """
+        try:
+            self.template
+        except AttributeError:
+            raise AttributeError("template not yet created. do not call this method outside the init method.")
+        ## Declare Parameters.
+        Name = Parameter("Name",
+                Description="Name of the user group.",
+                Type = "String")
+        UserNames = Parameter("UserNames",
+                Description="List of the users in this group who should be added to this group.",
+                Type = "CommaDelimitedList")
+
+        ## Attach parameter
+        NameAttached = self.template.add_parameter(Name)
+        UserNamesAttached = self.template.add_parameter(UserNames)
+
+        ## Add to a dictionary: 
+        affiliatedict_params = {"AffiliateName":Ref(NameAttached),
+                "UserNames":Ref(UserNamesAttached)}
+
+        return affiliatedict_params
 
 
 if __name__ == "__main__":
