@@ -4,7 +4,7 @@ from troposphere.iam import User,Group,Policy,ManagedPolicy,LoginProfile,AccessK
 from troposphere.serverless import Function,Environment
 from troposphere.awslambda import Permission
 from troposphere.logs import LogGroup
-from troposphere.cloudformation import CustomResource 
+from troposphere.cloudformation import CustomResource,Stack 
 from lambda_policies import lambda_basepolicy,lambda_writeS3
 import sys
 import json 
@@ -136,6 +136,9 @@ class NeuroCaaSTemplate(object):
         raise NotImplementedError
 
     def attach_users(self,affiliatedict):
+        """Function to vet if the users we want to attach actually exist. 
+
+        """
         print(affiliatedict,"affiliatedict")
         ## First get a list of usernames. 
         users = affiliatedict['UserNames']
@@ -151,6 +154,9 @@ class NeuroCaaSTemplate(object):
                 user_local = user+self.config["Lambda"]["LambdaConfig"]["REGION"]
                 self.iam_resource.User(user_local).create_date
                 print("User {} exists, adding to group".format(user))
+                grouplist = self.iam_client.list_groups_for_user(UserName=user_local)["Groups"]
+                assert len(grouplist) < 10, "user can only belong to 10 groups."
+                print("User currently belongs to {} groups".format(len(grouplist)))
                 affiliate_users.append(self.iam_resource.User(user_local))
                 affiliate_usernames.append(user_local)
             except Exception as e: 
@@ -571,6 +577,7 @@ class WebDevTemplate(NeuroCaaSTemplate):
         self.filename = filename
         self.config = self.get_config(self.filename)
         self.iam_resource = boto3.resource('iam',region_name = self.config['Lambda']["LambdaConfig"]["REGION"]) 
+        self.iam_client = boto3.client('iam',region_name = self.config['Lambda']["LambdaConfig"]["REGION"]) 
         ## We should get all resources once attached. 
         self.template,self.mkdirfunc,self.deldirfunc = self.initialize_template()
         ## Add bucket: 
@@ -905,8 +912,36 @@ class UserSubtemplate(WebDevTemplate):
         for affdict in affiliatedicts:
             self.add_affiliate(affdict)
         self.add_log_folder(affiliatedicts)
-        #self.figurelamb = self.add_figure_lambda()
-        #self.add_submit_lambda()
+
+## Call the substack given.  
+class TestParametrizedStack(WebDevTemplate):
+    def __init__(self,filename):
+        self.filename = filename
+        self.config = self.get_config(self.filename)
+        self.iam_resource = boto3.resource('iam',region_name = self.config['Lambda']["LambdaConfig"]["REGION"]) 
+        self.iam_client = boto3.client('iam',region_name = self.config['Lambda']["LambdaConfig"]["REGION"]) 
+        template = Template()
+        ## Apply a transform to use serverless functions. 
+        template.set_transform("AWS::Serverless-2016-10-31")
+        self.template = template
+        ## Now get an affiliate:
+        affiliatedict = self.config["UXData"]["Affiliates"][0]
+        ## Filter the names of users to also include the region. 
+        users,usernames  = self.attach_users(affiliatedict)
+        ## Get the parameters in the correct form.
+        name = affiliatedict["AffiliateName"]
+        ## Concatenate the usernames (substack can't take list) 
+        usernames_concat = ",".join(usernames)
+        substack = Stack(
+                "UserSubstack",
+                TemplateURL="template_basis.yaml", ## This should be a file that has had sam-package already run on it. 
+                Parameters = {
+                    "Name":name,
+                    "UserNames":usernames_concat
+                    })
+        self.template.add_resource(substack)
+
+        
 
 ## Make a parametrized version of the user template.  
 class UserParametrizedtemplate(WebDevTemplate):
@@ -914,6 +949,7 @@ class UserParametrizedtemplate(WebDevTemplate):
         self.filename = filename
         self.config = self.get_config(self.filename)
         self.iam_resource = boto3.resource('iam',region_name = self.config['Lambda']["LambdaConfig"]["REGION"]) 
+        self.iam_client = boto3.client("iam",region_name = self.config['Lambda']['LambdaConfig']["REGION"])
         ## We should get all resources once attached. 
         self.template,self.mkdirfunc,self.deldirfunc = self.initialize_template()
         affdict_params = self.add_affiliate_parameters()
@@ -1057,29 +1093,6 @@ class UserParametrizedtemplate(WebDevTemplate):
         usergroup_attached = self.template.add_resource(usergroup)
         return usergroup_attached
 
-    def attach_users(self,affiliatedict):
-        print(affiliatedict,"affiliatedict")
-        ## First get a list of usernames. 
-        users = affiliatedict['UserNames']
-        affiliatename = affiliatedict['AffiliateName']
-        ## Initialize list of users: 
-        affiliate_users = []
-        affiliate_usernames = []
-        err = 0
-        for user in users:
-            try:
-                # Filter for existing: we only want to treat users who have already been declared elsewhere. 
-                ## Get the internal user name filtered by region:
-                user_local = user+self.config["Lambda"]["LambdaConfig"]["REGION"]
-                self.iam_resource.User(user_local).create_date
-                print("User {} exists, adding to group".format(user))
-                affiliate_users.append(self.iam_resource.User(user_local))
-                affiliate_usernames.append(user_local)
-            except Exception as e: 
-                print("Error adding User {}, please evaluate".format(user),e)
-                raise
-
-        return affiliate_users,affiliate_usernames
 
     def add_affiliate_usernet(self,affiliatedict):
         ## Four steps here: 
