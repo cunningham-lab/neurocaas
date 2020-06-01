@@ -4,6 +4,8 @@ set -e
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ncaprootdir="$(dirname "$(dirname "$scriptdir")")"
 
+storagebucketname=$(jq .bucketname "$ncaprootdir/global_params_initialized.json" | sed 's/\"//g')
+
 source "$scriptdir"/paths.sh
 ## Get the path to this particular file. 
 ## NOTE: Add the anaconda path if running as admin.  
@@ -25,7 +27,7 @@ PIPENAME=$(echo "$PIPESTR" | tr -d '"')
 python "$scriptdir"/checkpath.py "$PIPENAME"
 
 cd $PIPEDIR
-sam package --s3-bucket ctnsampackages --output-template-file compiled_packaged.yaml
+sam package --s3-bucket $storagebucketname --output-template-file compiled_packaged.yaml
 
 sam deploy --template-file compiled_packaged.yaml --stack-name $PIPENAME --capabilities CAPABILITY_NAMED_IAM
 
