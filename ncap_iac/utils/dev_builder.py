@@ -110,6 +110,7 @@ class NeuroCaaSTemplate(object):
 
     ## Take the template, and add in a bucket that takes the pipeline name as the name. 
     def add_bucket(self):
+        bucket_id = "PipelineMainBucket"
         bucketname = self.config['PipelineName']
         ## First check that the bucketname is valid: 
         assert type(bucketname) == str,"bucketname must be string"
@@ -118,9 +119,9 @@ class NeuroCaaSTemplate(object):
         assert (lowercase and not(underscore)),'string must follow s3 bucket style'
         
         ## Now we can add this resource: 
-        bucket = Bucket('PipelineMainBucket',AccessControl = 'Private',BucketName = bucketname)
+        bucket = Bucket(bucket_id,AccessControl = 'Private',BucketName = bucketname)
         bucket_attached = self.template.add_resource(bucket)
-        return bucket_attached,bucketname 
+        return bucket_attached,bucketname,bucket_id 
 
     def add_affiliate(self,affiliatedict):
         '''
@@ -920,28 +921,92 @@ class TestParametrizedStack(WebDevTemplate):
         self.config = self.get_config(self.filename)
         self.iam_resource = boto3.resource('iam',region_name = self.config['Lambda']["LambdaConfig"]["REGION"]) 
         self.iam_client = boto3.client('iam',region_name = self.config['Lambda']["LambdaConfig"]["REGION"]) 
+        ## Initialize. 
+        self.template = self.initialize_template()
+        ## Add a bucket.
+        self.bucket,self.bucketname,self.bucket_logical_id = self.add_bucket()
+        ## Add make and delete directory functions. 
+        self.mkdirfunc,self.deldirfunc,self.mkfunction_logical_id,self.delfunction_logical_id = self.make_custom_resources()
+        ## Now iterate through affiliates:
+        for a,affiliatedict in enumerate(self.config["UXData"]["Affiliates"]):
+            ## Filter the names of users to also include the region. 
+            users,usernames  = self.attach_users(affiliatedict)
+            ## Get the parameters in the correct form.
+            name = affiliatedict["AffiliateName"]
+            ## Concatenate the usernames (substack can't take list param, must take string.) 
+            usernames_concat = ",".join(usernames)
+            substack = Stack(
+                    "UserSubstack{}".format(a),
+                    TemplateURL="template_basis.yaml", ## This should be a file that has had sam-package already run on it. 
+                    Parameters = {
+                        "MakeFuncArn":GetAtt(self.mkdirfunc,"Arn"),#Ref(self.bucket),
+                        "Name":name,
+                        "UserNames":usernames_concat
+                        },
+                    DependsOn=[self.bucket_logical_id,self.mkfunction_logical_id,self.delfunction_logical_id])
+            self.template.add_resource(substack)
+        self.figurelamb = self.add_figure_lambda()
+        self.add_submit_lambda()
+
+    def initialize_template(self):
+        """
+        Defining function for development mode template. Makes per-dev group folders. NOTE: once folders have been created, they will not be modified by additional updates. This protects user data. 
+        """
         template = Template()
         ## Apply a transform to use serverless functions. 
         template.set_transform("AWS::Serverless-2016-10-31")
-        self.template = template
-        ## Now get an affiliate:
-        affiliatedict = self.config["UXData"]["Affiliates"][0]
-        ## Filter the names of users to also include the region. 
-        users,usernames  = self.attach_users(affiliatedict)
-        ## Get the parameters in the correct form.
-        name = affiliatedict["AffiliateName"]
-        ## Concatenate the usernames (substack can't take list) 
-        usernames_concat = ",".join(usernames)
-        substack = Stack(
-                "UserSubstack",
-                TemplateURL="template_basis.yaml", ## This should be a file that has had sam-package already run on it. 
-                Parameters = {
-                    "Name":name,
-                    "UserNames":usernames_concat
-                    })
-        self.template.add_resource(substack)
-
+        return template
         
+    def make_custom_resources(self):
+        ## Make role for custom resources. 
+        ## Initialize the resources necessary to make directories. 
+        ## First get the trust agreement: 
+        with open('policies/lambda_role_assume_role_doc.json',"r") as f:
+            mkdirassume_role_doc = json.load(f)
+        ## Base lambda policy
+        base_policy = lambda_basepolicy("LambdaBaseRole")
+        ## Write permissions for lambda to s3 
+        write_policy = lambda_writeS3('LambdaWriteS3Policy')
+        ## 
+        self.template.add_resource(base_policy)
+        mkdirrole = Role("S3MakePathRole",
+                AssumeRolePolicyDocument=mkdirassume_role_doc,
+                ManagedPolicyArns=[Ref(base_policy)],
+                Policies = [write_policy])
+        mkdirrole_attached = self.template.add_resource(mkdirrole)
+
+        ## Get the lambda config parameters for initialization of the custom resource delete function [needs the region]
+        lambdaconfig = self.config['Lambda']['LambdaConfig']
+
+        ## Now we need to write a lambda function that actually does the work:  
+        mkfunction_logical_id = "S3PutObjectFunction"
+        mkfunction = Function(mkfunction_logical_id,
+                              CodeUri="../../protocols",
+                              Description= "Puts Objects in S3",
+                              Handler="helper.handler_mkdir",
+                              Environment = Environment(Variables=lambdaconfig),
+                              Role=GetAtt(mkdirrole_attached,"Arn"),
+                              Runtime="python3.6",
+                              Timeout=30)
+        mkfunction_attached = self.template.add_resource(mkfunction)
+        delfunction_logical_id = "S3DelObjectFunction"
+        delfunction = Function(delfunction_logical_id,
+                               CodeUri="../../protocols",
+                               Description= "Deletes Objects from S3",
+                               Handler="helper.handler_deldir",
+                               Environment = Environment(Variables=lambdaconfig),
+                               Role=GetAtt(mkdirrole_attached,"Arn"),
+                               Runtime="python3.6",
+                               Timeout=30)
+        delfunction_attached = self.template.add_resource(delfunction)
+        ## Custom resource to delete. 
+        delresource = CustomResource('DeleteCustomResource',
+                             ServiceToken=GetAtt(delfunction_attached,"Arn"),
+                             BucketName = self.config['PipelineName'],
+                             DependsOn = self.bucket_logical_id)
+        self.template.add_resource(delresource)
+        ## We can add other custom resource initializations in the future
+        return mkfunction_attached,delfunction_attached,mkfunction_logical_id,delfunction_logical_id
 
 ## Make a parametrized version of the user template.  
 class UserParametrizedtemplate(WebDevTemplate):
@@ -951,13 +1016,23 @@ class UserParametrizedtemplate(WebDevTemplate):
         self.iam_resource = boto3.resource('iam',region_name = self.config['Lambda']["LambdaConfig"]["REGION"]) 
         self.iam_client = boto3.client("iam",region_name = self.config['Lambda']['LambdaConfig']["REGION"])
         ## We should get all resources once attached. 
-        self.template,self.mkdirfunc,self.deldirfunc = self.initialize_template()
-        affdict_params = self.add_affiliate_parameters()
+        self.template = self.initialize_template()
+        self.makefuncarn,affdict_params = self.add_affiliate_parameters()
         ## Add bucket: 
-        self.bucket = self.add_bucket() 
+        #self.bucket = self.add_bucket() 
         ## Now add affiliates:
         self.add_affiliate(affdict_params)
         self.add_log_folder([affdict_params])
+
+    def initialize_template(self):
+        """
+        Defining function for development mode template. Makes per-dev group folders. NOTE: once folders have been created, they will not be modified by additional updates. This protects user data. 
+        """
+        template = Template()
+        ## Apply a transform to use serverless functions. 
+        template.set_transform("AWS::Serverless-2016-10-31")
+        return template
+
 
     ## Parameter addition function:
     def add_affiliate_parameters(self):
@@ -966,12 +1041,21 @@ class UserParametrizedtemplate(WebDevTemplate):
         Arguments:
         self: (object)
               The neurocaas blueprint. Should be initialized by calling the initialize_template() method. 
+        Outputs:
+              (Ref): 
+              a reference to the logical id of the main analysis bucket for the pipeline. 
+              (Dict): 
+              a dictionary mocking the structure of the affiliatedictionary that is imported from the stack configuration template.
+              Contains (Ref) objects as its entries.
         """
         try:
             self.template
         except AttributeError:
             raise AttributeError("template not yet created. do not call this method outside the init method.")
         ## Declare Parameters.
+        MakeFuncArn = Parameter("MakeFuncArn",
+                Description="ARN of the make folder function.",
+                Type = "String")
         Name = Parameter("Name",
                 Description="Name of the user group.",
                 Type = "String")
@@ -980,6 +1064,7 @@ class UserParametrizedtemplate(WebDevTemplate):
                 Type = "String")
 
         ## Attach parameter
+        MakeFuncArn = self.template.add_parameter(MakeFuncArn)
         NameAttached = self.template.add_parameter(Name)
         UserNamesAttached = self.template.add_parameter(UserNames)
 
@@ -987,20 +1072,18 @@ class UserParametrizedtemplate(WebDevTemplate):
         affiliatedict_params = {"AffiliateName":Ref(NameAttached),
                 "UserNames":Ref(UserNamesAttached)}
 
-        return affiliatedict_params
+        return Ref(MakeFuncArn),affiliatedict_params
 
     def add_affiliate_folder(self,affiliatename):
         ## Declare depends on resources: 
-        bucketname = 'PipelineMainBucket'
         basefoldername = "AffiliateTemplateBaseFolder" 
         ## Retrieve lambda function and role: 
         ## We will declare three custom resources per affiliate: 
         basemake = CustomResource(basefoldername,
-                                  ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                  ServiceToken=self.makefuncarn,
                                   BucketName = self.config['PipelineName'],
                                   Path = "",
-                                  DirName = affiliatename,
-                                  DependsOn = bucketname)
+                                  DirName = affiliatename)
         basefolder = self.template.add_resource(basemake)
 
         ## Designate cfn resource names for each: 
@@ -1010,15 +1093,16 @@ class UserParametrizedtemplate(WebDevTemplate):
         for key in pairs:
             cfn_name = key+"AffiliateTemplate"
             make = CustomResource(cfn_name,
-                                      ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                      ServiceToken=self.makefuncarn,
                                       BucketName = self.config['PipelineName'],
                                       Path = Join("",[affiliatename,'/']),
                                       DirName = self.config['Lambda']['LambdaConfig'][pairs[key]],
-                                      DependsOn = [bucketname,basefoldername])
+                                      DependsOn = basefoldername)
             folder = self.template.add_resource(make)
 
     def customize_userpolicy(self,affiliatedict):
         bucketname = self.config['PipelineName']
+        #bucketname = self.bucketid
         affiliatename = affiliatedict["AffiliateName"]
         indir = self.config['Lambda']['LambdaConfig']['INDIR']
         outdir = self.config['Lambda']['LambdaConfig']['OUTDIR']
@@ -1111,25 +1195,23 @@ class UserParametrizedtemplate(WebDevTemplate):
 
     def add_log_folder(self,affiliatedicts):
         "this has to happen after affiliates are defined"
-        bucketname = 'PipelineMainBucket'
         logfoldername = "LogFolder"
 
         ## A log folder to keep track of all resource monitoring across all users.  
         logmake = CustomResource(logfoldername,
-                                 ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                 ServiceToken=self.makefuncarn,
                                  BucketName = self.config['PipelineName'],
                                  Path = "",
-                                 DirName = self.config['Lambda']['LambdaConfig']['LOGDIR'],
-                                 DependsOn = bucketname)
+                                 DirName = self.config['Lambda']['LambdaConfig']['LOGDIR'])
         logfolder = self.template.add_resource(logmake)
 
         ## Make an "active jobs" subfolder within: 
         logactivemake = CustomResource(logfoldername+"active",
-                                 ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                 ServiceToken=self.makefuncarn,
                                  BucketName = self.config['PipelineName'],
                                  Path = self.config['Lambda']['LambdaConfig']['LOGDIR']+'/',
                                  DirName = "active",
-                                 DependsOn = [bucketname,logfoldername])
+                                 DependsOn = logfoldername)
         logactivefolder = self.template.add_resource(logactivemake)
 
         ## Make a folder for each affiliate so they can be assigned completed jobs too. 
@@ -1137,20 +1219,20 @@ class UserParametrizedtemplate(WebDevTemplate):
             print(affdict,"dict here")
             affiliatename = affdict["AffiliateName"]
             logaffmake = CustomResource(logfoldername+"AffiliateTemplate",
-                                     ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                     ServiceToken=self.makefuncarn,
                                      BucketName = self.config['PipelineName'],
                                      Path = self.config['Lambda']['LambdaConfig']['LOGDIR']+'/',
                                      DirName = affiliatename,
-                                     DependsOn = [bucketname,logfoldername])
+                                     DependsOn = logfoldername)
             logafffolder = self.template.add_resource(logaffmake)
 
         ## Finally, make a "debug" folder that will always exist: 
         logdebugmake = CustomResource(logfoldername+"debug",
-                                     ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
+                                     ServiceToken=self.makefuncarn,
                                      BucketName = self.config['PipelineName'],
                                      Path = self.config['Lambda']['LambdaConfig']['LOGDIR']+'/',
                                      DirName = "debug"+self.config["PipelineName"],
-                                     DependsOn = [bucketname,logfoldername])
+                                     DependsOn = logfoldername)
         logdebugfolder = self.template.add_resource(logdebugmake)
 
 if __name__ == "__main__":
