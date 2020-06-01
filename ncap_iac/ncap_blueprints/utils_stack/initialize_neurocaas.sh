@@ -74,7 +74,7 @@ fi
 storageoutput=$(aws cloudformation describe-stack-resources --stack-name teststoragestack |jq '.StackResources[] | select(.LogicalResourceId == "SubstackTemplateBucket") | .PhysicalResourceId' | sed 's/\"//g')
 
 #Initialize a global parameter template that contains the output of these operations that can be referenced by stack builds.
-jq --arg storage $storageoutput --arg lstack $lambdastackoutput --arg sstack $ssmstackoutput --arg estack $ec2stackoutput --arg sgdev $sgdevoutput --arg sgdeploy $sgdeployoutput '. + {"bucketname":"$storageoutput","lambdarolename":$lstack,"ssmrolename":$sstack,"ec2rolename":$estack,"securitygroupdevname":$sgdev,"securitygroupdeployname":$sgdeploy}' ../../global_params.json > ../../global_params_initialized.json
+jq --arg storage $storageoutput --arg lstack $lambdastackoutput --arg sstack $ssmstackoutput --arg estack $ec2stackoutput --arg sgdev $sgdevoutput --arg sgdeploy $sgdeployoutput '. + {"bucketname":$storage,"lambdarolename":$lstack,"ssmrolename":$sstack,"ec2rolename":$estack,"securitygroupdevname":$sgdev,"securitygroupdeployname":$sgdeploy}' ../../global_params.json > ../../global_params_initialized.json
 
 ## Resources without a given output: 
 ## Create a stack based on an existing binx repo for generating ssh keys with cfn. 
