@@ -1,0 +1,84 @@
+{
+    "Stacks": [
+        {
+            "StackId": "arn:aws:cloudformation:us-east-1:739988523141:stack/testutilsstack/dee681c0-7a8c-11ea-bc04-0a2de5ab949d",
+            "StackName": "testutilsstack",
+            "CreationTime": "2020-04-09T18:08:31.270Z",
+            "LastUpdatedTime": "2020-04-20T19:17:50.741Z",
+            "RollbackConfiguration": {},
+            "StackStatus": "UPDATE_COMPLETE",
+            "DisableRollback": false,
+            "NotificationARNs": [],
+            "Capabilities": [
+                "CAPABILITY_NAMED_IAM"
+            ],
+            "Tags": [],
+            "EnableTerminationProtection": false,
+            "DriftInformation": {
+                "StackDriftStatus": "NOT_CHECKED"
+            }
+        }
+    ]
+}
+Stack testutilsstack already exists, skipping creation.
+{
+    "Stacks": [
+        {
+            "StackId": "arn:aws:cloudformation:us-east-1:739988523141:stack/testsgstack/0f5f31a0-7aa9-11ea-9a94-0a4fdb0c1726",
+            "StackName": "testsgstack",
+            "CreationTime": "2020-04-09T21:28:50Z",
+            "RollbackConfiguration": {},
+            "StackStatus": "CREATE_COMPLETE",
+            "DisableRollback": false,
+            "NotificationARNs": [],
+            "Capabilities": [
+                "CAPABILITY_IAM"
+            ],
+            "Tags": [],
+            "EnableTerminationProtection": false,
+            "DriftInformation": {
+                "StackDriftStatus": "NOT_CHECKED"
+            }
+        }
+    ]
+}
+Stack testsgstack already exists, skipping creation.
+{
+    "Stacks": [
+        {
+            "StackId": "arn:aws:cloudformation:us-east-1:739988523141:stack/teststoragestack/f8f41870-a435-11ea-8d50-12d8771823f5",
+            "StackName": "teststoragestack",
+            "CreationTime": "2020-06-01T18:30:30.558Z",
+            "RollbackConfiguration": {},
+            "StackStatus": "CREATE_COMPLETE",
+            "DisableRollback": false,
+            "NotificationARNs": [],
+            "Tags": [],
+            "EnableTerminationProtection": false,
+            "DriftInformation": {
+                "StackDriftStatus": "NOT_CHECKED"
+            }
+        }
+    ]
+}
+Stack teststoragestack already exists, skipping creation.
+{
+    "Stacks": [
+        {
+            "StackId": "arn:aws:cloudformation:us-east-1:739988523141:stack/testkeystack/caefe6a0-7ceb-11ea-af34-0ed4cff9b69d",
+            "StackName": "testkeystack",
+            "Description": "Demo Custom CloudFormation Secret Provider",
+            "CreationTime": "2020-04-12T18:31:15.229Z",
+            "RollbackConfiguration": {},
+            "StackStatus": "CREATE_COMPLETE",
+            "DisableRollback": false,
+            "NotificationARNs": [],
+            "Tags": [],
+            "EnableTerminationProtection": false,
+            "DriftInformation": {
+                "StackDriftStatus": "NOT_CHECKED"
+            }
+        }
+    ]
+}
+Stack testkeystack already exists, skipping creation.

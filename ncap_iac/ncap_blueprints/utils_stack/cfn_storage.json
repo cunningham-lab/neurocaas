@@ -1,0 +1,21 @@
+{
+    "Resources": {
+        "SubstackTemplateBucket": {
+            "Properties": {
+                "AccessControl": "Private",
+                "BucketName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "neurocaas-cfn-deployment-resources",
+                            {
+                                "Ref": "AWS::AccountId"
+                            }
+                        ]
+                    ]
+                }
+            },
+            "Type": "AWS::S3::Bucket"
+        }
+    }
+}

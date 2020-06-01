@@ -1,0 +1,536 @@
+{
+    "Parameters": {
+        "MakeFuncArn": {
+            "Description": "ARN of the make folder function.",
+            "Type": "String"
+        },
+        "Name": {
+            "Description": "Name of the user group.",
+            "Type": "String"
+        },
+        "UserNames": {
+            "Description": "List of the users in this group who should be added to this group.",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "AffiliateTemplateBaseFolder": {
+            "Properties": {
+                "BucketName": "neurocaasusertest",
+                "DirName": {
+                    "Ref": "Name"
+                },
+                "Path": "",
+                "ServiceToken": {
+                    "Ref": "MakeFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "AffiliateTemplateUserNet": {
+            "Properties": {
+                "GroupName": {
+                    "Ref": "UserGroupAffiliateTemplateneurocaasusertest"
+                },
+                "Users": {
+                    "Fn::Split": [
+                        ",",
+                        {
+                            "Ref": "UserNames"
+                        }
+                    ]
+                }
+            },
+            "Type": "AWS::IAM::UserToGroupAddition"
+        },
+        "ConfigFolderAffiliateTemplate": {
+            "DependsOn": "AffiliateTemplateBaseFolder",
+            "Properties": {
+                "BucketName": "neurocaasusertest",
+                "DirName": "configs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "Name"
+                            },
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Ref": "MakeFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "InFolderAffiliateTemplate": {
+            "DependsOn": "AffiliateTemplateBaseFolder",
+            "Properties": {
+                "BucketName": "neurocaasusertest",
+                "DirName": "inputs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "Name"
+                            },
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Ref": "MakeFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolder": {
+            "Properties": {
+                "BucketName": "neurocaasusertest",
+                "DirName": "logs",
+                "Path": "",
+                "ServiceToken": {
+                    "Ref": "MakeFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderAffiliateTemplate": {
+            "DependsOn": "LogFolder",
+            "Properties": {
+                "BucketName": "neurocaasusertest",
+                "DirName": {
+                    "Ref": "Name"
+                },
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Ref": "MakeFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderactive": {
+            "DependsOn": "LogFolder",
+            "Properties": {
+                "BucketName": "neurocaasusertest",
+                "DirName": "active",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Ref": "MakeFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderdebug": {
+            "DependsOn": "LogFolder",
+            "Properties": {
+                "BucketName": "neurocaasusertest",
+                "DirName": "debugneurocaasusertest",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Ref": "MakeFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "OutFolderAffiliateTemplate": {
+            "DependsOn": "AffiliateTemplateBaseFolder",
+            "Properties": {
+                "BucketName": "neurocaasusertest",
+                "DirName": "results",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "Name"
+                            },
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Ref": "MakeFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "SubmitFolderAffiliateTemplate": {
+            "DependsOn": "AffiliateTemplateBaseFolder",
+            "Properties": {
+                "BucketName": "neurocaasusertest",
+                "DirName": "submissions",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "Name"
+                            },
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Ref": "MakeFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "UserGroupAffiliateTemplateneurocaasusertest": {
+            "Properties": {
+                "GroupName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "Name"
+                            },
+                            "neurocaasusertest",
+                            "group"
+                        ]
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "s3:GetBucketLocation",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor0"
+                                },
+                                {
+                                    "Action": "s3:HeadBucket",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor3"
+                                },
+                                {
+                                    "Action": "s3:ListAllMyBuckets",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor1"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringEquals": {
+                                            "s3:delimiter": [
+                                                "/"
+                                            ],
+                                            "s3:prefix": [
+                                                "",
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            {
+                                                                "Ref": "Name"
+                                                            },
+                                                            "/"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            {
+                                                                "Ref": "Name"
+                                                            },
+                                                            "/",
+                                                            "inputs"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            {
+                                                                "Ref": "Name"
+                                                            },
+                                                            "/",
+                                                            "results"
+                                                        ]
+                                                    ]
+                                                },
+                                                "logs",
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            {
+                                                                "Ref": "Name"
+                                                            },
+                                                            "/",
+                                                            "submissions"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            {
+                                                                "Ref": "Name"
+                                                            },
+                                                            "/",
+                                                            "configs"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            {
+                                                                "Ref": "Name"
+                                                            },
+                                                            "/",
+                                                            "inputs",
+                                                            "/"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            {
+                                                                "Ref": "Name"
+                                                            },
+                                                            "/",
+                                                            "results",
+                                                            "/"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            {
+                                                                "Ref": "Name"
+                                                            },
+                                                            "/",
+                                                            "submissions",
+                                                            "/"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            {
+                                                                "Ref": "Name"
+                                                            },
+                                                            "/",
+                                                            "configs",
+                                                            "/"
+                                                        ]
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::neurocaasusertest"
+                                    ],
+                                    "Sid": "ListBucket"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringLike": {
+                                            "s3:prefix": [
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            {
+                                                                "Ref": "Name"
+                                                            },
+                                                            "/",
+                                                            "inputs",
+                                                            "/*"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            {
+                                                                "Ref": "Name"
+                                                            },
+                                                            "/",
+                                                            "results",
+                                                            "/*"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            {
+                                                                "Ref": "Name"
+                                                            },
+                                                            "/",
+                                                            "configs",
+                                                            "/*"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            {
+                                                                "Ref": "Name"
+                                                            },
+                                                            "/",
+                                                            "submissions",
+                                                            "/*"
+                                                        ]
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::neurocaasusertest"
+                                    ],
+                                    "Sid": "ListSubBucket"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "neurocaasusertest",
+                                                    "/",
+                                                    {
+                                                        "Ref": "Name"
+                                                    },
+                                                    "/",
+                                                    "inputs",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "neurocaasusertest",
+                                                    "/",
+                                                    {
+                                                        "Ref": "Name"
+                                                    },
+                                                    "/",
+                                                    "configs",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "neurocaasusertest",
+                                                    "/",
+                                                    {
+                                                        "Ref": "Name"
+                                                    },
+                                                    "/",
+                                                    "submissions",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        }
+                                    ],
+                                    "Sid": "Inputfolderwrite"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "neurocaasusertest",
+                                                    "/",
+                                                    {
+                                                        "Ref": "Name"
+                                                    },
+                                                    "/",
+                                                    "results",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "neurocaasusertest",
+                                                    "/",
+                                                    {
+                                                        "Ref": "Name"
+                                                    },
+                                                    "/",
+                                                    "configs",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        }
+                                    ],
+                                    "Sid": "Outputfolderwrite"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    {
+                                        "Ref": "Name"
+                                    },
+                                    "policy"
+                                ]
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Group"
+        }
+    },
+    "Transform": "AWS::Serverless-2016-10-31"
+}
