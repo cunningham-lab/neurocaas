@@ -1,20 +1,5 @@
 {
     "Resources": {
-        "BaseFoldertraviscipermagroup": {
-            "DependsOn": "PipelineMainBucket",
-            "Properties": {
-                "BucketName": "cianalysispermastack",
-                "DirName": "traviscipermagroup",
-                "Path": "",
-                "ServiceToken": {
-                    "Fn::GetAtt": [
-                        "S3PutObjectFunction",
-                        "Arn"
-                    ]
-                }
-            },
-            "Type": "AWS::CloudFormation::CustomResource"
-        },
         "CWPermissions": {
             "Properties": {
                 "Action": "lambda:InvokeFunction",
@@ -84,24 +69,6 @@
             },
             "Type": "AWS::IAM::ManagedPolicy"
         },
-        "ConfigFoldertraviscipermagroup": {
-            "DependsOn": [
-                "PipelineMainBucket",
-                "BaseFoldertraviscipermagroup"
-            ],
-            "Properties": {
-                "BucketName": "cianalysispermastack",
-                "DirName": "configs",
-                "Path": "traviscipermagroup/",
-                "ServiceToken": {
-                    "Fn::GetAtt": [
-                        "S3PutObjectFunction",
-                        "Arn"
-                    ]
-                }
-            },
-            "Type": "AWS::CloudFormation::CustomResource"
-        },
         "DeleteCustomResource": {
             "DependsOn": "PipelineMainBucket",
             "Properties": {
@@ -143,24 +110,6 @@
             },
             "Type": "AWS::Logs::LogGroup"
         },
-        "InFoldertraviscipermagroup": {
-            "DependsOn": [
-                "PipelineMainBucket",
-                "BaseFoldertraviscipermagroup"
-            ],
-            "Properties": {
-                "BucketName": "cianalysispermastack",
-                "DirName": "inputs",
-                "Path": "traviscipermagroup/",
-                "ServiceToken": {
-                    "Fn::GetAtt": [
-                        "S3PutObjectFunction",
-                        "Arn"
-                    ]
-                }
-            },
-            "Type": "AWS::CloudFormation::CustomResource"
-        },
         "LambdaBaseRole": {
             "Properties": {
                 "Description": {
@@ -190,75 +139,6 @@
                 }
             },
             "Type": "AWS::IAM::ManagedPolicy"
-        },
-        "LogFolder": {
-            "DependsOn": "PipelineMainBucket",
-            "Properties": {
-                "BucketName": "cianalysispermastack",
-                "DirName": "logs",
-                "Path": "",
-                "ServiceToken": {
-                    "Fn::GetAtt": [
-                        "S3PutObjectFunction",
-                        "Arn"
-                    ]
-                }
-            },
-            "Type": "AWS::CloudFormation::CustomResource"
-        },
-        "LogFolderactive": {
-            "DependsOn": [
-                "PipelineMainBucket",
-                "LogFolder"
-            ],
-            "Properties": {
-                "BucketName": "cianalysispermastack",
-                "DirName": "active",
-                "Path": "logs/",
-                "ServiceToken": {
-                    "Fn::GetAtt": [
-                        "S3PutObjectFunction",
-                        "Arn"
-                    ]
-                }
-            },
-            "Type": "AWS::CloudFormation::CustomResource"
-        },
-        "LogFolderdebug": {
-            "DependsOn": [
-                "PipelineMainBucket",
-                "LogFolder"
-            ],
-            "Properties": {
-                "BucketName": "cianalysispermastack",
-                "DirName": "debugcianalysispermastack",
-                "Path": "logs/",
-                "ServiceToken": {
-                    "Fn::GetAtt": [
-                        "S3PutObjectFunction",
-                        "Arn"
-                    ]
-                }
-            },
-            "Type": "AWS::CloudFormation::CustomResource"
-        },
-        "LogFoldertraviscipermagroup": {
-            "DependsOn": [
-                "PipelineMainBucket",
-                "LogFolder"
-            ],
-            "Properties": {
-                "BucketName": "cianalysispermastack",
-                "DirName": "traviscipermagroup",
-                "Path": "logs/",
-                "ServiceToken": {
-                    "Fn::GetAtt": [
-                        "S3PutObjectFunction",
-                        "Arn"
-                    ]
-                }
-            },
-            "Type": "AWS::CloudFormation::CustomResource"
         },
         "MainLambda": {
             "Properties": {
@@ -304,7 +184,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "bed34b416dfae6a06cc9f55ad0a294a521345162\n"
+                        "versionid": "dc2c2a7d9fd65e9d9d9acdc85a29f9e57685866b\n"
                     }
                 },
                 "Events": {
@@ -341,24 +221,6 @@
                 "Timeout": 180
             },
             "Type": "AWS::Serverless::Function"
-        },
-        "OutFoldertraviscipermagroup": {
-            "DependsOn": [
-                "PipelineMainBucket",
-                "BaseFoldertraviscipermagroup"
-            ],
-            "Properties": {
-                "BucketName": "cianalysispermastack",
-                "DirName": "results",
-                "Path": "traviscipermagroup/",
-                "ServiceToken": {
-                    "Fn::GetAtt": [
-                        "S3PutObjectFunction",
-                        "Arn"
-                    ]
-                }
-            },
-            "Type": "AWS::CloudFormation::CustomResource"
         },
         "PipelineMainBucket": {
             "Properties": {
@@ -411,7 +273,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "bed34b416dfae6a06cc9f55ad0a294a521345162\n"
+                        "versionid": "dc2c2a7d9fd65e9d9d9acdc85a29f9e57685866b\n"
                     }
                 },
                 "Handler": "helper.handler_deldir",
@@ -515,7 +377,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "bed34b416dfae6a06cc9f55ad0a294a521345162\n"
+                        "versionid": "dc2c2a7d9fd65e9d9d9acdc85a29f9e57685866b\n"
                     }
                 },
                 "Handler": "helper.handler_mkdir",
@@ -530,140 +392,26 @@
             },
             "Type": "AWS::Serverless::Function"
         },
-        "SubmitFoldertraviscipermagroup": {
+        "UserSubstack0": {
             "DependsOn": [
                 "PipelineMainBucket",
-                "BaseFoldertraviscipermagroup"
+                "S3PutObjectFunction",
+                "S3DelObjectFunction"
             ],
             "Properties": {
-                "BucketName": "cianalysispermastack",
-                "DirName": "submissions",
-                "Path": "traviscipermagroup/",
-                "ServiceToken": {
-                    "Fn::GetAtt": [
-                        "S3PutObjectFunction",
-                        "Arn"
-                    ]
-                }
-            },
-            "Type": "AWS::CloudFormation::CustomResource"
-        },
-        "UserGrouptraviscipermagroupcianalysispermastack": {
-            "Properties": {
-                "GroupName": "traviscipermagroupcianalysispermastackgroup",
-                "Policies": [
-                    {
-                        "PolicyDocument": {
-                            "Statement": [
-                                {
-                                    "Action": "s3:GetBucketLocation",
-                                    "Effect": "Allow",
-                                    "Resource": "*",
-                                    "Sid": "VisualEditor0"
-                                },
-                                {
-                                    "Action": "s3:HeadBucket",
-                                    "Effect": "Allow",
-                                    "Resource": "*",
-                                    "Sid": "VisualEditor3"
-                                },
-                                {
-                                    "Action": "s3:ListAllMyBuckets",
-                                    "Effect": "Allow",
-                                    "Resource": "*",
-                                    "Sid": "VisualEditor1"
-                                },
-                                {
-                                    "Action": "s3:ListBucket",
-                                    "Condition": {
-                                        "StringEquals": {
-                                            "s3:delimiter": [
-                                                "/"
-                                            ],
-                                            "s3:prefix": [
-                                                "",
-                                                "traviscipermagroup/",
-                                                "traviscipermagroup/inputs",
-                                                "traviscipermagroup/results",
-                                                "logs",
-                                                "traviscipermagroup/submissions",
-                                                "traviscipermagroup/configs",
-                                                "traviscipermagroup/inputs/",
-                                                "traviscipermagroup/results/",
-                                                "traviscipermagroup/submissions/",
-                                                "traviscipermagroup/configs/"
-                                            ]
-                                        }
-                                    },
-                                    "Effect": "Allow",
-                                    "Resource": [
-                                        "arn:aws:s3:::cianalysispermastack"
-                                    ],
-                                    "Sid": "ListBucket"
-                                },
-                                {
-                                    "Action": "s3:ListBucket",
-                                    "Condition": {
-                                        "StringLike": {
-                                            "s3:prefix": [
-                                                "traviscipermagroup/inputs/*",
-                                                "traviscipermagroup/results/*",
-                                                "traviscipermagroup/configs/*",
-                                                "traviscipermagroup/submissions/*"
-                                            ]
-                                        }
-                                    },
-                                    "Effect": "Allow",
-                                    "Resource": [
-                                        "arn:aws:s3:::cianalysispermastack"
-                                    ],
-                                    "Sid": "ListSubBucket"
-                                },
-                                {
-                                    "Action": [
-                                        "s3:PutObject",
-                                        "s3:DeleteObject"
-                                    ],
-                                    "Effect": "Allow",
-                                    "Resource": [
-                                        "arn:aws:s3:::cianalysispermastack/traviscipermagroup/inputs/*",
-                                        "arn:aws:s3:::cianalysispermastack/traviscipermagroup/configs/*",
-                                        "arn:aws:s3:::cianalysispermastack/traviscipermagroup/submissions/*"
-                                    ],
-                                    "Sid": "Inputfolderwrite"
-                                },
-                                {
-                                    "Action": [
-                                        "s3:GetObject",
-                                        "s3:DeleteObject"
-                                    ],
-                                    "Effect": "Allow",
-                                    "Resource": [
-                                        "arn:aws:s3:::cianalysispermastack/traviscipermagroup/results/*",
-                                        "arn:aws:s3:::cianalysispermastack/traviscipermagroup/configs/*"
-                                    ],
-                                    "Sid": "Outputfolderwrite"
-                                }
-                            ],
-                            "Version": "2012-10-17"
-                        },
-                        "PolicyName": "traviscipermagrouppolicy"
-                    }
-                ]
-            },
-            "Type": "AWS::IAM::Group"
-        },
-        "traviscipermagroupUserNet": {
-            "Properties": {
-                "GroupName": {
-                    "Ref": "UserGrouptraviscipermagroupcianalysispermastack"
+                "Parameters": {
+                    "MakeFuncArn": {
+                        "Fn::GetAtt": [
+                            "S3PutObjectFunction",
+                            "Arn"
+                        ]
+                    },
+                    "Name": "traviscipermagroup",
+                    "UserNames": "cipermauser1us-east-1,cipermauser2us-east-1"
                 },
-                "Users": [
-                    "cipermauser1us-east-1",
-                    "cipermauser2us-east-1"
-                ]
+                "TemplateURL": "../utils_stack/user_subtemplate_packaged.yaml"
             },
-            "Type": "AWS::IAM::UserToGroupAddition"
+            "Type": "AWS::CloudFormation::Stack"
         }
     },
     "Transform": "AWS::Serverless-2016-10-31"
