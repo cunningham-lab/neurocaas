@@ -155,8 +155,20 @@ class NeuroCaaSTemplate(object):
                 user_local = user+self.config["Lambda"]["LambdaConfig"]["REGION"]
                 self.iam_resource.User(user_local).create_date
                 print("User {} exists, adding to group".format(user))
+                ## Now ask if we are just updating an existing stack: 
+                ## Get the groupname we will assign: 
+                identifier = "{}".format(self.config["PipelineName"].replace("-",""))
+                affiliatename = affiliatedict["AffiliateName"]
+                groupname = "".join([affiliatename,identifier,"group"])
                 grouplist = self.iam_client.list_groups_for_user(UserName=user_local)["Groups"]
-                assert len(grouplist) < 10, "user can only belong to 10 groups."
+                groupnameslist = [entry["GroupName"] for entry in grouplist]
+                ## Check to make sure: 
+                if groupname in groupnameslist:
+                    ## This us just an update, we can allow it to pass.
+                    pass
+                else:
+                    ## We need to watch out for the existing user group limit.
+                    assert len(grouplist) < 10, "user can only belong to 10 groups."
                 print("User currently belongs to {} groups".format(len(grouplist)))
                 affiliate_users.append(self.iam_resource.User(user_local))
                 affiliate_usernames.append(user_local)
@@ -793,7 +805,9 @@ class WebDevTemplate(NeuroCaaSTemplate):
     
 
 ## Call the substack given.  
-class TestParametrizedStack(NeuroCaaSTemplate):
+class WebSubstackTemplate(NeuroCaaSTemplate):
+    """Created 6/1/20. Newest version of the neurocaas pipeline template that makes use of substacks for every individual affiliate group. 
+    """
     def __init__(self,filename):
         self.filename = filename
         self.config = self.get_config(self.filename)
@@ -815,7 +829,7 @@ class TestParametrizedStack(NeuroCaaSTemplate):
             usernames_concat = ",".join(usernames)
             substack = Stack(
                     "UserSubstack{}".format(a),
-                    TemplateURL="template_basis.yaml", ## This should be a file that has had sam-package already run on it. 
+                    TemplateURL="../utils_stack/user_subtemplate_packaged.yaml", ## This should be a file that has had sam-package already run on it. 
                     Parameters = {
                         "MakeFuncArn":GetAtt(self.mkdirfunc,"Arn"),#Ref(self.bucket),
                         "Name":name,
@@ -835,6 +849,48 @@ class TestParametrizedStack(NeuroCaaSTemplate):
         template.set_transform("AWS::Serverless-2016-10-31")
         return template
         
+    def attach_users(self,affiliatedict):
+        """Function to vet if the users we want to attach actually exist. 
+
+        """
+        print(affiliatedict,"affiliatedict")
+        ## First get a list of usernames. 
+        users = affiliatedict['UserNames']
+        affiliatename = affiliatedict['AffiliateName']
+        ## Initialize list of users: 
+        affiliate_users = []
+        affiliate_usernames = []
+        err = 0
+        for user in users:
+            try:
+                # Filter for existing: we only want to treat users who have already been declared elsewhere. 
+                ## Get the internal user name filtered by region:
+                user_local = user+self.config["Lambda"]["LambdaConfig"]["REGION"]
+                self.iam_resource.User(user_local).create_date
+                print("User {} exists, adding to group".format(user))
+                ## Now ask if we are just updating an existing stack: 
+                ## Get the groupname we will assign: 
+                identifier = "{}".format(self.config["PipelineName"].replace("-",""))
+                affiliatename = affiliatedict["AffiliateName"]
+                groupname = "".join([affiliatename,identifier,"substackgroup"])
+                grouplist = self.iam_client.list_groups_for_user(UserName=user_local)["Groups"]
+                groupnameslist = [entry["GroupName"] for entry in grouplist]
+                ## Check to make sure: 
+                if groupname in groupnameslist:
+                    ## This us just an update, we can allow it to pass.
+                    pass
+                else:
+                    ## We need to watch out for the existing user group limit.
+                    assert len(grouplist) < 10, "user can only belong to 10 groups."
+                print("User currently belongs to {} groups".format(len(grouplist)))
+                affiliate_users.append(self.iam_resource.User(user_local))
+                affiliate_usernames.append(user_local)
+            except Exception as e: 
+                print("Error adding User {}, please evaluate".format(user),e)
+                raise
+
+        return affiliate_users,affiliate_usernames
+
     def make_custom_resources(self):
         ## Make role for custom resources. 
         ## Initialize the resources necessary to make directories. 
@@ -887,7 +943,12 @@ class TestParametrizedStack(NeuroCaaSTemplate):
         return mkfunction_attached,delfunction_attached,mkfunction_logical_id,delfunction_logical_id
 
 ## Make a parametrized version of the user template.  
-class UserParametrizedtemplate(NeuroCaaSTemplate):
+class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
+    """Created 6/1/20
+    Function to create a parametrized stack that will be referenced by other pipeline stacks. Separates users associated with a given 
+    pipeline from the actual mechanics of the pipeline processing. Note that this function DOES NOT actually depend upon the specific values of the stack configuration template that is passed to it. It only uses this structure to set up a parametrized template, and at a later date the dependence on a filename should be factored out. 
+    
+    """
     def __init__(self,filename):
         self.filename = filename
         self.config = self.get_config(self.filename)
@@ -1049,7 +1110,7 @@ class UserParametrizedtemplate(NeuroCaaSTemplate):
         identifier = "{}".format(self.config["PipelineName"].replace("-",""))
         affiliatename = affiliatedict["AffiliateName"]
         policy = Policy(PolicyDocument=self.customize_userpolicy(affiliatedict),PolicyName = Join("",[affiliatename,'policy']))
-        usergroup = Group("UserGroupAffiliateTemplate"+identifier,GroupName = Join("",[affiliatename,identifier,"group"]),Policies=[policy])
+        usergroup = Group("UserGroupAffiliateTemplate"+identifier,GroupName = Join("",[affiliatename,identifier,"substackgroup"]),Policies=[policy])
         usergroup_attached = self.template.add_resource(usergroup)
         return usergroup_attached
 
@@ -1130,6 +1191,12 @@ if __name__ == "__main__":
         print("webdev mode")
         ## Construct a web development mode pipeline. Standardizes user group handling for neatness. 
         temp =WebDevTemplate(filename)
+        with open(dirname+'/'+'compiled_template.json','w') as f:
+            print(temp.template.to_json(),file = f)
+    elif mode == "websubstack":
+        print("factorized substack mode")
+        ## Constructs a new version of web dev pipelines that scales to many users by referencing a parametrized substack for every user group.  
+        temp =WebSubstackTemplate(filename) 
         with open(dirname+'/'+'compiled_template.json','w') as f:
             print(temp.template.to_json(),file = f)
     else:
