@@ -202,11 +202,11 @@ class Submission_dev():
                 endtime = datetime.strptime(end, "%Y-%m-%dT%H:%M:%SZ")
                 diff = endtime-starttime
                 duration = abs(diff.seconds)
-                cost = price*duration/3600.
+                instcost = price*duration/3600.
             except TypeError:
                 ## In rare cases it seems one or the other of these things don't actually have entries. This is a problem. for now, charge for the hour: 
-                cost = price
-            cost+= cost
+                instcost = price
+            cost+= instcost
         
         ## Now compare with budget:
         budget = float(os.environ["MAXCOST"])
