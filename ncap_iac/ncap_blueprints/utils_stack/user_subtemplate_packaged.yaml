@@ -1,4 +1,7 @@
 Parameters:
+  BucketName:
+    Description: PhysicalResourceId of the bucket for this pipeline.
+    Type: String
   MakeFuncArn:
     Description: ARN of the make folder function.
     Type: String
@@ -11,7 +14,8 @@ Parameters:
 Resources:
   AffiliateTemplateBaseFolder:
     Properties:
-      BucketName: neurocaasusertest
+      BucketName:
+        Ref: BucketName
       DirName:
         Ref: Name
       Path: ''
@@ -21,7 +25,7 @@ Resources:
   AffiliateTemplateUserNet:
     Properties:
       GroupName:
-        Ref: UserGroupAffiliateTemplateneurocaasusertest
+        Ref: UserGroupAffiliateTemplate
       Users:
         Fn::Split:
         - ','
@@ -30,7 +34,8 @@ Resources:
   ConfigFolderAffiliateTemplate:
     DependsOn: AffiliateTemplateBaseFolder
     Properties:
-      BucketName: neurocaasusertest
+      BucketName:
+        Ref: BucketName
       DirName: configs
       Path:
         Fn::Join:
@@ -43,7 +48,8 @@ Resources:
   InFolderAffiliateTemplate:
     DependsOn: AffiliateTemplateBaseFolder
     Properties:
-      BucketName: neurocaasusertest
+      BucketName:
+        Ref: BucketName
       DirName: inputs
       Path:
         Fn::Join:
@@ -55,7 +61,8 @@ Resources:
     Type: AWS::CloudFormation::CustomResource
   LogFolder:
     Properties:
-      BucketName: neurocaasusertest
+      BucketName:
+        Ref: BucketName
       DirName: logs
       Path: ''
       ServiceToken:
@@ -64,7 +71,8 @@ Resources:
   LogFolderAffiliateTemplate:
     DependsOn: LogFolder
     Properties:
-      BucketName: neurocaasusertest
+      BucketName:
+        Ref: BucketName
       DirName:
         Ref: Name
       Path: logs/
@@ -74,7 +82,8 @@ Resources:
   LogFolderactive:
     DependsOn: LogFolder
     Properties:
-      BucketName: neurocaasusertest
+      BucketName:
+        Ref: BucketName
       DirName: active
       Path: logs/
       ServiceToken:
@@ -83,7 +92,8 @@ Resources:
   LogFolderdebug:
     DependsOn: LogFolder
     Properties:
-      BucketName: neurocaasusertest
+      BucketName:
+        Ref: BucketName
       DirName: debugneurocaasusertest
       Path: logs/
       ServiceToken:
@@ -92,7 +102,8 @@ Resources:
   OutFolderAffiliateTemplate:
     DependsOn: AffiliateTemplateBaseFolder
     Properties:
-      BucketName: neurocaasusertest
+      BucketName:
+        Ref: BucketName
       DirName: results
       Path:
         Fn::Join:
@@ -105,7 +116,8 @@ Resources:
   SubmitFolderAffiliateTemplate:
     DependsOn: AffiliateTemplateBaseFolder
     Properties:
-      BucketName: neurocaasusertest
+      BucketName:
+        Ref: BucketName
       DirName: submissions
       Path:
         Fn::Join:
@@ -115,13 +127,17 @@ Resources:
       ServiceToken:
         Ref: MakeFuncArn
     Type: AWS::CloudFormation::CustomResource
-  UserGroupAffiliateTemplateneurocaasusertest:
+  UserGroupAffiliateTemplate:
     Properties:
       GroupName:
         Fn::Join:
         - ''
         - - Ref: Name
-          - neurocaasusertest
+          - Fn::Join:
+            - ''
+            - Fn::Split:
+              - '-'
+              - Ref: BucketName
           - substackgroup
       Policies:
       - PolicyDocument:
@@ -196,7 +212,10 @@ Resources:
                     - /
             Effect: Allow
             Resource:
-            - arn:aws:s3:::neurocaasusertest
+              Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - Ref: BucketName
             Sid: ListBucket
           - Action: s3:ListBucket
             Condition:
@@ -228,7 +247,10 @@ Resources:
                     - /*
             Effect: Allow
             Resource:
-            - arn:aws:s3:::neurocaasusertest
+              Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - Ref: BucketName
             Sid: ListSubBucket
           - Action:
             - s3:PutObject
@@ -238,7 +260,7 @@ Resources:
             - Fn::Join:
               - ''
               - - 'arn:aws:s3:::'
-                - neurocaasusertest
+                - Ref: BucketName
                 - /
                 - Ref: Name
                 - /
@@ -247,7 +269,7 @@ Resources:
             - Fn::Join:
               - ''
               - - 'arn:aws:s3:::'
-                - neurocaasusertest
+                - Ref: BucketName
                 - /
                 - Ref: Name
                 - /
@@ -256,7 +278,7 @@ Resources:
             - Fn::Join:
               - ''
               - - 'arn:aws:s3:::'
-                - neurocaasusertest
+                - Ref: BucketName
                 - /
                 - Ref: Name
                 - /
@@ -271,7 +293,7 @@ Resources:
             - Fn::Join:
               - ''
               - - 'arn:aws:s3:::'
-                - neurocaasusertest
+                - Ref: BucketName
                 - /
                 - Ref: Name
                 - /
@@ -280,7 +302,7 @@ Resources:
             - Fn::Join:
               - ''
               - - 'arn:aws:s3:::'
-                - neurocaasusertest
+                - Ref: BucketName
                 - /
                 - Ref: Name
                 - /

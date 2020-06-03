@@ -1,5 +1,9 @@
 {
     "Parameters": {
+        "BucketName": {
+            "Description": "PhysicalResourceId of the bucket for this pipeline.",
+            "Type": "String"
+        },
         "MakeFuncArn": {
             "Description": "ARN of the make folder function.",
             "Type": "String"
@@ -16,7 +20,9 @@
     "Resources": {
         "AffiliateTemplateBaseFolder": {
             "Properties": {
-                "BucketName": "neurocaasusertest",
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
                 "DirName": {
                     "Ref": "Name"
                 },
@@ -30,7 +36,7 @@
         "AffiliateTemplateUserNet": {
             "Properties": {
                 "GroupName": {
-                    "Ref": "UserGroupAffiliateTemplateneurocaasusertest"
+                    "Ref": "UserGroupAffiliateTemplate"
                 },
                 "Users": {
                     "Fn::Split": [
@@ -46,7 +52,9 @@
         "ConfigFolderAffiliateTemplate": {
             "DependsOn": "AffiliateTemplateBaseFolder",
             "Properties": {
-                "BucketName": "neurocaasusertest",
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
                 "DirName": "configs",
                 "Path": {
                     "Fn::Join": [
@@ -68,7 +76,9 @@
         "InFolderAffiliateTemplate": {
             "DependsOn": "AffiliateTemplateBaseFolder",
             "Properties": {
-                "BucketName": "neurocaasusertest",
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
                 "DirName": "inputs",
                 "Path": {
                     "Fn::Join": [
@@ -89,7 +99,9 @@
         },
         "LogFolder": {
             "Properties": {
-                "BucketName": "neurocaasusertest",
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
                 "DirName": "logs",
                 "Path": "",
                 "ServiceToken": {
@@ -101,7 +113,9 @@
         "LogFolderAffiliateTemplate": {
             "DependsOn": "LogFolder",
             "Properties": {
-                "BucketName": "neurocaasusertest",
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
                 "DirName": {
                     "Ref": "Name"
                 },
@@ -115,7 +129,9 @@
         "LogFolderactive": {
             "DependsOn": "LogFolder",
             "Properties": {
-                "BucketName": "neurocaasusertest",
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
                 "DirName": "active",
                 "Path": "logs/",
                 "ServiceToken": {
@@ -127,7 +143,9 @@
         "LogFolderdebug": {
             "DependsOn": "LogFolder",
             "Properties": {
-                "BucketName": "neurocaasusertest",
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
                 "DirName": "debugneurocaasusertest",
                 "Path": "logs/",
                 "ServiceToken": {
@@ -139,7 +157,9 @@
         "OutFolderAffiliateTemplate": {
             "DependsOn": "AffiliateTemplateBaseFolder",
             "Properties": {
-                "BucketName": "neurocaasusertest",
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
                 "DirName": "results",
                 "Path": {
                     "Fn::Join": [
@@ -161,7 +181,9 @@
         "SubmitFolderAffiliateTemplate": {
             "DependsOn": "AffiliateTemplateBaseFolder",
             "Properties": {
-                "BucketName": "neurocaasusertest",
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
                 "DirName": "submissions",
                 "Path": {
                     "Fn::Join": [
@@ -180,7 +202,7 @@
             },
             "Type": "AWS::CloudFormation::CustomResource"
         },
-        "UserGroupAffiliateTemplateneurocaasusertest": {
+        "UserGroupAffiliateTemplate": {
             "Properties": {
                 "GroupName": {
                     "Fn::Join": [
@@ -189,7 +211,19 @@
                             {
                                 "Ref": "Name"
                             },
-                            "neurocaasusertest",
+                            {
+                                "Fn::Join": [
+                                    "",
+                                    {
+                                        "Fn::Split": [
+                                            "-",
+                                            {
+                                                "Ref": "BucketName"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
                             "substackgroup"
                         ]
                     ]
@@ -341,9 +375,17 @@
                                         }
                                     },
                                     "Effect": "Allow",
-                                    "Resource": [
-                                        "arn:aws:s3:::neurocaasusertest"
-                                    ],
+                                    "Resource": {
+                                        "Fn::Join": [
+                                            "",
+                                            [
+                                                "arn:aws:s3:::",
+                                                {
+                                                    "Ref": "BucketName"
+                                                }
+                                            ]
+                                        ]
+                                    },
                                     "Sid": "ListBucket"
                                 },
                                 {
@@ -407,9 +449,17 @@
                                         }
                                     },
                                     "Effect": "Allow",
-                                    "Resource": [
-                                        "arn:aws:s3:::neurocaasusertest"
-                                    ],
+                                    "Resource": {
+                                        "Fn::Join": [
+                                            "",
+                                            [
+                                                "arn:aws:s3:::",
+                                                {
+                                                    "Ref": "BucketName"
+                                                }
+                                            ]
+                                        ]
+                                    },
                                     "Sid": "ListSubBucket"
                                 },
                                 {
@@ -424,7 +474,9 @@
                                                 "",
                                                 [
                                                     "arn:aws:s3:::",
-                                                    "neurocaasusertest",
+                                                    {
+                                                        "Ref": "BucketName"
+                                                    },
                                                     "/",
                                                     {
                                                         "Ref": "Name"
@@ -440,7 +492,9 @@
                                                 "",
                                                 [
                                                     "arn:aws:s3:::",
-                                                    "neurocaasusertest",
+                                                    {
+                                                        "Ref": "BucketName"
+                                                    },
                                                     "/",
                                                     {
                                                         "Ref": "Name"
@@ -456,7 +510,9 @@
                                                 "",
                                                 [
                                                     "arn:aws:s3:::",
-                                                    "neurocaasusertest",
+                                                    {
+                                                        "Ref": "BucketName"
+                                                    },
                                                     "/",
                                                     {
                                                         "Ref": "Name"
@@ -482,7 +538,9 @@
                                                 "",
                                                 [
                                                     "arn:aws:s3:::",
-                                                    "neurocaasusertest",
+                                                    {
+                                                        "Ref": "BucketName"
+                                                    },
                                                     "/",
                                                     {
                                                         "Ref": "Name"
@@ -498,7 +556,9 @@
                                                 "",
                                                 [
                                                     "arn:aws:s3:::",
-                                                    "neurocaasusertest",
+                                                    {
+                                                        "Ref": "BucketName"
+                                                    },
                                                     "/",
                                                     {
                                                         "Ref": "Name"
