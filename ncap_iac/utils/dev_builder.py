@@ -832,6 +832,7 @@ class WebSubstackTemplate(NeuroCaaSTemplate):
                     TemplateURL="../utils_stack/user_subtemplate_packaged.yaml", ## This should be a file that has had sam-package already run on it. 
                     Parameters = {
                         "MakeFuncArn":GetAtt(self.mkdirfunc,"Arn"),#Ref(self.bucket),
+                        "BucketName":self.bucketname,
                         "Name":name,
                         "UserNames":usernames_concat
                         },
@@ -956,7 +957,7 @@ class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
         self.iam_client = boto3.client("iam",region_name = self.config['Lambda']['LambdaConfig']["REGION"])
         ## We should get all resources once attached. 
         self.template = self.initialize_template()
-        self.makefuncarn,affdict_params = self.add_affiliate_parameters()
+        self.makefuncarn,self.bucketname,affdict_params = self.add_affiliate_parameters()
         ## Now add affiliates:
         self.add_affiliate(affdict_params)
         self.add_log_folder([affdict_params])
@@ -980,7 +981,9 @@ class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
               The neurocaas blueprint. Should be initialized by calling the initialize_template() method. 
         Outputs:
               (Ref): 
-              a reference to the logical id of the main analysis bucket for the pipeline. 
+              a reference to the logical id of the folder making lambda function for the pipeline. 
+              (Ref): 
+              a reference to the physical resource id of the main analysis bucket for the pipeline. 
               (Dict): 
               a dictionary mocking the structure of the affiliatedictionary that is imported from the stack configuration template.
               Contains (Ref) objects as its entries.
@@ -993,6 +996,9 @@ class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
         MakeFuncArn = Parameter("MakeFuncArn",
                 Description="ARN of the make folder function.",
                 Type = "String")
+        BucketName = Parameter("BucketName",
+                Description="PhysicalResourceId of the bucket for this pipeline.",
+                Type = "String")
         Name = Parameter("Name",
                 Description="Name of the user group.",
                 Type = "String")
@@ -1001,7 +1007,8 @@ class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
                 Type = "String")
 
         ## Attach parameter
-        MakeFuncArn = self.template.add_parameter(MakeFuncArn)
+        MakeFuncArnAttached = self.template.add_parameter(MakeFuncArn)
+        BucketNameAttached = self.template.add_parameter(BucketName)
         NameAttached = self.template.add_parameter(Name)
         UserNamesAttached = self.template.add_parameter(UserNames)
 
@@ -1009,7 +1016,7 @@ class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
         affiliatedict_params = {"AffiliateName":Ref(NameAttached),
                 "UserNames":Ref(UserNamesAttached)}
 
-        return Ref(MakeFuncArn),affiliatedict_params
+        return Ref(MakeFuncArnAttached),Ref(BucketNameAttached),affiliatedict_params
 
     def add_affiliate_folder(self,affiliatename):
         ## Declare depends on resources: 
@@ -1018,7 +1025,7 @@ class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
         ## We will declare three custom resources per affiliate: 
         basemake = CustomResource(basefoldername,
                                   ServiceToken=self.makefuncarn,
-                                  BucketName = self.config['PipelineName'],
+                                  BucketName = self.bucketname,
                                   Path = "",
                                   DirName = affiliatename)
         basefolder = self.template.add_resource(basemake)
@@ -1031,15 +1038,14 @@ class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
             cfn_name = key+"AffiliateTemplate"
             make = CustomResource(cfn_name,
                                       ServiceToken=self.makefuncarn,
-                                      BucketName = self.config['PipelineName'],
+                                      BucketName = self.bucketname,
                                       Path = Join("",[affiliatename,'/']),
                                       DirName = self.config['Lambda']['LambdaConfig'][pairs[key]],
                                       DependsOn = basefoldername)
             folder = self.template.add_resource(make)
 
     def customize_userpolicy(self,affiliatedict):
-        bucketname = self.config['PipelineName']
-        #bucketname = self.bucketid
+        bucketname = self.bucketname
         affiliatename = affiliatedict["AffiliateName"]
         indir = self.config['Lambda']['LambdaConfig']['INDIR']
         outdir = self.config['Lambda']['LambdaConfig']['OUTDIR']
@@ -1055,7 +1061,7 @@ class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
             'Sid': 'ListBucket',
             'Effect': 'Allow',
             'Action': 's3:ListBucket',
-            'Resource': ['arn:aws:s3:::'+bucketname],
+            'Resource': Join("",['arn:aws:s3:::',bucketname]),
             'Condition':{'StringEquals':{'s3:prefix':['',
                 Join("",[affiliatename,'/']),
                 Join("",[affiliatename,'/',indir]),
@@ -1073,7 +1079,7 @@ class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
             'Sid': "ListSubBucket",
             'Effect': 'Allow',
             'Action': 's3:ListBucket',
-            'Resource': ['arn:aws:s3:::'+bucketname],
+            'Resource': Join("",['arn:aws:s3:::',bucketname]),
             'Condition':{'StringLike':{'s3:prefix':[
                 Join("",[affiliatename,'/',indir,'/*']),
                 Join("",[affiliatename,'/',outdir,'/*']),
@@ -1107,10 +1113,11 @@ class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
         return obj
 
     def generate_usergroup(self,affiliatedict):
-        identifier = "{}".format(self.config["PipelineName"].replace("-",""))
+        #identifier = "{}".format(self.config["PipelineName"].replace("-",""))
+        identifier = Join("",Split("-",self.bucketname))
         affiliatename = affiliatedict["AffiliateName"]
         policy = Policy(PolicyDocument=self.customize_userpolicy(affiliatedict),PolicyName = Join("",[affiliatename,'policy']))
-        usergroup = Group("UserGroupAffiliateTemplate"+identifier,GroupName = Join("",[affiliatename,identifier,"substackgroup"]),Policies=[policy])
+        usergroup = Group("UserGroupAffiliateTemplate",GroupName = Join("",[affiliatename,identifier,"substackgroup"]),Policies=[policy])
         usergroup_attached = self.template.add_resource(usergroup)
         return usergroup_attached
 
@@ -1137,7 +1144,7 @@ class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
         ## A log folder to keep track of all resource monitoring across all users.  
         logmake = CustomResource(logfoldername,
                                  ServiceToken=self.makefuncarn,
-                                 BucketName = self.config['PipelineName'],
+                                 BucketName = self.bucketname,
                                  Path = "",
                                  DirName = self.config['Lambda']['LambdaConfig']['LOGDIR'])
         logfolder = self.template.add_resource(logmake)
@@ -1145,7 +1152,7 @@ class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
         ## Make an "active jobs" subfolder within: 
         logactivemake = CustomResource(logfoldername+"active",
                                  ServiceToken=self.makefuncarn,
-                                 BucketName = self.config['PipelineName'],
+                                 BucketName = self.bucketname,
                                  Path = self.config['Lambda']['LambdaConfig']['LOGDIR']+'/',
                                  DirName = "active",
                                  DependsOn = logfoldername)
@@ -1157,7 +1164,7 @@ class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
             affiliatename = affdict["AffiliateName"]
             logaffmake = CustomResource(logfoldername+"AffiliateTemplate",
                                      ServiceToken=self.makefuncarn,
-                                     BucketName = self.config['PipelineName'],
+                                     BucketName = self.bucketname,
                                      Path = self.config['Lambda']['LambdaConfig']['LOGDIR']+'/',
                                      DirName = affiliatename,
                                      DependsOn = logfoldername)
@@ -1166,7 +1173,7 @@ class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
         ## Finally, make a "debug" folder that will always exist: 
         logdebugmake = CustomResource(logfoldername+"debug",
                                      ServiceToken=self.makefuncarn,
-                                     BucketName = self.config['PipelineName'],
+                                     BucketName = self.bucketname,
                                      Path = self.config['Lambda']['LambdaConfig']['LOGDIR']+'/',
                                      DirName = "debug"+self.config["PipelineName"],
                                      DependsOn = logfoldername)
