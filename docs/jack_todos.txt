@@ -1,0 +1,20 @@
+1. Reviewing the website repo
+    1. Please review code for features like: 
+        1. Is there adequate documentation/testing overall?
+        2. Is it clear how we are adding more users?
+        3. Is it clear how user permissions are working?
+        4. Is it clear how we are adding more analyses?
+        5. Is it clear how users are being shown their data?
+    2. Checking if these things seem well tested, improving test coverage.
+2. Formatting and cleanup of the website. 
+    1. Moving around text: Remove “what is neurocaas“ text, but move reference to our open source project to “How does neurocaas work”. 
+    2. Make figure on main page bigger. 
+    3. Make heading styles consistent throughout
+3. Adding users/streamlining way 
+    1. Try adding users and additional algorithms from the neurocaas admin page [ask taiga for admin page credentials]
+    2. Consider how much user addition could be automated/integrated with the neurocaas backend
+4. Development of your own algorithms. 
+    1. Read the developer documentation at neurocaas/docs/ 
+    2. Pick a simple feature to offer with well defined inputs and outputs. 
+    3. Start playing with the development console.
+    4. Feature additions: integration with docker, development of python package (non-website) api…
