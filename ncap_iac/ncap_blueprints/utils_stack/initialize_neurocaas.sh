@@ -5,7 +5,7 @@
 ## Initialize AWS resources necessary to launch instances autonomously. 
 aws cloudformation describe-stacks --stack-name testutilsstack > init_log.txt 2>&1
 existscode=$?
-if [ $existscode -eq 255 ] 
+if [[ $existscode -eq 255 || $existscode -eq 254 ]] 
 then
     echo "Resource Roles do not exist, creating."
     echo "Resource Roles do not exist, creating." >> init_log.txt 2>&1
@@ -30,7 +30,7 @@ ec2stackoutput=$(aws cloudformation describe-stack-resources --stack-name testut
 ## Now create a stack creating security groups:
 aws cloudformation describe-stacks --stack-name testsgstack >> init_log.txt 2>&1
 existscode=$?
-if [ $existscode -eq 255 ]
+if [[ $existscode -eq 255 || $existscode -eq 254 ]] 
 then
     echo "Security groups do not exist yet. Creating."
     echo "Security groups do not exist yet. Creating." >> init_log.txt 2>&1
@@ -54,7 +54,7 @@ sgdeployoutput=$(aws cloudformation describe-stack-resources --stack-name testsg
 ## Now create a stack creating storage for cfn artifacts:
 aws cloudformation describe-stacks --stack-name teststoragestack >> init_log.txt 2>&1
 existscode=$?
-if [ $existscode -eq 255 ]
+if [[ $existscode -eq 255 || $existscode -eq 254 ]] 
 then 
     echo "Storage bucket for build artifacts does not exist yet. Creating."
     echo "Storage bucket for build artifacts does not exist yet. Creating." >> init_log.txt 2>&1
@@ -80,7 +80,7 @@ jq --arg storage $storageoutput --arg lstack $lambdastackoutput --arg sstack $ss
 ## Create a stack based on an existing binx repo for generating ssh keys with cfn. 
 aws cloudformation describe-stacks --stack-name testkeystack >> init_log.txt 2>&1
 existscode=$?
-if [ $existscode -eq 255 ]
+if [[ $existscode -eq 255 || $existscode -eq 254 ]] 
 then
     echo "ssh keys do not exist yet. Creating."
     echo "ssh keys do not exist yet. Creating." >> init_log.txt 2>&1
