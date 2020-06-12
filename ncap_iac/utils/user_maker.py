@@ -6,6 +6,7 @@ from troposphere.awslambda import Permission
 from troposphere.logs import LogGroup
 from troposphere.cloudformation import CustomResource 
 from config_handler import NCAPTemplate
+from dev_builder import NeuroCaaSTemplate
 from lambda_policies import lambda_basepolicy,lambda_writeS3
 import sys
 import json 
@@ -171,10 +172,123 @@ class UserTemplate(NCAPTemplate):
         bucket_attached = self.template.add_resource(bucket)
         return bucket_attached,bucketname 
         
+class UserTemplateWeb(NeuroCaaSTemplate):
+    '''
+    Parsing file for user template for users who have been added through the website. Importantly, these users do not have their own dedicated buckets. 
+    '''
+
+    def __init__(self,filename):
+        ## Clean filename input: 
+        assert os.path.basename(filename) == "user_config_template.json", "Must pass a valid user template with filename 'user_config_template.json'."
+        self.filename = filename 
+        self.config = self.get_config(self.filename)
+        self.template = self.initialize_template()
+        ## Now we iterate through affiliates and set up resources for each. 
+        ## Set up iterative resources: 
+        self.users = {}
+        for aff in self.config["UXData"]["Affiliates"]:
+            ## we create users for each affiliate
+            self.generate_users(aff)
+            ## Now we create a user group that allows us to write to this bucket, and the users necessary to do so. 
+
+    def get_config(self,filename):
+        with open(filename,'r') as f:
+            obj = json.load(f)
+
+        ## Check that the top-level attributes we care about exist. 
+        error = 0
+        
+        try: 
+            obj['UXData']
+        except Exception as e: 
+            print('config file missing key attribute',e )
+            error += 1
+        try: 
+            obj['Lambda']
+        except Exception as e: 
+            print('config file missing key attribute',e )
+            error += 1
+        try: 
+            obj["Lambda"]["LambdaConfig"]['REGION']
+        except Exception as e: 
+            print('config file missing key attribute',e )
+            error += 1
+        assert error == 0, 'please fix formatting errors in config file'
+
+
+        return obj
+
+    def initialize_template(self):
+        """
+        Defining function for development mode template. Makes per-dev group folders. NOTE: once folders have been created, they will not be modified by additional updates. This protects user data. 
+        """
+        template = Template()
+        ## Apply a transform to use serverless functions. 
+        template.set_transform("AWS::Serverless-2016-10-31")
+        return template
+
+    def generate_user_with_creds(self,username,affiliatename,password = True,accesskey = True):
+        ## Generate a random password as 8-byte hexadecimal string
+        data = {}
+
+        assert password == True or accesskey == True, 'Must have some credentials'
+        
+        ## Now we declare a user, as we need to reference a user to generate access keys. 
+        ## IMPORTANT: we will associate with each user a UserName (in the sense of the AWS parameter.)
+        ## Doing so, we can reference existing users in other cfn stacks. An important and dire quirk to automated user creation is that creating the same IAM username in the same account in different regions can cause "unrecoverable data loss". To handle this, we will pass around usernames that are not postfixed, but will be converted under the hood to a username with a region associated. 
+        username_region = username+self.config["Lambda"]["LambdaConfig"]["REGION"]
+
+        user = User(affiliatename+'user'+str(username),UserName=username_region,Path="/"+affiliatename+'/')
+
+        user_t = self.template.add_resource(user)
+
+        if password == True:
+            ## User can reset if desired
+            ResetRequired = False
+            default_password = secrets.token_hex(8)
+            lp = LoginProfile(Password = default_password,PasswordResetRequired = ResetRequired)
+            data['password'] = []
+            data['password'].append({
+                'password': default_password
+                })
+        
+            self.template.add_output(Output('Password'+username,Value = default_password,Description = 'Default password of new user '+username + " in group "+affiliatename))
+            user_t.LoginProfile = lp
+
+
+        ## Now we generate access keys:  
+        if accesskey == True:
+            key = AccessKey('userkey'+username,UserName = Ref(user))
+            self.template.add_resource(key)
+            accesskey = Ref(key)
+            secretkey = GetAtt(key,'SecretAccessKey')
+
+            self.template.add_output(Output('AccessKey'+username,Value = accesskey,Description = 'Access Key of user: '+username + ' in group '+affiliatename))
+            self.template.add_output(Output('SecretAccessKey'+username,Value = secretkey,Description = 'Secret Key of new user: '+username+" in group "+ affiliatename))
+        return user_t
+
 if __name__ == "__main__":
     filename = sys.argv[1]
     dirname = os.path.dirname(filename)
-    ## Create new users  
-    utemp = UserTemplate(filename)
-    with open(dirname+"/"+"compiled_users.json","w") as f: 
-        print(utemp.template.to_json(),file = f)
+    ## First get the development stage we are in. 
+    with open(filename,"r") as f:
+        userdict = json.load(f)
+    try:
+        stage = userdict["STAGE"]
+    except KeyError:
+        ## Legacy vers. of scripting code that does not include a "STAGE" field.  
+        stage = "dev" 
+    except Exception as err:
+        print("Unhandled exception: ",sys.exc_info())
+        raise 
+
+    if stage == "dev":
+        ## Create new users  
+        utemp = UserTemplate(filename)
+        with open(dirname+"/"+"compiled_users.json","w") as f: 
+            print(utemp.template.to_json(),file = f)
+    elif stage == "web":
+        ## Create new users  
+        utemp = UserTemplateWeb(filename)
+        with open(dirname+"/"+"compiled_users.json","w") as f: 
+            print(utemp.template.to_json(),file = f)
