@@ -2,7 +2,7 @@
 
 Main repository for the [NeuroCAAS project](http://www.neurocaas.org), providing a neuroscience analysis platform using Infrastructure-as-Code (IaC).
 
-This repository hosts all of the Code that makes up our IaC approach, with structure as described in the [paper](https://www.biorxiv.org/content/10.1101/2020.06.11.146746v1)
+This repository hosts all of the Code that makes up our IaC approach, with structure as described in the [paper](https://www.biorxiv.org/content/10.1101/2020.06.11.146746v1).
 
 Structure: 
 - paper (material specifically related to the NeuroCAAS paper)
