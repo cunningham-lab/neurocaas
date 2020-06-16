@@ -5,9 +5,9 @@
         {
             "AffiliateName":"Affiliate's Name here. Must follow S3 bucket name conventions.",
             "UserNames":"[list of strings describing user names]",
+            "ContactEmail":"[list of strings describing user emails]",
             "Pipelines":"Path to processing directory. If processing directory lives at root, can be \"\"",
-            "PipelineDir":"Directory where pipeline should be built",
-            "ContactEmail":"The email that we should notify regarding processing status."
+            "PipelineDir":"Directory where pipeline should be built"
         }
     ]
     },
