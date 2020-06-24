@@ -3,7 +3,9 @@ import os
 import json 
 import itertools
 import csv
+import boto3
 import pathlib
+import re
 current_dir = pathlib.Path(__file__).parent.absolute()
 ## Tools to automatically fill in user stack templates from csvs. 
 ## We need a tool to parse excel files -> dictionary. 
@@ -32,7 +34,7 @@ def identify_groups(userdict):
 
 def convert_dict_to_json_individual(userdict,pipelines = "all"):
     # Assume a dict of the form given by processing csv, and output a dictionary of the form expected for json.  
-    username = userdict['Email'].split('@')[0]
+    username = userdict['Email']
     if pipelines == "all":
         pipelines = ['caiman_web_stack','dlc_web_stack','epi_web_stack','pmd_web_stack','locanmf_web_stack']
     elif type(pipelines) == list:
@@ -53,8 +55,9 @@ def convert_dict_to_json_group(userdicts,pipelines = 'all'):
     ## Now we are going to assume the affiliation of everyone here is the same group. 
     groupname = userdicts[0]['Affiliation']
     assert [udict['Affiliation'] == groupname for udict in userdicts], 'make sure grouping worked.'
-    emails = {udict['Email'].split('@')[0]:udict['Email'] for udict in userdicts}
-    usernames = [uemail.split('@')[0] for uemail in emails]
+    usernames = [udict['Email'] for udict in userdicts]
+    emails = {udict['Email']:udict['Email'] for udict in userdicts}
+    #usernames = [uemail.split('@')[0] for uemail in emails]
     
     jsondict = {'AffiliateName':groupname,'UserNames':usernames,'ContactEmail':emails,'Pipelines':pipelines,'PipelineDir':'not in use'}
     
@@ -88,10 +91,8 @@ def parse_userfile(path):
                 sortedby_group = sorted(group,key = identify_groups) 
                 datadicts_sorted = itertools.groupby(sortedby_group,identify_groups)
                 for groupname, grouped in datadicts_sorted:
-                    print(groupname)
                     if groupname == "Website":
                         dictvals = list(map(convert_dict_to_json_individual,grouped))
-                        print(dictvals,'WebsiteDictvals')
                         verifiedlist = verifiedlist+dictvals
                     else:
                         dictval = convert_dict_to_json_group(list(grouped))
@@ -130,10 +131,20 @@ if __name__ == "__main__":
     verifiedlist, unverifiedlist = parse_userfile(csvpath)
     config = get_usertemplate()
     config['UXData']['Affiliates'] = verifiedlist
-    ## TODO: Check for username uniqueness within the template.
-    ## TODO: Check for groupname uniqueness. 
-    ## TODO: Check for groupname validity. 
-    ## TODO: check for user existence here. 
+
+    ##  Check for username uniqueness within the template.
+    flat_userlist = [user for userlist in verifiedlist for user in userlist["UserNames"] ]
+    assert len(set(flat_userlist)) == len(flat_userlist), "usernames are not unique"
+
+    ##  Check for groupname uniqueness. 
+    flat_grouplist = [userlist["AffiliateName"] for userlist in verifiedlist]
+    assert len(set(flat_grouplist)) == len(flat_grouplist), "groupnames are not unique. "
+
+    ##  Check for groupname validity. 
+    ## Less than 64 chars: the other conditions are too broad. 
+    for groupname in flat_grouplist:
+        assert len(groupname) <= 64
+
     write_usertemplate(grouppath,config)
 
 
