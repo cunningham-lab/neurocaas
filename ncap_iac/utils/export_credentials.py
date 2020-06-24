@@ -42,16 +42,30 @@ if __name__ == "__main__":
     outputs = cfnclient.describe_stacks(StackName = stackname)["Stacks"][0]["Outputs"]
     ## Now write the outputs to  
     for out in outputs:
+        print(out,"out")
         key = out["OutputKey"]
         ## If this is a Key or Secret Key, we want to keep it. 
         Access = re.findall(r"^AccessKey(.+)",key)
         SecretAccess = re.findall(r"^SecretAccessKey(.+)",key)
+        ## We have to search descriptions for the username with regex right now: this is ugly.
         if Access:
+            username_template = 'Access Key of user: (.+?) in group'
+            namelist =re.search(username_template,out['Description'])
+            if namelist:
+                username = namelist.group(1)
+            else:
+                raise Exception("username not found.") 
             assert len(Access) == 1,"key improperly filtered"
-            user_dict[Access[0]]["Access Key"] = out["OutputValue"]
+            user_dict[username]["Access Key"] = out["OutputValue"]
         elif SecretAccess:
+            username_template = 'Secret Key of new user: (.+?) in group'
+            namelist =re.search(username_template,out['Description'])
+            if namelist:
+                username = namelist.group(1)
+            else:
+                raise Exception("username not found.") 
             assert len(SecretAccess) == 1, "key improperly filtered"
-            user_dict[SecretAccess[0]]["Secret Access Key"] = out["OutputValue"]
+            user_dict[username]["Secret Access Key"] = out["OutputValue"]
 
     ## Now let's write out to a csv: 
     path_prefix = "NCAP_KEY_AUTO_{}.csv"
