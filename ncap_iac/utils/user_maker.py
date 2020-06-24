@@ -8,6 +8,7 @@ from troposphere.cloudformation import CustomResource
 from config_handler import NCAPTemplate
 from dev_builder import NeuroCaaSTemplate
 from lambda_policies import lambda_basepolicy,lambda_writeS3
+import re
 import sys
 import json 
 import secrets
@@ -130,7 +131,12 @@ class UserTemplate(NCAPTemplate):
         ## Doing so, we can reference existing users in other cfn stacks. An important and dire quirk to automated user creation is that creating the same IAM username in the same account in different regions can cause "unrecoverable data loss". To handle this, we will pass around usernames that are not postfixed, but will be converted under the hood to a username with a region associated. 
         username_region = username+self.config["Lambda"]["LambdaConfig"]["REGION"]
 
-        user = User(affiliatename+'user'+str(username),UserName=username_region,Path="/"+affiliatename+'/')
+        ## We need to get the alphanumeric part of the username, and use that in the actual cloudformation logical name.  
+        alphapat = r'\w+'
+        match = re.findall(alphapat,username)
+        username_alpha = "".join(match) 
+
+        user = User(affiliatename+'user'+username_alpha,UserName=username_region,Path="/"+affiliatename+'/')
 
         user_t = self.template.add_resource(user)
 
@@ -144,19 +150,19 @@ class UserTemplate(NCAPTemplate):
                 'password': default_password
                 })
         
-            self.template.add_output(Output('Password'+username,Value = default_password,Description = 'Default password of new user '+username + " in group "+affiliatename))
+            self.template.add_output(Output('Password'+username_alpha,Value = default_password,Description = 'Default password of new user '+username + " in group "+affiliatename))
             user_t.LoginProfile = lp
 
 
         ## Now we generate access keys:  
         if accesskey == True:
-            key = AccessKey('userkey'+username,UserName = Ref(user))
+            key = AccessKey('userkey'+username_alpha,UserName = Ref(user))
             self.template.add_resource(key)
             accesskey = Ref(key)
             secretkey = GetAtt(key,'SecretAccessKey')
 
-            self.template.add_output(Output('AccessKey'+username,Value = accesskey,Description = 'Access Key of user: '+username + ' in group '+affiliatename))
-            self.template.add_output(Output('SecretAccessKey'+username,Value = secretkey,Description = 'Secret Key of new user: '+username+" in group "+ affiliatename))
+            self.template.add_output(Output('AccessKey'+username_alpha,Value = accesskey,Description = 'Access Key of user: '+username + ' in group '+affiliatename))
+            self.template.add_output(Output('SecretAccessKey'+username_alpha,Value = secretkey,Description = 'Secret Key of new user: '+username+" in group "+ affiliatename))
         return user_t
     
     def add_user_bucket(self,aff):
