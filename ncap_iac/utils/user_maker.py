@@ -12,6 +12,7 @@ import sys
 import json 
 import secrets
 import os
+import re
 import boto3
 
 ## A template that takes in a config file describing the sets of users that will be using the template. Users are associated under a particular group name [corresponding to a path prefix], and have access to a bucket that will eventually consolidate all of their data uploads [not yet implemented].
@@ -239,7 +240,16 @@ class UserTemplateWeb(NeuroCaaSTemplate):
         ## Doing so, we can reference existing users in other cfn stacks. An important and dire quirk to automated user creation is that creating the same IAM username in the same account in different regions can cause "unrecoverable data loss". To handle this, we will pass around usernames that are not postfixed, but will be converted under the hood to a username with a region associated. 
         username_region = username+self.config["Lambda"]["LambdaConfig"]["REGION"]
 
-        user = User(affiliatename+'user'+str(username),UserName=username_region,Path="/"+affiliatename+'/')
+        ## We need to get the alphanumeric part of the username, and use that in the actual cloudformation logical name.  
+        alphapat = '[^\W_]'
+        match = re.findall(alphapat,username)
+        username_alpha = "".join(match) 
+        print(username_alpha,"here")
+
+        groupmatch = re.findall(alphapat,affiliatename)
+        groupname_alpha = "".join(groupmatch)
+
+        user = User(groupname_alpha+'user'+username_alpha,UserName=username_region,Path="/"+groupname_alpha+'/')
 
         user_t = self.template.add_resource(user)
 
@@ -253,19 +263,19 @@ class UserTemplateWeb(NeuroCaaSTemplate):
                 'password': default_password
                 })
         
-            self.template.add_output(Output('Password'+username,Value = default_password,Description = 'Default password of new user '+username + " in group "+affiliatename))
+            self.template.add_output(Output('Password'+username_alpha,Value = default_password,Description = 'Default password of new user '+username + " in group "+affiliatename))
             user_t.LoginProfile = lp
 
 
         ## Now we generate access keys:  
         if accesskey == True:
-            key = AccessKey('userkey'+username,UserName = Ref(user))
+            key = AccessKey('userkey'+username_alpha,UserName = Ref(user))
             self.template.add_resource(key)
             accesskey = Ref(key)
             secretkey = GetAtt(key,'SecretAccessKey')
 
-            self.template.add_output(Output('AccessKey'+username,Value = accesskey,Description = 'Access Key of user: '+username + ' in group '+affiliatename))
-            self.template.add_output(Output('SecretAccessKey'+username,Value = secretkey,Description = 'Secret Key of new user: '+username+" in group "+ affiliatename))
+            self.template.add_output(Output('AccessKey'+username_alpha,Value = accesskey,Description = 'Access Key of user: '+username + ' in group '+affiliatename))
+            self.template.add_output(Output('SecretAccessKey'+username_alpha,Value = secretkey,Description = 'Secret Key of new user: '+username+" in group "+ affiliatename))
         return user_t
 
 if __name__ == "__main__":
