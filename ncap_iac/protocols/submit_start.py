@@ -46,7 +46,12 @@ class Submission_dev():
         # Get Upload Location Information
         self.bucket_name = bucket_name
         ## Get directory above the input directory. 
-        self.path = re.findall('.+?(?=/'+os.environ["SUBMITDIR"]+')',key)[0] 
+        ## This already protects us from submit.jsons uploaded to other directories. 
+        try:
+            self.path = re.findall('.+?(?=/'+os.environ["SUBMITDIR"]+')',key)[0] 
+        except IndexError as e:
+            raise IndexError("Submit file uploaded to the wrong directory. Shutting down.")
+
         ## Now add in the time parameter: 
         self.time = time
         ## We will index by the submit file name prefix if it exists: 
