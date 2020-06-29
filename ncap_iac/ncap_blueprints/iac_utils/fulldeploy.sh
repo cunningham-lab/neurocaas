@@ -9,7 +9,7 @@ storagebucketname=$(jq .bucketname "$ncaprootdir/global_params_initialized.json"
 source "$scriptdir"/paths.sh
 ## Get the path to this particular file. 
 ## NOTE: Add the anaconda path if running as admin.  
-source activate sam
+source activate neurocaas
 
 ## Input management: 
 ## Get the path to the directory where user data is stored: 
@@ -38,7 +38,7 @@ sam build -t compiled_template.json -m "$ncaprootdir"/protocols/requirements.txt
 
 sam package --s3-bucket $storagebucketname --output-template-file compiled_packaged.yaml
 
-sam deploy --template-file compiled_packaged.yaml --stack-name $PIPENAME --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+sam deploy --template-file compiled_packaged.yaml --stack-name $PIPENAME --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --s3-bucket $storagebucketname
 
 #aws s3 cp test_resources/computereport_1234567.json s3://$PIPENAME/logs/debug/
 #aws s3 cp test_resources/computereport_2345678.json s3://$PIPENAME/logs/debug/
