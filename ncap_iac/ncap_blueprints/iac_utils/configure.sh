@@ -6,7 +6,7 @@ ncaprootdir="$(dirname "$(dirname "$scriptdir")")"
 
 source "$scriptdir"/paths.sh
 
-source activate sam
+source activate neurocaas
 
 ## Input management: 
 ## Get the path to the directory where user data is stored: 
