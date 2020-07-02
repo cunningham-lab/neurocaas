@@ -15,10 +15,15 @@ s3_client = boto3.client('s3', region_name=os.environ['REGION'])
 
 def mkdir(bucket, path, dirname):
     """ Makes new directory path in bucket
+
     :param bucket: s3 bucket object within which directory is being created
+    :type bucket: Boto3 bucket object
     :param path: string local path where directory is to be created
+    :type path: str
     :param dirname: string name of directory to be created
+    :type dirname: str
     :return: path to new directory
+    :rtype: str
     """
     new_path = os.path.join(path, dirname, '')
     try:
@@ -29,10 +34,15 @@ def mkdir(bucket, path, dirname):
 
 def mkdir_reset(bucketname, path, dirname):
     """ Makes new directory path in bucket, if exists, wipes and recreates.
+
     :param bucketname: s3 bucket object within which directory is being created
+    :type bucketname: Boto3 bucket object
     :param path: string local path where directory is to be created
+    :type path: str
     :param dirname: string name of directory to be created
+    :type dirname: str
     :return: path to new directory
+    :rtype: str
     """
     new_path = os.path.join(path, dirname, '')
     try:
@@ -43,42 +53,95 @@ def mkdir_reset(bucketname, path, dirname):
         s3_client.put_object(Bucket=bucketname, Key=new_path)
     return new_path
 
+def deldir(bucket,path):
+    """ Deletes all objects under directory path (and the directory itself in bucket. )
+
+    :param bucket: s3 bucket object within which directory is being deleted
+    :type bucket: boto3 bucket object
+    :param path: string local path where directory is to be deleted
+    :type path: string
+    """
+    bucket = s3_resource.Bucket(bucket)
+    for obj in bucket.objects.filter(Prefix=path):
+        s3_resource.Object(bucket.name, obj.key).delete()
+
+def delbucket(bucket):
+    """ Deletes all objects in a bucket.
+
+    :param bucket: s3 bucket object within which directory is being deleted
+    :type bucket: boto3 bucket object
+    """
+    bucket = s3_resource.Bucket(bucket)
+    for obj in bucket.objects.all():
+        print(obj.key,'keys')
+        s3_resource.Object(bucket.name, obj.key).delete()
+ 
 def ls(bucket, path):
-    """ Get all objects with bucket as strings"""
+    """ Get all names of all objects in bucket under a given prefix path as strings
+
+    :param bucket: s3 bucket object to list.
+    :type bucket: boto3 bucket object
+    :param path: prefix path specifying the location you want to list. 
+    :type path: str
+    :return: A list of strings describing the objects under the specified path in the bucket. 
+    :rtype: list of strings
+    """
     return [
         objname.key for objname in bucket.objects.filter(Prefix=path)
     ]
     
 def ls_name(bucket_name, path):
-    """ Get all objects with bucket as strings"""
+    """ Get the names of all objects in bucket under a given prefix path as strings. Takes the name of the bucket as input, not hte bucket itself for usage outside of the utils module.  
+    
+    :param bucket_name: name of s3 bucket to list. 
+    :type bucket_name: str
+    :param path: prefix path specifying the location you want to list. 
+    :type path: str
+    :return: A list of strings describing the objects under the specified path in the bucket. 
+    :rtype: list of strings
+    """
     bucket = s3_resource.Bucket(bucket_name)
     return [
         objname.key for objname in bucket.objects.filter(Prefix=path)
     ]
 
 def exists(bucket_name, path):
-    """ checks if there is any data under the given (Prefix) path for the given bucket. """
+    """ Checks if there is any data under the given (Prefix) path for the given bucket. Could be a directory or object.
+    
+    :param bucket_name: name of s3 bucket to list. 
+    :type bucket_name: str
+    :param path: prefix path specifying the location you want to list. 
+    :type path: str
+    :return: a boolean value for if data exists under the given path.
+    :rtype: bool
+    """
     bucket = s3_resource.Bucket(bucket_name)
     objlist = [objname.key for objname in bucket.objects.filter(Prefix=path)]
     return len(objlist) >0
 
 def cp(bucket_name,pathfrom,pathto): 
-    """
-    Implement a copy function from [pathfrom] to [pathto] within the same bucket. 
+    """ Implement a copy function from [pathfrom] to [pathto] within the same bucket. 
+
     inputs:
-    bucket_name (str): the name of the bucket 
-    pathfrom (str): the path from which to copy. Must include filename.
-    pathto (str): the path to which we will copy. Must include filename. 
+    :param bucket_name: the name of the bucket 
+    :type bucket_name: str
+    :param pathfrom:  the path from which to copy. Must include filename.
+    :type pathfrom: str
+    :param pathto:  the path to which we will copy. Must include filename. 
+    :type pathto: str
     """
     #s3_resource.Object(bucket_name,pathto).copy_from(CopySource = pathfrom)
     s3_resource.meta.client.copy({"Bucket":bucket_name,"Key":pathfrom},bucket_name,pathto)
 
 def mv(bucket_name,pathfrom,pathto):
-    """
-    Implements a move function from [pathfrom] to [pathto] within the same bucket. 
-    bucket_name (str): the name of the bucket 
-    pathfrom (str): the path from which to copy. Must include filename.
-    pathto (str): the path to which we will copy. Must include filename. 
+    """ Implements a move function from [pathfrom] to [pathto] within the same bucket. 
+
+    :param bucket_name: the name of the bucket 
+    :type bucket_name: str
+    :param pathfrom: the path from which to copy. Must include filename.
+    :type pathfrom: str
+    :param pathto: the path to which we will copy. Must include filename. 
+    :type pathto: str 
     """
     cp(bucket_name,pathfrom,pathto)
     s3_resource.Object(bucket_name,pathfrom).delete()
