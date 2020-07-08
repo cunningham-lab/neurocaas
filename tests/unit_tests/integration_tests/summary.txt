@@ -1,0 +1,2 @@
+6/7/20. 
+This directory worked to test resources directly in the loop with existing AWS stacks. It works if it is run from ncap-iac/tests/integration tests. It may no longer be necessary given the tests we are running against travis. 

@@ -71,11 +71,7 @@ def handler_deldir(event, context):
             ## Get individual properties: 
             bucket = props['BucketName']
             path = props['Path']
-            dirname = props['DirName']
-            s3 = utils.s3.s3_resource
-            bucket = s3.Bucket(bucket)
-            for obj in bucket.objects.filter(Prefix=path):
-                s3.Object(bucket.name, obj.key).delete()
+            utils.s3.deldir(bucket,path)
 
         utils.serverless.sendResponse(event,context,"SUCCESS",responseData)
     except Exception as e:
@@ -99,12 +95,7 @@ def handler_delbucket(event, context):
     try:
         if event['RequestType'] == 'Delete':
             bucket = event['ResourceProperties']['BucketName']
-            print(event,'event request type')
-            s3 = utils.s3.s3_resource
-            bucket = s3.Bucket(bucket)
-            for obj in bucket.objects.all():
-                print(obj.key,'keys')
-                s3.Object(bucket.name, obj.key).delete()
+            s3 = utils.s3.delbucket(bucket)
 
         utils.serverless.sendResponse(event,context,"SUCCESS",responseData)
     except Exception as e:

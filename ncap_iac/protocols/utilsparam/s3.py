@@ -29,7 +29,12 @@ def mkdir(bucket, path, dirname):
     try:
         s3_client.head_object(Bucket=bucket, Key=new_path)
     except ClientError:
-        s3_client.put_object(Bucket=bucket, Key=new_path)
+        try:
+            s3_client.put_object(Bucket=bucket, Key=new_path)
+        ## It's possible that the bucket itself does not exist:
+        except ClientError as e:
+            e.response["Error"]["Code"] == "NoSuchBucket"
+            raise Exception("bucket with given name not found")
     return new_path
 
 def mkdir_reset(bucketname, path, dirname):
@@ -50,16 +55,21 @@ def mkdir_reset(bucketname, path, dirname):
         s3_resource.Bucket(bucketname).objects.filter(Prefix=new_path).delete()
         s3_client.put_object(Bucket=bucketname, Key=new_path)
     except ClientError:
-        s3_client.put_object(Bucket=bucketname, Key=new_path)
+        try:
+            s3_client.put_object(Bucket=bucketname, Key=new_path)
+        ## It's possible that the bucket itself does not exist:
+        except ClientError as e:
+            e.response["Error"]["Code"] == "NoSuchBucket"
+            raise Exception("bucket with given name not found")
     return new_path
 
 def deldir(bucket,path):
     """ Deletes all objects under directory path (and the directory itself in bucket. )
 
-    :param bucket: s3 bucket object within which directory is being deleted
-    :type bucket: boto3 bucket object
+    :param bucket: s3 bucket name within which directory is being deleted
+    :type bucket: str 
     :param path: string local path where directory is to be deleted
-    :type path: string
+    :type path: str
     """
     bucket = s3_resource.Bucket(bucket)
     for obj in bucket.objects.filter(Prefix=path):
@@ -147,7 +157,16 @@ def mv(bucket_name,pathfrom,pathto):
     s3_resource.Object(bucket_name,pathfrom).delete()
 
 def load_json(bucket_name, key):
-    """ """
+    """ Function to load the contents of a json file stored in S3 into memory for a lambda function. 
+
+    :param bucket_name: the name of the bucket where the json file lives. 
+    :type bucket_name: str
+    :param key: the path to the json object. 
+    :type key: str
+    :raises: ValueError. If the key does not point to a properly formatted json file, an exception will be raised. 
+    :return: json content: the content of the json file. 
+    :rtype: dict
+    """
     try:
         file_object = s3_resource.Object(bucket_name, key)
         raw_content = file_object.get()['Body'].read().decode('utf-8')
@@ -159,7 +178,16 @@ def load_json(bucket_name, key):
     return json_content 
 
 def load_yaml(bucket_name, key):
-    """ """
+    """ Function to load the contents of a yaml file stored in S3 into memory for a lambda function. 
+
+    :param bucket_name: the name of the bucket where the yaml file lives. 
+    :type bucket_name: str
+    :param key: the path to the yaml object. 
+    :type key: str
+    :raises: ValueError. If the key does not point to a properly formatted yaml file, an exception will be raised. 
+    :return: yaml content: the content of the yaml file. 
+    :rtype: dict
+    """
     try:
         file_object = s3_resource.Object(bucket_name, key)
         raw_content = file_object.get()['Body'].read().decode('utf-8')
