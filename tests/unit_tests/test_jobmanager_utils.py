@@ -6,8 +6,9 @@ import ncap_iac.protocols.utilsparam.s3 as s3
 import pytest 
 from botocore.stub import Stubber
 import json
-from unittest.mock import patch,MagicMock
-from .test_s3_mock_resources import make_mock_bucket#,make_mock_bucket_single_output
+from unittest.mock import patch,MagicMock,call
+from .test_fixtures import return_json_read, return_json_malformed
+from .test_s3_mock_resources import make_mock_bucket,make_mock_object
 
 
 @pytest.fixture(autouse=True)
@@ -88,17 +89,145 @@ class Test_s3():
                  assert s3.mkdir_reset(bucketname=bucket_name,path = path,dirname=dirname)
 
     def test_deldir(self):
-        bucket_name = "example_bucket"
-        path = "foo/bar"
-        mbucket = make_mock_bucket([{"key":"some/other/path"}],filter_path = "key")
+        mbucket = make_mock_bucket([{"key":"some/given/path"},{"key":"some/other/path"}],filter_path = "some")
+        mobject = make_mock_object({"key":"some/other/path"}) 
         with patch.object(s3.s3_resource,"Bucket",return_value = mbucket) as mock_bucket_method:
-            with patch.object(s3.s3_resource,"Object",return_value = MagicMock) as mock_bucket_method:
+            with patch.object(s3.s3_resource,"Object",return_value = mobject) as mock_object_method:
+                s3.deldir("mock_bucket_name","path/to/thing")
+                mock_object_method.assert_called()
+            mock_bucket_method.assert_called_once()
+
+    def test_deldir_path_empty(self):
+        mbucket = make_mock_bucket([{"key":"an/given/path"},{"key":"an/other/path"}],filter_path = "some")
+        mobject = make_mock_object({"key":"some/other/path"}) 
+        with patch.object(s3.s3_resource,"Bucket",return_value = mbucket) as mock_bucket_method:
+            with patch.object(s3.s3_resource,"Object",return_value = mobject) as mock_object_method:
+                s3.deldir("mock_bucket_name","path/to/thing")
+                mock_object_method.assert_not_called()
+            mock_bucket_method.assert_called_once()
+
+    def test_deldir_bucket_empty(self):
+        mbucket = make_mock_bucket([],filter_path = "some")
+        mobject = make_mock_object({"key":"some/other/path"}) 
+        with patch.object(s3.s3_resource,"Bucket",return_value = mbucket) as mock_bucket_method:
+            with patch.object(s3.s3_resource,"Object",return_value = mobject) as mock_object_method:
+                s3.deldir("mock_bucket_name","path/to/thing")
+                mock_object_method.assert_not_called()
+            mock_bucket_method.assert_called_once()
+
+    def test_delbucket(self):
+        mbucket = make_mock_bucket([{"key":"some/given/path"},{"key":"some/other/path"}],filter_path = "some")
+        mobject = make_mock_object({"key":"some/other/path"}) 
+        with patch.object(s3.s3_resource,"Bucket",return_value = mbucket) as mock_bucket_method:
+            with patch.object(s3.s3_resource,"Object",return_value = mobject) as mock_object_method:
+                s3.delbucket("mock_bucket_name")
+                mock_object_method.assert_called()
+            mock_bucket_method.assert_called_once()
+
+    def test_delbucket_bucket_empty(self):
+        mbucket = make_mock_bucket([],filter_path = "some")
+        mobject = make_mock_object({"key":"some/other/path"}) 
+        with patch.object(s3.s3_resource,"Bucket",return_value = mbucket) as mock_bucket_method:
+            with patch.object(s3.s3_resource,"Object",return_value = mobject) as mock_object_method:
+                s3.delbucket("mock_bucket_name")
+                mock_object_method.assert_not_called()
+            mock_bucket_method.assert_called_once()
+
+    def test_ls(self):
+        tuple_arguments = ("path/to/1","path/to/2")
+        path = "path"
+        mbucket = make_mock_bucket([{"key":path} for path in tuple_arguments],filter_path = path)
+        with patch.object(s3.s3_resource,"Bucket",return_value = mbucket) as mock_bucket_method:
+            bucket = s3.s3_resource.Bucket("name")
+            assert list(tuple_arguments) == s3.ls(bucket,path)
+            mock_bucket_method.assert_called_once()
+            
+    def test_ls_prefix(self):
+        tuple_arguments = ("path/to/1","path/to/2","other/path")
+        path = "path"
+        mbucket = make_mock_bucket([{"key":path} for path in tuple_arguments],filter_path = path)
+        with patch.object(s3.s3_resource,"Bucket",return_value = mbucket) as mock_bucket_method:
+            bucket = s3.s3_resource.Bucket("name")
+            assert list(tuple_arguments)[:2] == s3.ls(bucket,path)
+            mock_bucket_method.assert_called_once()
+
+    def test_ls_empty_prefix(self):
+        tuple_arguments = ("path/to/1","path/to/2","other/path")
+        path = "otherkey"
+        mbucket = make_mock_bucket([{"key":path} for path in tuple_arguments],filter_path = path)
+        with patch.object(s3.s3_resource,"Bucket",return_value = mbucket) as mock_bucket_method:
+            bucket = s3.s3_resource.Bucket("name")
+            assert [] == s3.ls(bucket,path)
+            mock_bucket_method.assert_called_once()
+
+    def test_ls_name(self):
+        tuple_arguments = ("path/to/1","path/to/2")
+        path = "path"
+        mbucket = make_mock_bucket([{"key":path} for path in tuple_arguments],filter_path = path)
+        with patch.object(s3.s3_resource,"Bucket",return_value = mbucket) as mock_bucket_method:
+            assert list(tuple_arguments) == s3.ls_name("bucketname",path)
+            mock_bucket_method.assert_called_once()
+            
+    def test_ls_name_prefix(self,s3_stub):
+        tuple_arguments = ("path/to/1","path/to/2","other/path")
+        path = "path"
+        mbucket = make_mock_bucket([{"key":path} for path in tuple_arguments],filter_path = path)
+        with patch.object(s3.s3_resource,"Bucket",return_value = mbucket) as mock_bucket_method:
+            assert list(tuple_arguments)[:2] == s3.ls_name("bucketname",path)
+            mock_bucket_method.assert_called_once()
+
+    def test_ls_name_empty_prefix(self):
+        tuple_arguments = ("path/to/1","path/to/2","other/path")
+        path = "otherkey"
+        mbucket = make_mock_bucket([{"key":path} for path in tuple_arguments],filter_path = path)
+        with patch.object(s3.s3_resource,"Bucket",return_value = mbucket) as mock_bucket_method:
+            assert [] == s3.ls_name("bucketname",path)
+            mock_bucket_method.assert_called_once()
 
     def test_exists_obj_exists(self):
-        mbucket = make_mock_bucket([{"key":"key/path/full"}],filter_path = "key")
+        key = "path/to/thing"
+        mbucket = make_mock_bucket([{"key":key}],filter_path = "path")
         with patch.object(s3.s3_resource,"Bucket",return_value=mbucket) as mock_method:
-            condition = s3.exists("mock_bucket_name","path/to/thing")
+            condition = s3.exists("mock_bucket_name","path")
             assert condition
+
+    def test_exists_obj_not_exists(self):
+        key = "path/to/thing"
+        mbucket = make_mock_bucket([{"key":key}],filter_path = "otherkey")
+        with patch.object(s3.s3_resource,"Bucket",return_value=mbucket) as mock_method:
+            condition = s3.exists("mock_bucket_name",key)
+            assert not condition
+
+    def test_cp(self):
+        path1 = "path1"
+        path2 = "path2"
+        example_bucketname = "example_bucketname"
+        with patch.object(s3.s3_resource,"meta",return_value = MagicMock) as mock_client:
+            s3.cp(example_bucketname,path1,path2)
+            mock_client.mock_calls[0] 
+            assert mock_client.mock_calls == [call.client.copy({'Bucket':example_bucketname, 'Key': path1},example_bucketname, path2)]
+        
+    def test_mv(self):
+        path1 = "path1"
+        path2 = "path2"
+        example_bucketname = "example_bucketname"
+        mobject = make_mock_object({"key":"some/other/path"}) 
+        with patch.object(s3.s3_resource,"meta",return_value = MagicMock) as mock_client:
+            with patch.object(s3.s3_resource,"Object",return_value = mobject) as mock_object:
+                s3.mv(example_bucketname,path1,path2)
+                assert mock_client.mock_calls == [call.client.copy({'Bucket':example_bucketname, 'Key': path1},example_bucketname, path2)]
+                ## Shouldn't the following also record Object().delete?
+                assert mock_object.mock_calls == [call('example_bucketname',path1)]
+
+    def test_load_json(self):
+        a = return_json_read()
+        file_object_attrs = {'get.return_value':{'Body':MagicMock({**{'read.return_value':a}})}}
+        file_object_mock = MagicMock(**file_object_attrs)
+        print(file_object_mock.get()["Body"].read())
+        with patch.object(s3.s3_resource,"Object",return_value = file_object_mock) as mock_fileobj:
+
+            s3.load_json("a","b")
+
 
 
 
