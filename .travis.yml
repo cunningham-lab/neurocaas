@@ -1,7 +1,6 @@
 language: python
 python:
 - 3.6
-
 cache: pip
 env:
   matrix:
@@ -42,7 +41,8 @@ env:
   - secure: WIRs4LVFiwfkf30VNjhQBl1M34szhecz37wMAqu4opihFNru/d3c9V7+yKHemRi/RTAlihSqewTQ4hGHkDCVjXjTcq7auZEiJffkLHPbCMa+X2cfmYIZMQgznrDyTaTZcYFj7EPs3101nfHxMVXsL1mZnQ3TzMYZdCqd2M6AEw7LCDQkI7BIcBXK+8FI1Jgf4evIn/zUhoxC1HUYP0aMpBwZLhtvuTQWQsNrBkwctxMN6Ev+0u13IBVx5/h00sAEZPaWeFnjDJHIlW3jVg6wXcJ+w2XXHWfnKDd1yGrp9px/ocpKqFYL3zZkGZSlqV8KSLQz+VlemgOF5Yyy8CcZS9mD4KOclHzf04YzKrUnihcePgRsdnN026JUtqszPsd+wamfz/Ru1HE3qOqLDi32BB8QjAxkcoozB/EAuW6XkY8elCueOSic23YrtlKRbFI5Z+BHv5IHGrFbYAFPHhG61FzUo9xYlIq/vFhnhSMr+1XjZv2T0ASiqj9ltAFqdf1b315aUOuD4td4YxDDXsFvRUjYyQrQ1Y+twGCadKiEtPIRcwT36ADf8Rsj+oGanldGH66UfT4LiOcMXGpRGVsw7yp/KkfXAIOELjf3DXn4cMTa9KkwFHD4XrAIWLam8ygHkjkIXHa8QhufKZhIheFQu/l7lKvDRP6w8sWGV8eXv5A=
   - secure: btfFZBySWYtt8VMs2kyUlsJhyzTEzyGHYQ/XVjAKh+JRl6y7jjZ30Jsy8ZfO1cr2rLQE7f9cP9Mp1szxVWsonwmLHrj6asJdol6yLdjA3Da6KCLGCZwxVOZhOwW/ky/C1pYreOcwZtcpuF4l0dgTY6nZZq8TdPquKXXxFJdCdh7xW00wdbD7CBTa+b+dF11/WMUo3fbnN3oOB3yf4yr4pY5jNZAULed/pWObURDpTysfi5nPsBm+4f4tdRztGyUqNW9CDsKkZLhu7wLqN0iP20aFaJEACMuJ9ZHS5LcqjQHDHnrS6YsmxWCUnb5Z98gMs4gL4thUhM8AxY6mxjFv3o3RZstZUgYL6X75iYfT6Otb1zNY6eL3i6xKAjva0y12FTGK5wXq50q8fLc9vzD94+h9RMaCawZ9w3pVYqiy6oR1GjYkBBIiXzASx27IGfU+9uPr5ixwp/mBIm6yqsyOpHvu/c5MCWeAo2u+a0UmZhZs8phkQTd24Xl56Cx7MMOXLfZQp3KQwHKTxWm5q5Tr2DKISeSct/e8Ld/xuJjK1cmp4ngBPp9lFEAsNll9jHMaW9lcwEOqF5f1stg3fbDwANuu/Tz+t/kQVxQlJQsYWp7NwZLjYvZyVxTDdzHfOT3FSzU2215HFUX3WWmLxK1j6TacMjIASK9XEzZiOJm5yXU=
   - secure: Gl8eqEetgNhO24C2ET236OQfOHAHSnFihioJ61pzE3XQ5X0O2At3zGTQLAJPPvtreBSw0C0yxA3ECuyhqLT+gntqVyPKBUPmxh0FoODj6qE9rkRpj24tio2eKm2kAH06BCN/uYIbZbhIzBr/KnErLnQa4tlZOpPe81KmltEMhCAaO8mMHmHMn5Ud+swKCK9kQ/3PMxaG4uCTeR7MyycveBPCD2f+K6biFO/Q1xExlb0lrprGgfr1/DJyz4a9BgDeXA6LBs4gKEQ/UzO06l1Qw1RRL5zqcIlZ+oE4zruM8dGH8C+mMlLfW5UporVN5/HMLPKPHopY9tgOZAmRlSVbS8DYsS3FwE+0J21q5VFoGfhmYTLHQL03EdfMenewxjGia/yuicfRDePzmMG3IN7lGtyJ44dULLU7BWbcFYBZ2o1b4EcNmDHBJwlwOr1EwOQLuI2Vtey10UJB4wEWf5nUpefuto0Caurwo0GGCSAhajrc4VPqCcLrHS6uzbYP/I5z1RJj3vUtJsD+IowFl5Mo6zw3GL/97nJIZLFcsz8jWoxU2/j+FqzjExrBg3mG55n9zsDvhnJb1bwFEPZwuIEvHvHLXYzouxqNfrf7UvDpSetfJ0osK9M0EvRV1QysJNN19uz7breK+LKqx7U0PPbBxq0hMr+kXoGFMgALaM8nFYw=
-
+  - secure: DkN6+GMvlS2IkChrfJZrWT/5TWoozc1KbDcGuINVi2fvU7FbfPJZno9Z0vilx+s2yxYlpecnK/amTa4TEWAu967JNLzNqGn0MwEPf+OM+SHJwfAGzgzJdM95i/QhQvzpl3HPDOgluk1+5CLIpz7dBdNxbpVtj4K3864B6LrCRMpJ135O5K3mn7PbeBiftDw0rSv4fm9eVVsIaJVdpKZYEr9rFOHVqlizdvJ4K9v4N9jrmPx6kaH/GQKfr46l0vA0IuCTvGRDv+Fpk4bsKDzgQcWzE5qrFjH8gU7vmJNDN/2K/bk/wH6VhteC9pOznbEPZ+lNYS0HfG+zgI1naLdnsKnPcacb4On959uOX8YP1K4usfECRy292mEsaRYyydQW3Tr2DyP+QGScTaIPCl3w3nMnXpARi0f0Z9Th9sCTmv2jg1L1YnvEl+zFPHhmltvCuXpVB2pGfVCgwUWmYuKGKoHSqfFczevv3BY1bLQADza95Bb2KZjcMAUbEtiqU5ip5ToXfXLEO5ilGo1BlZ+14nqnlmMrZwsjGCJ1NMc+ELTVCiMBbdtJoWUzDh98fnxEdjwAbLf79YDXDt5wgjc0XMXCkhlltIMpUQliWg7whnHP4q6g79yQORaB+lQdu4x6i6qzmSH4xGvcP/Fa+8rIesjfvb49y80tJhNWNvtah78=
+  - secure: NchiLT97yCG9dRp1yfcqmOgP5FLBqGS7NwPVsnHU0TiWxLLJAzFx8Ssp4sK1KOeDQMAEsrpLg0VMeVzl0HWjjN3OcnKafshLiYk8WkA3hlDFLizB6sLeT8mTx5LYUGfFJ8HCDNSI8SF+0eAAkS+iZ6zMGn926mdDqYLPU7qcQD358C/WkwVo9j8hrJ4QB4ocX6ciiiaDfGk0D7bYc2XOFqyMmo2qjxLxwo9OPQBFliU7CPpIm5jSZP481r+3tz+H34DNlaiOqHuZ/JTbnDipdWETH8qFA2xf4K6y53o1RFb+6zmiMOLFKJfYehHN6gqAFqh4+iyB8+uqAJai4j36/E3cwCIGAbIbW08OnQz2gwa3T4aWCWDziAsaxLz+KaJgg6qsByBwgtXJkuMwcej+m4WHCpDKrFSrBiFGv0hMVlG67feW9zrB4QCLCtKhjCDjowmYrYKE8Op1HGXak67k0vDUXSAIc5TJVv3i8vBHoW4Myj7RKhcB3BRoNudTemr4lheJR/EyxrmbgfQfvIzbM020GdOrA5wr7dtgLFriAfg6gUVO/fhcrEIvCZWc943siUrhWHGnjY2Zqm+8qMmk7bjlCtLzM7wHKTEYcNNJGYq5F8GPgrAanX8LDyJq8AwpyunwhJXEFzTe0HjbOfi791QcNZ7/ZzIqUOrDW0UgwvY=
 addons:
   apt:
     packages:
@@ -50,10 +50,9 @@ addons:
     - libelf-dev
     - libdw-dev
     - cmake
-    
 stages:
-  - experiments
-  - test
+- experiments
+- test
 install:
 - pip install -r requirements.txt
 - pip install aws-sam-cli
@@ -61,42 +60,17 @@ before_script:
 - sudo apt-get install jq
 script:
 - bash tests/test_permastack.sh $eventfile
-
 jobs:
 - stage: experiments
   install:
-    - pip install -r requirements_experiments.txt
+  - pip install -r requirements_experiments.txt
   script:
-    - bash tests/test_experiments.sh
+  - bash tests/test_experiments.sh
 - stage: test
   install:
-    - pip install -r requirements.txt
-    - pip install aws-sam-cli
+  - pip install -r requirements.txt
+  - pip install aws-sam-cli
   before_script:
-    - sudo apt-get install jq
+  - sudo apt-get install jq
   script:
-    - bash tests/test_permastack.sh $eventfile
-      #- stage: tester
-      #  install:
-      #    - pip install -r requirements.txt
-      #    - pip install aws-sam-cli
-      #    - apt-get -y libcurl4-openssl-dev
-      #    - apt-get -y libelf-dev
-      #    - apt-get -y libdw-dev
-      #    - apt-get -y cmake
-      #  before_script:
-      #    - sudo apt-get install jq
-      #  script:
-      #    - bash tests/test_permastack.sh $eventfile
-## After script to get code coverage. 
-  #after_script:
-  #  #- bash tests/test_cleanup.sh
-  #- bash <(curl -s https://codecov.io/bash)
-  #  #    - AWS_ACCESS_KEY_ID=$ACCESS_KEY_USER
-  #  #    - AWS_SECRET_ACCESS_KEY=$SECRET_KEY_USER
-  #  #    - echo $(aws configure list)
-  #after_success: "wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz
-  #  &&\ntar xzf master.tar.gz &&\ncd kcov-master &&\nmkdir build &&\ncd build &&\ncmake
-  #  .. &&\nmake &&\nsudo make install &&\ncd ../.. &&\nrm -rf kcov-master &&\nmkdir
-  #  -p coverage &&\nkcov coverage script.sh &&\nbash <(curl -s https://codecov.io/bash)
-  #  \n"
+  - bash tests/test_permastack.sh $eventfile
