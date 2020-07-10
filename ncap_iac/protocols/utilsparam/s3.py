@@ -192,31 +192,39 @@ def load_yaml(bucket_name, key):
         file_object = s3_resource.Object(bucket_name, key)
         raw_content = file_object.get()['Body'].read().decode('utf-8')
         yaml_content = yaml.safe_load(raw_content)
-    except ValueError as ve:
-        raise ValueError("[JOB TERMINATE REASON] Could not load config file. From parser: {}".format(ve))
+    except yaml.scanner.ScannerError as ve:
+        raise ValueError("[JOB TERMINATE REASON] Could not load config file. YAML is misformatted.".format(ve))
     return yaml_content
 
 def extract_files(bucket_name,prefix,ext = None):
-    """
-    Filters out the actual filenames being used to process data from the prefix that is given. 
-    Inputs:
-    bucket_name (str): the name of the s3 bucket. 
-    prefix (str): the "folder name" that we care about 
-    ext (optional): if provided, will filter filenames to be of the given extension. 
+    """Filters out the actual filenames being used to process data from the prefix that is given. 
+
+    :param bucket_name: the name of the s3 bucket
+    :type bucket_name: str
+    :param prefix: the "folder name" that we care about
+    :type prefix: str
+    :param ext: will filter filename to be of given extension. do not provide leading '.' 
+    :type ext: str (optional)
     """
     bucket = s3_resource.Bucket(bucket_name)
     objgen = bucket.objects.filter(Prefix = prefix)
     if ext is None:
         file_list = [obj.key for obj in objgen if obj.key[-1] != "/"]
+    elif ext.startswith("."):
+        raise ValueError("pass extension without leading .")
     else:
         file_list = [obj.key for obj in objgen if obj.key[-1] != "/" and obj.key.split(".")[-1] == ext]
 
     return file_list 
 
 def write_endfile(bucketname,resultpath):
+    """Given the name of a bucket and a path to a result directory, writes an "end.txt" file to that bucket.
+
+    :param bucketname: name of the s3 bucket we will be writing to. 
+    :type bucketname: str
+    :param resultpath: path to which you will be writing. Provide the path to the results directory, and this file will fild the process results subdirectory within it. TODO: factor out the subdirectory name and reference global parameters. 
     """
-    Given the name of a bucket and a path to a result directory, writes an "end.txt" file to that bucket.
-    """
+
     bucket = s3_resource.Bucket(bucketname)
     bucket.put_object(
             Key = os.path.join(resultpath,"process_results","end.txt"),
@@ -225,12 +233,14 @@ def write_endfile(bucketname,resultpath):
 
 
 def write_active_monitorlog(bucketname,name,log):
-    """
-    Given the name of a bucket, writes an active monitoring log to that bucket.  
-    inputs:
-    bucketname (str): the name of the bucket that we are writing this log to. the path is already known.
-    name (str): the name of the instance we are setting up monitoring for. 
-    log (dict): the contents of the log file. 
+    """ Given the name of a bucket, writes an active monitoring log to that bucket.  
+
+    :param bucketname: the name of the bucket that we are writing this log to. the path is already known.
+    :type bucketname: str
+    :param name: the name of the instance we are setting up monitoring for. 
+    :type name: str
+    :param log: the contents of the log file.
+    :type log: dict
     """
     bucket = s3_resource.Bucket(bucketname)
     bucket.put_object(
@@ -239,27 +249,35 @@ def write_active_monitorlog(bucketname,name,log):
             )
 
 def delete_active_monitorlog(bucketname,name):
-    """
-    Given the name of a bucket, deletes an active monitoring log from that bucket.  
-    inputs:
-    bucketname (str): the name of the bucket that we are writing this log to. the path is already known.
-    name (str): the name of the instance we are setting up monitoring for. 
-    log (dict): the contents of the log file. 
+    """ Given the name of a bucket, deletes an active monitoring log from that bucket.  
+
+    :param bucketname: the name of the bucket that we are writing this log to. the path is already known.
+    :type bucketname: str
+    :param name: the name of the instance we are setting up monitoring for. 
+    :type name: str
     """
     Key = os.path.join("logs","active",name)
     s3_client.delete_object(Bucket = bucketname,Key = Key)
 
 def update_monitorlog(bucketname,name,status,time):
-    """
-    Called by the monitor_updater lambda function. Updates existing log files. 
+    """ Called by the monitor_updater lambda function. Updates existing log files. 
+
+    :param bucketname: name of the s3 bucket where we are updating log. 
+    :type bucketname: str
+    :param name: name of the instance that we are updating monitoring for.  
+    :type name: str
+    :param status: the status of the instance that led to this update event being triggered. 
+    :type status: "running" or "shutting down" (provided by cloudwatch events)
+    :param time: the time at which the relevant event occurred. 
+    :type time: string conversion of datetime. 
     """
     bucket = s3_resource.Bucket(bucketname)
     key = "logs/active/{}".format(name)
-    print(key,"key")
     log_translate = {"running":"start","shutting-down":"end"}
 
     try:
         log = load_json(bucketname,key)
+        print(log)
         log[log_translate[status]] = time
         bucket.put_object(
                 Key = os.path.join("logs","active",name),
