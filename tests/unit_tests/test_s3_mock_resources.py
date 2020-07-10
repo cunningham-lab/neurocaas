@@ -28,8 +28,6 @@ def make_mock_bucket(mock_obj_specs,filter_path = None):
     ## Now initialize two s3 collections: like lists with extra methods. One for filter, one for full. 
     mock_s3collection_full = MagicMock()
     mock_s3collection_filter = MagicMock()
-    ## Assign their return values. 
-    print(filter_stored_obj_list)
     mock_s3collection_full.__iter__.return_value = mock_stored_obj_list
     mock_s3collection_filter.__iter__.return_value = filter_stored_obj_list
     mock_bucket_attrs = {
@@ -55,8 +53,20 @@ def make_mock_object(specdict):
 def make_mock_file_object(bytesobj):
     """make_mock_file_object.
 
-    :param bytesobj:
-    """
+    :param bytesobj: the payload that will be delivered by the mock object. 
+    :type bytesobj: bytes
 
-    return mockobject
+    :return: mock object that can be queried for bytes input just as an s3 object can. 
+    :rtype: MagicMock
+    """
+    bodymock = MagicMock()
+    bodymock.read.return_value = bytesobj
+    bodydict = {"Body":bodymock}
+    mock_fileobj = MagicMock()
+    mock_fileobj.get.return_value = bodydict
+    file_object_attrs = {'get.return_value':{'Body':bodymock}}
+    file_object_mock = MagicMock(**file_object_attrs)
+
+
+    return mock_fileobj
 
