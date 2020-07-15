@@ -12,9 +12,13 @@ import subprocess
 import secrets
 import os
 import boto3
+import pathlib
+
+current_dir=pathlib.Path(__file__).parent.absolute()
+print(current_dir)
 
 ## Import global parameters: 
-with open("../global_params_initialized.json") as gp:
+with open(os.path.join(os.path.dirname(current_dir),"global_params_initialized.json")) as gp:
     gpdict = json.load(gp)
 
 ## Function that takes in a pipeline config file. 
@@ -941,6 +945,53 @@ class WebSubstackTemplate(NeuroCaaSTemplate):
         ## We can add other custom resource initializations in the future
         return mkfunction_attached,delfunction_attached,mkfunction_logical_id,delfunction_logical_id
 
+    ##  can now move on to the actual lambda function!!
+    def add_submit_lambda(self):
+        """
+        Customized version of lambda function with looser trigger conditions. This version removes the per affiliate trigger, meaning that the data analysis stack no longer has to be updated to incorporate new users, thereby simplifying the pipeline update system. 
+        """
+        ## We will make event triggers for all affiliates. 
+        all_affiliates = self.config["UXData"]["Affiliates"]
+        ## Make Rule: 
+        all_events = {}
+        ## Get necessary properties: 
+        readdir = self.config['Lambda']['LambdaConfig']['SUBMITDIR'] 
+
+        aff_filter = Filter('Filtersuffix',
+                S3Key = S3Key('S3Key',
+                    Rules= [
+                            Rules('SuffixRule',Name = 'suffix',Value = 'submit.json')
+                            ])) 
+        event_name = 'BucketEventSubmit'
+        all_events[event_name] = {'Type':'S3',
+                                  'Properties':{
+                                      'Bucket':Ref('PipelineMainBucket'),
+                                      'Events':['s3:ObjectCreated:*'],
+                                      'Filter':aff_filter}}
+        ## We're going to add in all of the lambda configuration items to the runtime environment.
+        lambdaconfig = self.config['Lambda']['LambdaConfig']
+        ### Most of the config can be done through the config file, but we will pass certain elements from the template. 
+        lambdaconfig['figlambid'] = Ref(self.figurelamb) 
+        lambdaconfig['figlambarn'] = GetAtt(self.figurelamb,'Arn')
+        lambdaconfig['cwrolearn'] = GetAtt(self.cwrole,'Arn')
+
+        ## Additionally, we're going to add in the git commit version. 
+        lambdaconfig['versionid'] = subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8") 
+        ## Now add to a lambda function: 
+        function = Function('MainLambda',
+                CodeUri = self.config['Lambda']["CodeUri"],##'../lambda_repo',
+                Runtime = 'python3.6',
+                Handler = self.config['Lambda']["Handler"],##'submit_start.handler',
+                Description = 'Main Lambda Function for Serverless',
+                MemorySize = 128,
+                Timeout = self.config["Lambda"]['LambdaConfig']["EXECUTION_TIMEOUT"],
+                Role = 'arn:aws:iam::{accid}:role/{role}'.format(accid = boto3.client('sts').get_caller_identity().get('Account'),role = gpdict['lambdarolename']),
+                Events= all_events,
+                Environment = Environment(Variables=lambdaconfig)
+                )         
+        self.template.add_resource(function)
+
+
 ## Make a parametrized version of the user template.  
 class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
     """Created 6/1/20
@@ -1177,61 +1228,11 @@ class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
                                      DependsOn = logfoldername)
         logdebugfolder = self.template.add_resource(logdebugmake)
 
-    ##  can now move on to the actual lambda function!!
-    def add_submit_lambda(self):
-        """
-        Customized version of lambda function with looser trigger conditions. This version removes the per affiliate trigger, meaning that the data analysis stack no longer has to be updated to incorporate new users, thereby simplifying the pipeline update system. 
-        """
-        ## We will make event triggers for all affiliates. 
-        all_affiliates = self.config["UXData"]["Affiliates"]
-        ## Make Rule: 
-        all_events = {}
-        ## Get necessary properties: 
-        readdir = self.config['Lambda']['LambdaConfig']['SUBMITDIR'] 
-
-        aff_filter = Filter('Filtersuffix',
-                S3Key = S3Key('S3Key',
-                    Rules= [
-                            Rules('SuffixRule',Name = 'suffix',Value = 'submit.json')
-                            ])) 
-        event_name = 'BucketEventSubmit'
-        all_events[event_name] = {'Type':'S3',
-                                  'Properties':{
-                                      'Bucket':Ref('PipelineMainBucket'),
-                                      'Events':['s3:ObjectCreated:*'],
-                                      'Filter':aff_filter}}
-        ## We're going to add in all of the lambda configuration items to the runtime environment.
-        lambdaconfig = self.config['Lambda']['LambdaConfig']
-        ### Most of the config can be done through the config file, but we will pass certain elements from the template. 
-        lambdaconfig['figlambid'] = Ref(self.figurelamb) 
-        lambdaconfig['figlambarn'] = GetAtt(self.figurelamb,'Arn')
-        lambdaconfig['cwrolearn'] = GetAtt(self.cwrole,'Arn')
-
-        ## Additionally, we're going to add in the git commit version. 
-        lambdaconfig['versionid'] = subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8") 
-        ## Now add to a lambda function: 
-        function = Function('MainLambda',
-                CodeUri = self.config['Lambda']["CodeUri"],##'../lambda_repo',
-                Runtime = 'python3.6',
-                Handler = self.config['Lambda']["Handler"],##'submit_start.handler',
-                Description = 'Main Lambda Function for Serverless',
-                MemorySize = 128,
-                Timeout = self.config["Lambda"]['LambdaConfig']["EXECUTION_TIMEOUT"],
-                Role = 'arn:aws:iam::{accid}:role/{role}'.format(accid = boto3.client('sts').get_caller_identity().get('Account'),role = gpdict['lambdarolename']),
-                Events= all_events,
-                Environment = Environment(Variables=lambdaconfig)
-                )         
-        self.template.add_resource(function)
 
 if __name__ == "__main__":
     filename = sys.argv[1]
     mode = sys.argv[2]
     dirname = os.path.dirname(filename)
-    ## Create any new users that have not yet been declared. 
-    ## utemp = UserTemplate(filename)
-    ## with open(dirname+"/"+"compiled_users.json","w") as f:$ 
-        #print(utemp.template.to_json(),file = f)
-    print(mode,"mode")
     if mode == "develop":
         print("develop mode")
         ## Construct a development mode pipeline.  
