@@ -24,22 +24,22 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web"
+        "arn:aws:s3:::pmd-ncap-web"
       ],
       "Condition": {
         "StringEquals": {
           "s3:prefix": [
             "",
-            "origdevs/",
-            "origdevs/inputs",
-            "origdevs/results",
+            "debuggers/",
+            "debuggers/inputs",
+            "debuggers/results",
             "logs",
-            "origdevs/submissions",
-            "origdevs/configs",
-            "origdevs/inputs/",
-            "origdevs/results/",
-            "origdevs/submissions/",
-            "origdevs/configs/"
+            "debuggers/submissions",
+            "debuggers/configs",
+            "debuggers/inputs/",
+            "debuggers/results/",
+            "debuggers/submissions/",
+            "debuggers/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -52,15 +52,15 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web"
+        "arn:aws:s3:::pmd-ncap-web"
       ],
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "origdevs/inputs/*",
-            "origdevs/results/*",
-            "origdevs/configs/*",
-            "origdevs/submissions/*"
+            "debuggers/inputs/*",
+            "debuggers/results/*",
+            "debuggers/configs/*",
+            "debuggers/submissions/*"
           ]
         }
       }
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/inputs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/submissions/*"
+        "arn:aws:s3:::pmd-ncap-web/debuggers/inputs/*",
+        "arn:aws:s3:::pmd-ncap-web/debuggers/configs/*",
+        "arn:aws:s3:::pmd-ncap-web/debuggers/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/results/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*"
+        "arn:aws:s3:::pmd-ncap-web/debuggers/results/*",
+        "arn:aws:s3:::pmd-ncap-web/debuggers/configs/*"
       ]
     }
   ]

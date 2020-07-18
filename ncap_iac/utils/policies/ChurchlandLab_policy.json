@@ -24,22 +24,22 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web"
+        "arn:aws:s3:::cshl-wfield-preprocessing-develop"
       ],
       "Condition": {
         "StringEquals": {
           "s3:prefix": [
             "",
-            "origdevs/",
-            "origdevs/inputs",
-            "origdevs/results",
+            "ChurchlandLab/",
+            "ChurchlandLab/inputs",
+            "ChurchlandLab/results",
             "logs",
-            "origdevs/submissions",
-            "origdevs/configs",
-            "origdevs/inputs/",
-            "origdevs/results/",
-            "origdevs/submissions/",
-            "origdevs/configs/"
+            "ChurchlandLab/submissions",
+            "ChurchlandLab/configs",
+            "ChurchlandLab/inputs/",
+            "ChurchlandLab/results/",
+            "ChurchlandLab/submissions/",
+            "ChurchlandLab/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -52,15 +52,15 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web"
+        "arn:aws:s3:::cshl-wfield-preprocessing-develop"
       ],
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "origdevs/inputs/*",
-            "origdevs/results/*",
-            "origdevs/configs/*",
-            "origdevs/submissions/*"
+            "ChurchlandLab/inputs/*",
+            "ChurchlandLab/results/*",
+            "ChurchlandLab/configs/*",
+            "ChurchlandLab/submissions/*"
           ]
         }
       }
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/inputs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/submissions/*"
+        "arn:aws:s3:::cshl-wfield-preprocessing-develop/ChurchlandLab/inputs/*",
+        "arn:aws:s3:::cshl-wfield-preprocessing-develop/ChurchlandLab/configs/*",
+        "arn:aws:s3:::cshl-wfield-preprocessing-develop/ChurchlandLab/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/results/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*"
+        "arn:aws:s3:::cshl-wfield-preprocessing-develop/ChurchlandLab/results/*",
+        "arn:aws:s3:::cshl-wfield-preprocessing-develop/ChurchlandLab/configs/*"
       ]
     }
   ]

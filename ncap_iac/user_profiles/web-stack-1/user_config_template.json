@@ -1,0 +1,260 @@
+{
+    "STAGE": "webusercentric",
+    "UXData": {
+        "Affiliates": [
+            {
+                "AffiliateName": "Test",
+                "UserNames": [
+                    "1@gmail.com",
+                    "a@gmail.com"
+                ],
+                "ContactEmail": {
+                    "1@gmail.com": "1@gmail.com",
+                    "a@gmail.com": "a@gmail.com"
+                },
+                "Pipelines": [
+                    "caiman-ncap-web",
+                    "dlc-ncap-web",
+                    "epi-ncap-web",
+                    "pmd-ncap-web",
+                    "locanmf-ncap-web"
+                ],
+                "KeySerialNumber":2,
+                "PipelineDir": "not in use"
+            },
+            {
+                "AffiliateName": "neuralengineering@ucdenver.edugroup",
+                "UserNames": [
+                    "neuralengineering@ucdenver.edu"
+                ],
+                "ContactEmail": {
+                    "neuralengineering@ucdenver.edu": "neuralengineering@ucdenver.edu"
+                },
+                "Pipelines": [
+                    "caiman-ncap-web",
+                    "dlc-ncap-web",
+                    "epi-ncap-web",
+                    "pmd-ncap-web",
+                    "locanmf-ncap-web"
+                ],
+                "KeySerialNumber":2,
+                "PipelineDir": "things are fine here"
+            },
+            {
+                "AffiliateName": "dmitrijs_celinskis@brown.edugroup",
+                "UserNames": [
+                    "dmitrijs_celinskis@brown.edu"
+                ],
+                "ContactEmail": {
+                    "dmitrijs_celinskis@brown.edu": "dmitrijs_celinskis@brown.edu"
+                },
+                "Pipelines": [
+                    "caiman-ncap-web",
+                    "dlc-ncap-web",
+                    "epi-ncap-web",
+                    "pmd-ncap-web",
+                    "locanmf-ncap-web"
+                ],
+                "KeySerialNumber":2,
+                "PipelineDir": "things are fine here"
+            },
+            {
+                "AffiliateName": "neuralengineering@cuanschutz.edugroup",
+                "UserNames": [
+                    "neuralengineering@cuanschutz.edu"
+                ],
+                "ContactEmail": {
+                    "neuralengineering@cuanschutz.edu": "neuralengineering@cuanschutz.edu"
+                },
+                "Pipelines": [
+                    "caiman-ncap-web",
+                    "dlc-ncap-web",
+                    "epi-ncap-web",
+                    "pmd-ncap-web",
+                    "locanmf-ncap-web"
+                ],
+                "KeySerialNumber":2,
+                "PipelineDir": "things are fine here"
+            },
+            {
+                "AffiliateName": "ajscallon@gmail.comgroup",
+                "UserNames": [
+                    "ajscallon@gmail.com"
+                ],
+                "ContactEmail": {
+                    "ajscallon@gmail.com": "ajscallon@gmail.com"
+                },
+                "Pipelines": [
+                    "caiman-ncap-web",
+                    "dlc-ncap-web",
+                    "epi-ncap-web",
+                    "pmd-ncap-web",
+                    "locanmf-ncap-web"
+                ],
+                "KeySerialNumber":2,
+                "PipelineDir": "things are fine here"
+            },
+            {
+                "AffiliateName": "andrew.scallon@ucdenver.edugroup",
+                "UserNames": [
+                    "andrew.scallon@ucdenver.edu"
+                ],
+                "ContactEmail": {
+                    "andrew.scallon@ucdenver.edu": "andrew.scallon@ucdenver.edu"
+                },
+                "Pipelines": [
+                    "caiman-ncap-web",
+                    "dlc-ncap-web",
+                    "epi-ncap-web",
+                    "pmd-ncap-web",
+                    "locanmf-ncap-web"
+                ],
+                "KeySerialNumber":2,
+                "PipelineDir": "things are fine here"
+            },
+            {
+                "AffiliateName": "sjayakumar@fas.harvard.edugroup",
+                "UserNames": [
+                    "sjayakumar@fas.harvard.edu"
+                ],
+                "ContactEmail": {
+                    "sjayakumar@fas.harvard.edu": "sjayakumar@fas.harvard.edu"
+                },
+                "Pipelines": [
+                    "caiman-ncap-web",
+                    "dlc-ncap-web",
+                    "epi-ncap-web",
+                    "pmd-ncap-web",
+                    "locanmf-ncap-web"
+                ],
+                "KeySerialNumber":2,
+                "PipelineDir": "things are fine here"
+            },
+            {
+                "AffiliateName": "raphael@vathes.comgroup",
+                "UserNames": [
+                    "raphael@vathes.com"
+                ],
+                "ContactEmail": {
+                    "raphael@vathes.com": "raphael@vathes.com"
+                },
+                "Pipelines": [
+                    "caiman-ncap-web",
+                    "dlc-ncap-web",
+                    "epi-ncap-web",
+                    "pmd-ncap-web",
+                    "locanmf-ncap-web"
+                ],
+                "KeySerialNumber":2,
+                "PipelineDir": "things are fine here"
+            },
+            {
+                "AffiliateName": "edgar.walker@gmail.comgroup",
+                "UserNames": [
+                    "edgar.walker@gmail.com"
+                ],
+                "ContactEmail": {
+                    "edgar.walker@gmail.com": "edgar.walker@gmail.com"
+                },
+                "Pipelines": [
+                    "caiman-ncap-web",
+                    "dlc-ncap-web",
+                    "epi-ncap-web",
+                    "pmd-ncap-web",
+                    "locanmf-ncap-web"
+                ],
+                "KeySerialNumber":2,
+                "PipelineDir": "things are fine here"
+            },
+            {
+                "AffiliateName": "jvoigts@mit.edugroup",
+                "UserNames": [
+                    "jvoigts@mit.edu"
+                ],
+                "ContactEmail": {
+                    "jvoigts@mit.edu": "jvoigts@mit.edu"
+                },
+                "Pipelines": [
+                    "caiman-ncap-web",
+                    "dlc-ncap-web",
+                    "epi-ncap-web",
+                    "pmd-ncap-web",
+                    "locanmf-ncap-web"
+                ],
+                "KeySerialNumber":2,
+                "PipelineDir": "things are fine here"
+            },
+            {
+                "AffiliateName": "zhenrui.liao@columbia.edugroup",
+                "UserNames": [
+                    "zhenrui.liao@columbia.edu"
+                ],
+                "ContactEmail": {
+                    "zhenrui.liao@columbia.edu": "zhenrui.liao@columbia.edu"
+                },
+                "Pipelines": [
+                    "caiman-ncap-web",
+                    "dlc-ncap-web",
+                    "epi-ncap-web",
+                    "pmd-ncap-web",
+                    "locanmf-ncap-web"
+                ],
+                "KeySerialNumber":2,
+                "PipelineDir": "things are fine here"
+            },
+            {
+                "AffiliateName": "omid.ghasemsani@usc.edugroup",
+                "UserNames": [
+                    "omid.ghasemsani@usc.edu"
+                ],
+                "ContactEmail": {
+                    "omid.ghasemsani@usc.edu": "omid.ghasemsani@usc.edu"
+                },
+                "Pipelines": [
+                    "caiman-ncap-web",
+                    "dlc-ncap-web",
+                    "epi-ncap-web",
+                    "pmd-ncap-web",
+                    "locanmf-ncap-web"
+                ],
+                "KeySerialNumber":2,
+                "PipelineDir": "things are fine here"
+            },
+            {
+                "AffiliateName": "browncompute",
+                "UserNames": [
+                    "jason_ritt@brown.edu",
+                    "josh@open-ephys.org",
+                    "christopher_moore@brown.edu"
+                ],
+                "ContactEmail": {
+                    "jason_ritt@brown.edu": "jason_ritt@brown.edu",
+                    "josh@open-ephys.org": "josh@open-ephys.org",
+                    "christopher_moore@brown.edu": "christopher_moore@brown.edu"
+                },
+                "Pipelines": [
+                    "caiman-ncap-web",
+                    "dlc-ncap-web",
+                    "epi-ncap-web",
+                    "pmd-ncap-web",
+                    "locanmf-ncap-web"
+                ],
+                "KeySerialNumber":2,
+                "PipelineDir": "not in use"
+            }
+        ]
+    },
+    "Lambda": {
+        "LambdaConfig": {
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS": "Type of instance to launch.",
+            "IAM_ROLE": "iam role with ssm and s3 access",
+            "EXECUTION_TIMEOUT": "172800",
+            "LOGDIR": "logs",
+            "OUTDIR": "results",
+            "INDIR": "inputs",
+            "LOGFILE": "lambda_log.txt",
+            "MONITOR": true
+        }
+    }
+}

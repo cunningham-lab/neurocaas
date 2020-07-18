@@ -1,0 +1,1354 @@
+{
+    "Outputs": {
+        "AccessKeytestusera": {
+            "Description": "Access Key of user: testusera in group testuserorg2",
+            "Value": {
+                "Ref": "userkeytestusera"
+            }
+        },
+        "Passwordtestusera": {
+            "Description": "Default password of new user testusera in group testuserorg2",
+            "Value": "a14cc42173c6e425"
+        },
+        "SecretAccessKeytestusera": {
+            "Description": "Secret Key of new user: testusera in group testuserorg2",
+            "Value": {
+                "Fn::GetAtt": [
+                    "userkeytestusera",
+                    "SecretAccessKey"
+                ]
+            }
+        }
+    },
+    "Resources": {
+        "AffiliateTemplateBaseFoldertestuserorg2cianalysispermastackdel": {
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "testuserorg2",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "AffiliateTemplateBaseFoldertestuserorg2cianalysispermastackmake": {
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "testuserorg2",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "AffiliateTemplateBaseFoldertestuserorg2ctnfrontendexample1del": {
+            "Properties": {
+                "BucketName": "ctnfrontendexample1",
+                "DirName": "testuserorg2",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "AffiliateTemplateBaseFoldertestuserorg2ctnfrontendexample1make": {
+            "Properties": {
+                "BucketName": "ctnfrontendexample1",
+                "DirName": "testuserorg2",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "AffiliateTemplateBaseFoldertestuserorg2testneurocaasusersidefoldersdel": {
+            "Properties": {
+                "BucketName": "testneurocaasusersidefolders",
+                "DirName": "testuserorg2",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "AffiliateTemplateBaseFoldertestuserorg2testneurocaasusersidefoldersmake": {
+            "Properties": {
+                "BucketName": "testneurocaasusersidefolders",
+                "DirName": "testuserorg2",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "AffiliateTemplateUserNettestuserorg2": {
+            "Properties": {
+                "GroupName": {
+                    "Ref": "UserGroupAffiliateTemplatetestuserorg2"
+                },
+                "Users": [
+                    {
+                        "Ref": "testuserorg2usertestusera"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::UserToGroupAddition"
+        },
+        "ConfigFolderAffiliateTemplatetestuserorg2cianalysispermastackdel": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2cianalysispermastackdel",
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "configs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "ConfigFolderAffiliateTemplatetestuserorg2cianalysispermastackmake": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2cianalysispermastackmake",
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "configs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "ConfigFolderAffiliateTemplatetestuserorg2ctnfrontendexample1del": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2ctnfrontendexample1del",
+            "Properties": {
+                "BucketName": "ctnfrontendexample1",
+                "DirName": "configs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "ConfigFolderAffiliateTemplatetestuserorg2ctnfrontendexample1make": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2ctnfrontendexample1make",
+            "Properties": {
+                "BucketName": "ctnfrontendexample1",
+                "DirName": "configs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "ConfigFolderAffiliateTemplatetestuserorg2testneurocaasusersidefoldersdel": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2testneurocaasusersidefoldersdel",
+            "Properties": {
+                "BucketName": "testneurocaasusersidefolders",
+                "DirName": "configs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "ConfigFolderAffiliateTemplatetestuserorg2testneurocaasusersidefoldersmake": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2testneurocaasusersidefoldersmake",
+            "Properties": {
+                "BucketName": "testneurocaasusersidefolders",
+                "DirName": "configs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "InFolderAffiliateTemplatetestuserorg2cianalysispermastackdel": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2cianalysispermastackdel",
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "inputs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "InFolderAffiliateTemplatetestuserorg2cianalysispermastackmake": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2cianalysispermastackmake",
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "inputs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "InFolderAffiliateTemplatetestuserorg2ctnfrontendexample1del": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2ctnfrontendexample1del",
+            "Properties": {
+                "BucketName": "ctnfrontendexample1",
+                "DirName": "inputs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "InFolderAffiliateTemplatetestuserorg2ctnfrontendexample1make": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2ctnfrontendexample1make",
+            "Properties": {
+                "BucketName": "ctnfrontendexample1",
+                "DirName": "inputs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "InFolderAffiliateTemplatetestuserorg2testneurocaasusersidefoldersdel": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2testneurocaasusersidefoldersdel",
+            "Properties": {
+                "BucketName": "testneurocaasusersidefolders",
+                "DirName": "inputs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "InFolderAffiliateTemplatetestuserorg2testneurocaasusersidefoldersmake": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2testneurocaasusersidefoldersmake",
+            "Properties": {
+                "BucketName": "testneurocaasusersidefolders",
+                "DirName": "inputs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LambdaBaseRole": {
+            "Properties": {
+                "Description": {
+                    "Fn::Join": [
+                        " ",
+                        [
+                            "Base Policy for all lambda function roles in",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "logs:CreateLogGroup",
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": "arn:aws:logs:*:*:*"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::IAM::ManagedPolicy"
+        },
+        "LogFolderAffiliatetestuserorg2del": {
+            "Properties": {
+                "BucketName": "testneurocaasusersidefolders",
+                "DirName": "testuserorg2",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderAffiliatetestuserorg2make": {
+            "Properties": {
+                "BucketName": "testneurocaasusersidefolders",
+                "DirName": "testuserorg2",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "OutFolderAffiliateTemplatetestuserorg2cianalysispermastackdel": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2cianalysispermastackdel",
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "results",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "OutFolderAffiliateTemplatetestuserorg2cianalysispermastackmake": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2cianalysispermastackmake",
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "results",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "OutFolderAffiliateTemplatetestuserorg2ctnfrontendexample1del": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2ctnfrontendexample1del",
+            "Properties": {
+                "BucketName": "ctnfrontendexample1",
+                "DirName": "results",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "OutFolderAffiliateTemplatetestuserorg2ctnfrontendexample1make": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2ctnfrontendexample1make",
+            "Properties": {
+                "BucketName": "ctnfrontendexample1",
+                "DirName": "results",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "OutFolderAffiliateTemplatetestuserorg2testneurocaasusersidefoldersdel": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2testneurocaasusersidefoldersdel",
+            "Properties": {
+                "BucketName": "testneurocaasusersidefolders",
+                "DirName": "results",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "OutFolderAffiliateTemplatetestuserorg2testneurocaasusersidefoldersmake": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2testneurocaasusersidefoldersmake",
+            "Properties": {
+                "BucketName": "testneurocaasusersidefolders",
+                "DirName": "results",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "S3DelObjectFunction": {
+            "Properties": {
+                "CodeUri": "../../protocols",
+                "Description": "Deletes Objects from S3",
+                "Environment": {
+                    "Variables": {
+                        "CONFIGDIR": "configs",
+                        "EXECUTION_TIMEOUT": "172800",
+                        "IAM_ROLE": "iam role with ssm and s3 access",
+                        "INDIR": "inputs",
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "Type of instance to launch.",
+                        "SUBMITDIR": "submissions"
+                    }
+                },
+                "Handler": "helper.handler_deldir",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "S3MakePathRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "S3MakePathRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "LambdaBaseRole"
+                    }
+                ],
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "s3:DeleteObject",
+                                        "s3:ListBucket",
+                                        "s3:PutObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "write_s3_policy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "S3PutObjectFunction": {
+            "Properties": {
+                "CodeUri": "../../protocols",
+                "Description": "Puts Objects in S3",
+                "Environment": {
+                    "Variables": {
+                        "CONFIGDIR": "configs",
+                        "EXECUTION_TIMEOUT": "172800",
+                        "IAM_ROLE": "iam role with ssm and s3 access",
+                        "INDIR": "inputs",
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "Type of instance to launch.",
+                        "SUBMITDIR": "submissions"
+                    }
+                },
+                "Handler": "helper.handler_mkdir",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "S3MakePathRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "SubmitFolderAffiliateTemplatetestuserorg2cianalysispermastackdel": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2cianalysispermastackdel",
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "submissions",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "SubmitFolderAffiliateTemplatetestuserorg2cianalysispermastackmake": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2cianalysispermastackmake",
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "submissions",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "SubmitFolderAffiliateTemplatetestuserorg2ctnfrontendexample1del": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2ctnfrontendexample1del",
+            "Properties": {
+                "BucketName": "ctnfrontendexample1",
+                "DirName": "submissions",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "SubmitFolderAffiliateTemplatetestuserorg2ctnfrontendexample1make": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2ctnfrontendexample1make",
+            "Properties": {
+                "BucketName": "ctnfrontendexample1",
+                "DirName": "submissions",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "SubmitFolderAffiliateTemplatetestuserorg2testneurocaasusersidefoldersdel": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2testneurocaasusersidefoldersdel",
+            "Properties": {
+                "BucketName": "testneurocaasusersidefolders",
+                "DirName": "submissions",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "SubmitFolderAffiliateTemplatetestuserorg2testneurocaasusersidefoldersmake": {
+            "DependsOn": "AffiliateTemplateBaseFoldertestuserorg2testneurocaasusersidefoldersmake",
+            "Properties": {
+                "BucketName": "testneurocaasusersidefolders",
+                "DirName": "submissions",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "testuserorg2",
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "UserGroupAffiliateTemplatetestuserorg2": {
+            "Properties": {
+                "GroupName": "testuserorg2usercentricgroup",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "s3:GetBucketLocation",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor0"
+                                },
+                                {
+                                    "Action": "s3:HeadBucket",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor3"
+                                },
+                                {
+                                    "Action": "s3:ListAllMyBuckets",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor1"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringEquals": {
+                                            "s3:delimiter": [
+                                                "/"
+                                            ],
+                                            "s3:prefix": [
+                                                "",
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            "testuserorg2",
+                                                            "/"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            "testuserorg2",
+                                                            "/",
+                                                            "inputs"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            "testuserorg2",
+                                                            "/",
+                                                            "results"
+                                                        ]
+                                                    ]
+                                                },
+                                                "logs",
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            "testuserorg2",
+                                                            "/",
+                                                            "submissions"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            "testuserorg2",
+                                                            "/",
+                                                            "configs"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            "testuserorg2",
+                                                            "/",
+                                                            "inputs",
+                                                            "/"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            "testuserorg2",
+                                                            "/",
+                                                            "results",
+                                                            "/"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            "testuserorg2",
+                                                            "/",
+                                                            "submissions",
+                                                            "/"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            "testuserorg2",
+                                                            "/",
+                                                            "configs",
+                                                            "/"
+                                                        ]
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "cianalysispermastack"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "testneurocaasusersidefolders"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "ctnfrontendexample1"
+                                                ]
+                                            ]
+                                        }
+                                    ],
+                                    "Sid": "ListBucket"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringLike": {
+                                            "s3:prefix": [
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            "testuserorg2",
+                                                            "/",
+                                                            "inputs",
+                                                            "/*"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            "testuserorg2",
+                                                            "/",
+                                                            "results",
+                                                            "/*"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            "testuserorg2",
+                                                            "/",
+                                                            "configs",
+                                                            "/*"
+                                                        ]
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            "testuserorg2",
+                                                            "/",
+                                                            "submissions",
+                                                            "/*"
+                                                        ]
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "cianalysispermastack"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "testneurocaasusersidefolders"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "ctnfrontendexample1"
+                                                ]
+                                            ]
+                                        }
+                                    ],
+                                    "Sid": "ListSubBucket"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "cianalysispermastack",
+                                                    "/",
+                                                    "testuserorg2",
+                                                    "/",
+                                                    "inputs",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "cianalysispermastack",
+                                                    "/",
+                                                    "testuserorg2",
+                                                    "/",
+                                                    "configs",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "cianalysispermastack",
+                                                    "/",
+                                                    "testuserorg2",
+                                                    "/",
+                                                    "submissions",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "testneurocaasusersidefolders",
+                                                    "/",
+                                                    "testuserorg2",
+                                                    "/",
+                                                    "inputs",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "testneurocaasusersidefolders",
+                                                    "/",
+                                                    "testuserorg2",
+                                                    "/",
+                                                    "configs",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "testneurocaasusersidefolders",
+                                                    "/",
+                                                    "testuserorg2",
+                                                    "/",
+                                                    "submissions",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "ctnfrontendexample1",
+                                                    "/",
+                                                    "testuserorg2",
+                                                    "/",
+                                                    "inputs",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "ctnfrontendexample1",
+                                                    "/",
+                                                    "testuserorg2",
+                                                    "/",
+                                                    "configs",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "ctnfrontendexample1",
+                                                    "/",
+                                                    "testuserorg2",
+                                                    "/",
+                                                    "submissions",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        }
+                                    ],
+                                    "Sid": "Inputfolderwrite"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "cianalysispermastack",
+                                                    "/",
+                                                    "testuserorg2",
+                                                    "/",
+                                                    "results",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "cianalysispermastack",
+                                                    "/",
+                                                    "testuserorg2",
+                                                    "/",
+                                                    "configs",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "testneurocaasusersidefolders",
+                                                    "/",
+                                                    "testuserorg2",
+                                                    "/",
+                                                    "results",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "testneurocaasusersidefolders",
+                                                    "/",
+                                                    "testuserorg2",
+                                                    "/",
+                                                    "configs",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "ctnfrontendexample1",
+                                                    "/",
+                                                    "testuserorg2",
+                                                    "/",
+                                                    "results",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    "ctnfrontendexample1",
+                                                    "/",
+                                                    "testuserorg2",
+                                                    "/",
+                                                    "configs",
+                                                    "/*"
+                                                ]
+                                            ]
+                                        }
+                                    ],
+                                    "Sid": "Outputfolderwrite"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    "testuserorg2",
+                                    "policy"
+                                ]
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Group"
+        },
+        "testuserorg2usertestusera": {
+            "Properties": {
+                "LoginProfile": {
+                    "Password": "a14cc42173c6e425",
+                    "PasswordResetRequired": "false"
+                },
+                "Path": "/testuserorg2/",
+                "UserName": "testuseraus-east-1"
+            },
+            "Type": "AWS::IAM::User"
+        },
+        "userkeytestusera": {
+            "Properties": {
+                "Serial": 1,
+                "UserName": {
+                    "Ref": "testuserorg2usertestusera"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        }
+    },
+    "Transform": "AWS::Serverless-2016-10-31"
+}

@@ -361,6 +361,7 @@ class DevTemplate(NeuroCaaSTemplate):
         self.filename = filename
         self.config = self.get_config(self.filename)
         self.iam_resource = boto3.resource('iam',region_name = self.config['Lambda']["LambdaConfig"]["REGION"]) 
+        self.iam_client = boto3.client('iam',region_name = self.config['Lambda']["LambdaConfig"]["REGION"]) 
         ## We should get all resources once attached. 
         self.template,self.mkdirfunc,self.deldirfunc = self.initialize_template()
         ## Add bucket: 
@@ -1253,6 +1254,7 @@ if __name__ == "__main__":
             print(temp.template.to_json(),file = f)
     else:
         print("mode {} not implemented yet or does not exist.".format(mode))
+        raise Exception("please specify mode in template. ")
 
     ## 
 

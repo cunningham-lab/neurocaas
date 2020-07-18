@@ -30,16 +30,16 @@
         "StringEquals": {
           "s3:prefix": [
             "",
-            "origdevs/",
-            "origdevs/inputs",
-            "origdevs/results",
+            "marlab/",
+            "marlab/inputs",
+            "marlab/results",
             "logs",
-            "origdevs/submissions",
-            "origdevs/configs",
-            "origdevs/inputs/",
-            "origdevs/results/",
-            "origdevs/submissions/",
-            "origdevs/configs/"
+            "marlab/submissions",
+            "marlab/configs",
+            "marlab/inputs/",
+            "marlab/results/",
+            "marlab/submissions/",
+            "marlab/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -57,10 +57,10 @@
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "origdevs/inputs/*",
-            "origdevs/results/*",
-            "origdevs/configs/*",
-            "origdevs/submissions/*"
+            "marlab/inputs/*",
+            "marlab/results/*",
+            "marlab/configs/*",
+            "marlab/submissions/*"
           ]
         }
       }
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/inputs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/submissions/*"
+        "arn:aws:s3:::caiman-ncap-web/marlab/inputs/*",
+        "arn:aws:s3:::caiman-ncap-web/marlab/configs/*",
+        "arn:aws:s3:::caiman-ncap-web/marlab/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/results/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*"
+        "arn:aws:s3:::caiman-ncap-web/marlab/results/*",
+        "arn:aws:s3:::caiman-ncap-web/marlab/configs/*"
       ]
     }
   ]

@@ -1,0 +1,27 @@
+{
+    "STAGE":"web",
+    "UXData":{
+    "Affiliates":[
+        {
+            "AffiliateName":"columbianeurotheory",
+            "UserNames":[""],
+            "ContactEmail":["re2365@columbia.edu"],
+            "Pipelines":"Path to processing directory. If processing directory lives at root, can be \"\"",
+            "PipelineDir":"Directory where pipeline should be built"
+        }
+    ]
+    },
+    "Lambda":{
+        "LambdaConfig":{
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS":"Type of instance to launch.",
+            "IAM_ROLE":"iam role with ssm and s3 access",
+            "EXECUTION_TIMEOUT":"172800",
+            "LOGDIR":"logs",
+            "OUTDIR":"results",
+            "INDIR":"inputs",
+            "LOGFILE":"lambda_log.txt",
+            "MONITOR":true
+        }
+    }
+}
