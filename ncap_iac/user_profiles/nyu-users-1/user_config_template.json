@@ -1,16 +1,18 @@
 {
+    "STAGE":"webusercentric",
     "UXData":{
     "Affiliates":[
         {
             "AffiliateName":"marlab",
             "UserNames":["adam.mar@nyulangone.org","Begona.Gamallo-Lana@nyulangone.org","molly.klores@nyulangone.org","pkaitlyn@umich.edu","lps300@nyu.edu"],
             "Pipelines":[   
-                 "caiman_web_stack",
-                    "dlc_web_stack",
-                    "epi_web_stack",
-                    "pmd_web_stack",
-                    "locanmf_web_stack"
+                 "caiman-ncap-web",
+                    "dlc-ncap-web",
+                    "epi-ncap-web",
+                    "pmd-ncap-web",
+                    "locanmf-ncap-web"
             ],
+            "KeySerialNumber":2,
             "PipelineDir":["adam.mar@nyulangone.org","Begona.Gamallo-Lana@nyulangone.org","molly.klores@nyulangone.org","pkaitlyn@umich.edu","lps300@nyu.edu"],
             "ContactEmail":"The email that we should notify regarding processing status."
         }
