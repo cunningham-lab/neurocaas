@@ -1,12 +1,13 @@
 {
-    "STAGE":"web",
+    "STAGE":"webusercentric",
     "UXData":{
     "Affiliates":[
         {
             "AffiliateName":"Affiliate's Name here. Must follow S3 bucket name conventions.",
             "UserNames":"[list of strings describing user names]",
             "ContactEmail":"[list of strings describing user emails]",
-            "Pipelines":"Path to processing directory. If processing directory lives at root, can be \"\"",
+            "KeySerialNumber":2,
+            "Pipelines":["epi-ncap-web","dlc-ncap-web","locanmf-ncap-web","caiman-ncap-web","pmd-ncap-web"],
             "PipelineDir":"Directory where pipeline should be built"
         }
     ]
