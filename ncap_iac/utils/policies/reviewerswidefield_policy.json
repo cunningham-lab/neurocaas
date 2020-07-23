@@ -24,22 +24,22 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web"
+        "arn:aws:s3:::cshl-wfield-preprocessing-develop"
       ],
       "Condition": {
         "StringEquals": {
           "s3:prefix": [
             "",
-            "origdevs/",
-            "origdevs/inputs",
-            "origdevs/results",
+            "reviewerswidefield/",
+            "reviewerswidefield/inputs",
+            "reviewerswidefield/results",
             "logs",
-            "origdevs/submissions",
-            "origdevs/configs",
-            "origdevs/inputs/",
-            "origdevs/results/",
-            "origdevs/submissions/",
-            "origdevs/configs/"
+            "reviewerswidefield/submissions",
+            "reviewerswidefield/configs",
+            "reviewerswidefield/inputs/",
+            "reviewerswidefield/results/",
+            "reviewerswidefield/submissions/",
+            "reviewerswidefield/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -52,15 +52,15 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web"
+        "arn:aws:s3:::cshl-wfield-preprocessing-develop"
       ],
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "origdevs/inputs/*",
-            "origdevs/results/*",
-            "origdevs/configs/*",
-            "origdevs/submissions/*"
+            "reviewerswidefield/inputs/*",
+            "reviewerswidefield/results/*",
+            "reviewerswidefield/configs/*",
+            "reviewerswidefield/submissions/*"
           ]
         }
       }
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/inputs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/submissions/*"
+        "arn:aws:s3:::cshl-wfield-preprocessing-develop/reviewerswidefield/inputs/*",
+        "arn:aws:s3:::cshl-wfield-preprocessing-develop/reviewerswidefield/configs/*",
+        "arn:aws:s3:::cshl-wfield-preprocessing-develop/reviewerswidefield/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/results/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*"
+        "arn:aws:s3:::cshl-wfield-preprocessing-develop/reviewerswidefield/results/*",
+        "arn:aws:s3:::cshl-wfield-preprocessing-develop/reviewerswidefield/configs/*"
       ]
     }
   ]

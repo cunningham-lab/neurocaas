@@ -13,3 +13,13 @@ Links:
 https://botocore.amazonaws.com/v1/documentation/api/latest/reference/stubber.html
 # mocks:
 https://docs.python.org/3/library/unittest.mock.html#unittest.mock.patch
+
+7/10/20.
+
+The basic S3 utilsparam unit tests are done and working. This leaves the logger objects (do we still need them all?), and then higher level things to test. We need to figure out if it's important to stub/mock everything in the utils module to test something in the main code (submit_start, helper, etc.). People seem ideologically split on this, when not taking into the account we would have to call s3 resources. The most important step is just to look more at that code so you can figure out what's possible/feasible.  
+Important changes: added coverage module: 
+run: 
+coverage run --source=../../ncap_iac -m pytest test_jobmanager_utils.py
+also: 
+coverage report -m
+for coverage reports. 

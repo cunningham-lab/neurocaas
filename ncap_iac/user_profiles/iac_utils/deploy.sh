@@ -29,7 +29,7 @@ sam build -t compiled_users.json -m $ncaprootdir/protocols/requirements.txt --us
 
 sam package --s3-bucket $storagebucketname --output-template-file compiled_users.yaml
 
-sam deploy --template-file compiled_users.yaml --stack-name $PIPENAME --capabilities CAPABILITY_NAMED_IAM
+sam deploy --template-file compiled_users.yaml --stack-name $PIPENAME --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --s3-bucket $storagebucketname
 
 ## Added February 4th:
 cd $ncaprootdir/utils

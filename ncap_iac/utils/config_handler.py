@@ -105,7 +105,7 @@ class NCAPTemplate(object):
         delfunction = Function("S3DelObjectFunction",
                                CodeUri="../../protocols",
                                Description= "Deletes Objects from S3",
-                               Handler="helper.handler_deldir",
+                               Handler="helper.handler_delbucket",
                                Environment = Environment(Variables=lambdaconfig),
                                Role=GetAtt(mkdirrole_attached,"Arn"),
                                Runtime="python3.6",

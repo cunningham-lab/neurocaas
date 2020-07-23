@@ -30,16 +30,16 @@
         "StringEquals": {
           "s3:prefix": [
             "",
-            "origdevs/",
-            "origdevs/inputs",
-            "origdevs/results",
+            "siegelbaumlab/",
+            "siegelbaumlab/inputs",
+            "siegelbaumlab/results",
             "logs",
-            "origdevs/submissions",
-            "origdevs/configs",
-            "origdevs/inputs/",
-            "origdevs/results/",
-            "origdevs/submissions/",
-            "origdevs/configs/"
+            "siegelbaumlab/submissions",
+            "siegelbaumlab/configs",
+            "siegelbaumlab/inputs/",
+            "siegelbaumlab/results/",
+            "siegelbaumlab/submissions/",
+            "siegelbaumlab/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -57,10 +57,10 @@
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "origdevs/inputs/*",
-            "origdevs/results/*",
-            "origdevs/configs/*",
-            "origdevs/submissions/*"
+            "siegelbaumlab/inputs/*",
+            "siegelbaumlab/results/*",
+            "siegelbaumlab/configs/*",
+            "siegelbaumlab/submissions/*"
           ]
         }
       }
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/inputs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/submissions/*"
+        "arn:aws:s3:::caiman-ncap-web/siegelbaumlab/inputs/*",
+        "arn:aws:s3:::caiman-ncap-web/siegelbaumlab/configs/*",
+        "arn:aws:s3:::caiman-ncap-web/siegelbaumlab/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/results/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*"
+        "arn:aws:s3:::caiman-ncap-web/siegelbaumlab/results/*",
+        "arn:aws:s3:::caiman-ncap-web/siegelbaumlab/configs/*"
       ]
     }
   ]

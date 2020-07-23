@@ -1,13 +1,12 @@
 {
-    "STAGE":"webusercentric",
+    "STAGE":"web",
     "UXData":{
     "Affiliates":[
         {
-            "AffiliateName":"Affiliate's Name here. Must follow S3 bucket name conventions.",
-            "UserNames":"[list of strings describing user names]",
-            "ContactEmail":"[list of strings describing user emails]",
-            "KeySerialNumber":2,
-            "Pipelines":["epi-ncap-web","dlc-ncap-web","locanmf-ncap-web","caiman-ncap-web","pmd-ncap-web"],
+            "AffiliateName":"columbianeurotheory",
+            "UserNames":[""],
+            "ContactEmail":["re2365@columbia.edu"],
+            "Pipelines":"Path to processing directory. If processing directory lives at root, can be \"\"",
             "PipelineDir":"Directory where pipeline should be built"
         }
     ]

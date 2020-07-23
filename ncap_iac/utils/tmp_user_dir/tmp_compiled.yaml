@@ -1,0 +1,887 @@
+Outputs:
+  AccessKeytestusera:
+    Description: 'Access Key of user: testusera in group testuserorg1'
+    Value:
+      Ref: userkeytestusera
+  AccessKeytestuserb:
+    Description: 'Access Key of user: testuserb in group testuserorg1'
+    Value:
+      Ref: userkeytestuserb
+  Passwordtestusera:
+    Description: Default password of new user testusera in group testuserorg1
+    Value: 7d4e2ea5d259632d
+  Passwordtestuserb:
+    Description: Default password of new user testuserb in group testuserorg1
+    Value: 0bac4890a0501759
+  SecretAccessKeytestusera:
+    Description: 'Secret Key of new user: testusera in group testuserorg1'
+    Value:
+      Fn::GetAtt:
+      - userkeytestusera
+      - SecretAccessKey
+  SecretAccessKeytestuserb:
+    Description: 'Secret Key of new user: testuserb in group testuserorg1'
+    Value:
+      Fn::GetAtt:
+      - userkeytestuserb
+      - SecretAccessKey
+Resources:
+  AffiliateTemplateBaseFoldertestuserorg1cianalysispermastackdel:
+    Properties:
+      BucketName: cianalysispermastack
+      DirName: testuserorg1
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  AffiliateTemplateBaseFoldertestuserorg1cianalysispermastackmake:
+    Properties:
+      BucketName: cianalysispermastack
+      DirName: testuserorg1
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  AffiliateTemplateBaseFoldertestuserorg1epincapwebdel:
+    Properties:
+      BucketName: epi-ncap-web
+      DirName: testuserorg1
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  AffiliateTemplateBaseFoldertestuserorg1epincapwebmake:
+    Properties:
+      BucketName: epi-ncap-web
+      DirName: testuserorg1
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  AffiliateTemplateBaseFoldertestuserorg1testneurocaasusersidefoldersdel:
+    Properties:
+      BucketName: testneurocaasusersidefolders
+      DirName: testuserorg1
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  AffiliateTemplateBaseFoldertestuserorg1testneurocaasusersidefoldersmake:
+    Properties:
+      BucketName: testneurocaasusersidefolders
+      DirName: testuserorg1
+      Path: ''
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  AffiliateTemplateUserNettestuserorg1:
+    Properties:
+      GroupName:
+        Ref: UserGroupAffiliateTemplatetestuserorg1
+      Users:
+      - Ref: affiliateusertestusera
+      - Ref: affiliateusertestuserb
+    Type: AWS::IAM::UserToGroupAddition
+  ConfigFolderAffiliateTemplatetestuserorg1cianalysispermastackdel:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1cianalysispermastackdel
+    Properties:
+      BucketName: cianalysispermastack
+      DirName: configs
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  ConfigFolderAffiliateTemplatetestuserorg1cianalysispermastackmake:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1cianalysispermastackmake
+    Properties:
+      BucketName: cianalysispermastack
+      DirName: configs
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  ConfigFolderAffiliateTemplatetestuserorg1epincapwebdel:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1epincapwebdel
+    Properties:
+      BucketName: epi-ncap-web
+      DirName: configs
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  ConfigFolderAffiliateTemplatetestuserorg1epincapwebmake:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1epincapwebmake
+    Properties:
+      BucketName: epi-ncap-web
+      DirName: configs
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  ConfigFolderAffiliateTemplatetestuserorg1testneurocaasusersidefoldersdel:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1testneurocaasusersidefoldersdel
+    Properties:
+      BucketName: testneurocaasusersidefolders
+      DirName: configs
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  ConfigFolderAffiliateTemplatetestuserorg1testneurocaasusersidefoldersmake:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1testneurocaasusersidefoldersmake
+    Properties:
+      BucketName: testneurocaasusersidefolders
+      DirName: configs
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  InFolderAffiliateTemplatetestuserorg1cianalysispermastackdel:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1cianalysispermastackdel
+    Properties:
+      BucketName: cianalysispermastack
+      DirName: inputs
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  InFolderAffiliateTemplatetestuserorg1cianalysispermastackmake:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1cianalysispermastackmake
+    Properties:
+      BucketName: cianalysispermastack
+      DirName: inputs
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  InFolderAffiliateTemplatetestuserorg1epincapwebdel:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1epincapwebdel
+    Properties:
+      BucketName: epi-ncap-web
+      DirName: inputs
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  InFolderAffiliateTemplatetestuserorg1epincapwebmake:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1epincapwebmake
+    Properties:
+      BucketName: epi-ncap-web
+      DirName: inputs
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  InFolderAffiliateTemplatetestuserorg1testneurocaasusersidefoldersdel:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1testneurocaasusersidefoldersdel
+    Properties:
+      BucketName: testneurocaasusersidefolders
+      DirName: inputs
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  InFolderAffiliateTemplatetestuserorg1testneurocaasusersidefoldersmake:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1testneurocaasusersidefoldersmake
+    Properties:
+      BucketName: testneurocaasusersidefolders
+      DirName: inputs
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LambdaBaseRole:
+    Properties:
+      Description:
+        Fn::Join:
+        - ' '
+        - - Base Policy for all lambda function roles in
+          - Ref: AWS::StackName
+      PolicyDocument:
+        Statement:
+        - Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Effect: Allow
+          Resource: arn:aws:logs:*:*:*
+        Version: '2012-10-17'
+    Type: AWS::IAM::ManagedPolicy
+  LogFolderAffiliatetestuserorg1del:
+    Properties:
+      BucketName: testneurocaasusersidefolders
+      DirName: testuserorg1
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  LogFolderAffiliatetestuserorg1make:
+    Properties:
+      BucketName: testneurocaasusersidefolders
+      DirName: testuserorg1
+      Path: logs/
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  OutFolderAffiliateTemplatetestuserorg1cianalysispermastackdel:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1cianalysispermastackdel
+    Properties:
+      BucketName: cianalysispermastack
+      DirName: results
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  OutFolderAffiliateTemplatetestuserorg1cianalysispermastackmake:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1cianalysispermastackmake
+    Properties:
+      BucketName: cianalysispermastack
+      DirName: results
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  OutFolderAffiliateTemplatetestuserorg1epincapwebdel:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1epincapwebdel
+    Properties:
+      BucketName: epi-ncap-web
+      DirName: results
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  OutFolderAffiliateTemplatetestuserorg1epincapwebmake:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1epincapwebmake
+    Properties:
+      BucketName: epi-ncap-web
+      DirName: results
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  OutFolderAffiliateTemplatetestuserorg1testneurocaasusersidefoldersdel:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1testneurocaasusersidefoldersdel
+    Properties:
+      BucketName: testneurocaasusersidefolders
+      DirName: results
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  OutFolderAffiliateTemplatetestuserorg1testneurocaasusersidefoldersmake:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1testneurocaasusersidefoldersmake
+    Properties:
+      BucketName: testneurocaasusersidefolders
+      DirName: results
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  S3DelObjectFunction:
+    Properties:
+      CodeUri: s3://neurocaas-cfn-deployment-resources739988523141/b08378fd77c79bc307f94049d6a48b99
+      Description: Deletes Objects from S3
+      Environment:
+        Variables:
+          CONFIGDIR: configs
+          EXECUTION_TIMEOUT: '172800'
+          IAM_ROLE: iam role with ssm and s3 access
+          INDIR: inputs
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MONITOR: true
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: Type of instance to launch.
+          SUBMITDIR: submissions
+      Handler: helper.handler_deldir
+      Role:
+        Fn::GetAtt:
+        - S3MakePathRole
+        - Arn
+      Runtime: python3.6
+      Timeout: 30
+    Type: AWS::Serverless::Function
+  S3MakePathRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - Ref: LambdaBaseRole
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - s3:DeleteObject
+            - s3:ListBucket
+            - s3:PutObject
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: write_s3_policy
+    Type: AWS::IAM::Role
+  S3PutObjectFunction:
+    Properties:
+      CodeUri: s3://neurocaas-cfn-deployment-resources739988523141/07bc063a5f76dd1149c09341ea6170dc
+      Description: Puts Objects in S3
+      Environment:
+        Variables:
+          CONFIGDIR: configs
+          EXECUTION_TIMEOUT: '172800'
+          IAM_ROLE: iam role with ssm and s3 access
+          INDIR: inputs
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MONITOR: true
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: Type of instance to launch.
+          SUBMITDIR: submissions
+      Handler: helper.handler_mkdir
+      Role:
+        Fn::GetAtt:
+        - S3MakePathRole
+        - Arn
+      Runtime: python3.6
+      Timeout: 30
+    Type: AWS::Serverless::Function
+  SubmitFolderAffiliateTemplatetestuserorg1cianalysispermastackdel:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1cianalysispermastackdel
+    Properties:
+      BucketName: cianalysispermastack
+      DirName: submissions
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  SubmitFolderAffiliateTemplatetestuserorg1cianalysispermastackmake:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1cianalysispermastackmake
+    Properties:
+      BucketName: cianalysispermastack
+      DirName: submissions
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  SubmitFolderAffiliateTemplatetestuserorg1epincapwebdel:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1epincapwebdel
+    Properties:
+      BucketName: epi-ncap-web
+      DirName: submissions
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  SubmitFolderAffiliateTemplatetestuserorg1epincapwebmake:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1epincapwebmake
+    Properties:
+      BucketName: epi-ncap-web
+      DirName: submissions
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  SubmitFolderAffiliateTemplatetestuserorg1testneurocaasusersidefoldersdel:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1testneurocaasusersidefoldersdel
+    Properties:
+      BucketName: testneurocaasusersidefolders
+      DirName: submissions
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  SubmitFolderAffiliateTemplatetestuserorg1testneurocaasusersidefoldersmake:
+    DependsOn: AffiliateTemplateBaseFoldertestuserorg1testneurocaasusersidefoldersmake
+    Properties:
+      BucketName: testneurocaasusersidefolders
+      DirName: submissions
+      Path:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - /
+      ServiceToken:
+        Fn::GetAtt:
+        - S3PutObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  UserGroupAffiliateTemplatetestuserorg1:
+    Properties:
+      GroupName:
+        Fn::Join:
+        - ''
+        - - testuserorg1
+          - substackgroup
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: s3:GetBucketLocation
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor0
+          - Action: s3:HeadBucket
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor3
+          - Action: s3:ListAllMyBuckets
+            Effect: Allow
+            Resource: '*'
+            Sid: VisualEditor1
+          - Action: s3:ListBucket
+            Condition:
+              StringEquals:
+                s3:delimiter:
+                - /
+                s3:prefix:
+                - ''
+                - Fn::Join:
+                  - ''
+                  - - testuserorg1
+                    - /
+                - Fn::Join:
+                  - ''
+                  - - testuserorg1
+                    - /
+                    - inputs
+                - Fn::Join:
+                  - ''
+                  - - testuserorg1
+                    - /
+                    - results
+                - logs
+                - Fn::Join:
+                  - ''
+                  - - testuserorg1
+                    - /
+                    - submissions
+                - Fn::Join:
+                  - ''
+                  - - testuserorg1
+                    - /
+                    - configs
+                - Fn::Join:
+                  - ''
+                  - - testuserorg1
+                    - /
+                    - inputs
+                    - /
+                - Fn::Join:
+                  - ''
+                  - - testuserorg1
+                    - /
+                    - results
+                    - /
+                - Fn::Join:
+                  - ''
+                  - - testuserorg1
+                    - /
+                    - submissions
+                    - /
+                - Fn::Join:
+                  - ''
+                  - - testuserorg1
+                    - /
+                    - configs
+                    - /
+            Effect: Allow
+            Resource:
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - cianalysispermastack
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - testneurocaasusersidefolders
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - epi-ncap-web
+            Sid: ListBucket
+          - Action: s3:ListBucket
+            Condition:
+              StringLike:
+                s3:prefix:
+                - Fn::Join:
+                  - ''
+                  - - testuserorg1
+                    - /
+                    - inputs
+                    - /*
+                - Fn::Join:
+                  - ''
+                  - - testuserorg1
+                    - /
+                    - results
+                    - /*
+                - Fn::Join:
+                  - ''
+                  - - testuserorg1
+                    - /
+                    - configs
+                    - /*
+                - Fn::Join:
+                  - ''
+                  - - testuserorg1
+                    - /
+                    - submissions
+                    - /*
+            Effect: Allow
+            Resource:
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - cianalysispermastack
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - testneurocaasusersidefolders
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - epi-ncap-web
+            Sid: ListSubBucket
+          - Action:
+            - s3:PutObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - cianalysispermastack
+                - /
+                - testuserorg1
+                - /
+                - inputs
+                - /*
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - cianalysispermastack
+                - /
+                - testuserorg1
+                - /
+                - configs
+                - /*
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - cianalysispermastack
+                - /
+                - testuserorg1
+                - /
+                - submissions
+                - /*
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - testneurocaasusersidefolders
+                - /
+                - testuserorg1
+                - /
+                - inputs
+                - /*
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - testneurocaasusersidefolders
+                - /
+                - testuserorg1
+                - /
+                - configs
+                - /*
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - testneurocaasusersidefolders
+                - /
+                - testuserorg1
+                - /
+                - submissions
+                - /*
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - epi-ncap-web
+                - /
+                - testuserorg1
+                - /
+                - inputs
+                - /*
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - epi-ncap-web
+                - /
+                - testuserorg1
+                - /
+                - configs
+                - /*
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - epi-ncap-web
+                - /
+                - testuserorg1
+                - /
+                - submissions
+                - /*
+            Sid: Inputfolderwrite
+          - Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            Effect: Allow
+            Resource:
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - cianalysispermastack
+                - /
+                - testuserorg1
+                - /
+                - results
+                - /*
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - cianalysispermastack
+                - /
+                - testuserorg1
+                - /
+                - configs
+                - /*
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - testneurocaasusersidefolders
+                - /
+                - testuserorg1
+                - /
+                - results
+                - /*
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - testneurocaasusersidefolders
+                - /
+                - testuserorg1
+                - /
+                - configs
+                - /*
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - epi-ncap-web
+                - /
+                - testuserorg1
+                - /
+                - results
+                - /*
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - epi-ncap-web
+                - /
+                - testuserorg1
+                - /
+                - configs
+                - /*
+            Sid: Outputfolderwrite
+          Version: '2012-10-17'
+        PolicyName:
+          Fn::Join:
+          - ''
+          - - testuserorg1
+            - policy
+    Type: AWS::IAM::Group
+  affiliateusertestusera:
+    Properties:
+      LoginProfile:
+        Password: 7d4e2ea5d259632d
+        PasswordResetRequired: 'false'
+      Path: /
+      UserName: testuseraus-east-1
+    Type: AWS::IAM::User
+  affiliateusertestuserb:
+    Properties:
+      LoginProfile:
+        Password: 0bac4890a0501759
+        PasswordResetRequired: 'false'
+      Path: /
+      UserName: testuserbus-east-1
+    Type: AWS::IAM::User
+  userkeytestusera:
+    Properties:
+      Serial: 1
+      UserName:
+        Ref: affiliateusertestusera
+    Type: AWS::IAM::AccessKey
+  userkeytestuserb:
+    Properties:
+      Serial: 1
+      UserName:
+        Ref: affiliateusertestuserb
+    Type: AWS::IAM::AccessKey
+Transform: AWS::Serverless-2016-10-31
