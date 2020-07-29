@@ -2,8 +2,6 @@
 set -e
 ## This is a test of the "MainLambda" function as contained in the ncap_iac/protocols/submit_start.py module. It makes use of a permanently built stack (cianalysispermastack), and will use the FigLambda function there as part of its testing. Note that a semi-exhaustive set of 30 test cases for this function is contained in the "envs" section of the .travis.yml file above. This is a nice building block to assure that the main lambda function is correctly functioning.  
 
-docker pull amazon/aws-sam-cli-build-image-python3.6
-docker pull amazon/aws-sam-cli-emulation-image-python3.6:rapid-1.0.0 
 analysisdirname=cianalysispermastack
 testgroupid=traviscipermagroup
 

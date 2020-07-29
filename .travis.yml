@@ -69,6 +69,7 @@ jobs:
   - pip install aws-sam-cli
   before_script:
   - sudo apt-get install jq
+  - docker pull amazon/aws-sam-cli-build-image-python3.6
   script:
   - bash tests/test_permastack.sh "condition_0_0_s3_putevent.json"
 - stage: experiments
