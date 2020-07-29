@@ -52,6 +52,7 @@ addons:
 services:
   - docker 
 stages:
+- testdocker
 - experiments
 - test
 install:
