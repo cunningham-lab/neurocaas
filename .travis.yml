@@ -52,6 +52,7 @@ addons:
 services:
   - docker 
 stages:
+- precursor
 - experiments
 - test
 install:
@@ -62,6 +63,14 @@ before_script:
 script:
 - bash tests/test_permastack.sh $eventfile
 jobs:
+- stage: precursor
+  install:
+  - pip install -r requirements.txt
+  - pip install aws-sam-cli
+  before_script:
+  - sudo apt-get install jq
+  script:
+  - bash tests/test_permastack.sh "condition_0_0_s3_putevent.json"
 - stage: experiments
   install:
   - pip install -r requirements_experiments.txt
