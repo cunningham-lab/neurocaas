@@ -52,7 +52,6 @@ addons:
 services:
   - docker 
 stages:
-- testdocker
 - experiments
 - test
 install:
@@ -63,9 +62,6 @@ before_script:
 script:
 - bash tests/test_permastack.sh $eventfile
 jobs:
-- stage: testdocker
-  script:
-  - docker pull amazon/aws-sam-cli-build-image-python3.6
 - stage: experiments
   install:
   - pip install -r requirements_experiments.txt
@@ -78,5 +74,4 @@ jobs:
   before_script:
   - sudo apt-get install jq
   script:
-  - docker pull amazon/aws-sam-cli-build-image-python3.6
   - bash tests/test_permastack.sh $eventfile
