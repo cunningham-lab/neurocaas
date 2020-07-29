@@ -1,7 +1,6 @@
 language: python
 python:
 - 3.6
-cache: pip
 env:
   matrix:
   - eventfile="condition_0_0_s3_putevent.json"
