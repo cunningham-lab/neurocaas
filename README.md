@@ -5,7 +5,7 @@ Main repository for the [NeuroCAAS project](http://www.neurocaas.org), providing
 
 This repository hosts all of the Code that makes up our IaC approach, with structure as described in the [paper](https://www.biorxiv.org/content/10.1101/2020.06.11.146746v1).
 
-Please note that this project is released with a Contributor Code of Conduct, [here](ContributorCovenant.md)
+Please note that this project is released with a Contributor Code of Conduct, [here](ContributorCovenant.md).
 
 Structure: 
 - paper (material specifically related to the NeuroCAAS paper)
