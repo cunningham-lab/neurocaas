@@ -73,35 +73,39 @@ class Submission_dev():
         self.jobname = "job_{}_{}_{}".format(submit_name,bucket_name,self.timestamp)
         jobpath = os.path.join(self.path,os.environ['OUTDIR'],self.jobname)
         self.jobpath = jobpath
-        ## And create a corresponding directory in the submit area. 
-        create_jobdir  = utilsparams3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
+        try:
+            ## And create a corresponding directory in the submit area. 
+            create_jobdir  = utilsparams3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
 
-        ## Create a logging object and write to it. 
-        ## a logger for the submit area.  
-        self.logger = utilsparams3.JobLogger_demo(self.bucket_name, self.jobpath)
-        msg = "REQUEST START TIME: {} (GMT)".format(str(self.logger.basetime)[:-4])
-        self.logger.append(msg)
-        self.logger.printlatest()
-        self.logger.write()
-        msg = "ANALYSIS VERSION ID: {}".format(os.environ['versionid'].split("\n")[0])
-        self.logger.append(msg)
-        self.logger.printlatest()
-        self.logger.write()
-        msg = "JOB ID: {}".format(self.timestamp)
-        self.logger.append(msg)
-        self.logger.printlatest()
-        self.logger.write()
-        self.logger._logs.append("\n ")
-        msg = "[Job Manager] Detected new job: starting up."
-        self.logger.append(msg)
-        self.logger.printlatest()
-        self.logger.write()
-        msg = "        [Internal (init)] Initializing job manager."
-        self.logger.append(msg)
-        self.logger.printlatest()
-        self.logger.write()
-        ########################
-        ## Now parse the rest of the file. 
+            ## Create a logging object and write to it. 
+            ## a logger for the submit area.  
+            self.logger = utilsparams3.JobLogger_demo(self.bucket_name, self.jobpath)
+            msg = "REQUEST START TIME: {} (GMT)".format(str(self.logger.basetime)[:-4])
+            self.logger.append(msg)
+            self.logger.printlatest()
+            self.logger.write()
+            msg = "ANALYSIS VERSION ID: {}".format(os.environ['versionid'].split("\n")[0])
+            self.logger.append(msg)
+            self.logger.printlatest()
+            self.logger.write()
+            msg = "JOB ID: {}".format(self.timestamp)
+            self.logger.append(msg)
+            self.logger.printlatest()
+            self.logger.write()
+            self.logger._logs.append("\n ")
+            msg = "[Job Manager] Detected new job: starting up."
+            self.logger.append(msg)
+            self.logger.printlatest()
+            self.logger.write()
+            msg = "        [Internal (init)] Initializing job manager."
+            self.logger.append(msg)
+            self.logger.printlatest()
+            self.logger.write()
+            ########################
+            ## Now parse the rest of the file. 
+            print("finished logging setup.")
+        except ClientError as e:
+            print("error with logging:", e.response["Error"])
         try:
             self.instance_type = submit_file['instance_type'] # TODO default option from config
         except KeyError as ke: 
