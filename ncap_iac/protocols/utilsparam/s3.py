@@ -9,7 +9,7 @@ from botocore.errorfactory import ClientError
 #####from .config import REGION, LOGDIR, LOGFILE
 
 # Boto3 Resources & Clients
-s3_resource = boto3.resource('s3')
+s3_resource = boto3.resource('s3', region_name=os.environ['REGION'])
 s3_client = boto3.client('s3', region_name=os.environ['REGION'])
 
 
