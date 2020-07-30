@@ -58,7 +58,9 @@ class Submission_dev():
             submit_name = ""
 
         #### Parse submit file 
+        print("loading json")
         submit_file = utilsparams3.load_json(bucket_name, key)
+        print("loaded json")
         
         ## Machine formatted fields (error only available in lambda) 
         ## These next three fields check that the submit file is correctly formatted
@@ -671,7 +673,9 @@ def process_upload_dev(bucket_name, key,time):
     try:
         if os.environ['LAUNCH'] == 'true':
             ## Now check how many datasets we have
+            print("creating submission object")
             submission = Submission_dev(bucket_name, key, time)
+            print("created submission object")
         elif os.environ["LAUNCH"] == 'false':
             raise NotImplementedError("This option not available for configs. ")
         submission.logger.append(donemessage.format(s = step))
