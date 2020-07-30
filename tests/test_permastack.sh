@@ -10,7 +10,7 @@ source "$(dirname $0)"/paths.sh
 rootpath=$(dirname $(dirname $(get_abs_filename "$0" )))
 cd $rootpath/ncap_iac/ncap_blueprints/
 
-bash $rootpath/tests/create_profile.sh
+#bash $rootpath/tests/create_profile.sh
 
 statusbuild=$(bash iac_utils/build.sh $analysisdirname)
 buildcode=$?

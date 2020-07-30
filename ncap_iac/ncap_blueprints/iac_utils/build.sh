@@ -52,4 +52,4 @@ python dev_builder.py $PIPEDIR/stack_config_template.json "$stagestr"
 cd $PIPEDIR
 echo $ncaprootdir "rootdir"
 
-sam build -t compiled_template.json -m "$ncaprootdir"/protocols/requirements.txt --use-container --debug
+sam build -t compiled_template.json -m "$ncaprootdir"/protocols/requirements.txt --use-container --debug --region us-east-1
