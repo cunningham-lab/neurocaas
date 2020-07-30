@@ -10,6 +10,7 @@ from botocore.errorfactory import ClientError
 
 # Boto3 Resources & Clients
 s3_resource = boto3.resource('s3')
+print(os.environ["REGION"],"LAMBDA REGION IS")
 s3_client = boto3.client('s3', region_name=os.environ['REGION'])
 
 
