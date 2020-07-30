@@ -68,9 +68,9 @@ python generate_customcomparison.py /path/to/your/costfile.yaml
 See the guide at neurocaas/docs/NeuroCAAS_Developer_Guide.pdf
 
 Coming soon:
-- SSM [link]
-- voltage imaging pipeline [link]
-- deep graph pose [link]
+- SSM 
+- voltage imaging pipeline 
+- deep graph pose 
 - gene spot finder
 
 Future directions:
