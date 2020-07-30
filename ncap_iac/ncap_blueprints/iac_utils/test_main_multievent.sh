@@ -22,7 +22,7 @@ cd $PIPEDIR
 testpath="$PIPEDIR/test_resources/putevents/$2"
 
 ## Test main lambda function
-exitcode=$(sam local invoke MainLambda --event $testpath -n test_resources/main_func_env_vars.json)
+exitcode=$(sam local invoke MainLambda --event $testpath -n test_resources/main_func_env_vars.json --profile default)
 
 expectedcode=$(jq .code $testpath)
 
