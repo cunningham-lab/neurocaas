@@ -57,10 +57,14 @@ class Submission_dev():
             ## If the filename is just "submit.json, we just don't append anything to the job name. "
             submit_name = ""
 
-        #### Parse submit file 
-        print("loading json")
-        submit_file = utilsparams3.load_json(bucket_name, key)
-        print("loaded json")
+        try:
+            #### Parse submit file 
+            print("loading json")
+            submit_file = utilsparams3.load_json(bucket_name, key)
+            print("loaded json")
+        except ClientError as e:
+            print(e.response["Error"])
+            raise ClientError("[JOB TERMINATE REASON] 'json not loaded.'")
         
         ## Machine formatted fields (error only available in lambda) 
         ## These next three fields check that the submit file is correctly formatted

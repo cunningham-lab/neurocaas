@@ -10,7 +10,6 @@ from botocore.errorfactory import ClientError
 
 # Boto3 Resources & Clients
 s3_resource = boto3.resource('s3')
-print(os.environ["REGION"],"LAMBDA REGION IS")
 s3_client = boto3.client('s3', region_name=os.environ['REGION'])
 
 
@@ -86,16 +85,20 @@ def mv(bucket_name,pathfrom,pathto):
 
 def load_json(bucket_name, key):
     """ """
+    print("entered load json")
     try:
         file_object = s3_resource.Object(bucket_name, key)
     except ClientError as e:
+        print("printing clienterror")
         print(e.response["Error"])
         raise ClientError("S3 resource object declaration (and first aws api call) failed.")
+    print("loaded file object.")
     try:
         raw_content = file_object.get()['Body'].read().decode('utf-8')
         json_content = json.loads(raw_content)
     except ValueError as ve:
         raise ValueError("[JOB TERMINATE REASON] Could not load config file. From parser: {}".format(ve))
+    print("exited load json")
 
     ## Transfer type 
     return json_content 
