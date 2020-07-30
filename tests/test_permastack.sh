@@ -15,6 +15,10 @@ cd $rootpath/ncap_iac/ncap_blueprints/
 statusbuild=$(bash iac_utils/build.sh $analysisdirname)
 buildcode=$?
 
+docker run amazon/aws-sam-cli-build-image-python3.6 aws iam get-user
+
+docker run amazon/aws-sam-cli-build-image-python3.6 aws s3 ls
+
 statustest=$(bash iac_utils/test_main_multievent.sh "$analysisdirname" "$1")
 testcode=$?
 #newtest=$(bash iac_utils/test_monitor.sh $analysisdirname)
