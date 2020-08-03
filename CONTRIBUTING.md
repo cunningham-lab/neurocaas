@@ -88,5 +88,5 @@ We are moving to [black](https://github.com/psf/black) as a shared coding style.
 
 If you discover an issue with a particular analysis implementation, please label the issue with the name of that analysis.
 
-### Attribution
+# Attribution
 This contribution guideline is based on the contributing template provided at https://github.com/nayafia/contributing-template.
