@@ -49,8 +49,6 @@ addons:
     - libelf-dev
     - libdw-dev
     - cmake
-services:
-  - docker 
 stages:
 - precursor
 - experiments
@@ -60,7 +58,6 @@ install:
 - pip install aws-sam-cli==0.53.0
 before_script:
 - sudo apt-get install jq
-- docker pull amazon/aws-sam-cli-build-image-python3.7
 script:
 - bash tests/test_permastack.sh $eventfile
 jobs:
@@ -70,10 +67,7 @@ jobs:
   - pip install aws-sam-cli==0.53.0
   before_script:
   - sudo apt-get install jq
-  - docker pull amazon/aws-sam-cli-build-image-python3.6
   script:
-  - docker run amazon/aws-sam-cli-build-image-python3.6 aws iam get-user
-  - docker run amazon/aws-sam-cli-build-image-python3.6 aws s3 ls 
   - bash tests/test_permastack.sh "condition_0_1_s3_putevent.json"
 - stage: experiments
   install:
@@ -86,6 +80,5 @@ jobs:
   - pip install aws-sam-cli==0.53.0
   before_script:
   - sudo apt-get install jq
-  - docker pull amazon/aws-sam-cli-build-image-python3.6
   script:
   - bash tests/test_permastack.sh $eventfile
