@@ -31,7 +31,6 @@ At this point, you're ready to make your changes! Feel free to ask for help; eve
 
 
 # Getting started
-### Give them a quick walkthrough of how to submit a contribution.
 
 For something that is bigger than a one or two line fix:
 
@@ -39,8 +38,6 @@ For something that is bigger than a one or two line fix:
 2. Do the changes in your fork
 3. If you like the change and think the project could use it:
     * Be sure you have followed the code style for the project (moving to black style).
-
-### If you have a different process for small or "obvious" fixes, let them know.
 
  Small contributions such as fixing spelling errors, where the content is small enough to not be considered intellectual property, can be submitted by a contributor as a patch.
 
@@ -71,20 +68,19 @@ When filing an issue, make sure to answer these five questions:
 5. What did you see instead?
 6. Are you working with a deployed analysis on neurocaas, or deploying a new one?
 
-### How to suggest a feature
+# How to suggest a feature
 
 If you find yourself wishing for a feature that doesn't exist in NeuroCAAS, you are probably not alone. Open an issue on our issues list on GitHub which describes the feature you would like to see, why you need it, and how it should work. In the case that you are suggesting a feature for an analysis we already provide, please understand that we may have to discuss with the original implementation authors before committing to a change.
 
 # Code review process
-### Explain how a contribution gets accepted after it’s been submitted.
 
 Code is reviewed on a bi-weekly basis by the core team of NeuroCAAS developers. Please expect us to get back to you in that window.
 
-### Code style
+# Code style
 
 We are moving to [black](https://github.com/psf/black) as a shared coding style. Although not necessary, we would appreciate any contributions in that style.
 
-### Labeling conventions
+#Labeling conventions
 
 If you discover an issue with a particular analysis implementation, please label the issue with the name of that analysis.
 
