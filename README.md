@@ -67,7 +67,7 @@ python generate_customcomparison.py /path/to/your/costfile.yaml
 To run our comparison analysis on your own infrastructure, navigate to the "experiments" directory and follow the directions found in the guide there. 
 
 ### To Contribute Analyses: 
-See the [developer guide](docs/NeuroCAAS_Developer_Guide.pdf)
+See the [developer guide](docs/NeuroCAAS_Developer_Guide.pdf).
 
 ### Project Roadmap.
 See the [roadmap](Project_Roadmap.md) for expected timeline of new analyses, new features, and supplementary packages for this project. 
