@@ -63,19 +63,12 @@ cd /path/to/local/repo/neurocaas/experiments
 python generate_customcomparison.py /path/to/your/costfile.yaml
 ```
 
-
-### To Develop: 
-See the guide at neurocaas/docs/NeuroCAAS_Developer_Guide.pdf
-
-Coming soon:
-- SSM 
-- voltage imaging pipeline 
-- deep graph pose 
-- gene spot finder
-
-Future directions:
-- website-based dev portal
-- "super user" API (in code)
-- GUI support 
-
+### Customized Infrastructure Comparisons
 To run our comparison analysis on your own infrastructure, navigate to the "experiments" directory and follow the directions found in the guide there. 
+
+### To Contribute Analyses: 
+See the [developer guide](docs/NeuroCAAS_Developer_Guide.pdf).
+
+### Project Roadmap.
+See the [roadmap](Project_Roadmap.md) for expected timeline of new analyses, new features, and supplementary packages for this project. 
+
