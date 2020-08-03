@@ -27,8 +27,6 @@ Help people who are new to your project understand where they can be most helpfu
  Working on your first Pull Request? You can learn how from this *free* series, [How to Contribute to an Open Source Project on GitHub](https://egghead.io/series/how-to-contribute-to-an-open-source-project-on-github).
 
 
-At this point, you're ready to make your changes! Feel free to ask for help; everyone is a beginner at first :smile_cat:
-
 
 # Getting started
 
@@ -85,4 +83,4 @@ We are moving to [black](https://github.com/psf/black) as a shared coding style.
 If you discover an issue with a particular analysis implementation, please label the issue with the name of that analysis.
 
 # Attribution
-This contribution guideline is based on the contributing template provided at https://github.com/nayafia/contributing-template.
+This contribution guideline is based on the contributing template provided at https://github.com/nayafia/contributing-template, and draws heavily from the examples cited there. 
