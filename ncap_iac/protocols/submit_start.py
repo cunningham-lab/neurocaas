@@ -59,9 +59,7 @@ class Submission_dev():
 
         try:
             #### Parse submit file 
-            print("loading json")
             submit_file = utilsparams3.load_json(bucket_name, key)
-            print("loaded json")
         except ClientError as e:
             print(e.response["Error"])
             raise ClientError("[JOB TERMINATE REASON] 'json not loaded.'")
