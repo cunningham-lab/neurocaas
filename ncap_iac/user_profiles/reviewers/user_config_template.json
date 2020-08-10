@@ -17,6 +17,14 @@
             "KeySerialNumber":2,
             "PipelineDir":"Directory where pipeline should be built",
             "ContactEmail":"The email that we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"bardensr",
+            "UserNames":["reviewersbardensr"],
+            "Pipelines":["bardensr"],
+            "KeySerialNumber":2,
+            "PipelineDir":"Directory where pipeline should be built",
+            "ContactEmail":"The email that we should notify regarding processing status."
         }
     ]
     },
