@@ -58,7 +58,7 @@ stages:
 - test
 install:
 - pip install -r requirements.txt
-- pip install aws-sam-cli==0.53.0
+- pip install aws-sam-cli #==0.53.0
 before_script:
 - sudo apt-get install jq
 script:
