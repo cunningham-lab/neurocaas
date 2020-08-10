@@ -62,6 +62,7 @@ install:
 before_script:
 - sudo apt-get install jq
 script:
+- docker version
 - bash tests/test_permastack.sh $eventfile
 jobs:
 - stage: precursor
