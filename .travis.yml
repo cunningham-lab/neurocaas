@@ -72,6 +72,7 @@ jobs:
   before_script:
   - sudo apt-get install jq
   script:
+  - docker version
   - bash tests/test_permastack.sh "condition_0_1_s3_putevent.json"
 - stage: experiments
   install:
