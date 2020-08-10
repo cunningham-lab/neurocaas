@@ -59,5 +59,6 @@
 > Useful for workflows difficult to integrate with web frontend.
 
 * Brainstorming/prototyping: Find way to easily list all available analyses in package (like passing string to boto3 client?) (Q3 2020)
+* Integration with Datajoint Elements for modularity of our analyses with different preprocessing/postprocessing while maintaining data integrity.
 * V1: create a package that uploads files to s3, and then downloads them back from s3 once job is completed. (Q3 2021)
 * V2: provide option for real time streaming data analysis from generic camera sources (Q4 2021)
