@@ -1,10 +1,20 @@
 {
+    "STAGE":"webusercentric",
     "UXData":{
     "Affiliates":[
         {
-            "AffiliateName":"reviewersnn",
-            "UserNames":["editornn"],
-            "Pipelines":"Path to processing directory. If processing directory lives at root, can be \"\"",
+            "AffiliateName":"reviewers",
+            "UserNames":["editornn","reviewersnn"],
+            "Pipelines":["dlc-ncap-web","caiman-ncap-web","epi-ncap-web","locanmf-ncap-web","pmd-ncap-web"],
+            "KeySerialNumber":2,
+            "PipelineDir":"Directory where pipeline should be built",
+            "ContactEmail":"The email that we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"czi",
+            "UserNames":["reviewersczi"],
+            "Pipelines":["dlc-ncap-web","caiman-ncap-web","epi-ncap-web","locanmf-ncap-web","pmd-ncap-web"],
+            "KeySerialNumber":2,
             "PipelineDir":"Directory where pipeline should be built",
             "ContactEmail":"The email that we should notify regarding processing status."
         }
