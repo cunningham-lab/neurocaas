@@ -9,14 +9,14 @@
         "PostCodeUri": "../../protocols",
         "PostHandler": "postprocess.epipostprocess",
         "LambdaConfig": {
-            "AMI": "ami-078ef04c178d5eca2",
+            "AMI": "ami-06dbcc90df60ffb44",
             "INSTANCE_TYPE": "g4dn.12xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
             "IAM_ROLE": "SSMRole",
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
             "WORKING_DIRECTORY": "~/bin",
-            "COMMAND": "ls; cd ../../../../home/ubuntu; ncap_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
+            "COMMAND": "ls; cd ../../../../home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . ncap_remote/ncap_utils/workflow.sh; cleanup",
             "SHUTDOWN_BEHAVIOR": "terminate",
             "CONFIG": "config.yaml",
             "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
@@ -57,7 +57,8 @@
             {
                 "AffiliateName": "carcealabyassdev",
                 "UserNames": [
-                    "ioanacarcea","zahraadahman"
+                    "ioanacarcea",
+                    "zahraadahman"
                 ],
                 "PipelinePath": "",
                 "PipelineDir": "trackingfolder",

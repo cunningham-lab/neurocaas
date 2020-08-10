@@ -30,16 +30,16 @@
         "StringEquals": {
           "s3:prefix": [
             "",
-            "origdevs/",
-            "origdevs/inputs",
-            "origdevs/results",
+            "examplegroup2/",
+            "examplegroup2/inputs",
+            "examplegroup2/results",
             "logs",
-            "origdevs/submissions",
-            "origdevs/configs",
-            "origdevs/inputs/",
-            "origdevs/results/",
-            "origdevs/submissions/",
-            "origdevs/configs/"
+            "examplegroup2/submissions",
+            "examplegroup2/configs",
+            "examplegroup2/inputs/",
+            "examplegroup2/results/",
+            "examplegroup2/submissions/",
+            "examplegroup2/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -57,10 +57,10 @@
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "origdevs/inputs/*",
-            "origdevs/results/*",
-            "origdevs/configs/*",
-            "origdevs/submissions/*"
+            "examplegroup2/inputs/*",
+            "examplegroup2/results/*",
+            "examplegroup2/configs/*",
+            "examplegroup2/submissions/*"
           ]
         }
       }
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/inputs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/submissions/*"
+        "arn:aws:s3:::caiman-ncap-web/examplegroup2/inputs/*",
+        "arn:aws:s3:::caiman-ncap-web/examplegroup2/configs/*",
+        "arn:aws:s3:::caiman-ncap-web/examplegroup2/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/results/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*"
+        "arn:aws:s3:::caiman-ncap-web/examplegroup2/results/*",
+        "arn:aws:s3:::caiman-ncap-web/examplegroup2/configs/*"
       ]
     }
   ]

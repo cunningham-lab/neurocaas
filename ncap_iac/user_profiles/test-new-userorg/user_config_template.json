@@ -1,13 +1,14 @@
 {
-    "STAGE":"web",
+    "STAGE":"webusercentric",
     "UXData":{
     "Affiliates":[
         {
-            "AffiliateName":"cunninghamlab",
-            "UserNames":["jpccosyne","srbcosyne","tacosyne"],
-            "Pipelines":["epi-ncap"],
-            "PipelineDir":["Directory where pipeline should be built"],
-            "ContactEmail":"The email that we should notify regarding processing status."
+            "AffiliateName":"testuserorg2",
+            "UserNames":["testusera"],
+            "KeySerialNumber":1,
+            "ContactEmail":["testusera@gmail.com","tesuserb@gmail.com"],
+            "Pipelines":["testneurocaasusersidefolders","ctnfrontendexample1"],
+            "PipelineDir":"Directory where pipeline should be built"
         }
     ]
     },

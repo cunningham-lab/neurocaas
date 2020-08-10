@@ -1,0 +1,34 @@
+{
+    "STAGE":"webusercentric",
+    "UXData":{
+    "Affiliates":[
+        {
+            "AffiliateName":"marlab",
+            "UserNames":["adam.mar@nyulangone.org","Begona.Gamallo-Lana@nyulangone.org","molly.klores@nyulangone.org","pkaitlyn@umich.edu","lps300@nyu.edu"],
+            "Pipelines":[   
+                 "caiman-ncap-web",
+                    "dlc-ncap-web",
+                    "epi-ncap-web",
+                    "pmd-ncap-web",
+                    "locanmf-ncap-web"
+            ],
+            "KeySerialNumber":2,
+            "PipelineDir":["adam.mar@nyulangone.org","Begona.Gamallo-Lana@nyulangone.org","molly.klores@nyulangone.org","pkaitlyn@umich.edu","lps300@nyu.edu"],
+            "ContactEmail":"The email that we should notify regarding processing status."
+        }
+    ]
+    },
+    "Lambda":{
+        "LambdaConfig":{
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS":"Type of instance to launch.",
+            "IAM_ROLE":"iam role with ssm and s3 access",
+            "EXECUTION_TIMEOUT":"172800",
+            "LOGDIR":"logs",
+            "OUTDIR":"results",
+            "INDIR":"inputs",
+            "LOGFILE":"lambda_log.txt",
+            "MONITOR":true
+        }
+    }
+}

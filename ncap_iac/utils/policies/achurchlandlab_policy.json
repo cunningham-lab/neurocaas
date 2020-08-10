@@ -24,22 +24,22 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web"
+        "arn:aws:s3:::locanmf-ncap-web"
       ],
       "Condition": {
         "StringEquals": {
           "s3:prefix": [
             "",
-            "origdevs/",
-            "origdevs/inputs",
-            "origdevs/results",
+            "achurchlandlab/",
+            "achurchlandlab/inputs",
+            "achurchlandlab/results",
             "logs",
-            "origdevs/submissions",
-            "origdevs/configs",
-            "origdevs/inputs/",
-            "origdevs/results/",
-            "origdevs/submissions/",
-            "origdevs/configs/"
+            "achurchlandlab/submissions",
+            "achurchlandlab/configs",
+            "achurchlandlab/inputs/",
+            "achurchlandlab/results/",
+            "achurchlandlab/submissions/",
+            "achurchlandlab/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -52,15 +52,15 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web"
+        "arn:aws:s3:::locanmf-ncap-web"
       ],
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "origdevs/inputs/*",
-            "origdevs/results/*",
-            "origdevs/configs/*",
-            "origdevs/submissions/*"
+            "achurchlandlab/inputs/*",
+            "achurchlandlab/results/*",
+            "achurchlandlab/configs/*",
+            "achurchlandlab/submissions/*"
           ]
         }
       }
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/inputs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/submissions/*"
+        "arn:aws:s3:::locanmf-ncap-web/achurchlandlab/inputs/*",
+        "arn:aws:s3:::locanmf-ncap-web/achurchlandlab/configs/*",
+        "arn:aws:s3:::locanmf-ncap-web/achurchlandlab/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/results/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*"
+        "arn:aws:s3:::locanmf-ncap-web/achurchlandlab/results/*",
+        "arn:aws:s3:::locanmf-ncap-web/achurchlandlab/configs/*"
       ]
     }
   ]

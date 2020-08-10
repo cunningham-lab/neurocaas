@@ -12,6 +12,62 @@ import json
 import csv
 import re
 
+def get_userdata(configpath):
+    """
+    Takes the full user template config file, and outputs a flat list of users with relevant data paired. 
+
+    Args:
+    config (dict): A dictionary representing the contents of the user template file. 
+
+    Output:
+    (list): A list of dictionaries, containing the username, credentials, email, and affiliate groupname of each user. 
+    """
+    ## Parse the input: 
+    with open(configpath,"r") as f:
+        config = json.load(f)
+    region = config["Lambda"]["LambdaConfig"]["REGION"]
+    stackname = os.path.basename(os.path.dirname(configpath))
+    
+    ## Format the structure you want the user dictionary to have: 
+    all_users = {} 
+    for affiliate in config["UXData"]["Affiliates"]:
+        for name in affiliate["UserNames"]:
+            all_users[name] = {"Groupname":affiliate["AffiliateName"]}
+
+    user_dict = all_users# {user:{"Username":user} for user in all_users}
+    ## Now get the stack info:  
+    cfnclient = boto3.client("cloudformation",region_name = region)
+    ## Get the outputs of the stack:
+    outputs = cfnclient.describe_stacks(StackName = stackname)["Stacks"][0]["Outputs"]
+    ## Now write the outputs to  
+    for out in outputs:
+        key = out["OutputKey"]
+        ## If this is a Key or Secret Key, we want to keep it. 
+        Access = re.findall(r"^AccessKey(.+)",key)
+        SecretAccess = re.findall(r"^SecretAccessKey(.+)",key)
+        if Access:
+            assert len(Access) == 1,"key improperly filtered"
+            user_dict[Access[0]]["Access Key"] = out["OutputValue"]
+        elif SecretAccess:
+            assert len(SecretAccess) == 1, "key improperly filtered"
+            user_dict[SecretAccess[0]]["Secret Access Key"] = out["OutputValue"]
+    return user_dict
+
+
+def export_json_creds(out_dest,stackname,userdict,all_users):
+    """
+    Takes user credentials, and exports them in the json format that we want:  
+    email per affiliate group: 
+    username is given from the template. 
+    groupname is given from the template. 
+
+    Args:
+    out_dest (str): local folder where credentials will be stored. 
+    stackname (str): the name of the stack (also the name of the folder where the template for this user is stored).
+    userdict (dict): A dictionary containing a flat list of all the users we would like to add to this analysis, as well as their credentials. 
+    config (dict): The full configuration dictionary. 
+    """
+
 if __name__ == "__main__":
     ## Get the stackname
     path = sys.argv[1]
@@ -79,6 +135,11 @@ if __name__ == "__main__":
             writer = csv.DictWriter(file,fieldnames=fieldnames,delimiter = ",")
             writer.writeheader()
             writer.writerow(user_dict[user])
+
+    ## Let's also write out to a json file: 
+    ## args: out destination, stackname, user, userdict. 
+
+    
 
     
 

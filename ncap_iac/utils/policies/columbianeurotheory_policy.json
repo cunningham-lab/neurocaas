@@ -30,16 +30,16 @@
         "StringEquals": {
           "s3:prefix": [
             "",
-            "origdevs/",
-            "origdevs/inputs",
-            "origdevs/results",
+            "columbianeurotheory/",
+            "columbianeurotheory/inputs",
+            "columbianeurotheory/results",
             "logs",
-            "origdevs/submissions",
-            "origdevs/configs",
-            "origdevs/inputs/",
-            "origdevs/results/",
-            "origdevs/submissions/",
-            "origdevs/configs/"
+            "columbianeurotheory/submissions",
+            "columbianeurotheory/configs",
+            "columbianeurotheory/inputs/",
+            "columbianeurotheory/results/",
+            "columbianeurotheory/submissions/",
+            "columbianeurotheory/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -57,10 +57,10 @@
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "origdevs/inputs/*",
-            "origdevs/results/*",
-            "origdevs/configs/*",
-            "origdevs/submissions/*"
+            "columbianeurotheory/inputs/*",
+            "columbianeurotheory/results/*",
+            "columbianeurotheory/configs/*",
+            "columbianeurotheory/submissions/*"
           ]
         }
       }
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/inputs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/submissions/*"
+        "arn:aws:s3:::caiman-ncap-web/columbianeurotheory/inputs/*",
+        "arn:aws:s3:::caiman-ncap-web/columbianeurotheory/configs/*",
+        "arn:aws:s3:::caiman-ncap-web/columbianeurotheory/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/results/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*"
+        "arn:aws:s3:::caiman-ncap-web/columbianeurotheory/results/*",
+        "arn:aws:s3:::caiman-ncap-web/columbianeurotheory/configs/*"
       ]
     }
   ]

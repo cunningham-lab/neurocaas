@@ -3,11 +3,11 @@
     "UXData":{
     "Affiliates":[
         {
-            "AffiliateName":"cunninghamlab",
-            "UserNames":["jpccosyne","srbcosyne","tacosyne"],
-            "Pipelines":["epi-ncap"],
-            "PipelineDir":["Directory where pipeline should be built"],
-            "ContactEmail":"The email that we should notify regarding processing status."
+            "AffiliateName":"columbianeurotheory",
+            "UserNames":[""],
+            "ContactEmail":["re2365@columbia.edu"],
+            "Pipelines":"Path to processing directory. If processing directory lives at root, can be \"\"",
+            "PipelineDir":"Directory where pipeline should be built"
         }
     ]
     },

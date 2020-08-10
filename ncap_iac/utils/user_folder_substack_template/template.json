@@ -1,0 +1,275 @@
+{
+    "Parameters": {
+        "BucketName": {
+            "Description": "PhysicalResourceId of the bucket for this pipeline.",
+            "Type": "String"
+        },
+        "DelFuncArn": {
+            "Description": "ARN of the delete folder function.",
+            "Type": "String"
+        },
+        "MakeFuncArn": {
+            "Description": "ARN of the make folder function.",
+            "Type": "String"
+        },
+        "Name": {
+            "Description": "Name of the user group.",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "AffiliateTemplateBaseFolderusercentricsubstackdel": {
+            "Properties": {
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
+                "DirName": {
+                    "Ref": "Name"
+                },
+                "Path": "",
+                "ServiceToken": {
+                    "Ref": "DelFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "AffiliateTemplateBaseFolderusercentricsubstackmake": {
+            "Properties": {
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
+                "DirName": {
+                    "Ref": "Name"
+                },
+                "Path": "",
+                "ServiceToken": {
+                    "Ref": "MakeFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "AffiliateTemplateConfigFolderusercentricsubstackdel": {
+            "DependsOn": "AffiliateTemplateBaseFolderusercentricsubstackdel",
+            "Properties": {
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
+                "DirName": "configs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "Name"
+                            },
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Ref": "DelFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "AffiliateTemplateConfigFolderusercentricsubstackmake": {
+            "DependsOn": "AffiliateTemplateBaseFolderusercentricsubstackmake",
+            "Properties": {
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
+                "DirName": "configs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "Name"
+                            },
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Ref": "MakeFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "AffiliateTemplateInFolderusercentricsubstackdel": {
+            "DependsOn": "AffiliateTemplateBaseFolderusercentricsubstackdel",
+            "Properties": {
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
+                "DirName": "inputs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "Name"
+                            },
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Ref": "DelFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "AffiliateTemplateInFolderusercentricsubstackmake": {
+            "DependsOn": "AffiliateTemplateBaseFolderusercentricsubstackmake",
+            "Properties": {
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
+                "DirName": "inputs",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "Name"
+                            },
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Ref": "MakeFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "AffiliateTemplateOutFolderusercentricsubstackdel": {
+            "DependsOn": "AffiliateTemplateBaseFolderusercentricsubstackdel",
+            "Properties": {
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
+                "DirName": "results",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "Name"
+                            },
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Ref": "DelFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "AffiliateTemplateOutFolderusercentricsubstackmake": {
+            "DependsOn": "AffiliateTemplateBaseFolderusercentricsubstackmake",
+            "Properties": {
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
+                "DirName": "results",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "Name"
+                            },
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Ref": "MakeFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "AffiliateTemplateSubmitFolderusercentricsubstackdel": {
+            "DependsOn": "AffiliateTemplateBaseFolderusercentricsubstackdel",
+            "Properties": {
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
+                "DirName": "submissions",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "Name"
+                            },
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Ref": "DelFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "AffiliateTemplateSubmitFolderusercentricsubstackmake": {
+            "DependsOn": "AffiliateTemplateBaseFolderusercentricsubstackmake",
+            "Properties": {
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
+                "DirName": "submissions",
+                "Path": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "Name"
+                            },
+                            "/"
+                        ]
+                    ]
+                },
+                "ServiceToken": {
+                    "Ref": "MakeFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderAffiliateusercentricsubstackdel": {
+            "Properties": {
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
+                "DirName": {
+                    "Ref": "Name"
+                },
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Ref": "DelFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderAffiliateusercentricsubstackmake": {
+            "Properties": {
+                "BucketName": {
+                    "Ref": "BucketName"
+                },
+                "DirName": {
+                    "Ref": "Name"
+                },
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Ref": "MakeFuncArn"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        }
+    },
+    "Transform": "AWS::Serverless-2016-10-31"
+}

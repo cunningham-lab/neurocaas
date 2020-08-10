@@ -24,22 +24,22 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web"
+        "arn:aws:s3:::ctnfrontendexample2"
       ],
       "Condition": {
         "StringEquals": {
           "s3:prefix": [
             "",
-            "origdevs/",
-            "origdevs/inputs",
-            "origdevs/results",
+            "examplegroup3FRONTEND2/",
+            "examplegroup3FRONTEND2/inputs",
+            "examplegroup3FRONTEND2/results",
             "logs",
-            "origdevs/submissions",
-            "origdevs/configs",
-            "origdevs/inputs/",
-            "origdevs/results/",
-            "origdevs/submissions/",
-            "origdevs/configs/"
+            "examplegroup3FRONTEND2/submissions",
+            "examplegroup3FRONTEND2/configs",
+            "examplegroup3FRONTEND2/inputs/",
+            "examplegroup3FRONTEND2/results/",
+            "examplegroup3FRONTEND2/submissions/",
+            "examplegroup3FRONTEND2/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -52,15 +52,15 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web"
+        "arn:aws:s3:::ctnfrontendexample2"
       ],
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "origdevs/inputs/*",
-            "origdevs/results/*",
-            "origdevs/configs/*",
-            "origdevs/submissions/*"
+            "examplegroup3FRONTEND2/inputs/*",
+            "examplegroup3FRONTEND2/results/*",
+            "examplegroup3FRONTEND2/configs/*",
+            "examplegroup3FRONTEND2/submissions/*"
           ]
         }
       }
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/inputs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/submissions/*"
+        "arn:aws:s3:::ctnfrontendexample2/examplegroup3FRONTEND2/inputs/*",
+        "arn:aws:s3:::ctnfrontendexample2/examplegroup3FRONTEND2/configs/*",
+        "arn:aws:s3:::ctnfrontendexample2/examplegroup3FRONTEND2/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::caiman-ncap-web/origdevs/results/*",
-        "arn:aws:s3:::caiman-ncap-web/origdevs/configs/*"
+        "arn:aws:s3:::ctnfrontendexample2/examplegroup3FRONTEND2/results/*",
+        "arn:aws:s3:::ctnfrontendexample2/examplegroup3FRONTEND2/configs/*"
       ]
     }
   ]
