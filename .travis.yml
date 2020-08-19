@@ -26,4 +26,4 @@ before_script:
 - sudo apt-get install jq
 script:
 - echo $(docker version)
-- bash tests/test_permastack.sh "condition_0_1_s3_putevent.json"   
+- sam build -t ./ncap_iac/ncap_blueprints/cianalysispermastack/compiled_template.json --use-container --debug -m "./ncap_iac/protocols/requirements.txt"
