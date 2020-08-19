@@ -25,6 +25,6 @@ install:
 before_script:
 - sudo apt-get install jq
 script:
-- docker version
+- echo $(docker version)
 - bash tests/test_permastack.sh "condition_0_1_s3_putevent.json"
   
