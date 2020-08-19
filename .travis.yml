@@ -26,5 +26,5 @@ before_script:
 - sudo apt-get install jq
 script:
 - echo $(docker version)
-- sam build -t empty_cfn.json -m --use-container --debug -m "./ncap_iac/protocols/requirements.txt"  
+- sam build -t ./ncap_iac/ncap_blueprints/cianalysispermastack/compiled_template.json -m --use-container --debug -m "./ncap_iac/protocols/requirements.txt"  
   
