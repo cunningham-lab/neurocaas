@@ -184,11 +184,11 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "b817c238699be891e68c17e503f5b6949cc386d4\n"
+                        "versionid": "efbb248666e901f5729ed9917926224ca80ff83b\n"
                     }
                 },
                 "Events": {
-                    "BucketEventtraviscipermagroup": {
+                    "BucketEventSubmit": {
                         "Properties": {
                             "Bucket": {
                                 "Ref": "PipelineMainBucket"
@@ -199,10 +199,6 @@
                             "Filter": {
                                 "S3Key": {
                                     "Rules": [
-                                        {
-                                            "Name": "prefix",
-                                            "Value": "traviscipermagroup/submissions"
-                                        },
                                         {
                                             "Name": "suffix",
                                             "Value": "submit.json"
@@ -273,10 +269,10 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "b817c238699be891e68c17e503f5b6949cc386d4\n"
+                        "versionid": "efbb248666e901f5729ed9917926224ca80ff83b\n"
                     }
                 },
-                "Handler": "helper.handler_deldir",
+                "Handler": "helper.handler_delbucket",
                 "Role": {
                     "Fn::GetAtt": [
                         "S3MakePathRole",
@@ -377,7 +373,7 @@
                         "figlambid": {
                             "Ref": "FigLambda"
                         },
-                        "versionid": "b817c238699be891e68c17e503f5b6949cc386d4\n"
+                        "versionid": "efbb248666e901f5729ed9917926224ca80ff83b\n"
                     }
                 },
                 "Handler": "helper.handler_mkdir",

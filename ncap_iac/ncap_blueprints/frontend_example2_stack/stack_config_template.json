@@ -1,6 +1,7 @@
 {
     "PipelineName":"ctnfrontendexample2",
     "REGION":"us-east-1",
+    "STAGE":"websubstack",
     "Lambda":{
         "CodeUri":"../lambda_repo",
         "Handler":"submit_start.handler_log",
@@ -31,8 +32,26 @@
     "UXData":{
     "Affiliates":[
         {
+            "AffiliateName":"testuserorg1",
+            "UserNames":["testusera","testuserb"],
+            "UserInput":true,
+            "ContactEmail":"The email we should notify regarding processing status."
+        },
+        {
             "AffiliateName":"examplegroup1FRONTEND2",
-            "UserNames":["johannes","taiga"],
+            "UserNames":["taiga","johannes"],
+            "UserInput":true,
+            "ContactEmail":"The email we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"examplegroup2FRONTEND2",
+            "UserNames":["taiga","johannes"],
+            "UserInput":true,
+            "ContactEmail":"The email we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"examplegroup3FRONTEND2",
+            "UserNames":["taiga","johannes"],
             "UserInput":true,
             "ContactEmail":"The email we should notify regarding processing status."
         }

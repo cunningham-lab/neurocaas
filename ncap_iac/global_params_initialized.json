@@ -4,6 +4,7 @@
   "log_directory": "logs",
   "config_directory": "configs",
   "submission_directory": "submissions",
+  "bucketname": "neurocaas-cfn-deployment-resources739988523141",
   "lambdarolename": "testutilsstack-LambdaRole-1I7AHKZQN6WOJ",
   "ssmrolename": "testutilsstack-SSMRole-1GG0BKY7GL634",
   "ec2rolename": "testutilsstack-EC2Role-1B7WX6SACQEWF",

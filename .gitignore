@@ -143,6 +143,7 @@ ncap_iac/ncap_blueprints/*/compiled_users.json
 ncap_iac/ncap_blueprints/*/compiled_users.yaml
 ncap_iac/user_profiles/*/compiled_users.json
 ncap_iac/user_profiles/*/compiled_users.yaml
+cost_investigation/*
 paper/README.txt
 paper/README.pdf
 paper/NeuroCAAS_manuscript_5_19_final.pdf

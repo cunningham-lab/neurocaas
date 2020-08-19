@@ -122,6 +122,16 @@
                 "PipelineDir": "trackingfolder",
                 "UserInput": true,
                 "ContactEmail": "The email we should notify regarding processing status."
+            },
+            {
+                "AffiliateName": "siegelbaumlab",
+                "UserNames": [
+                    "av2686"
+                ],
+                "PipelinePath": "",
+                "PipelineDir": "trackingfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
             }
         ]
     }
