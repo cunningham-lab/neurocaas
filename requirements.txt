@@ -16,6 +16,7 @@ colorama==0.3.9
 cryptography==2.7
 cycler==0.10.0
 decorator==4.4.0
+docker==4.2.1
 docutils==0.14
 idna==2.8
 imagesize==1.2.0
