@@ -1,8 +1,17 @@
 {
     "Transform": "AWS::Serverless-2016-10-31",
     "Resources": {
-        "Topic": {
-            "Type": "AWS::SNS::Topic"
+        "TestSamBuildFunction": {
+            "Properties": {
+                "CodeUri": "./ncap_iac/protocols",
+                "Description": "Puts Objects in S3",
+                "Handler": "helper.handler_mkdir",
+                "Role": "DummyRole",
+                "Runtime": "python3.6",
+                "Timeout": 30
+            },
+            "Type": "AWS::Serverless::Function"
         }
     }
 }
+
