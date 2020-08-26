@@ -83,7 +83,6 @@ def delbucket(bucket):
     """
     bucket = s3_resource.Bucket(bucket)
     for obj in bucket.objects.all():
-        print(obj.key,'keys')
         s3_resource.Object(bucket.name, obj.key).delete()
  
 def ls(bucket, path):

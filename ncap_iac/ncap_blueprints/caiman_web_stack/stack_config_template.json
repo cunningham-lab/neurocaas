@@ -98,6 +98,40 @@
                 ],
                 "UserInput": true,
                 "ContactEmail": "tgabe94@gmail.com"
+            },
+            {
+                "AffiliateName": "polleuxlab",
+                "UserNames": [
+                    "av2686"
+                ],
+                "PipelinePath": "dlctracking",
+                "PipelineDir": "dlcfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
+            },
+            {
+                "AffiliateName": "columbianeurotheory",
+                "UserNames": [
+                    "re2365"
+                ],
+                "PipelinePath": "dlctracking",
+                "PipelineDir": "dlcfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
+            },
+            {
+                "AffiliateName": "marlab",
+                "UserNames": [
+                    "adam.mar@nyulangone.org",
+                    "Begona.Gamallo-Lana@nyulangone.org",
+                    "lps300@nyu.edu",
+                    "molly.klores@nyulangone.org",
+                    "pkaitlyn@umich.edu"
+                ],
+                "PipelinePath": "",
+                "PipelineDir": "trackingfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
             }
         ]
     }
