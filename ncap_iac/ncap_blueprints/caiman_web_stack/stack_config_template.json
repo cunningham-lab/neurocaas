@@ -1,7 +1,7 @@
 {
     "PipelineName": "caiman-ncap-web",
     "REGION": "us-east-1",
-    "STAGE": "webdev",
+    "STAGE": "websubstack",
     "Lambda": {
         "CodeUri": "../../protocols",
         "Handler": "submit_start.handler_develop",
@@ -20,11 +20,11 @@
             "SHUTDOWN_BEHAVIOR": "terminate",
             "CONFIG": "config.yaml",
             "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
-            "EXECUTION_TIMEOUT": 180,
+            "EXECUTION_TIMEOUT": 900,
             "SSM_TIMEOUT": 172000,
             "LAUNCH": true,
             "LOGFILE": "lambda_log.txt",
-            "DEPLOY_LIMIT": 100,
+            "DEPLOY_LIMIT": 10,
             "MAXCOST": 300,
             "MONITOR": true,
             "LOGDIR": "logs",

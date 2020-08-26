@@ -33,8 +33,10 @@ def mkdir(bucket, path, dirname):
             s3_client.put_object(Bucket=bucket, Key=new_path)
         ## It's possible that the bucket itself does not exist:
         except ClientError as e:
-            e.response["Error"]["Code"] == "NoSuchBucket"
-            raise Exception("bucket with given name not found")
+            if e.response["Error"]["Code"] == "NoSuchBucket":
+                raise Exception("bucket with given name not found")
+            else:
+                raise Exception(e.response["Error"]["Code"])
     return new_path
 
 def mkdir_reset(bucketname, path, dirname):
