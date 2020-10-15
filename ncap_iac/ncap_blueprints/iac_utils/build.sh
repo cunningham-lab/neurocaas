@@ -29,7 +29,7 @@ cd $ncaprootdir/utils
 stage=$(jq ".STAGE" "$PIPEDIR"/stack_config_template.json ) 
 stagestr=$(echo $stage | tr -d '"')
 echo $stagestr
-#python dev_builder.py $PIPEDIR/stack_config_template.json "$stagestr"
+python dev_builder.py $PIPEDIR/stack_config_template.json "$stagestr"
 
 ## We need to navigate to the pipeline directory because we have a relative path in our compilation code. 
 cd $PIPEDIR
