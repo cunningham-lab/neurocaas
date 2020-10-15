@@ -120,9 +120,7 @@ class Test_s3_base():
     def test_delbucket(self):
         create_mock_bucket("localstack-todelete")
         self.s3_client.put_object(Bucket = self.bucket_name,Key = path)
-            s3.delbucket("mock_bucket_name")
-                mock_object_method.assert_called()
-            mock_bucket_method.assert_called_once()
+        s3.delbucket("mock_bucket_name")
 
     def test_delbucket_bucket_empty(self):
         mbucket = make_mock_bucket([],filter_path = "some")
