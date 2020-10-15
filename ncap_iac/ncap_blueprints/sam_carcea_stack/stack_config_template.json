@@ -1,9 +1,10 @@
 {
+    "STAGE":"develop",
     "PipelineName": "carceamonitored",
     "REGION": "us-east-1",
     "Lambda": {
-        "CodeUri": "../lambda_repo",
-        "Handler": "submit_start.handler_full",
+        "CodeUri": "../../protocols",
+        "Handler": "submit_start.handler_develop",
         "LambdaConfig": {
             "AMI": "ami-069f846c3d9e987b4",
             "INSTANCE_TYPE": "p3.2xlarge",
@@ -12,18 +13,19 @@
             "IAM_ROLE": "pmd-s3-ssm",
             "KEY_NAME": "ta_testkey",
             "WORKING_DIRECTORY": "/home/ubuntu",
-            "COMMAND": "aws configure list",
+            "COMMAND": "ls; bin/run.sh \"{}\" \"{}\" \"{}\" \"{}\"; sudo poweroff",
             "SHUTDOWN_BEHAVIOR": "terminate",
             "CONFIG": "config.yaml",
             "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
             "EXECUTION_TIMEOUT": 180,
             "SSM_TIMEOUT": 172000,
-            "LOGDIR": "logs",
-            "OUTDIR": "results",
-            "INDIR": "inputs",
             "LAUNCH": true,
             "LOGFILE": "lambda_log.txt",
             "DEPLOY_LIMIT": 100,
+            "MAXCOST": 300,
+            "LOGDIR": "logs",
+            "OUTDIR": "results",
+            "INDIR": "inputs",
             "MONITOR": false
         }
     },

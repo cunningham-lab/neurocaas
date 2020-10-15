@@ -757,7 +757,7 @@ def process_upload_dev(bucket_name, key,time):
         if os.environ["MONITOR"] == "true":
             submission.put_instance_monitor_rule()
         elif os.environ["MONITOR"] == "false":
-            submission.append("        [Internal (monitoring)] Skipping monitor.")
+            submission.logger.append("        [Internal (monitoring)] Skipping monitor.")
         submission.logger.write()
         submission.start_instance()
         submission.logger.write()

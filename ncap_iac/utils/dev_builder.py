@@ -306,7 +306,7 @@ class NeuroCaaSTemplate(object):
         # 2. 
         ## Now add to a lambda function: 
         function = Function('FigLambda',
-                CodeUri = '../../protocols',
+                CodeUri = self.config['Lambda']['CodeUri'],
                 Runtime = 'python3.6',
                 Handler = 'log.monitor_updater',
                 Description = 'Lambda Function logging start/stop for NCAP',
@@ -404,7 +404,7 @@ class DevTemplate(NeuroCaaSTemplate):
 
         ## Now we need to write a lambda function that actually does the work:  
         mkfunction = Function("S3PutObjectFunction",
-                              CodeUri="../../protocols",
+                              CodeUri=self.config['Lambda']['CodeUri'],
                               Description= "Puts Objects in S3",
                               Handler="helper.handler_mkdir",
                               Environment = Environment(Variables=lambdaconfig),
@@ -413,7 +413,7 @@ class DevTemplate(NeuroCaaSTemplate):
                               Timeout=30)
         mkfunction_attached = template.add_resource(mkfunction)
         delfunction = Function("S3DelObjectFunction",
-                               CodeUri="../../protocols",
+                               CodeUri=self.config['Lambda']['CodeUri'],
                                Description= "Deletes Objects from S3",
                                Handler="helper.handler_delbucket",
                                Environment = Environment(Variables=lambdaconfig),
