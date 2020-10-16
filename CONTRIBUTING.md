@@ -4,7 +4,7 @@
 
 ### Following these guidelines can help all members of our open source community work together productively. By following these guidelines, you save the developers of this project time, and in return, they should address your issues and changes.
 
-### Please note that developers of data analysis algorithms who would like to contribute their analyses to NeuroCAAS should not contribute directly to this repo. Instead, they should read the [developer guide](docs/NeuroCAAS_Developer_Guide.pdf). This guide is for developers who would like to contribute to the NeuroCAAS platform (e.g. working on a gui, testing developer tools, submitting bug reports, improving documentation, improving an analysis already on the platform).
+### Please note that developers of data analysis algorithms who would like to contribute their analyses to NeuroCAAS should not contribute directly to this repo. Instead, they should read the [developer guide](docs/devguide.md). This guide is for developers who would like to contribute to the NeuroCAAS platform (e.g. working on a gui, testing developer tools, submitting bug reports, improving documentation, improving an analysis already on the platform).
 
 ### Please understand that because this project is heavily integrated with the AWS cloud, we have to vet features and consider the cost any potential changes when accepting contributions.
 
