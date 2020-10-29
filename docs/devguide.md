@@ -232,47 +232,293 @@ Developing a machine image into an immutable analysis environment
 After connecting to your remote instance via ssh, you can download your
 code repositories and dependencies to it, and test basic functionality.
 Once this is done, you will have to clone the repository
-[neurocaas\_remote](https://github.com/cunningham-lab/neurocaas_remote)
-into the user’s remote directory. This directory ensures that live
-logging of analysis progress to users proceeds smoothly. The basic logic
-of all NeuroCAAS analyses is that when users run jobs on neurocaas, they
-deposit a special file called a “submit” file. This file contains the
-path to the primary dataset (or datasets) that they would like to
-analyze, the path to a corresponding configuration file for parameters,
-and a timestamp of when the job was submitted. This information is
-parsed by a serverless lambda function, which finally provides the
-instance with four parameters: 1) the S3 bucket we will be communicating
-with. 2) the path to a single dataset in S3 that we will be analyzing
-(multiple datasets are parallelized to different instances). 3) the path
-to the results folder where we will deposit results, and 4) the path to
-the configuration file that we will use to analyze data (these are the
-four curly braces in the COMMAND field listed above). Then, a job
-manager will call a script on this instance (via the COMMAND parameter),
-which can then pull data and configuration files from user storage,
-analyze that data according to provided configuration files, and then
-push the results back to the user. We provide basic template scripts
-that will streamline the process of setting up logging, pulling data to
-and from user storage, etc. If you would like to write your own routines
-to do so (e.g., if you want to specify a different COMMAND) structure in
-your blueprints we encourage you to do so, although messing with
-parallel processing in communication with AWS can be thorny. For users
-who just want to get started, we recommend looking at the “run\_main.sh”
-script in the “neurocaas\_remote” repo, and pasting their own bash
-commands into the indicated area therein. IMPORTANT: Note that you must
-perform a shutdown of the instance in your commands to make sure your
-instance is terminated. We recommend you include this in the COMMAND
-value as shown in the above example, as it is most reliable there.
-IMPORTANT: this script will not be run by the a user with the same
-permissions or root directory that you have when developing. Rather, it
-will be run by a user with admin priviledges and a different home
-directory. This makes it necessary to source user environment files and
-alter the PATH variable explicitly (for a more realistic simulation of
-how the script will be run with these permissions, try testing commands
-as admin by running “sudo -i” first).
+[neurocaas\_contrib](https://github.com/cunningham-lab/neurocaas_contrib)
+into the user’s remote directory. This repo contains utility functions 
+to connect software that lives on the instance with data on the user side,
+and send logs to the users as analysis proceeds. 
+It also contains examples of projects that show how to use these utility functions.
+We will now explain the workflow for developing a script with the neurocaas_contrib repository. 
 
-We recommend testing your script locally by writing the COMMAND that you
-have in your blueprint directly into the CLI, with the four parameters
-in brackets specified as above.
+#### Background: User-side data organization
+In order to understand the workflow for developing a script with this repo, 
+it will help to first have an idea of how data is organized for an analysis user. 
+Regardless of how they are accessing NeuroCAAS, user data will always be stored in AWS [S3 buckets](https://aws.amazon.com/s3/), 
+with the following organization:
+
+    s3://{analysis_name}   ## This is the name of the S3 bucket
+    |- {group_name}        ## Each NeuroCAAS user is a member of a group (i.e. lab, research group, etc.) 
+       |- inputs
+          configs
+          results
+          |- job_{timestamp}
+             |- logs
+             |- process_results
+          submissions
+          |- {id}_submit.json 
+   
+This S3 bucket and the relevant directory structure will be generated once you deploy your analysis scripts (see section: Deploying your blueprint). 
+The inputs, configs, and results subdirectories are the most relevant for this section of the guide, as they will be referenced in the script. 
+The rest of this section describes how we will be pulling relevant material to your remote instance from the inputs and configs directories, 
+and depositing results to the relevant results/job\_{timestamp} directory.
+
+If you want to see how the user interacts with this file structure, sign up for an account on [neurocaas.org](neurocaas.org). 
+
+#### Main script
+All NeuroCAAS analyses should be triggered by running a central bash script called run\_main.sh.
+This script ensures that all jobs run on NeuroCAAS are managed and logged correctly. 
+This script takes 5 arguments, as follows:   
+
+`% bash run_main.sh $bucketname $path_to_input $path_to_result_dir $path_to_config_file $path_to_analysis_script`
+
+The first four parameters refer to locations in Amazon S3 where the inputs and results of this analysis will be stored. 
+These parameters correspond to the directory structure given above as follows: 
+- $bucketname: {analysis\_name}
+- $path\_to\_input: {group\_name}/inputs/name\_of\_dataset
+- $path\_to\_result\_dir: results/job\_{timestamp}
+- $path\_to\_config\_file: {group\_name}/configs/name\_of\_config\_file
+These will be automatically filled in by NeuroCAAS when users request jobs, 
+but can be manually filled in for certain test cases. For more info see the section, "Testing a machine image."
+
+The fifth parameter, $path\_to\_analysis\_script, is a analysis-specific bash script, that will be run inside the run\_main.sh script. It will call all of the analysis source code
+, transfer data in to the instance, etc. This will be the subject of the next subsection, Analysis script. 
+
+This script-in-a-script organization ensures two things:
+
+- Reliability of logging. Logging progress mid-analysis can be a delicate process, and standardizing it 
+in a single main script helps to ensure that developers will not have to worry about this step.
+
+- Correct error handling. In the event that analysis scripting runs into an error, we want to be able to detect and 
+catch these errors. We can do so much more easily if all relevant code is executed in a separate script, ensuring that
+the relevant steps necessary to report the error to the user, and run appropriate cleanup on the instance are carried out. 
+
+In the rest of this subsection, we will walk through the content of run\_main.sh. This will be more of a reference for interested parties.
+If you would like to get started developing your own analysis, you can jump ahead to the next subsection, Analysis script. 
+
+##### Content of run\_main.sh
+```
+4 execpath="$0"
+5 scriptpath="$(dirname "$execpath")/ncap_utils"
+6 ## Get in absolute path loader: 
+7 source "$scriptpath/paths.sh"
+```
+
+First, we get the absolute path to the subdirectory containing our utility functions, and load in path management functions from paths.sh
+
+```
+10 set -a
+11 neurocaasrootdir=$(dirname $(get_abs_filename "$execpath"))
+12 set +a
+```
+
+Throughout this script, we will declare a set of environment variables that can be accessed by the child analysis script. 
+The first of these is $neurocaasrootdir- the absolute path to the neurocaas_contrib repo. 
+
+```
+14 source "$scriptpath/workflow.sh"
+15 ## Import functions for data transfer 
+16 source "$scriptpath/transfer.sh"
+```
+
+We have previously mentioned that this repo contains a variety of helper functions to connect the remote instance with a user. 
+These shell functions are stored separately in the file workflow.sh (for setting up logging files), and transfer.sh 
+(for transferring data between your instance and the user.) By sourcing them, we make them available to use in this script.
+
+```
+27 set -a
+28 parseargsstd "$1" "$2" "$3" "$4"
+29 set +a
+30
+31 echo $bucketname >> "/home/ubuntu/check_vars.txt" 
+32 echo $groupdir >> "/home/ubuntu/check_vars.txt" 
+33 echo $resultdir >> "/home/ubuntu/check_vars.txt" 
+34 echo $processdir >> "/home/ubuntu/check_vars.txt" 
+35 echo $dataname >> "/home/ubuntu/check_vars.txt" 
+36 echo $inputpath >> "/home/ubuntu/check_vars.txt" 
+37 echo $configname >> "/home/ubuntu/check_vars.txt" 
+38 echo $configpath >> "/home/ubuntu/check_vars.txt" 
+```
+
+In this step, we will declare more environment variables that will be passed to our analysis script. This is perhaps the most significant step 
+carried out by the run\_main.sh script, as these environment variables make it much easier to move and manipulate data. The function 
+parseargsstd is imported from the workflow.sh script.
+As follows, these variables specify certain paths inside the directory structure described in the background.
+- $bucketname <-> analysis\_name 
+- $groupdir <-> group\_name 
+- $resultdir <-> results/job\_{timestamp} 
+- $processdir <-> results/job\_{timestamp}/process_results
+- $dataname <-> the basename of a datafile in the inputs directory.
+- $inputpath <-> {group\_name}/inputs/datafile
+- $configname <-> the basename of a config file in the configs directory.
+- $configpath <-> {group\_name}/configs/configfile
+
+These variables are then printed to the file /home/ubuntu/check\_vars.txt where they can be examined for debugging purposes.
+
+```
+40 ## Set up Error Status Reporting:
+41 errorlog_init 
+42 
+43 ## Set up STDOUT and STDERR Monitoring:
+44 errorlog_background & 
+45 background_pid=$!
+46 echo $background_pid, "is the pid of the background process"
+```
+
+Both errorlog\_init and errorlog\_background are functions imported from the workflow.sh file. The file errorlog\_init initially fetches a 
+status file from the specific job directory in the s3 bucket and prepares it to be written to. This status file contains info on the commands run on the instance, 
+the cpu utilization, and the high-level status of the job (INITIALAIZING, IN PROGRESS, SUCCESS or FAILED). The function errorlog\_background is then run as a background process,  
+continually updating a local copy of the status file as well as other logging data. Finally we save the process id of this background process to terminate it later. 
+
+```
+48 ## MAIN SCRIPT GOES HERE #####################
+49
+50 bash "$5" > "$neurocaasrootdir"/joboutput.txt 2>"$neurocaasrootdir"/joberror.txt
+51 ##############################################
+52 ## Cleanup: figure out how the actual processing went. 
+53 ## MUST BE RUN IMMEDIATELY AFTER PROCESSING SCRIPTS TO GET ERROR CODE CORRECTLY.
+54 errorlog_final
+```
+
+Now, we can finally run the bash script given to us as the fifth argument of run\_main.sh. We assume that it does not take any arguments, but it will have access to all 
+of the environment variables declared above, which should be sufficient to perform all necessary tasks. Note that stdout and stderr are written to the neurocaas_contrib base directory, 
+allowing us to evaluate job status by eye as well. The function errorlog_final (from workflow.sh) performs a final update to the logging files and changes their status to "SUCCESS" or "FAILURE" depending on the 
+result of running line 50.  
+
+```
+55 ## Once this is all over, send the config and end.txt file
+56 aws s3 cp s3://"$bucketname"/"$configpath" s3://"$bucketname"/"$groupdir"/"$processdir"/$configname
+57 aws s3 cp "$neurocaasrootdir"/update.txt s3://"$bucketname"/"$groupdir"/"$processdir"/
+58 kill "$background_pid"
+```
+
+Finally, we run some cleanup: we will transfer the configuration file used to run this job to the output directory for reproducibility (line 56),
+send an empty file to indicate that this stage of the job is complete (line 57), and finally kill the background logging process (line 58). The actual machine shutdown is handled by 
+a higher level system to improve reliability and stability. Note that here in lines 56-57 we use the declared data path variables extensively. This will be the case in the actual analysis script as well.  
+
+#### Analysis script
+TL;DR from the previous section: 
+- We will assume the analysis script takes no parameters. Instead, you have access to certain environment variables declared in run_main.sh that should make it easier to transfer data to and from the user. These variables correspond to the 
+directory structure explained in the background, as follows: 
+    - $bucketname <-> analysis\_name 
+    - $groupdir <-> group\_name 
+    - $resultdir <-> results/job\_{timestamp} 
+    - $processdir <-> results/job\_{timestamp}/process_results
+    - $dataname <-> the basename of a datafile in the inputs directory.
+    - $inputpath <-> {group\_name}/inputs/datafile
+    - $configname <-> the basename of a config file in the configs directory.
+    - $configpath <-> {group\_name}/configs/configfile
+We will assume that the analysis script is located in a subdirectory of neurocaas\_contrib, as neurocaas\_contrib/analysis\_name/run\_analysis\_name.sh
+
+
+As a first example, let's take a look at the directory neurocaas\_contrib/mock. 
+This directory contains a simple example analysis script [(run_mock_internal.sh)](https://github.com/cunningham-lab/neurocaas_contrib/blob/reorganize/mock/run_mock_internal.sh). 
+This script pulls an integer parameter `$waittime` from a configuration file and waits that amount of time before exiting. 
+We can walk through this script line by line: 
+
+```
+1 #!/bin/bash
+2
+3 ## Import functions for workflow management. 
+4 ## Get the path to this function: 
+5 execpath="$0"
+6 echo execpath
+7 scriptpath="$(dirname "$execpath")/ncap\_utils"
+8
+9 source "$scriptpath/workflow.sh"
+10 ## Import functions for data transfer 
+11 source "$scriptpath/transfer.sh"
+
+```
+
+This initial block of code sources utility functions from the directory neurocaas_contrib/ncap_utils.
+These shell functions are stored separately in the file workflow.sh (for setting up logging files), and transfer.sh 
+(for transferring data between your instance and the user.)
+
+```
+13 ## Set up error logging. 
+14 errorlog
+```
+
+The function `errorlog` is imported from the file workflow.sh. It records every line of this bash script after it is executed, 
+and writes it to the json file neurocaaas_contrib/ncap_utils/statusdict.json. This file will be delivered back to the user, so that
+the user has a running log of what command is running on the instance, as well as other information. Importantly this function also sets the -e flag on the script, 
+indicating that it will exit if any errors are encountered.  
+
+```
+21 #source .dlamirc
+22
+23 export PATH="/home/ubuntu/anaconda3/bin:$PATH"
+24
+25 source activate epi
+```
+
+Keep in mind that when these scripts are run, they will not be run as a user, but rather as root. 
+This can introduce some gotchas- if you are working with the AWS deep learning AMI, you will need to run 
+`source .dlamirc` to establish the correct links between the instance and its GPU device(s). Likewise, 
+you will have to manually append the user's anaconda bin to the path before running `source activate {}` to start a conda environment. 
+In general, it's a good idea to test the analysis script as root by running `sudo -i` and navigating to the user's directory to see 
+if there are any other issues.  
+ 
+```
+27 ## Declare local storage locations: 
+28 userhome="/home/ubuntu"
+29 datastore="epi/scripts/localdata/"
+30 configstore="/home/ubuntu/" 
+31 outstore="mock_results/"
+32 ## Make local storage locations
+33 accessdir "$userhome/$datastore" "$userhome/$outstore"
+```
+
+In general, it's useful to organize local analogues for the input, config, and results directories, so that you can just copy directories wholesale from s3 to the instance or vice versa. 
+Here we've designated $datastore as the input location, the root user's home directory as the config storage directory, and $outstore as the output location (though this analysis won't have any output). 
+The function accessdir (line 33) will then create these folders (and designate them as read/writable to all users) to prepare for data transfer. 
+
+```
+35 ## Stereotyped download script for data. The only reason this comes after something custom is because we depend upon the AWS CLI and installed credentials. 
+36 download "$inputpath" "$bucketname" "$datastore"
+37
+38 ## Stereotyped download script for config: 
+39 download "$configpath" "$bucketname" "$configstore"
+```
+
+Here we're referencing the environment variables inherited from run_main.sh, and using them to download data and configuration files from the relevant locations in Amazon S3 to the locations that we designated. 
+Note that you are also free to use the aws cli (`aws s3 cp` or `aws s3 sync`) to fetch data and configs from S3 as well. The function `download` can be found in the transfer.sh file.  
+
+```
+43 waittime=$(jq .wait "$configstore/$configname")
+44 sleep $waittime
+```
+
+This is the meat of the script. Now the input data and configuration files are in known locations ($datastore and $configstore), and can be referenced by known names (the variables $configname and $dataname) 
+inherited from run_main.sh. These parameters can then be passed to any local analysis routine. In this case, as a minimal example, we are simply getting an integer parameter from the configuration file, 
+and waiting that amount of time. One notable difference is that this example has no output that we would generally want to route to the $outstore directory. Figuring out what goes here is the majority of the conceptual work necessary
+to load an analysis on NeuroCAAS.  
+
+```
+50 cd "mock_results"
+51 aws s3 sync ./ "s3://$bucketname/$groupdir/$processdir"
+```
+
+The last thing we do in this script is to move to our output directory (which is empty), and upload the results to the relevant directory in S3, as given by our inherited environment variables. Note that here we 
+use the variable $processdir, instead of $resultdir, so that we can avoid dumping results directly into the job subdirectory. If you would like to write your own logs as jobs proceed, you can do so by writing them to 
+the folder s3://$bucketname/$groupdir/$resultdir/logs/, where automatic logs will also be written. 
+
+If any of the steps above fail, the flag -e set in the function errorlog will ensure that the whole script exits. This will be used to catch and report failure cases back to the main script. If you want to be fancy, 
+you can set up input parsing before starting analyses. Error messages can be sent to STDOUT, and will be reported back to the user via auto-generated logs.    
+
+
+For more involved examples, see neurocaas\_contrib/{caiman,dlc,epi,locanmf,pmd}). The corresponding run\_{analysis} files should provide an idea of how this basic framework can be used to serve a variety of different 
+analysis needs, including analyses that require several different input modalities (locanmf), have train and test modes with different inputs (dlc), or accept parameters in different formats (caiman). 
+
+When it comes to testing an analysis script, we recommend doing so AFTER initially deploying your blueprint. This means that once you have tested your main analysis call (the analogue of lines 43 and 44 in the analysis script)
+and have a preliminary script, you can save your machine image, clean up, and deploy your updated blueprint before starting up another instance from the python console. 
+ This will create the folder structure discussed in the background section, letting you can upload test data and configs to the relevant locations in S3.  
+
+If you want to test your script locally, you can do so by:
+- 1) creating an s3 bucket with the structure shown in the background section
+- 2) uploading test data and config files to the relevant locations  
+- 3) calling run_main.sh with the relevant variables.  
+
+Note that you may get many loud errors from the background process, as it will not be able to find the appropriate logging files in the s3 bucket, but this should not interrupt your main analysis script.  
 
 Saving your machine image
 -------------------------
@@ -318,45 +564,6 @@ Note that you can launch new development images, but you can only do so
 after terminating your current one to prevent losing track of
 development.
 
-Testing a machine image
------------------------
-
-IMPORTANT NOTE: this step can only be done AFTER initially deploying a
-blueprint (Step 6). Our Python development API has the capacity to
-*mock* the job managers that parse user input. In order to test your
-machine image including the inputs and outputs that a user would see,
-follow these steps: 1) you upload data and configuration files to the s3
-bucket, just as a user would. 2) you manually write a submit.json file,
-like below:
-
-    {
-        "dataname":"path/inputs/data.zip",
-        "configname":"path/configs/config.json",
-        "timestamp": "debugging_identifier"
-    }
-
-Where the dataname and configname values point to the data that you
-uploaded in step 1.
-
-Then, run
-
-`>>> devami.submit_job_log(submitpath)`
-
-Where submitpath is the path to the submit file you wrote. This will
-trigger processing in your development instance as a background process
-(you can observe it with top). Make sure to cancel or remove the
-instance shutdown command when you are running this test, otherwise your
-instance will stop after the processing finishes. You can monitor the
-status and output of this job as it proceeds directly from python with:
-
-`>>> devami.job_status(index)`
-
-`>>> devami.job_output(index)`
-
-Where index gives the number of job you would like to analyze (default
-is -1, the most recent). The results themselves will be returned to AWS
-S3
-
 Deploying your blueprint
 ========================
 
@@ -371,9 +578,48 @@ This will run all the steps necessary to build the cloud resources
 corresponding to your blueprint, and you can test it further from the
 python API after adding some test users.
 
+Testing a machine image
+-----------------------
+
+IMPORTANT NOTE: this step can only be done AFTER initially deploying a
+blueprint (Step 6). Our Python development API has the capacity to
+*mock* the job managers that parse user input. In order to test your
+machine image including the inputs and outputs that a user would see,
+follow these steps: 1) you upload data and configuration files to the deployed s3
+bucket, just as a user would. 2) you manually write a submit.json file,
+like below:
+
+    {
+        "dataname":"path/inputs/data.zip",
+        "configname":"path/configs/config.json",
+        "timestamp": "debugging_identifier"
+    }
+
+Where the dataname and configname values point to the data that you
+uploaded in step 1.
+
+Then, run
+
+`>>> devami.submit_job(submitpath)`
+
+Where submitpath is the path to the submit file you wrote. This will
+trigger processing in your development instance as a background process
+(you can observe it with top). If you don't remove the instance shutdown 
+command when you are running this test, your instance will stop after the processing finishes. You can monitor the
+status and output of this job as it proceeds locally from python with:
+
+`>>> devami.job_status(index)`
+
+`>>> devami.job_output(index)`
+
+Where index gives the number of job you would like to analyze (default
+is -1, the most recent). The results themselves will be returned to AWS
+S3 upon job completion.
+
+
 Adding users
 ------------
 
 Once your blueprint has successfully been deployed, you can authorize
-some users to access it. Contact your neurocaas admin at
-neurocaas@gmail.com for instructions on how to proceed from here.
+some users to access it. Additionally, if it is ready you can publish your analysis to the neurocaas website, and have it accessible by default to interested users. 
+Contact your neurocaas admin at neurocaas@gmail.com for instructions on how to proceed from here.
