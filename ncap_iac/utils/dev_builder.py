@@ -581,7 +581,7 @@ class DevTemplate(NeuroCaaSTemplate):
 
 class WebDevTemplate(NeuroCaaSTemplate):
     """
-    Dev mode pipelines are not hooked up to all users, and explicitly grant individuals access to a dedicated analysis bucket. Input locations are localized to the analysis bucket in the dev case.  
+    Dev mode pipelines are not hooked up to all users, and explicitly grant individuals access to a dedicated analysis bucket. Input locations are localized to the analysis bucket in the dev case. NOTE 10/30: On visual inspection, it appears that the only difference between this and dev template is in the ("generate_usergroup") function. All other functions besides initialization look to be identical to DevTemplate. This might be worth removing by first inheriting from DevTemplate instead.  
 
     inputs: 
     filename (str): the path to the stack_config_template.json blueprint that you want to deploy.
@@ -1243,7 +1243,7 @@ if __name__ == "__main__":
             print(temp.template.to_json(),file = f)
     elif mode == "webdev":
         print("webdev mode")
-        ## Construct a web development mode pipeline. Standardizes user group handling for neatness. 
+        ## Construct a web development mode pipeline. Standardizes user group handling for neatness, adding a suffix to group names to remove naming collisions when adding users to different pipelines.  
         temp =WebDevTemplate(filename)
         with open(dirname+'/'+'compiled_template.json','w') as f:
             print(temp.template.to_json(),file = f)
