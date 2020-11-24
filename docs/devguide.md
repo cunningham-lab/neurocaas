@@ -138,19 +138,22 @@ we first need to initialize a blueprint for your stack. Navigate to the
 Where the argument passed must be restricted to lowercase letters,
 numbers, and dash marks (-). This will create a folder with the
 specified name. If you navigate into this folder, you can see the
-blueprint that specifies an analysis pipeline. The parameters that you
-will most care about are the “Lambda.LambdaConfig.AMI”,
-“Lambda.LambdaConfig.INSTANCE\_TYPE” and “Lambda.LambdaConfig.COMMAND”
-parameters (although you will only have to specify an INSTANCE\_TYPE to
-start with). AMI specifies the Amazon Machine Image where your software
-and dependencies are installed, and contains most of the
-analysis-specific configuration details that you must specify.
-INSTANCE\_TYPE specifies the hardware configuration that is run by
-default (can be changed on demand) and is selected from a list of
-instance types available on AWS. Finally, COMMAND specifies a bash
-command that will be run on your remote instance [with parameters] to
-generate data analysis. Altering this will require you to alter further
-settings, which we will describe later.
+blueprint that specifies an analysis pipeline. 
+
+This blueprint contains all of the details that specify the different resources 
+and services that will support your analysis. When initializing an analysis, 
+we can leave most of these fixed, but there are a few that we should go over: 
+The parameters that you will probably change are:
+
+- STAGE: This parameter describes different stages of pipeline development. It should be set to "webdev" while initializing a blueprint.
+
+- Lambda.LambdaConfig.INSTANCE\_TYPE: INSTANCE\_TYPE specifies the hardware configuration that is run by
+default (can be changed on demand) and is selected from a list of instance types available on AWS.
+
+Important parameters to keep in mind for later: 
+- Lambda.LambdaConfig.AMI: AMI specifies the Amazon Machine Image where your software and dependencies are installed, and contains most of the analysis-specific configuration details that you must specify. As you develop, you will save your progress into different AMIs so they can be linked to the blueprint through this parameter.
+
+- Lambda.LambdaConfig.COMMAND: COMMAND specifies a bash command that will be run on your remote instance [with parameters specified in the main script section] to generate data analysis. You will most likely not have to change this command, but it is the principal way in which we will be starting analyses on a remote instance. 
 
 For now, remove all Affiliates from the UXData area except for
 “debuggers” we will return to these later.
