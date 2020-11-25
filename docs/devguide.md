@@ -593,13 +593,16 @@ bucket, just as a user would. 2) you manually write a submit.json file,
 like below:
 
     {
-        "dataname":"path/inputs/data.zip",
-        "configname":"path/configs/config.json",
+        "dataname":"{group_name}/inputs/data.zip",
+        "configname":"{group_name}/configs/config.json",
         "timestamp": "debugging_identifier"
     }
 
 Where the dataname and configname values point to the data that you
-uploaded in step 1.
+uploaded in step 1, and {group\_name} corresponds to the group name 
+depicted in the user-side data organization diagram. If you followed 
+the instructions regarding blueprint configuration, this will most likely 
+be "debuggers".
 
 Then, run
 
