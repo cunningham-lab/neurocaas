@@ -43,8 +43,7 @@ installed on your local machine:
 -   Docker (for the AWS Sam CLI)- *install via Docker homepage-
     referenced in SAM CLI installation*.
 
--   Anaconda (<https://www.anaconda.com>). *Not a strict requirement,
-    but we will assume development in a conda virtual environment.*
+-   Anaconda (<https://www.anaconda.com>).
 
 First verify your aws cli installation by running:
 
