@@ -5,8 +5,8 @@ if __name__ == "__main__":
     md.new_header(title = "Todo list for docker workflow",level = 1)
     md.new_line("A more detailed todo list for the integration of docker into the developer workflow.")
     md.new_list([
-        "[ ] Create a general neurocaas-contrib base image with attached input/output volume",
-        "[ ] API to pull this base image to local.",
+        "[x] Create a general neurocaas-contrib base image with attached input/output volume",
+        "[x] ~~API to pull this base image to local.~~ have the right dockerfile to set up this image.",
         "[ ] API to launch interactive shell into container based on base image",
         "[ ] API to start, stop, delete and save container into image.",
         "[ ] API to test image locally",
@@ -46,6 +46,8 @@ if __name__ == "__main__":
             ], marked_with = '+')
     
     md.new_paragraph("For most analyses, we will most likely require a second round of testing on the appropriate EC2 instance type similar to what we have now, but having a well setup local workflow should make things significantly easier.")
+    md.new_header(title = "Update 12/1",level =2)
+    md.new_paragraph("We have now completed two elements of our original todo list. The second element is complicated by the fact we're trying to use the AWS ECR to store images, which has weird interactions with the AWS CLI version. Bottom line is that for now, I'm happy to have our developers run `docker pull continuum/anaconda3` to get the base image we used, and then build the image locally.")
     md.create_md_file()
 
     

@@ -1,5 +1,5 @@
 
-Script documentation for file: docker_todos, Updated on:2020-11-30 23:21:14.592402
+Script documentation for file: docker_todos, Updated on:2020-12-01 18:31:34.375950
 ==================================================================================
  
   
@@ -7,8 +7,8 @@ Script documentation for file: docker_todos, Updated on:2020-11-30 23:21:14.5924
 # Todo list for docker workflow
   
 A more detailed todo list for the integration of docker into the developer workflow.
-- [ ] Create a general neurocaas-contrib base image with attached input/output volume
-- [ ] API to pull this base image to local.
+- [x] Create a general neurocaas-contrib base image with attached input/output volume
+- [x] ~~API to pull this base image to local.~~ have the right dockerfile to set up this image.
 - [ ] API to launch interactive shell into container based on base image
 - [ ] API to start, stop, delete and save container into image.
 - [ ] API to test image locally
@@ -43,3 +43,7 @@ Once this image is set up, we can run a container from this image and set up a b
 
 
 For most analyses, we will most likely require a second round of testing on the appropriate EC2 instance type similar to what we have now, but having a well setup local workflow should make things significantly easier.
+## Update 12/1
+
+
+We have now completed two elements of our original todo list. The second element is complicated by the fact we're trying to use the AWS ECR to store images, which has weird interactions with the AWS CLI version. Bottom line is that for now, I'm happy to have our developers run `docker pull continuum/anaconda3` to get the base image we used, and then build the image locally.
