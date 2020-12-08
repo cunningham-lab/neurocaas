@@ -72,6 +72,8 @@ if __name__ == "__main__":
     md.new_line("The right way to incorporate these features into our setup is to create a NeuroCAASLocalEnv object that sets up a local environment (docker volume + directory). This way, we can let developers *locally* test their setup and examine the way logs would be generated, handle different test cases, etc. ")
     md.new_header(title="Update 12/5",level = 2)
     md.new_paragraph("Today we took care of the bookkeeping necessary to save containers to new images locally. We are managing this through image tags on the repository neurocaas/contrib, with the suggestion that tags be formatted as [github repo].[commit hash]. We also introduced the api necessary to test containers through docker exec, which should speed things up significantly. Now, the next step is setting up a local version of io-dir, creating a volume from it, and attaching it to containers on startup through the api.")
+    md.new_header(title = "Update 12/8",level = 2)
+    md.new_paragraph("We were able to successfully write logs to local. One issue now is how much to make the contents if io-dir mirror the contents in the s3 file. The best thing to do might be to just have it mirror the s3 file contents (as relevant for the analysis) exactly. The only issue here is that when results are written, they are written from inside the docker container. How do we make it so that users still have the freedom to write results into the docker container, but that they stay organized as we would like them to? Where should this logic be handled? One option would be to handle this on container exit. This would introduce a function that moves files around, which we can do via docker diff.")
     md.create_md_file()
 
     
