@@ -11,8 +11,11 @@ if __name__ == "__main__":
         "[x] API to start, stop, delete and save container into image.",
         "[x] API to test image locally (docker exec)",
         "[x] API to pull from remote registry (on dockerhub)",
+        "[x] Revision of logging files for compatibility",
         "[ ] API to test image locally (LocalEnv)",
-        "[ ] Determine local testing criterion for pull request to be considered.",
+        "[ ] See if we need to test with Amazon Linux 2 base docker images."
+        "[ ] ~~Determine local testing criterion for pull request to be considered.~~ The criterion is exactly the success of a local deployment with localstack. This removes all burden from us to provision AWS resources before a plausible working pipeline can be set up.",
+        "[ ] Command line workflow with console scripts",
         "[ ] API to push to remote registry (on amazon?)"
         ])
     md.new_paragraph("We want to design a way for analysis developers to easily build their analyses in docker containers. While we can always count on docker-fluent developers to tweak a Dockerfile, it's always nice to have a way to visualize what's going on, and build interactively, even if it leads to larger docker images in the long run. We will start out by making a docker base image that looks like this:")
@@ -74,6 +77,19 @@ if __name__ == "__main__":
     md.new_paragraph("Today we took care of the bookkeeping necessary to save containers to new images locally. We are managing this through image tags on the repository neurocaas/contrib, with the suggestion that tags be formatted as [github repo].[commit hash]. We also introduced the api necessary to test containers through docker exec, which should speed things up significantly. Now, the next step is setting up a local version of io-dir, creating a volume from it, and attaching it to containers on startup through the api.")
     md.new_header(title = "Update 12/8",level = 2)
     md.new_paragraph("We were able to successfully write logs to local. One issue now is how much to make the contents if io-dir mirror the contents in the s3 file. The best thing to do might be to just have it mirror the s3 file contents (as relevant for the analysis) exactly. The only issue here is that when results are written, they are written from inside the docker container. How do we make it so that users still have the freedom to write results into the docker container, but that they stay organized as we would like them to? Where should this logic be handled? One option would be to handle this on container exit. This would introduce a function that moves files around, which we can do via docker diff.")
+    md.new_header(title = "Udate 12/10",level = 2)
+    md.new_paragraph("We were able to successfully start testing the log module using localstack. Localstack is a very powerful tool, and taking it seriously is a great idea for our workflow. We should consider as a non-critical update implementing localstack testing features directly into the developer package. By doing so, we can effectively simulate the whole workflow: The appearance of output files in a virtual s3 bucket, as well as generating a submit file to the localstack bucket and watching the whole process take place. This gives us a nice way to slot the current devutils code into a consistent workflow as well, as we would only have to introduce minimal changes in order to make it compatible with localstack. This could also be the foundation for a local workflow, etc...")
+    md.new_paragraph("With more knowledge of localstack and docker, here is a new proposal for a developer workflow.")
+    md.new_list([
+        "Developer downloads and installs neurocaas_contrib repo + package.",
+        "Developer interactively builds their compute resources into a docker container on their local machine. (advanced users can just provide a dockerfile with the right image tag)",
+        "Developer test 1: execute the container and make sure the logs look right (NeuroCAASImage.test_container).",
+        "Developer test 2: save the container into a new image (NeuroCAASImage.save_container_to_image) and then run that image with the appropriate commands (NeuroCAASImage.run_analysis). See the logs and outputs in the designated local location.",
+        "Developer test 3: (optional) use localstack to simulate a full run, triggering via submit files and examining the output in a localstack bucket.",
+        "Developer test 4: Request an AWS instance, and make sure your container works with the instance (important for GPU containers).",
+        "Submit pull request to neurocaas-contrib repo."],marked_with="1") 
+    md.new_header(title = "Update 12/11",level = 2)
+    md.new_paragraph("Finished up testing of logging objects today. Took a first pass at integrating into local testing environment. The kinks in this still need to be worked out. ")
     md.create_md_file()
 
     
