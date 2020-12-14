@@ -1,5 +1,5 @@
 from troposphere import Ref,Parameter,GetAtt,Template,Output,Join,Split,Sub,AWS_STACK_NAME,AWS_REGION
-from troposphere.s3 import Bucket,Rules,S3Key,Filter
+from troposphere.s3 import Bucket,Rules,S3Key,Filter,CorsConfiguration,CorsRules
 from troposphere.iam import User,Group,Policy,ManagedPolicy,LoginProfile,AccessKey,UserToGroupAddition,Role
 from troposphere.serverless import Function,Environment
 from troposphere.awslambda import Permission
@@ -992,6 +992,25 @@ class WebSubstackTemplate(NeuroCaaSTemplate):
                 Environment = Environment(Variables=lambdaconfig)
                 )         
         self.template.add_resource(function)
+
+    def add_bucket(self):
+        """Set up CORS configuration on bucket if deploying in websubstack mode.
+
+        """
+        corsrule = CorsRules(AllowedHeaders = ["*"],AllowedMethods = ["GET","PUT","POST","DELETE"],AllowedOrigins=["*"],ExposedHeaders=["ETag"],MaxAge=3000)
+        corsconfig = CorsConfiguration(CorsRules = [corsrule])
+        bucket_id = "PipelineMainBucket"
+        bucketname = self.config['PipelineName']
+        ## First check that the bucketname is valid: 
+        assert type(bucketname) == str,"bucketname must be string"
+        lowercase = bucketname.islower()
+        underscore = '_' in bucketname 
+        assert (lowercase and not(underscore)),'string must follow s3 bucket style'
+        
+        ## Now we can add this resource: 
+        bucket = Bucket(bucket_id,AccessControl = 'Private',BucketName = bucketname,CorsConfiguration=corsconfig)
+        bucket_attached = self.template.add_resource(bucket)
+        return bucket_attached,bucketname,bucket_id 
 
 
 ## Make a parametrized version of the user template.  
