@@ -12,11 +12,11 @@ if __name__ == "__main__":
         "[x] API to test image locally (docker exec)",
         "[x] API to pull from remote registry (on dockerhub)",
         "[x] Revision of logging files for compatibility",
-        "[ ] API to test image locally (LocalEnv)",
-        "[ ] See if we need to test with Amazon Linux 2 base docker images."
-        "[ ] ~~Determine local testing criterion for pull request to be considered.~~ The criterion is exactly the success of a local deployment with localstack. This removes all burden from us to provision AWS resources before a plausible working pipeline can be set up.",
-        "[ ] Command line workflow with console scripts",
-        "[ ] API to push to remote registry (on amazon?)"
+        "[x] API to test image locally (LocalEnv)",
+        "[x] ~~See if we need to test with Amazon Linux 2 base docker images~~ It seems like we do, but we can check by changing the docker host in our command.."
+        "[x] ~~Determine local testing criterion for pull request to be considered.~~ The criterion is exactly the success of a local deployment with localstack. This removes all burden from us to provision AWS resources before a plausible working pipeline can be set up.",
+        "[ ] ~~Command line workflow with console scripts~~ Save  this for a for a future release",
+        "[ ] ~~API to push to remote registry (on amazon?)~~ this doesn't have to be part of our prototype workflow."
         ])
     md.new_paragraph("We want to design a way for analysis developers to easily build their analyses in docker containers. While we can always count on docker-fluent developers to tweak a Dockerfile, it's always nice to have a way to visualize what's going on, and build interactively, even if it leads to larger docker images in the long run. We will start out by making a docker base image that looks like this:")
     md.new_list([
@@ -90,6 +90,8 @@ if __name__ == "__main__":
         "Submit pull request to neurocaas-contrib repo."],marked_with="1") 
     md.new_header(title = "Update 12/11",level = 2)
     md.new_paragraph("Finished up testing of logging objects today. Took a first pass at integrating into local testing environment. The kinks in this still need to be worked out. ")
+    md.new_header(title="Update 12/13",level = 2)
+    md.new_paragraph("We have gone through an initial test of a dockerized implementation that works locally using the carcealab_videoconfig repo that you built a few weeks ago. The results are quite promising. Although there is more refactoring to be done, and several features that would help a lot with usability, and lack of confusion, things are working. For a thorough update, see update_12_13_20 where I walk through my thoughts on how all of this is coming together.")
     md.create_md_file()
 
     
