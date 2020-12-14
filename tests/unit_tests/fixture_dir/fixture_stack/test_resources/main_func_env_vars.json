@@ -1,0 +1,24 @@
+{
+    "MainLambda": {
+        "AMI": "ami-061f98a1f90c0d6fd",
+        "REGION": "us-east-1",
+        "INSTANCE_TYPE": "t2.micro",
+        "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
+        "IAM_ROLE": "SSMRole",
+        "KEY_NAME": "testkeystack-custom-dev-key-pair",
+        "WORKING_DIRECTORY": "/home/ubuntu",
+        "COMMAND": "cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
+        "SHUTDOWN_BEHAVIOR": "terminate",
+        "CONFIG": "config.yaml",
+        "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+        "EXECUTION_TIMEOUT": 360,
+        "cwrolearn": "arn:aws:iam::739988523141:role/cianalysispermastack-CloudWatchBusRole-17NQYYWHU41PX",
+        "figlambarn": "arn:aws:lambda:us-east-1:739988523141:function:cianalysispermastack-FigLambda-WAJE7D03XDRC",
+        "figlambid": "cianalysispermastack-FigLambda-WAJE7D03XDRC"
+    },
+    "FigLambda": {
+        "BUCKET_NAME": "cianalysispermastack",
+        "REGION": "us-east-1",
+        "INDIR": "inputs"
+    }
+}

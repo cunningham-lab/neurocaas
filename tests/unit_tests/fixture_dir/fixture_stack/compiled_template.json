@@ -1,0 +1,670 @@
+{
+    "Resources": {
+        "BaseFoldertraviscipermagroup": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "traviscipermagroup",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "CWPermissions": {
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Ref": "FigLambda"
+                },
+                "Principal": "events.amazonaws.com"
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "CloudWatchBusRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "events.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "CloudwatchBusPolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "CloudwatchBusPolicy": {
+            "Properties": {
+                "Description": {
+                    "Fn::Join": [
+                        " ",
+                        [
+                            "Base Policy for all lambda function roles in",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "events:*",
+                            "Effect": "Allow",
+                            "Resource": "*",
+                            "Sid": "CloudWatchEventsFullAccess"
+                        },
+                        {
+                            "Action": "iam:PassRole",
+                            "Effect": "Allow",
+                            "Resource": "arn:aws:iam::*:role/AWS_Events_Invoke_Targets",
+                            "Sid": "IAMPassRoleForCloudWatchEvents"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::IAM::ManagedPolicy"
+        },
+        "ConfigFoldertraviscipermagroup": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFoldertraviscipermagroup"
+            ],
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "configs",
+                "Path": "traviscipermagroup/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "DeleteCustomResource": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3DelObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "FigLambda": {
+            "Properties": {
+                "CodeUri": "../../protocols",
+                "Description": "Lambda Function logging start/stop for NCAP",
+                "Environment": {
+                    "Variables": {
+                        "BUCKET_NAME": "cianalysispermastack",
+                        "INDIR": "inputs",
+                        "REGION": "us-east-1"
+                    }
+                },
+                "Events": {},
+                "Handler": "log.monitor_updater",
+                "MemorySize": 128,
+                "Role": "arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ",
+                "Runtime": "python3.6",
+                "Timeout": 90
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "FignameLogGroup": {
+            "Properties": {
+                "LogGroupName": {
+                    "Fn::Sub": "/aws/lambda/${FigLambda}"
+                }
+            },
+            "Type": "AWS::Logs::LogGroup"
+        },
+        "InFoldertraviscipermagroup": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFoldertraviscipermagroup"
+            ],
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "inputs",
+                "Path": "traviscipermagroup/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LambdaBaseRole": {
+            "Properties": {
+                "Description": {
+                    "Fn::Join": [
+                        " ",
+                        [
+                            "Base Policy for all lambda function roles in",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "logs:CreateLogGroup",
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": "arn:aws:logs:*:*:*"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::IAM::ManagedPolicy"
+        },
+        "LogFolder": {
+            "DependsOn": "PipelineMainBucket",
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "logs",
+                "Path": "",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderactive": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "active",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFolderdebug": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "debugcianalysispermastack",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "LogFoldertraviscipermagroup": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "LogFolder"
+            ],
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "traviscipermagroup",
+                "Path": "logs/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "MainLambda": {
+            "Properties": {
+                "CodeUri": "../../protocols",
+                "Description": "Main Lambda Function for Serverless",
+                "Environment": {
+                    "Variables": {
+                        "AMI": "ami-061f98a1f90c0d6fd",
+                        "COMMAND": "cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
+                        "CONFIG": "config.yaml",
+                        "CONFIGDIR": "configs",
+                        "DEPLOY_LIMIT": 100,
+                        "EXECUTION_TIMEOUT": 180,
+                        "IAM_ROLE": "SSMRole",
+                        "INDIR": "inputs",
+                        "INSTANCE_TYPE": "t2.micro",
+                        "KEY_NAME": "testkeystack-custom-dev-key-pair",
+                        "LAUNCH": true,
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MAXCOST": "300",
+                        "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
+                        "SHUTDOWN_BEHAVIOR": "terminate",
+                        "SSM_TIMEOUT": 172000,
+                        "SUBMITDIR": "submissions",
+                        "WORKING_DIRECTORY": "~/bin",
+                        "cwrolearn": {
+                            "Fn::GetAtt": [
+                                "CloudWatchBusRole",
+                                "Arn"
+                            ]
+                        },
+                        "figlambarn": {
+                            "Fn::GetAtt": [
+                                "FigLambda",
+                                "Arn"
+                            ]
+                        },
+                        "figlambid": {
+                            "Ref": "FigLambda"
+                        },
+                        "versionid": "240ff19d35fcd7d1434ca93f9cacde41f52d4f70\n"
+                    }
+                },
+                "Events": {
+                    "BucketEventtraviscipermagroup": {
+                        "Properties": {
+                            "Bucket": {
+                                "Ref": "PipelineMainBucket"
+                            },
+                            "Events": [
+                                "s3:ObjectCreated:*"
+                            ],
+                            "Filter": {
+                                "S3Key": {
+                                    "Rules": [
+                                        {
+                                            "Name": "prefix",
+                                            "Value": "traviscipermagroup/submissions"
+                                        },
+                                        {
+                                            "Name": "suffix",
+                                            "Value": "submit.json"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "Type": "S3"
+                    }
+                },
+                "Handler": "submit_start.handler_develop",
+                "MemorySize": 128,
+                "Role": "arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ",
+                "Runtime": "python3.6",
+                "Timeout": 180
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "OutFoldertraviscipermagroup": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFoldertraviscipermagroup"
+            ],
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "results",
+                "Path": "traviscipermagroup/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "PipelineMainBucket": {
+            "Properties": {
+                "AccessControl": "Private",
+                "BucketName": "cianalysispermastack"
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "S3DelObjectFunction": {
+            "Properties": {
+                "CodeUri": "../../protocols",
+                "Description": "Deletes Objects from S3",
+                "Environment": {
+                    "Variables": {
+                        "AMI": "ami-061f98a1f90c0d6fd",
+                        "COMMAND": "cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
+                        "CONFIG": "config.yaml",
+                        "CONFIGDIR": "configs",
+                        "DEPLOY_LIMIT": 100,
+                        "EXECUTION_TIMEOUT": 180,
+                        "IAM_ROLE": "SSMRole",
+                        "INDIR": "inputs",
+                        "INSTANCE_TYPE": "t2.micro",
+                        "KEY_NAME": "testkeystack-custom-dev-key-pair",
+                        "LAUNCH": true,
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MAXCOST": "300",
+                        "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
+                        "SHUTDOWN_BEHAVIOR": "terminate",
+                        "SSM_TIMEOUT": 172000,
+                        "SUBMITDIR": "submissions",
+                        "WORKING_DIRECTORY": "~/bin",
+                        "cwrolearn": {
+                            "Fn::GetAtt": [
+                                "CloudWatchBusRole",
+                                "Arn"
+                            ]
+                        },
+                        "figlambarn": {
+                            "Fn::GetAtt": [
+                                "FigLambda",
+                                "Arn"
+                            ]
+                        },
+                        "figlambid": {
+                            "Ref": "FigLambda"
+                        },
+                        "versionid": "240ff19d35fcd7d1434ca93f9cacde41f52d4f70\n"
+                    }
+                },
+                "Handler": "helper.handler_delbucket",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "S3MakePathRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "S3MakePathRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Ref": "LambdaBaseRole"
+                    }
+                ],
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "s3:DeleteObject",
+                                        "s3:ListBucket",
+                                        "s3:PutObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "write_s3_policy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "S3PutObjectFunction": {
+            "Properties": {
+                "CodeUri": "../../protocols",
+                "Description": "Puts Objects in S3",
+                "Environment": {
+                    "Variables": {
+                        "AMI": "ami-061f98a1f90c0d6fd",
+                        "COMMAND": "cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
+                        "CONFIG": "config.yaml",
+                        "CONFIGDIR": "configs",
+                        "DEPLOY_LIMIT": 100,
+                        "EXECUTION_TIMEOUT": 180,
+                        "IAM_ROLE": "SSMRole",
+                        "INDIR": "inputs",
+                        "INSTANCE_TYPE": "t2.micro",
+                        "KEY_NAME": "testkeystack-custom-dev-key-pair",
+                        "LAUNCH": true,
+                        "LOGDIR": "logs",
+                        "LOGFILE": "lambda_log.txt",
+                        "MAXCOST": "300",
+                        "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+                        "MONITOR": true,
+                        "OUTDIR": "results",
+                        "REGION": "us-east-1",
+                        "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
+                        "SHUTDOWN_BEHAVIOR": "terminate",
+                        "SSM_TIMEOUT": 172000,
+                        "SUBMITDIR": "submissions",
+                        "WORKING_DIRECTORY": "~/bin",
+                        "cwrolearn": {
+                            "Fn::GetAtt": [
+                                "CloudWatchBusRole",
+                                "Arn"
+                            ]
+                        },
+                        "figlambarn": {
+                            "Fn::GetAtt": [
+                                "FigLambda",
+                                "Arn"
+                            ]
+                        },
+                        "figlambid": {
+                            "Ref": "FigLambda"
+                        },
+                        "versionid": "240ff19d35fcd7d1434ca93f9cacde41f52d4f70\n"
+                    }
+                },
+                "Handler": "helper.handler_mkdir",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "S3MakePathRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30
+            },
+            "Type": "AWS::Serverless::Function"
+        },
+        "SubmitFoldertraviscipermagroup": {
+            "DependsOn": [
+                "PipelineMainBucket",
+                "BaseFoldertraviscipermagroup"
+            ],
+            "Properties": {
+                "BucketName": "cianalysispermastack",
+                "DirName": "submissions",
+                "Path": "traviscipermagroup/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "S3PutObjectFunction",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource"
+        },
+        "UserGrouptraviscipermagroupcianalysispermastack": {
+            "Properties": {
+                "GroupName": "traviscipermagroupcianalysispermastackgroup",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "s3:GetBucketLocation",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor0"
+                                },
+                                {
+                                    "Action": "s3:HeadBucket",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor3"
+                                },
+                                {
+                                    "Action": "s3:ListAllMyBuckets",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "VisualEditor1"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringEquals": {
+                                            "s3:delimiter": [
+                                                "/"
+                                            ],
+                                            "s3:prefix": [
+                                                "",
+                                                "traviscipermagroup/",
+                                                "traviscipermagroup/inputs",
+                                                "traviscipermagroup/results",
+                                                "logs",
+                                                "traviscipermagroup/submissions",
+                                                "traviscipermagroup/configs",
+                                                "traviscipermagroup/inputs/",
+                                                "traviscipermagroup/results/",
+                                                "traviscipermagroup/submissions/",
+                                                "traviscipermagroup/configs/"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::cianalysispermastack"
+                                    ],
+                                    "Sid": "ListBucket"
+                                },
+                                {
+                                    "Action": "s3:ListBucket",
+                                    "Condition": {
+                                        "StringLike": {
+                                            "s3:prefix": [
+                                                "traviscipermagroup/inputs/*",
+                                                "traviscipermagroup/results/*",
+                                                "traviscipermagroup/configs/*",
+                                                "traviscipermagroup/submissions/*"
+                                            ]
+                                        }
+                                    },
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::cianalysispermastack"
+                                    ],
+                                    "Sid": "ListSubBucket"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::cianalysispermastack/traviscipermagroup/inputs/*",
+                                        "arn:aws:s3:::cianalysispermastack/traviscipermagroup/configs/*",
+                                        "arn:aws:s3:::cianalysispermastack/traviscipermagroup/submissions/*"
+                                    ],
+                                    "Sid": "Inputfolderwrite"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::cianalysispermastack/traviscipermagroup/results/*",
+                                        "arn:aws:s3:::cianalysispermastack/traviscipermagroup/configs/*"
+                                    ],
+                                    "Sid": "Outputfolderwrite"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "traviscipermagrouppolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Group"
+        },
+        "traviscipermagroupUserNet": {
+            "Properties": {
+                "GroupName": {
+                    "Ref": "UserGrouptraviscipermagroupcianalysispermastack"
+                },
+                "Users": [
+                    "cipermauser1us-east-1",
+                    "cipermauser2us-east-1"
+                ]
+            },
+            "Type": "AWS::IAM::UserToGroupAddition"
+        }
+    },
+    "Transform": "AWS::Serverless-2016-10-31"
+}

@@ -1,0 +1,28 @@
+{
+    "0": {
+        "path": "traviscipermagroup/inputs/dataset1.json",
+        "code": true
+    },
+    "1": {
+        "path": [
+            "traviscipermagroup/inputs/dataset1.json",
+            "traviscipermagroup/inputs/dataset2.json"
+        ],
+        "code": true
+    },
+    "2": {
+        "path": "traviscipermagroup/inputs/datasets/",
+        "code": true
+    },
+    "3": {
+        "path": "traviscipermagroup/inputs/dataset_fake.json",
+        "code": false
+    },
+    "4": {
+        "path": [
+            "traviscipermagroup/inputs/dataset1.json",
+            "traviscipermagroup/inputs/dataset_fake.json"
+        ],
+        "code": false
+    }
+}

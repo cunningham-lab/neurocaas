@@ -5,7 +5,7 @@ from troposphere.serverless import Function,Environment
 from troposphere.awslambda import Permission
 from troposphere.logs import LogGroup
 from troposphere.cloudformation import CustomResource,Stack 
-from lambda_policies import lambda_basepolicy,lambda_writeS3
+from ncap_iac.utils.lambda_policies import lambda_basepolicy,lambda_writeS3
 
 import sys
 import json 

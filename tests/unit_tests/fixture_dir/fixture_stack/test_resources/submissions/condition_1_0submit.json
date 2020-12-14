@@ -1,0 +1,9 @@
+{
+    "dataname": [
+        "traviscipermagroup/inputs/dataset1.json",
+        "traviscipermagroup/inputs/dataset2.json"
+    ],
+    "configname": "traviscipermagroup/configs/config_broken.json",
+    "timestamp": "16:52:06.838391condition_1_0",
+    "exitcode": 99
+}
