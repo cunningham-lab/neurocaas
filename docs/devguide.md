@@ -4,10 +4,42 @@ Introduction
 Neuroscience Cloud Analysis As a Service welcomes external developers to
 deploy their existing analyses onto our platform. Once analyses are
 built, they can be loaded onto the website interface for NeuroCAAS
-seamlessly. We’ll describe the process of developing analyses for
-NeuroCAAS in three steps: 1. Building a machine image. 2. Setting up
-your machine image to work as an immutable analysis environment. 3.
-Testing and Deployment. All steps are available via a python and shell
+seamlessly where they can be accessed by users in the neuroscience community. 
+
+In this guide, we will describe a process to _incrementally 
+automate_ all of the steps you would need to take to set up and use your analysis. 
+This process includes automated installation and build (which you may recognize from 
+Docker-like services), but also includes setup of hardware, scripting 
+of your analysis workflow, and data transfer between 
+the machine where the compute is happening and a requesting user.  
+
+At the core of the process is a *blueprint* that records the steps you would like to 
+automate, as you determine them in the course of the development process. 
+
+## End Goal
+The goal is to offer data analysis to users in such a way that they can analyze
+their data without ever having to purchase, configure, or host analyses on their
+own machines. This goal follows the "software as a service" model that has become popular in industry.
+
+In this figure, you can see the resources and workflow that you will be able to 
+support with your analysis at the end of the development process: 
+<img src="./images/Fig2_backend_12_14.png" />
+
+Key Points:
+- Your analysis will be hosted on cloud based virtual machines (VMs). These machines are automatically set up with your analysis software pre-loaded on them, and run automatically when given a dataset to analyze. The main point of this guide is to figure out the set of steps that will make this happen for your particular analysis, and record them in a document called a _blueprint_. 
+- A single virtual machine is  *entirely dedicated* to running your analysis on a given dataset. Once it is done analyzing a dataset, it will terminate itself. This means there are no history effects between successive analysis runs: each analysis is governed only by the automatic setup procedure described in your blueprint.  
+- For users, data analysis can be done entirely by interacting with data storage (more on setting this up later). When they want to trigger a particular analysis run, they upload a file indicating the data and parameters they want to analyze to a special directory called "submissions". This upload triggers the automatic VM setup process described above., and users simply wait for the results to appear in a separate, designated subdirectory. Although shown as file storage here, most users will use NeuroCAAS through a web client that automates the process of uploading submission files.  
+ 
+We’ll describe the process of developing analyses for
+NeuroCAAS in three steps: 
+
+1. Choosing hardware and computing environment 
+
+2. Setting up your automatic analysis runs 
+
+3. Testing and deployment. 
+
+All steps are available via a python and shell
 script based API. Development will follow a principle of Infrastructure
 as Code (IaC), meaning that all of your development steps will be
 documented in code as you build.
@@ -25,8 +57,7 @@ installed on your local machine:
     key and secret access keys)
     (<https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html>)
 
--   A local clone of the [NeuroCAAS
-    Repository](https://github.com/cunningham-lab/ctn_lambda/tree/reorganize).
+-   A local clone of the [NeuroCAAS Repository](https://github.com/cunningham-lab/ctn_lambda/tree/reorganize).
 
 -   Custom resources for ssh-key management available at this repo:
     <https://github.com/binxio/cfn-secret-provider>
@@ -40,8 +71,7 @@ installed on your local machine:
     applications.
     <https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html>
 
--   Docker (for the AWS Sam CLI)- *install via Docker homepage-
-    referenced in SAM CLI installation*.
+-   Docker (for the AWS Sam CLI)- *install via Docker homepage-referenced in SAM CLI installation*.
 
 -   Anaconda (<https://www.anaconda.com>).
 
@@ -79,6 +109,8 @@ running:
 `% conda install pip`
 
 `% pip install -r requirements.txt`
+
+`% pip install .`
 
 Initializing NeuroCAAS
 ======================
