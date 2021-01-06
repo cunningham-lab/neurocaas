@@ -1,5 +1,6 @@
 ## A module to work with AMIs for the purpose of debugging and updating.
 import boto3
+from botocore.exceptions import ClientError
 import sys
 import time
 import os
@@ -15,8 +16,8 @@ basedir = os.path.dirname(os.path.dirname(utildir))
 with open(os.path.join(basedir,"global_params_initialized.json")) as gp:
     gpdict = json.load(gp)
 
-## New class to develop an ami.
 
+## New class to develop an ami.
 class NeuroCaaSAMI(object):
     """
     This class streamlines the experience of building an ami for a new pipeline, or impriving one within an existing pipeline. It has three main functions:
@@ -66,7 +67,25 @@ class NeuroCaaSAMI(object):
         self.ami_hist = []
         self.instance_saved = False
 
-    def launch_ami(self,ami = None,dataset_size = None):
+    def assign_instance(self,instance_id):
+        """Add a method to assign instances instances as the indicated development instance.  
+
+        :param instance_id: takes the instance id as a string.
+
+        """
+        if self.instance is not None:
+            self.instance_hist.append(self.instance)
+            self.instance_saved = False ## Defaults to assuming the instance has not been saved. 
+        ec2_resource = boto3.resource("ec2")
+        instance = ec2_resource.Instance(instance_id)
+        try:
+            instance.state
+        except ClientError:
+            print("Instance with id {} can't be loaded".format(instance_id))
+            raise
+        self.instance = instance
+
+    def launch_devinstance(self,ami = None,dataset_size = None):
         """
         Launches an instance from an ami. If ami is not given, launches the default ami of the pipeline as indicated in the stack configuration file. Launches on the instance type given in this same stack configuration file.
 
@@ -163,66 +182,9 @@ class NeuroCaaSAMI(object):
         print("instance running at {}".format(self.ip))
         self.instance_saved = False
 
-
-# 
     def submit_job(self,submitpath):
         """
-        Submit a submit file json to a currently active development instance. Will not work if the current instance is not live. Modified to the take config file, and create logging.
-        Inputs:
-        submitpath:(str) path to a submit.json formatted file.
-        Output:
-        (str): path to the output directory created by this function.
-        (str): path to the data file analyzed by this function. 
-        (str): id of the command issued to the instance. 
-
-        """
-        ## First make sure we have an instance to send to.
-        assert self.check_running()
-        ## Now get the submit configuration:
-        with open(submitpath,'r') as f:
-            submit_config = json.load(f)
-
-        ## Get the datasets we want to use.
-        data_allname = submit_config['dataname']
-        config_name = submit_config['configname']
-
-        ## Now get the command we want to send properly formatted:
-        command_unformatted = self.config['Lambda']['LambdaConfig']['COMMAND']
-        ## Get relevant parameters:
-        bucketname_test = self.config['PipelineName']
-        outdir = os.path.join(gpdict["output_directory"],"debugjob{}".format(str(datetime.datetime.now())))
-
-        ## Now get a represetative dataset:
-        s3 = boto3.resource("s3")
-        bucket = s3.Bucket(bucketname_test)
-        objgen = bucket.objects.filter(Prefix = data_allname)
-        file_list = [obj.key for obj in objgen if obj.key[-1]!="/"]
-        data_filename = file_list[0]
-
-
-        command_formatted = [command_unformatted.format(bucketname_test,data_filename,outdir,config_name)]
-        working_directory = [self.config['Lambda']['LambdaConfig']['WORKING_DIRECTORY']]
-        timeout = [str(self.config['Lambda']['LambdaConfig']['SSM_TIMEOUT'])]
-
-        print('sending command: '+command_formatted[0] +' to instance '+self.instance.instance_id)
-        ## Get the ssm client:
-        ssm_client = boto3.client('ssm',region_name = self.config['Lambda']['LambdaConfig']['REGION'])
-        response = ssm_client.send_command(
-            DocumentName="AWS-RunShellScript", # One of AWS' preconfigured documents
-            Parameters={'commands': command_formatted,
-                        "workingDirectory":working_directory,
-                        "executionTimeout":timeout},
-            InstanceIds=[self.instance.instance_id],
-            OutputS3BucketName=bucketname_test,
-            OutputS3KeyPrefix="debug_direct/"
-        )
-        commandid = response['Command']['CommandId']
-        time.sleep(5)
-        self.commands.append({"instance":self.instance.instance_id,"time":str(datetime.datetime.now()),"commandid":commandid,"commandinfo":ssm_client.get_command_invocation(CommandId=commandid,InstanceId=self.instance.instance_id)})
-        return outdir,data_filename,commandid
-
-    def submit_job_log(self,submitpath):
-        """
+        Submit a test job with a submit.json file. 
         Inputs:
         submitpath:(str) path to a submit.json formatted file.
         """
@@ -473,6 +435,7 @@ class NeuroCaaSAMI(object):
 
         self.instance.load()
         return self.instance.state
+
     def check_running(self):
         """
         A function to check if the instance associated with this object is live.
