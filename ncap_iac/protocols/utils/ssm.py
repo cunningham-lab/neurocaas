@@ -5,7 +5,6 @@ from .config import REGION, EXECUTION_TIMEOUT
 # Boto3 Resources & Clients
 ssm_client = boto3.client('ssm', region_name=REGION) 
 
-
 def execute_commands_on_linux_instances(commands, 
                                         instance_ids, 
                                         working_dirs,
@@ -26,3 +25,11 @@ def execute_commands_on_linux_instances(commands,
         OutputS3BucketName=log_bucket_name,
         OutputS3KeyPrefix=log_path
     )
+
+def append_parameter(name,value):
+    """Appends to a comma separated parameter in SSM parameter store. If the parameter does not exist, creates it.  
+
+    """
+    current_value = ssm_client.get_parameter(Name = name)["Parameter"]["Value"]
+    new_value = "{},{}".format(current_value,value)
+    ssm_client.put_parameter(Name = name,Value = new_value)
