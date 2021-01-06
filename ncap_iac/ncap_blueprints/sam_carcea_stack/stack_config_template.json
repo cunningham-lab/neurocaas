@@ -6,7 +6,7 @@
         "CodeUri": "../../protocols",
         "Handler": "submit_start.handler_develop",
         "LambdaConfig": {
-            "AMI": "ami-069f846c3d9e987b4",
+            "AMI": "ami-08d7824d0e981d147",
             "INSTANCE_TYPE": "p3.2xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "launch-wizard-34",
