@@ -1,10 +1,9 @@
 import boto3
 import os
 
-
 # Boto3 Resources & Clients
 ssm_client = boto3.client('ssm', region_name=os.environ['REGION']) 
-
+budgetname = "/neurocaas/budgets/{g}/{a}"
 
 def execute_commands_on_linux_instances(commands, 
                                         instance_ids, 
@@ -38,3 +37,31 @@ def mount_volumes(attach_responses):
         volume_id = attach_responses[instance_id]["create"]["VolumeId"]
         ## Automation assume role is generated from utils stack. TODO: make the pulling of stack resource arns automatic. 
         ssm_client.start_automation_execution(DocumentName= "NeuroCaaS AutomountDocument",Parameters = {"InstanceId":[instance_id],"VolumeId":[volume_id],"AutomationAssumeRole":["arn:aws:iam::739988523141:role/testutilsstack-MountRole-HYJ75PSR095O"]})
+
+def put_budget_parameter(groupname,analysisname,value,overwrite = True):
+    """ Assign a value to the user's budget parameter. Has the form /neurocaas/budgets/groupname/analysisname
+
+    :param groupname: the name of the user group for which we are assigning a budget parameter.
+    :param analysisname: the name of the analysis bucket for which we are assigning a budget.
+    :param value: the value to assign. Must be an integer.
+    :param overwrite: Whether or not to overwrite an existing budget value. Defaults to True.
+    """
+    assert type(value) == int
+    paramname = budgetname.format(g=groupname,a =analysisname)
+    response = ssm_client.put_parameter(
+            Name = paramname,
+            Description = "Budgeted allowance in dollars for this user group.",
+            Type = "String",
+            Overwrite = overwrite,
+            Value = str(value)
+            )
+
+def get_budget_parameter(groupname,analysisname):
+    """ Get the assigned value of the user's budget parameter. Has the form /neurocaas/budgets/groupname/analysisname
+
+    """
+    paramname = budgetname.format(g=groupname,a =analysisname)
+    response = ssm_client.get_parameter(
+            Name = paramname)
+    return int(response["Parameter"]["Value"])
+        

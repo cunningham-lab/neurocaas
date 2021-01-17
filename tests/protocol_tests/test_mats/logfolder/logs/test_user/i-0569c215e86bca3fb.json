@@ -1,0 +1,15 @@
+{
+  "instance-id": "i-0569c215e86bca3fb",
+  "instance-type": "p3.2xlarge",
+  "spot": true,
+  "price": 1.53,
+  "databucket": "dlc-ncap-web",
+  "datapath": [
+    "sawtelllab/inputs/myconfig_analysis_ncap.py",
+    "sawtelllab/inputs/video_0.avi"
+  ],
+  "configpath": "sawtelllab/configs/NeuroCAAS_DLC_test.yaml",
+  "jobpath": "sawtelllab/results/job__dlc-ncap-web_1595132991",
+  "start": "2020-07-19T04:30:14Z",
+  "end": "2020-07-19T04:33:08Z"
+}

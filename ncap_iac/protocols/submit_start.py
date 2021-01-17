@@ -27,6 +27,7 @@ except Exception as e:
         message = "Exception: " + error + "  Stacktrace: " + stacktrace
         err = {"message": message}
         print(err)
+        raise
 
 
 def respond(err, res=None):
@@ -46,7 +47,10 @@ class Submission_dev():
         # Get Upload Location Information
         self.bucket_name = bucket_name
         ## Get directory above the input directory. 
-        self.path = re.findall('.+?(?=/'+os.environ["SUBMITDIR"]+')',key)[0] 
+        try:
+            self.path = re.findall('.+?(?=/'+os.environ["SUBMITDIR"]+')',key)[0] 
+        except IndexError:    
+            raise FileNotFoundError("[JOB TERMINATE REASON] 'submit file {} is misformatted'".format(key))
         ## Now add in the time parameter: 
         self.time = time
         ## We will index by the submit file name prefix if it exists: 
@@ -62,7 +66,7 @@ class Submission_dev():
             submit_file = utilsparams3.load_json(bucket_name, key)
         except ClientError as e:
             print(e.response["Error"])
-            raise ClientError("[JOB TERMINATE REASON] 'json not loaded.'")
+            raise FileNotFoundError("[JOB TERMINATE REASON] 'submit file {} could not be loaded from bucket {}'".format(key,bucket_name))
         
         ## Machine formatted fields (error only available in lambda) 
         ## These next three fields check that the submit file is correctly formatted
@@ -88,7 +92,7 @@ class Submission_dev():
             self.logger.append(msg)
             self.logger.printlatest()
             self.logger.write()
-            msg = "ANALYSIS VERSION ID: {}".format(os.environ['versionid'].split("\n")[0])
+            msg = "ANALYSIS VERSION ID: {}".format(os.environ['versionid'].split("\n")[1])
             self.logger.append(msg)
             self.logger.printlatest()
             self.logger.write()
@@ -217,7 +221,20 @@ class Submission_dev():
             cost+= instcost
         
         ## Now compare with budget:
-        budget = float(os.environ["MAXCOST"])
+        try:
+            budget = float(utilsparamssm.get_budget_parameter(self.path,self.bucket_name))
+        except ClientError as e:    
+            try:
+                assert e.response["Error"]["Code"] == "ParameterNotFound"
+                budget = float(os.environ["MAXCOST"])
+                message = "        [Internal (get_costmonitoring)] Customized budget not found. Using default budget value of {}".format(budget)
+                self.logger.append(message)
+                self.logger.printlatest()
+            except:    
+                raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to get budget.")
+        except Exception:    
+            raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to get budget.")
+            
 
         if cost < budget:
             message = "        [Internal (get_costmonitoring)] Incurred cost so far: ${}. Remaining budget: ${}".format(cost,budget-cost)
