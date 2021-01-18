@@ -59,6 +59,8 @@ def put_budget_parameter(groupname,analysisname,value,overwrite = True):
 def get_budget_parameter(groupname,analysisname):
     """ Get the assigned value of the user's budget parameter. Has the form /neurocaas/budgets/groupname/analysisname
 
+    :param groupname: the name of the user group for which we are retrieving the budget parameter.
+    :param analysisname: the name of the analysis bucket for which we are retrieving a budget.
     """
     paramname = budgetname.format(g=groupname,a =analysisname)
     response = ssm_client.get_parameter(
