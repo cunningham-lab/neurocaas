@@ -145,15 +145,6 @@ def check_instances():
         pytest.fail("Uncleaned instances!")
 
 @pytest.fixture
-def set_ssm_client(monkeypatch):
-    """Use SSM to set budget lower than the tolerable value.
-
-    """
-    session = localstack_client.session.Session()
-    ssm_client = session.client("ssm")
-    monkeypatch.setattr(ssm, "ssm_client", session.client("ssm")) ## TODO I don't think these are scoped correctly w/o a context manager.
-
-@pytest.fixture
 def set_ssm_budget_under(monkeypatch):
     """Use SSM to set budget lower than the tolerable value.
 
