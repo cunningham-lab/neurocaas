@@ -61,6 +61,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install aws-sam-cli==0.53.0 
+          pip install localstack==0.12.3
           pip install ./ 
           sudo apt-get install jq
 

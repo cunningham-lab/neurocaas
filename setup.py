@@ -13,6 +13,8 @@ setuptools.setup(
         long_description_content_type = "test/markdown", 
         url = "https://github.com/cunningham-lab/ctn_lambda",
         packages = setuptools.find_packages(),
+        include_package_data=True,
+        package_data={"ncap_iac":["*.json"]}
         classifiers = [
             "License :: OSI Approved :: MIT License"],
         python_requires=">3.6",
