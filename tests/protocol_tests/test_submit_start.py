@@ -117,8 +117,6 @@ def setup_testing_bucket(monkeypatch):
             obj = s3_client.get_object(Bucket = bucket_name,Key = os.path.join(user_name,sk))
         s3_client.get_object(Bucket = bucket_name,Key="logs/test_user/i-0ff308d5c9b5786f3.json")    
     except ClientError:    
-        print("oops")
-        raise
         ## Write data files
         s3_client.create_bucket(Bucket = bucket_name)
         for sk in subkeys:
