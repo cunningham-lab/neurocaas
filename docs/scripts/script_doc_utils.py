@@ -1,7 +1,10 @@
 ## Module to help incorporate active documentation into your work framework. Initialize documents, embed images, create tables, etc. 
 import pathlib
+from inspect import currentframe,getframeinfo
+import pickle
 import __main__
 import os
+import sys
 from collections import OrderedDict
 import datetime
 import matplotlib.pyplot as plt
@@ -30,8 +33,6 @@ def initialize_doc(linkdict = None):
             assert os.path.exists(os.path.join(pathname,filename+".md")), ("The file {}.md does not exist in the script_docs folder.".format(filename))
             file_text = "{} file: ".format(l)+mdFile.new_inline_link(text = filename,link = "./{}.md".format(filename))
             mdFile.new_line(file_text,align = linklocs[l],bold_italics_code = 'b')
-
-
 
     return mdFile
 
@@ -100,3 +101,90 @@ def insert_vectors_as_table(md,vectors,labels):
     veclist.extend(flatlist)
     md.new_line("  \n")
     md.new_table(columns = nb,rows = length+1,text = veclist,text_align = "center")
+
+## Let's do some advanced logging with context managers. We would like a nice way to print code that is currently being run, or return the relevant variables. Taken from https://stackoverflow.com/questions/32163436/python-decorator-for-printing-every-line-executed-by-a-function/32261446#32261446 
+def debug_decorator(func):
+    """Debug decorator to call function within the debug context.
+    """
+    def decorated_func(*args,**kwargs):
+        with debug_context(func.__name__):
+            return_value = func(*args,**kwargs)
+        return return_value
+    return decorated_func
+
+class debug_context():
+    """Class implementing a debugging context manager to get information about code as it runs. 
+
+    """
+    def __init__(self,name):
+        self.name = name
+
+    def __enter__(self):
+        print("Entering debug context")
+        sys.settrace(self.trace_calls)
+
+    def __exit__(self,*args,**kwargs):
+        sys.settrace(None)
+
+    def trace_calls(self,frame,event,arg):
+        if event != 'call':
+            return
+        elif frame.f_code.co_name != self.name:
+            return
+        return self.trace_lines
+
+    def trace_lines(self,frame,event,arg):
+        if event not in ['line','return']:
+            return
+
+        co = frame.f_code
+        func_name = co.co_name
+        line_no = frame.f_lineno
+        filename = co.co_filename
+        local_vars = frame.f_locals
+        print ('  {0} {1} {2} locals: {3}'.format(func_name, 
+                                                  event,
+                                                  line_no, 
+                                                  local_vars))
+    
+def insert_code_from_file(md,filepath,startline,endline = None,language = "python"):
+    """Function to read certain lines of code in from other files and insert them into the given md file.  
+
+    :param md: the markdown document we will insert into. 
+    :param filepath: path to the file from which we are reading code.  
+    :param startline: the line number at which to start reading code. If endline is not given, we will only read this line. 
+    :param endline: the line number at which to finish reading code. Assume python list indexing syntax.  
+    :param language: the language to assume when embedding code into markdown. 
+    """
+    assert os.path.exists(filepath),"file must exist"
+    assert type(startline) == int
+    if endline is None:
+        endline = startline+1
+    with open(filepath,'r') as f:
+        lines = [line.rstrip() for line in f][startline:endline]
+        sep = "\n"
+        linestring = sep.join(lines)
+
+    md.insert_code(linestring,language = language)
+
+class md_context():
+    """Abstract class implementing a general context to get information about code as it runs. 
+
+    """
+    def __init__(self,md):
+        self.md = md
+        self.startframe = None
+        self.endframe = None
+
+    def __enter__(self):
+        print("Entering logging context")
+        framinfo = getframeinfo(currentframe().f_back)
+        self.startline = framinfo.lineno
+        self.filename = framinfo.filename 
+
+    def __exit__(self,*args,**kwargs):
+        framinfo = getframeinfo(currentframe().f_back)
+        self.endline = framinfo.lineno
+        insert_code_from_file(self.md,self.filename,self.startline,self.endline,language = "python")
+
+

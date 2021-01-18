@@ -1,0 +1,847 @@
+{
+    "drvae-models": {
+        "bucket_name": "drvae-models",
+        "users": {}
+    },
+    "epi-ncap-web": {
+        "bucket_name": "epi-ncap-web",
+        "users": {
+            "cunninghamlab": {
+                "username": "cunninghamlab",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0.033188888888888886,
+                    "July": 0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 10300.0,
+                    "July": 0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "examplegroup2": {
+                "username": "examplegroup2",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0.46690622222222233,
+                    "July": 0.027679999999999996,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 13381.0,
+                    "July": 519.0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "jacktest2": {
+                "username": "jacktest2",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 0,
+                    "August": 0.03024,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 0,
+                    "August": 567.0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "reviewers": {
+                "username": "reviewers",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 2.4970102222222232,
+                    "July": 2.5442666666666676,
+                    "August": 0.7278933333333334,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 56392.0,
+                    "July": 47705.0,
+                    "August": 13648.0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "testuserorg1": {
+                "username": "testuserorg1",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 0,
+                    "August": 0.0216,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 0,
+                    "August": 405.0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            }
+        }
+    },
+    "caiman-ncap-web": {
+        "bucket_name": "caiman-ncap-web",
+        "users": {
+            "columbianeurotheory": {
+                "username": "columbianeurotheory",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 0.3157333333333333,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 370.0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "polleuxlab": {
+                "username": "polleuxlab",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 0.3182933333333333,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 373.0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "reviewers": {
+                "username": "reviewers",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 6.136482777777776,
+                    "July": 4.783226666666667,
+                    "August": 0.8004266666666666,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 8840.0,
+                    "July": 6112.0,
+                    "August": 938.0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "siegelbaumlab": {
+                "username": "siegelbaumlab",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 0,
+                    "August": 0.79616,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 0,
+                    "August": 933.0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            }
+        }
+    },
+    "dlc-ncap-web": {
+        "bucket_name": "dlc-ncap-web",
+        "users": {
+            "bendeskylab": {
+                "username": "bendeskylab",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 34.71068500000001,
+                    "August": 3.2835500000000004,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 65076.0,
+                    "August": 3863.0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "henlab": {
+                "username": "henlab",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 0.4986525,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 759.0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "reviewers": {
+                "username": "reviewers",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 43.799225000000035,
+                    "July": 0.6661875,
+                    "August": 0.19261,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 53028.0,
+                    "July": 1110.0,
+                    "August": 412.0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "sawtelllab": {
+                "username": "sawtelllab",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 0.31025,
+                    "August": 1183.5834775000005,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 365.0,
+                    "August": 1403326.0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "siegelbaumlab": {
+                "username": "siegelbaumlab",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 0,
+                    "August": 0.6255999999999999,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 0,
+                    "August": 736.0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            }
+        }
+    },
+    "pmd-ncap-web": {
+        "bucket_name": "pmd-ncap-web",
+        "users": {
+            "achurchlandlab": {
+                "username": "achurchlandlab",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 0.5486933333333333,
+                    "August": 0.28501333333333334,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 643.0,
+                    "August": 334.0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "debuggers": {
+                "username": "debuggers",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 5.31712,
+                    "July": 0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 6231.0,
+                    "July": 0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "reviewers": {
+                "username": "reviewers",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 1.8432,
+                    "July": 0.27392,
+                    "August": 0.30293333333333333,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 2160.0,
+                    "July": 321.0,
+                    "August": 355.0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            }
+        }
+    },
+    "locanmf-ncap-web": {
+        "bucket_name": "locanmf-ncap-web",
+        "users": {
+            "achurchlandlab": {
+                "username": "achurchlandlab",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 0.0275,
+                    "August": 0.1841125,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 200.0,
+                    "August": 1339.0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "debuggers": {
+                "username": "debuggers",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0.27761250000000004,
+                    "July": 0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 2019.0,
+                    "July": 0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "reviewers": {
+                "username": "reviewers",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 1.8921750000000002,
+                    "July": 0.185125,
+                    "August": 0.3732375,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 14463.0,
+                    "July": 1481.0,
+                    "August": 2850.0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            }
+        }
+    },
+    "dlc-ncap-stable": {
+        "bucket_name": "dlc-ncap-stable",
+        "users": {
+            "bendeskylabdlcdevelop": {
+                "username": "bendeskylabdlcdevelop",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 36.606950000000005,
+                    "June": 0,
+                    "July": 0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 43067.0,
+                    "June": 0,
+                    "July": 0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "henlabdlcdevelop": {
+                "username": "henlabdlcdevelop",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 1.0302,
+                    "July": 0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 1212.0,
+                    "July": 0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "sawtelllabdlcdevelop": {
+                "username": "sawtelllabdlcdevelop",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 8.7822,
+                    "June": 0,
+                    "July": 0,
+                    "August": 2101.7678,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 10332.0,
+                    "June": 0,
+                    "July": 0,
+                    "August": 2472668.0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            }
+        }
+    },
+    "yass-ncap-stable": {
+        "bucket_name": "yass-ncap-stable",
+        "users": {
+            "carcealabyassdev": {
+                "username": "carcealabyassdev",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 0.5042133333333333,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 0,
+                    "June": 0,
+                    "July": 464.0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "sawtelllabyassdevelop": {
+                "username": "sawtelllabyassdevelop",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 8.43688,
+                    "June": 0,
+                    "July": 0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 7764.0,
+                    "June": 0,
+                    "July": 0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            },
+            "yassgeneralusers": {
+                "username": "yassgeneralusers",
+                "cost": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 1.3159533333333333,
+                    "June": 0,
+                    "July": 0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                },
+                "duration": {
+                    "January": 0,
+                    "February": 0,
+                    "March": 0,
+                    "April": 0,
+                    "May": 1211.0,
+                    "June": 0,
+                    "July": 0,
+                    "August": 0,
+                    "September": 0,
+                    "October": 0,
+                    "November": 0,
+                    "December": 0
+                }
+            }
+        }
+    }
+}

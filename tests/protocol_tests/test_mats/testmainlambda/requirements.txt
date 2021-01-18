@@ -1,0 +1,4 @@
+requests==2.22.0
+pyyaml==5.1
+boto3==1.9.199
+docker==4.2.1

@@ -1,0 +1,43 @@
+{
+    "PipelineName": "cianalysispermastack",
+    "REGION": "us-east-1",
+    "STAGE": "websubstack",
+    "Lambda": {
+        "CodeUri": "../../protocols",
+        "Handler": "submit_start.handler_develop",
+        "Launch": true,
+        "LambdaConfig": {
+            "AMI": "ami-061f98a1f90c0d6fd",
+            "INSTANCE_TYPE": "t2.micro",
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
+            "IAM_ROLE": "SSMRole",
+            "KEY_NAME": "testkeystack-custom-dev-key-pair",
+            "WORKING_DIRECTORY": "~/bin",
+            "COMMAND": "cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
+            "SHUTDOWN_BEHAVIOR": "terminate",
+            "CONFIG": "config.yaml",
+            "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+            "EXECUTION_TIMEOUT": 180,
+            "SSM_TIMEOUT": 172000,
+            "LAUNCH": true,
+            "LOGFILE": "lambda_log.txt",
+            "DEPLOY_LIMIT": 100,
+            "MAXCOST": "300",
+            "MONITOR": true
+        }
+    },
+    "UXData": {
+        "Affiliates": [
+            {
+                "AffiliateName": "traviscipermagroup",
+                "UserNames": [
+                    "cipermauser1",
+                    "cipermauser2"
+                ],
+                "UserInput": true,
+                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
+            }
+        ]
+    }
+}

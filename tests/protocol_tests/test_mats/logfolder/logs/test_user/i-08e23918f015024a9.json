@@ -1,0 +1,23 @@
+{
+  "instance-id": "i-08e23918f015024a9",
+  "instance-type": "p3.2xlarge",
+  "spot": true,
+  "price": 1.53,
+  "databucket": "dlc-ncap-web",
+  "datapath": [
+    "sawtelllab/inputs/video_1.avi",
+    "sawtelllab/inputs/video_10.avi",
+    "sawtelllab/inputs/video_2.avi",
+    "sawtelllab/inputs/video_3.avi",
+    "sawtelllab/inputs/video_4.avi",
+    "sawtelllab/inputs/video_5.avi",
+    "sawtelllab/inputs/video_6.avi",
+    "sawtelllab/inputs/video_7.avi",
+    "sawtelllab/inputs/video_8.avi",
+    "sawtelllab/inputs/video_9.avi"
+  ],
+  "configpath": "sawtelllab/configs/NeuroCAAS_DLC_test.yaml",
+  "jobpath": "sawtelllab/results/job__dlc-ncap-web_1595220966",
+  "start": "2020-07-20T04:56:38Z",
+  "end": "2020-07-20T05:08:52Z"
+}
