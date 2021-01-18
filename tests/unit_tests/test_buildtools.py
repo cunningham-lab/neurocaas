@@ -220,6 +220,7 @@ class Test_Build_Blueprint():
     """
     def test_init(self,pytestconfig):
         os.chdir(os.path.join(pytestconfig.rootdir,"ncap_iac/utils"))
-        z = subprocess.call(["python","dev_builder.py","../../tests/unit_tests/fixture_dir/fixture_stack/stack_config_template.json","webdev"])
+        z = subprocess.call(["python","dev_builder.py","../../tests/unit_tests/fixture_dir/fixture_stack/stack_config_template.json","websubstack"])
+        assert z == 0
 
 
