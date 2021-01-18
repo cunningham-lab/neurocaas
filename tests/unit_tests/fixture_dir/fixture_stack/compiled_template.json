@@ -1,0 +1,34 @@
+{
+    "Resources": {
+        "PipelineMainBucket": {
+            "Properties": {
+                "AccessControl": "Private",
+                "BucketName": "testcorsconfig",
+                "CorsConfiguration": {
+                    "CorsRules": [
+                        {
+                            "AllowedHeaders": [
+                                "*"
+                            ],
+                            "AllowedMethods": [
+                                "GET",
+                                "PUT",
+                                "POST",
+                                "DELETE"
+                            ],
+                            "AllowedOrigins": [
+                                "*"
+                            ],
+                            "ExposedHeaders": [
+                                "ETag"
+                            ],
+                            "MaxAge": 3000
+                        }
+                    ]
+                }
+            },
+            "Type": "AWS::S3::Bucket"
+        }
+    },
+    "Transform": "AWS::Serverless-2016-10-31"
+}

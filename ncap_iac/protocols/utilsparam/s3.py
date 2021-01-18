@@ -9,7 +9,7 @@ from botocore.errorfactory import ClientError
 #####from .config import REGION, LOGDIR, LOGFILE
 
 # Boto3 Resources & Clients
-s3_resource = boto3.resource('s3')
+s3_resource = boto3.resource('s3', region_name=os.environ['REGION'])
 s3_client = boto3.client('s3', region_name=os.environ['REGION'])
 
 
@@ -33,8 +33,10 @@ def mkdir(bucket, path, dirname):
             s3_client.put_object(Bucket=bucket, Key=new_path)
         ## It's possible that the bucket itself does not exist:
         except ClientError as e:
-            e.response["Error"]["Code"] == "NoSuchBucket"
-            raise Exception("bucket with given name not found")
+            if e.response["Error"]["Code"] == "NoSuchBucket":
+                raise Exception("bucket with given name not found")
+            else:
+                raise Exception(e.response["Error"]["Code"])
     return new_path
 
 def mkdir_reset(bucketname, path, dirname):
@@ -83,7 +85,6 @@ def delbucket(bucket):
     """
     bucket = s3_resource.Bucket(bucket)
     for obj in bucket.objects.all():
-        print(obj.key,'keys')
         s3_resource.Object(bucket.name, obj.key).delete()
  
 def ls(bucket, path):
@@ -169,6 +170,9 @@ def load_json(bucket_name, key):
     """
     try:
         file_object = s3_resource.Object(bucket_name, key)
+    except ClientError as e:
+        raise ClientError("S3 resource object declaration (and first aws api call) failed.")
+    try:
         raw_content = file_object.get()['Body'].read().decode('utf-8')
         json_content = json.loads(raw_content)
     except ValueError as ve:

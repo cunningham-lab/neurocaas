@@ -2,6 +2,9 @@
 Test class for Job Manager utils. Test case for botocore stubbing. 
 """
 from ncap_iac.protocols.utilsparam.env_vars import *
+import boto3
+from botocore.exceptions import ClientError
+import localstack_client.session
 import ncap_iac.protocols.utilsparam.s3 as s3
 import pytest 
 from botocore.stub import Stubber
@@ -12,121 +15,112 @@ from .test_fixtures import return_json_read, return_json_malformed,return_yaml_r
 from .test_s3_mock_resources import make_mock_bucket,make_mock_object,make_mock_file_object
 
 
-@pytest.fixture(autouse=True)
-def s3_stub():
-    with Stubber(s3.s3_client) as stubber:
-        yield stubber
-        stubber.assert_no_pending_responses()
+@pytest.fixture(autouse = True)
+def boto3_localstack_s3patch(monkeypatch):
+    session_ls = localstack_client.session.Session()
+    monkeypatch.setattr(s3, "s3_client", session_ls.client("s3"))
+    monkeypatch.setattr(s3, "s3_resource", session_ls.resource("s3"))
 
+def create_mock_bucket(bucket_name):
+    session_ls = localstack_client.session.Session()
+    s3_localclient = session_ls.client("s3") 
+    s3_localclient.create_bucket(Bucket = bucket_name)
 
-@pytest.fixture
-def create_good_submission_args():
-    with open("../utils/simevents/s3_putevent_pytest.json") as f:
-        event = json.load(f)
-        record = event["Records"][0]
-        bucket_name = record["s3"]["bucket"]["name"]
-        key = record["s3"]["object"]["key"] 
-        time = record["eventTime"]
-    return bucket_name,key,time 
+def list_bucket(bucket_name):
+    session_ls = localstack_client.session.Session()
+    s3_localresource = session_ls.resource("s3") 
+    bucket = s3_localresource.Bucket(bucket_name)
+    keys = []
+    for obj in bucket.objects.all():
+        keys.append(obj.key)
+    return keys
+
+def empty_and_delete_bucket(bucket_name):
+    session_ls = localstack_client.session.Session()
+    s3_localresource = session_ls.resource("s3") 
+    bucket = s3_localresource.Bucket(bucket_name)
+    for key in bucket.objects.all():
+        key.delete()
+    response = bucket.delete()
+    
 
 class Test_s3_base():
     """ Tests the basic functions used to interact directly with the boto3 api. 
 
     """
-    def test_mkdir_obj_exists(self,s3_stub):
-        bucket_name = "example_bucket"
-        path = "foo"
-        dirname = "bar"
-        s3_stub.add_response("head_object",expected_params={"Bucket":bucket_name,"Key":os.path.join(path,dirname,"")},service_response = {})
-        new_path = s3.mkdir(bucket=bucket_name,path=path,dirname=dirname) 
+    @classmethod
+    def setup_class(cls):
+        cls.bucket_name = "localstack-test-bucket"
+        create_mock_bucket(cls.bucket_name)
+        session_ls = localstack_client.session.Session()
+        cls.s3_client = session_ls.client("s3")
+        cls.s3_resource = session_ls.resource("s3")
+    
+    @classmethod
+    def teardown_class(cls):
+        empty_and_delete_bucket(cls.bucket_name)
+
+    def test_mkdir_obj_exists(self):
+        path = "test0/to"
+        dirname = "existing"
+        self.s3_client.put_object(Bucket = self.bucket_name,Key = os.path.join(path,dirname))
+        new_path = s3.mkdir(bucket=self.bucket_name,path=path,dirname=dirname) 
+        assert new_path == os.path.join(path,dirname,"")
+        
+    def test_mkdir_obj_not_exists(self):
+        path = "test1/to"
+        dirname = "nonexisting"
+        new_path = s3.mkdir(bucket=self.bucket_name,path=path,dirname=dirname) 
         assert new_path == os.path.join(path,dirname,"")
 
-    def test_mkdir_obj_not_exists(self,s3_stub):
-        bucket_name = "example_bucket"
-        path = "foo"
-        dirname = "bar"
-        s3_stub.add_client_error("head_object",service_error_code = "NoSuchKey")
-        s3_stub.add_response("put_object",expected_params={"Bucket":bucket_name,"Key":os.path.join(path,dirname,"")},service_response = {})
-        new_path = s3.mkdir(bucket=bucket_name,path=path,dirname=dirname) 
-        assert new_path == os.path.join(path,dirname,"")
-
-    def test_mkdir_bucket_not_exists(self,s3_stub):
-        bucket_name = "example_bucket"
-        path = "foo"
-        dirname = "bar"
-        s3_stub.add_client_error("head_object",service_error_code = "NoSuchBucket",service_message ='The specified bucket does not exist.')
-        s3_stub.add_client_error("put_object",expected_params = {"Bucket":bucket_name,"Key":os.path.join(path,dirname,"")},service_error_code = "NoSuchBucket",service_message ='The specified bucket does not exist.')
+    def test_mkdir_bucket_not_exists(self):
+        bucket_name = "localstack-nonexistent-bucket"
+        path = "test2/to"
+        dirname = "existing"
         with pytest.raises(Exception):
-            assert s3.mkdir(bucket=bucket_name,path=path,dirname=dirname) 
+            assert s3.mkdir(bucket=bucket_name,path=self.path,dirname=self.dirname) 
 
-    def test_mkdir_reset_obj_exists(self,s3_stub):
-        bucket_name = "example_bucket"
-        path = "foo"
-        dirname = "bar"
-        s3_stub.add_response("head_object",expected_params={"Bucket":bucket_name,"Key":os.path.join(path,dirname,"")},service_response = {})
-        s3_stub.add_response("put_object",expected_params={"Bucket":bucket_name,"Key":os.path.join(path,dirname,"")},service_response = {})
-        mbucket = make_mock_bucket([{"key":os.path.join(path,dirname,"")}],filter_path = "key")
-        with patch.object(s3.s3_resource,"Bucket",return_value=mbucket) as mock_method:
-            new_path = s3.mkdir_reset(bucketname=bucket_name,path = path,dirname=dirname)
-            assert new_path == os.path.join(path,dirname,"")
+    def test_mkdir_reset_obj_exists(self):
+        path = "test3/to"
+        dirname = "existing"
+        self.s3_client.put_object(Bucket = self.bucket_name,Key = os.path.join(path,dirname))
+        new_path = s3.mkdir_reset(bucketname=self.bucket_name,path = path,dirname=dirname)
+        assert new_path == os.path.join(path,dirname,"")
 
-    def test_mkdir_reset_obj_not_exists(self,s3_stub):
-        bucket_name = "example_bucket"
-        path = "foo"
-        dirname = "bar"
-        s3_stub.add_client_error("head_object",service_error_code = "NoSuchKey")
-        s3_stub.add_response("put_object",expected_params={"Bucket":bucket_name,"Key":os.path.join(path,dirname,"")},service_response = {})
-        mbucket = make_mock_bucket([{"key":"some/other/path"}],filter_path = "key")
-        with patch.object(s3.s3_resource,"Bucket",return_value=mbucket) as mock_method:
-            new_path = s3.mkdir_reset(bucketname=bucket_name,path = path,dirname=dirname)
-            assert new_path == os.path.join(path,dirname,"")
+    def test_mkdir_reset_obj_not_exists(self):
+        path = "test4/to"
+        dirname = "nonexisting"
+        new_path = s3.mkdir_reset(bucketname=self.bucket_name,path = path,dirname=dirname)
+        assert new_path == os.path.join(path,dirname,"")
 
-    def test_mkdir_reset_bucket_not_exists(self,s3_stub):
-        bucket_name = "example_bucket"
-        path = "foo"
-        dirname = "bar"
-        s3_stub.add_client_error("head_object",service_error_code = "NoSuchBucket",service_message ='The specified bucket does not exist.')
-        s3_stub.add_client_error("put_object",expected_params = {"Bucket":bucket_name,"Key":os.path.join(path,dirname,"")},service_error_code = "NoSuchBucket",service_message ='The specified bucket does not exist.')
-        mbucket = make_mock_bucket([{"key":"some/other/path"}],filter_path = "key")
-        with patch.object(s3.s3_resource,"Bucket",return_value=mbucket) as mock_method:
-            with pytest.raises(Exception):
-                 assert s3.mkdir_reset(bucketname=bucket_name,path = path,dirname=dirname)
+    def test_mkdir_reset_bucket_not_exists(self):
+        bucket_name = "localstack-nonexistent-bucket"
+        path = "test5/to"
+        dirname = "nonexisting"
+        with pytest.raises(Exception):
+             assert s3.mkdir_reset(bucketname=bucket_name,path = path,dirname=dirname)
 
     def test_deldir(self):
-        mbucket = make_mock_bucket([{"key":"some/given/path"},{"key":"some/other/path"}],filter_path = "some")
-        mobject = make_mock_object({"key":"some/other/path"}) 
-        with patch.object(s3.s3_resource,"Bucket",return_value = mbucket) as mock_bucket_method:
-            with patch.object(s3.s3_resource,"Object",return_value = mobject) as mock_object_method:
-                s3.deldir("mock_bucket_name","path/to/thing")
-                mock_object_method.assert_called()
-            mock_bucket_method.assert_called_once()
+        path = "test6/key"
+        self.s3_client.put_object(Bucket = self.bucket_name,Key = path)
+        all_keys = list_bucket(self.bucket_name) 
+        s3.deldir(self.bucket_name,path)
+        all_keys_post_delete = list_bucket(self.bucket_name) 
+        all_keys.remove(path)
+        assert all_keys  == all_keys_post_delete 
+
 
     def test_deldir_path_empty(self):
-        mbucket = make_mock_bucket([{"key":"an/given/path"},{"key":"an/other/path"}],filter_path = "some")
-        mobject = make_mock_object({"key":"some/other/path"}) 
-        with patch.object(s3.s3_resource,"Bucket",return_value = mbucket) as mock_bucket_method:
-            with patch.object(s3.s3_resource,"Object",return_value = mobject) as mock_object_method:
-                s3.deldir("mock_bucket_name","path/to/thing")
-                mock_object_method.assert_not_called()
-            mock_bucket_method.assert_called_once()
-
-    def test_deldir_bucket_empty(self):
-        mbucket = make_mock_bucket([],filter_path = "some")
-        mobject = make_mock_object({"key":"some/other/path"}) 
-        with patch.object(s3.s3_resource,"Bucket",return_value = mbucket) as mock_bucket_method:
-            with patch.object(s3.s3_resource,"Object",return_value = mobject) as mock_object_method:
-                s3.deldir("mock_bucket_name","path/to/thing")
-                mock_object_method.assert_not_called()
-            mock_bucket_method.assert_called_once()
+        path = "test7/key"
+        all_keys = list_bucket(self.bucket_name) 
+        s3.deldir(self.bucket_name,path)
+        all_keys_post_delete = list_bucket(self.bucket_name) 
+        assert all_keys  == all_keys_post_delete 
 
     def test_delbucket(self):
-        mbucket = make_mock_bucket([{"key":"some/given/path"},{"key":"some/other/path"}],filter_path = "some")
-        mobject = make_mock_object({"key":"some/other/path"}) 
-        with patch.object(s3.s3_resource,"Bucket",return_value = mbucket) as mock_bucket_method:
-            with patch.object(s3.s3_resource,"Object",return_value = mobject) as mock_object_method:
-                s3.delbucket("mock_bucket_name")
-                mock_object_method.assert_called()
-            mock_bucket_method.assert_called_once()
+        create_mock_bucket("localstack-todelete")
+        self.s3_client.put_object(Bucket = self.bucket_name,Key = path)
+        s3.delbucket("mock_bucket_name")
 
     def test_delbucket_bucket_empty(self):
         mbucket = make_mock_bucket([],filter_path = "some")

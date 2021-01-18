@@ -1,11 +1,12 @@
 from troposphere import Ref,Parameter,GetAtt,Template,Output,Join,Split,Sub,AWS_STACK_NAME,AWS_REGION
-from troposphere.s3 import Bucket,Rules,S3Key,Filter
+from troposphere.s3 import Bucket,Rules,S3Key,Filter,CorsConfiguration,CorsRules
 from troposphere.iam import User,Group,Policy,ManagedPolicy,LoginProfile,AccessKey,UserToGroupAddition,Role
 from troposphere.serverless import Function,Environment
 from troposphere.awslambda import Permission
 from troposphere.logs import LogGroup
 from troposphere.cloudformation import CustomResource,Stack 
-from lambda_policies import lambda_basepolicy,lambda_writeS3
+from ncap_iac.utils.lambda_policies import lambda_basepolicy,lambda_writeS3
+
 import sys
 import json 
 import subprocess
@@ -305,7 +306,7 @@ class NeuroCaaSTemplate(object):
         # 2. 
         ## Now add to a lambda function: 
         function = Function('FigLambda',
-                CodeUri = '../../protocols',
+                CodeUri = self.config['Lambda']['CodeUri'],
                 Runtime = 'python3.6',
                 Handler = 'log.monitor_updater',
                 Description = 'Lambda Function logging start/stop for NCAP',
@@ -403,7 +404,7 @@ class DevTemplate(NeuroCaaSTemplate):
 
         ## Now we need to write a lambda function that actually does the work:  
         mkfunction = Function("S3PutObjectFunction",
-                              CodeUri="../../protocols",
+                              CodeUri=self.config['Lambda']['CodeUri'],
                               Description= "Puts Objects in S3",
                               Handler="helper.handler_mkdir",
                               Environment = Environment(Variables=lambdaconfig),
@@ -412,7 +413,7 @@ class DevTemplate(NeuroCaaSTemplate):
                               Timeout=30)
         mkfunction_attached = template.add_resource(mkfunction)
         delfunction = Function("S3DelObjectFunction",
-                               CodeUri="../../protocols",
+                               CodeUri=self.config['Lambda']['CodeUri'],
                                Description= "Deletes Objects from S3",
                                Handler="helper.handler_delbucket",
                                Environment = Environment(Variables=lambdaconfig),
@@ -580,7 +581,7 @@ class DevTemplate(NeuroCaaSTemplate):
 
 class WebDevTemplate(NeuroCaaSTemplate):
     """
-    Dev mode pipelines are not hooked up to all users, and explicitly grant individuals access to a dedicated analysis bucket. Input locations are localized to the analysis bucket in the dev case.  
+    Dev mode pipelines are not hooked up to all users, and explicitly grant individuals access to a dedicated analysis bucket. Input locations are localized to the analysis bucket in the dev case. NOTE 10/30: On visual inspection, it appears that the only difference between this and dev template is in the ("generate_usergroup") function. All other functions besides initialization look to be identical to DevTemplate. This might be worth removing by first inheriting from DevTemplate instead.  
 
     inputs: 
     filename (str): the path to the stack_config_template.json blueprint that you want to deploy.
@@ -992,6 +993,25 @@ class WebSubstackTemplate(NeuroCaaSTemplate):
                 )         
         self.template.add_resource(function)
 
+    def add_bucket(self):
+        """Set up CORS configuration on bucket if deploying in websubstack mode.
+
+        """
+        corsrule = CorsRules(AllowedHeaders = ["*"],AllowedMethods = ["GET","PUT","POST","DELETE"],AllowedOrigins=["*"],ExposedHeaders=["ETag"],MaxAge=3000)
+        corsconfig = CorsConfiguration(CorsRules = [corsrule])
+        bucket_id = "PipelineMainBucket"
+        bucketname = self.config['PipelineName']
+        ## First check that the bucketname is valid: 
+        assert type(bucketname) == str,"bucketname must be string"
+        lowercase = bucketname.islower()
+        underscore = '_' in bucketname 
+        assert (lowercase and not(underscore)),'string must follow s3 bucket style'
+        
+        ## Now we can add this resource: 
+        bucket = Bucket(bucket_id,AccessControl = 'Private',BucketName = bucketname,CorsConfiguration=corsconfig)
+        bucket_attached = self.template.add_resource(bucket)
+        return bucket_attached,bucketname,bucket_id 
+
 
 ## Make a parametrized version of the user template.  
 class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
@@ -1242,7 +1262,7 @@ if __name__ == "__main__":
             print(temp.template.to_json(),file = f)
     elif mode == "webdev":
         print("webdev mode")
-        ## Construct a web development mode pipeline. Standardizes user group handling for neatness. 
+        ## Construct a web development mode pipeline. Standardizes user group handling for neatness, adding a suffix to group names to remove naming collisions when adding users to different pipelines.  
         temp =WebDevTemplate(filename)
         with open(dirname+'/'+'compiled_template.json','w') as f:
             print(temp.template.to_json(),file = f)

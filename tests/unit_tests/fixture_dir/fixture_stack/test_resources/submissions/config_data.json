@@ -1,0 +1,26 @@
+{
+    "0": {
+        "path": "traviscipermagroup/configs/config_broken.json",
+        "code": false
+    },
+    "1": {
+        "path": "traviscipermagroup/configs/config_None_None.json",
+        "code": true
+    },
+    "2": {
+        "path": "traviscipermagroup/configs/config_None_10.json",
+        "code": true
+    },
+    "3": {
+        "path": "traviscipermagroup/configs/config_10_10.json",
+        "code": true
+    },
+    "4": {
+        "path": "traviscipermagroup/configs/config_10_None.json",
+        "code": true
+    },
+    "5": {
+        "path": "traviscipermagroup/configs/config_fake.json",
+        "code": false
+    }
+}

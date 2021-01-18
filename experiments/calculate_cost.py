@@ -435,7 +435,7 @@ def plot_time(pipeline,compute= True):
         timeint = 2800 
     else:
         raise NotImplementedError("This option does not exist yet.")
-    legend = ['Local','NeuroCAAS']
+    legend = ['On Premise','NeuroCAAS']
     breakout = ['Upload','Compute']
     ## Save to a file because it's easy. 
     tablename = os.path.join(pipeline,pipeline+'timelog.txt')
@@ -585,7 +585,7 @@ def plot_LCC(pipeline,pricing = "PowerMatch",compute = True):
     ## Additional information w.r.t. plotting:
     costlegend = ['NeuroCAAS','NeuroCAAS Save']
     breakout = ['Upload','Compute']
-    timelegend = ['Local','NeuroCAAS']
+    timelegend = ['On Premise','NeuroCAAS']
     ## Save to a file because it's easy. 
     costfilename = os.path.join(pipeline,pipeline+'costlog.txt')
     timefilename = os.path.join(pipeline,pipeline+'timelog.txt')
@@ -755,7 +755,7 @@ def plot_LUC(pipeline,pricing = "PowerMatch"):
     ## Additional information w.r.t. plotting:
     costlegend = ['NeuroCAAS','NeuroCAAS Save']
     breakout = ['Upload','Compute']
-    timelegend = ['Local','NeuroCAAS']
+    timelegend = ['On Premise','NeuroCAAS']
     ## Save to a file because it's easy. 
     costfilename = pipeline+'costlog.txt'
     timefilename = pipeline+'timelog.txt'
@@ -778,7 +778,7 @@ def plot_LUC(pipeline,pricing = "PowerMatch"):
     crossover = tco_weekly_tiled.T/cost_df.values
     ## Get the local timings: 
     compute = time_df["Compute"]
-    local_compute = [compute["{} Local".format(x)] for x in xlabels]
+    local_compute = [compute["{} On Premise".format(x)] for x in xlabels]
     print(local_compute)
     print(time_df)
     ypositions = [21,11,1]

@@ -57,8 +57,12 @@ class Submission_dev():
             ## If the filename is just "submit.json, we just don't append anything to the job name. "
             submit_name = ""
 
-        #### Parse submit file 
-        submit_file = utilsparams3.load_json(bucket_name, key)
+        try:
+            #### Parse submit file 
+            submit_file = utilsparams3.load_json(bucket_name, key)
+        except ClientError as e:
+            print(e.response["Error"])
+            raise ClientError("[JOB TERMINATE REASON] 'json not loaded.'")
         
         ## Machine formatted fields (error only available in lambda) 
         ## These next three fields check that the submit file is correctly formatted
@@ -73,35 +77,39 @@ class Submission_dev():
         self.jobname = "job_{}_{}_{}".format(submit_name,bucket_name,self.timestamp)
         jobpath = os.path.join(self.path,os.environ['OUTDIR'],self.jobname)
         self.jobpath = jobpath
-        ## And create a corresponding directory in the submit area. 
-        create_jobdir  = utilsparams3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
+        try:
+            ## And create a corresponding directory in the submit area. 
+            create_jobdir  = utilsparams3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
 
-        ## Create a logging object and write to it. 
-        ## a logger for the submit area.  
-        self.logger = utilsparams3.JobLogger_demo(self.bucket_name, self.jobpath)
-        msg = "REQUEST START TIME: {} (GMT)".format(str(self.logger.basetime)[:-4])
-        self.logger.append(msg)
-        self.logger.printlatest()
-        self.logger.write()
-        msg = "ANALYSIS VERSION ID: {}".format(os.environ['versionid'].split("\n")[0])
-        self.logger.append(msg)
-        self.logger.printlatest()
-        self.logger.write()
-        msg = "JOB ID: {}".format(self.timestamp)
-        self.logger.append(msg)
-        self.logger.printlatest()
-        self.logger.write()
-        self.logger._logs.append("\n ")
-        msg = "[Job Manager] Detected new job: starting up."
-        self.logger.append(msg)
-        self.logger.printlatest()
-        self.logger.write()
-        msg = "        [Internal (init)] Initializing job manager."
-        self.logger.append(msg)
-        self.logger.printlatest()
-        self.logger.write()
-        ########################
-        ## Now parse the rest of the file. 
+            ## Create a logging object and write to it. 
+            ## a logger for the submit area.  
+            self.logger = utilsparams3.JobLogger_demo(self.bucket_name, self.jobpath)
+            msg = "REQUEST START TIME: {} (GMT)".format(str(self.logger.basetime)[:-4])
+            self.logger.append(msg)
+            self.logger.printlatest()
+            self.logger.write()
+            msg = "ANALYSIS VERSION ID: {}".format(os.environ['versionid'].split("\n")[0])
+            self.logger.append(msg)
+            self.logger.printlatest()
+            self.logger.write()
+            msg = "JOB ID: {}".format(self.timestamp)
+            self.logger.append(msg)
+            self.logger.printlatest()
+            self.logger.write()
+            self.logger._logs.append("\n ")
+            msg = "[Job Manager] Detected new job: starting up."
+            self.logger.append(msg)
+            self.logger.printlatest()
+            self.logger.write()
+            msg = "        [Internal (init)] Initializing job manager."
+            self.logger.append(msg)
+            self.logger.printlatest()
+            self.logger.write()
+            ########################
+            ## Now parse the rest of the file. 
+            print("finished logging setup.")
+        except ClientError as e:
+            print("error with logging:", e.response["Error"])
         try:
             self.instance_type = submit_file['instance_type'] # TODO default option from config
         except KeyError as ke: 
@@ -667,7 +675,9 @@ def process_upload_dev(bucket_name, key,time):
     try:
         if os.environ['LAUNCH'] == 'true':
             ## Now check how many datasets we have
+            print("creating submission object")
             submission = Submission_dev(bucket_name, key, time)
+            print("created submission object")
         elif os.environ["LAUNCH"] == 'false':
             raise NotImplementedError("This option not available for configs. ")
         submission.logger.append(donemessage.format(s = step))
@@ -747,7 +757,7 @@ def process_upload_dev(bucket_name, key,time):
         if os.environ["MONITOR"] == "true":
             submission.put_instance_monitor_rule()
         elif os.environ["MONITOR"] == "false":
-            submission.append("        [Internal (monitoring)] Skipping monitor.")
+            submission.logger.append("        [Internal (monitoring)] Skipping monitor.")
         submission.logger.write()
         submission.start_instance()
         submission.logger.write()

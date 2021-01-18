@@ -7,6 +7,7 @@ Suite of tests for the bash script based- build tools that we have written.
 import pytest
 import os 
 import subprocess
+from ncap_iac.utils import dev_builder
 
 """
 Suite of tests to check that new pipelines are configured correctly using configure.sh 
@@ -48,62 +49,60 @@ class TestConfigureBlueprint(ConstructBlueprintBase):
         """
         
         ## Create this folder 
-        os.chdir(os.path.join(pytestconfig.rootdir,"ncap_iac/tests/"))
+        os.chdir(os.path.join(pytestconfig.rootdir,"tests/"))
         self.pathname = "autogen_test_stack"
         currdir = os.getcwd()
-        os.chdir("../ncap_blueprints/iac_utils")
+        os.chdir("../ncap_iac/ncap_blueprints/iac_utils")
         subprocess.call(["bash","configure.sh",self.pathname])
         assert os.path.exists(os.path.join("../",self.pathname))
         assert os.path.exists(os.path.join("../",self.pathname,"stack_config_template.json"))
         os.chdir(currdir)
-        self.tearDown(os.path.join("../ncap_blueprints",self.pathname))
+        self.tearDown(os.path.join("../ncap_iac/ncap_blueprints",self.pathname))
 
     def test_ncap_blueprints_paths_configure(self,pytestconfig):
         """
         Test the basic functionality of configure.sh given a file name and run from the ncap_blueprints directory  
         """
         ## Create this folder 
-        os.chdir(os.path.join(pytestconfig.rootdir,"ncap_iac/tests/"))
+        os.chdir(os.path.join(pytestconfig.rootdir,"tests/"))
         self.pathname = "autogen_test_stack_blueprint"
         ## Try with ncap_blueprints:
         currdir = os.getcwd()
-        os.chdir("../ncap_blueprints")
+        os.chdir("../ncap_iac/ncap_blueprints")
         subprocess.call(["bash","iac_utils/configure.sh",self.pathname])
         assert os.path.exists(self.pathname)
         assert os.path.exists(os.path.join(self.pathname,"stack_config_template.json"))
         os.chdir(currdir)
-        self.tearDown(os.path.join("../ncap_blueprints",self.pathname))
+        self.tearDown(os.path.join("ncap_blueprints",self.pathname))
 
     def test_ncap_iac_paths_configure(self,pytestconfig):
         """
         Test the basic functionality of configure.sh given a file name and run from the ncap_iac directory.  
         """
-        os.chdir(os.path.join(pytestconfig.rootdir,"ncap_iac/tests/"))
+        os.chdir(os.path.join(pytestconfig.rootdir,"tests/"))
         ## Create this folder 
         self.pathname = "autogen_test_stack_iac"
         ## Try with ncap_iac
         currdir = os.getcwd()
-        os.chdir("../")
-        subprocess.call(["bash","ncap_blueprints/iac_utils/configure.sh",self.pathname])
+        subprocess.call(["bash","../ncap_iac/ncap_blueprints/iac_utils/configure.sh",self.pathname])
         assert os.path.exists(os.path.join("ncap_blueprints/",self.pathname))
         assert os.path.exists(os.path.join("ncap_blueprints/",self.pathname,"stack_config_template.json"))
         os.chdir(currdir)
-        self.tearDown(os.path.join("../ncap_blueprints",self.pathname))
+        self.tearDown(os.path.join("ncap_blueprints",self.pathname))
 
     def test_ncap_pipeline_configure(self,pytestconfig):
         """
         Test the basic functionality of configure.sh given a file name and run from the ncap_iac directory.  
         """
-        os.chdir(os.path.join(pytestconfig.rootdir,"ncap_iac/tests/"))
+        os.chdir(os.path.join(pytestconfig.rootdir,"tests/"))
         ## Create this folder 
         self.pathname = "autogen_test_stack_pipeline"
         ## Make one:
         currdir = os.getcwd()
-        os.chdir("../")
-        subprocess.call(["bash","ncap_blueprints/iac_utils/configure.sh",self.pathname])
+        subprocess.call(["bash","../ncap_iac/ncap_blueprints/iac_utils/configure.sh",self.pathname])
         assert os.path.exists(os.path.join("ncap_blueprints/",self.pathname))
         assert os.path.exists(os.path.join("ncap_blueprints/",self.pathname,"stack_config_template.json"))
-        os.chdir(os.path.join("ncap_blueprints/",self.pathname))
+        os.chdir(os.path.join("../ncap_iac/ncap_blueprints/",self.pathname))
         
         ## Try from inside another pipeline folder. 
         self.pathname2 = "autogen_2_test_stack_blueprint"
@@ -120,7 +119,7 @@ class TestConfigureProfile(ConstructProfileBase):
         """
         Test the basic functionality of configure.sh given a valid file name and run from the iac_utils directory.  
         """
-        os.chdir(os.path.join(pytestconfig.rootdir,"ncap_iac/tests/"))
+        os.chdir(os.path.join(pytestconfig.rootdir,"tests/"))
         ## Create this folder 
         self.pathname = "autogen-test-users"
         currdir = os.getcwd()
@@ -191,7 +190,7 @@ class TestConfigureProfile(ConstructProfileBase):
         """
         Test that we're correctly catching incorrectly configured paths (no underscores. )
         """
-        os.chdir(os.path.join(pytestconfig.rootdir,"ncap_iac/tests/"))
+        os.chdir(os.path.join(pytestconfig.rootdir,"tests/"))
         self.pathname = "autogen_test_users_iac"
         ## Try with ncap_iac
         currdir = os.getcwd()
@@ -205,7 +204,7 @@ class TestConfigureProfile(ConstructProfileBase):
         """
         Test that we're correctly catching incorrectly configured paths (no underscores. )
         """
-        os.chdir(os.path.join(pytestconfig.rootdir,"ncap_iac/tests/"))
+        os.chdir(os.path.join(pytestconfig.rootdir,"tests/"))
         self.pathname = "Autogen-test-users-iac"
         ## Try with ncap_iac
         currdir = os.getcwd()
@@ -214,3 +213,14 @@ class TestConfigureProfile(ConstructProfileBase):
         captured = capfd.readouterr()
         assert captured.err.split("\n")[3] == "AssertionError: Names must be alphanumeric"
         os.chdir(currdir)
+
+class Test_Build_Blueprint():
+    """Class to test the process of going from custom blueprint -> aws cloudformation json file 
+
+    """
+    def test_init(self,pytestconfig):
+        os.chdir(os.path.join(pytestconfig.rootdir,"ncap_iac/utils"))
+        z = subprocess.call(["python","dev_builder.py","../../tests/unit_tests/fixture_dir/fixture_stack/stack_config_template.json","websubstack"])
+        assert z == 0
+
+

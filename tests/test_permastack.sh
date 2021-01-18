@@ -12,6 +12,7 @@ cd $rootpath/ncap_iac/ncap_blueprints/
 
 statusbuild=$(bash iac_utils/build.sh $analysisdirname)
 buildcode=$?
+
 statustest=$(bash iac_utils/test_main_multievent.sh "$analysisdirname" "$1")
 testcode=$?
 #newtest=$(bash iac_utils/test_monitor.sh $analysisdirname)

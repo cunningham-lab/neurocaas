@@ -92,6 +92,57 @@ def launch_new_instance(instance_type, ami, logger):
     logger.append("        [Utils] New instance {} created!".format(instances[0]))
     return instances[0]
 
+def launch_new_instance_with_tags(instance_type,ami,logger,timeout):
+    """ Launch new instances with predetermined tags. 
+    
+    """
+    assert type(timeout) == int
+    tag_specifications = [
+         {
+        "ResourceType":"volume",
+        "Tags":[
+            {
+                "Key":"PriceTracking",
+                "Value":"On"
+                },
+            {
+                "Key":"Timeout",    
+                "Value":str(timeout)
+                }
+            ]
+        },
+        {
+        "ResourceType":"instance",
+        "Tags":[
+            {
+                "Key":"PriceTracking",
+                "Value":"On"
+                },
+            {
+                "Key":"Timeout",    
+                "Value":str(timeout)
+                }
+            ]
+        }]
+
+    logger.append("        [Utils] Acquiring new {} instance from {} ...".format(instance_type, ami))
+    print(tag_specifications)
+    
+    instances = ec2_resource.create_instances(
+        ImageId=ami,
+        IamInstanceProfile={'Name': os.environ['IAM_ROLE']},
+        InstanceType=instance_type,
+        MinCount=1,
+        MaxCount=1,
+        KeyName=os.environ['KEY_NAME'],
+        SecurityGroups=[os.environ['SECURITY_GROUPS']],
+        TagSpecifications = tag_specifications,
+        InstanceInitiatedShutdownBehavior=os.environ['SHUTDOWN_BEHAVIOR']
+    )
+    logger.append("        [Utils] New instance {} created!".format(instances[0]))
+    return instances[0]
+
+
 def launch_new_instances(instance_type, ami, logger, number, add_size, duration = None):
     """ Script To Launch New Instance From Image
     If duration parameter is specified, will launch the appropriate cost instance
@@ -117,7 +168,6 @@ def launch_new_instances(instance_type, ami, logger, number, add_size, duration 
 
     ## Now parse the dataset size and figure if we should diverge from default behavior. 
 
-    #TODO: add something here. 
 
     ## Now we will take the parsed duration and use it to launch instances.  
     
@@ -206,6 +256,143 @@ def launch_new_instances(instance_type, ami, logger, number, add_size, duration 
                     InstanceInitiatedShutdownBehavior=os.environ['SHUTDOWN_BEHAVIOR']
                 )
             else:
+                logger.append("        [Utils] unhandled error while launching save instances. contact NeuroCAAS admin.")
+                raise ValueError("[JOB TERMINATE REASON] Unhandled exception")
+
+    [logger.append("        [Utils] New instance {} created!".format(instances[i])) for i in range(number)]
+    logger.write()
+    return instances
+
+def launch_new_instances_with_tags(instance_type, ami, logger, number, add_size, duration = None):
+    """ Script To Launch New Instance From Image
+    If duration parameter is specified, will launch the appropriate cost instance
+    If number parameter is specified, will try to launch the requested number of instances. If not available, then will return none. 
+    """
+    logger.append("        [Utils] Acquiring new {} instances from {} ...".format(instance_type, ami))
+
+    ## First parse the duration and figure out if there's anything we can do for it. 
+    ## The duration should be given as the max number of minutes the job is expected to take. 
+    if type(duration) == int:
+        hours = ceil(duration/60)
+        minutes_rounded = hours*60
+        if minutes_rounded > 360:
+            spot_duration = None
+        else:
+            spot_duration = minutes_rounded 
+    elif duration is None:
+        spot_duration = None
+    else:
+        logger.append("        [Utils] duration parameter is not valid. Must be an integer representing max number of minutes expected.")
+        logger.write()
+        raise ValueError("[JOB TERMINATE REASON] Given __duration__ parameter is not valid. Must be an integer, giving the maximum time expected in minutes.")
+
+    ## Now parse the dataset size and figure if we should diverge from default behavior. 
+
+
+    ## Now we will take the parsed duration and use it to launch instances.  
+    response = ec2_client.describe_images(ImageIds = [os.environ["AMI"]])
+    root = response["Images"][0]["RootDeviceName"]
+    bdm = [
+            {
+                "DeviceName": root,
+                "Ebs": {
+                    "DeleteOnTermination": True,
+                    "VolumeSize":add_size,
+                    "VolumeType":"gp2",
+                    "Encrypted": False
+                    }
+                
+                }
+            ]
+
+    assert type(duration) == int
+    tag_specifications = [
+         {
+        "ResourceType":"volume",
+        "Tags":[
+            {
+                "Key":"PriceTracking",
+                "Value":"On"
+                },
+            {
+                "Key":"Timeout",    
+                "Value":str(duration)
+                }
+            ]
+        },
+        {
+        "ResourceType":"instance",
+        "Tags":[
+            {
+                "Key":"PriceTracking",
+                "Value":"On"
+                },
+            {
+                "Key":"Timeout",    
+                "Value":str(duration)
+                }
+            ]
+        }]
+    
+    if spot_duration is None:
+        logger.append("        [Utils] save not available (duration not given or greater than 6 hours). Launching standard instance.")
+        logger.write()
+        response = ec2_client.describe_images(ImageIds = [os.environ["AMI"]])
+        root = response["Images"][0]["RootDeviceName"]
+        instances = ec2_resource.create_instances(
+            BlockDeviceMappings= bdm,
+            ImageId=ami,
+            InstanceType=instance_type,
+            IamInstanceProfile={'Name': os.environ['IAM_ROLE']},
+            MinCount=number,
+            MaxCount=number,
+            TagSpecifications = tag_specifications,
+            KeyName=os.environ['KEY_NAME'],
+            SecurityGroups=[os.environ['SECURITY_GROUPS']],
+            InstanceInitiatedShutdownBehavior=os.environ['SHUTDOWN_BEHAVIOR']
+        )
+
+    else:
+        logger.append("        [Utils] Reserving save instance for {} minutes".format(spot_duration))
+        marketoptions = {"MarketType":'spot',
+                "SpotOptions":{
+                    "SpotInstanceType":"one-time",
+                    "BlockDurationMinutes":spot_duration,
+                    }
+                
+                }
+        try:
+            instances = ec2_resource.create_instances(
+                BlockDeviceMappings= bdm,
+                ImageId=ami,
+                InstanceType=instance_type,
+                IamInstanceProfile={'Name': os.environ['IAM_ROLE']},
+                MinCount=number,
+                MaxCount=number,
+                TagSpecifications = tag_specifications,
+                KeyName=os.environ['KEY_NAME'],
+                SecurityGroups=[os.environ['SECURITY_GROUPS']],
+                InstanceInitiatedShutdownBehavior=os.environ['SHUTDOWN_BEHAVIOR'],
+                InstanceMarketOptions = marketoptions
+            )
+        except botocore.exceptions.ClientError as e:
+            if e.response["Error"]["Code"] == "InsufficientInstanceCapacity":
+                logger.append("        [Utils] Save not available (beyond available aws capacity). Launching standard instance.")
+                logger.write()
+                instances = ec2_resource.create_instances(
+                    BlockDeviceMappings=bdm,
+                    ImageId=ami,
+                    InstanceType=instance_type,
+                    IamInstanceProfile={'Name': os.environ['IAM_ROLE']},
+                    MinCount=number,
+                    MaxCount=number,
+                    TagSpecifications = tag_specifications,
+                    KeyName=os.environ['KEY_NAME'],
+                    SecurityGroups=[os.environ['SECURITY_GROUPS']],
+                    InstanceInitiatedShutdownBehavior=os.environ['SHUTDOWN_BEHAVIOR']
+                )
+            else:
+                print(e.response)
                 logger.append("        [Utils] unhandled error while launching save instances. contact NeuroCAAS admin.")
                 raise ValueError("[JOB TERMINATE REASON] Unhandled exception")
 
