@@ -145,6 +145,15 @@ def check_instances():
         pytest.fail("Uncleaned instances!")
 
 @pytest.fixture
+def set_ssm_client(monkeypatch):
+    """Use SSM to set budget lower than the tolerable value.
+
+    """
+    session = localstack_client.session.Session()
+    ssm_client = session.client("ssm")
+    monkeypatch.setattr(ssm, "ssm_client", session.client("ssm")) ## TODO I don't think these are scoped correctly w/o a context manager.
+
+@pytest.fixture
 def set_ssm_budget_under(monkeypatch):
     """Use SSM to set budget lower than the tolerable value.
 
@@ -231,12 +240,18 @@ class Test_Submission_dev():
 
 ### Testing function get_costmonitoring
     def test_Submission_dev_get_costmonitoring(self,setup_lambda_env,setup_testing_bucket,check_instances,monkeypatch):
+        session = localstack_client.session.Session()
+        ssm_client = session.client("ssm")
+        monkeypatch.setattr(ssm, "ssm_client", session.client("ssm")) 
         bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
         sd = submit_start.Submission_dev(bucket_name,key_name,"111111111")
         monkeypatch.setenv("MAXCOST",str(1300))
         assert sd.get_costmonitoring()
 
     def test_Submission_dev_get_costmonitoring_fail(self,setup_lambda_env,setup_testing_bucket,check_instances,monkeypatch):
+        session = localstack_client.session.Session()
+        ssm_client = session.client("ssm")
+        monkeypatch.setattr(ssm, "ssm_client", session.client("ssm")) 
         bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
         sd = submit_start.Submission_dev(bucket_name,key_name,"111111111")
         monkeypatch.setenv("MAXCOST",str(1200))
