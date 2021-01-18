@@ -76,7 +76,7 @@ jobs:
           conda config --describe envs_dirs
           conda env list
           
-          pytest tests/protocol_tests/
+          pytest tests/protocol_tests/test_submit_start.py
         env:
           AWS_DEFAULT_REGION: "us-east-1"
 
