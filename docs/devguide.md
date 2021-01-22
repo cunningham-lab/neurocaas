@@ -30,8 +30,8 @@ Key Points:
 ```bash
     s3://{analysis_name}   ## This is the name of the S3 bucket
     |- {group_name}        ## Each NeuroCAAS user is a member of a group (i.e. lab, research group, etc.) 
-       |- inputs
        |- configs
+       |- inputs
        |- submissions
        |  |- {id}_submit.json 
        |- results
@@ -42,15 +42,12 @@ Key Points:
 
  When users want to trigger a particular analysis run, they upload a file indicating the data and parameters they want to analyze to a special directory called `submissions` (see the figure for content of this file). This upload triggers the automatic VM setup process described above, and users simply wait for the results to appear in a separate, designated subdirectory (`results`). Although shown as file storage here, most users will use NeuroCAAS through a web client that automates the process of uploading submission files.
 This S3 bucket and the relevant directory structure will be generated once you deploy your analysis scripts (see section: Deploying your blueprint). 
+If you want to see how the user interacts with this file structure, sign up for an account on [neurocaas.org](neurocaas.org). 
 - Your analysis will be hosted on cloud based virtual machines (VMs). These machines are automatically set up with your analysis software pre-loaded on them, and run automatically when given a dataset to analyze. The main point of this guide is to figure out the set of steps that will make this happen for your particular analysis, and record them in a document called a _blueprint_. 
 - A single virtual machine is  *entirely dedicated* to running your analysis on a given dataset. Once it is done analyzing a dataset, it will terminate itself. This means there are no history effects between successive analysis runs: each analysis is governed only by the automatic setup procedure described in your blueprint.  
  
    
-The inputs, configs, and results subdirectories are the most relevant for this section of the guide, as they will be referenced in the script. 
-The rest of this section describes how we will be pulling relevant material to your remote instance from the inputs and configs directories, 
-and depositing results to the relevant results/job\_{timestamp} directory.
 
-If you want to see how the user interacts with this file structure, sign up for an account on [neurocaas.org](neurocaas.org). 
 
 We’ll describe the process of developing analyses for
 NeuroCAAS in three steps: 
@@ -304,7 +301,7 @@ This script takes 5 arguments, as follows:
 `% bash run_main.sh $bucketname $path_to_input $path_to_result_dir $path_to_config_file $path_to_analysis_script`
 
 The first four parameters refer to locations in Amazon S3 where the inputs and results of this analysis will be stored. 
-These parameters correspond to the directory structure given above as follows: 
+These parameters correspond to the directory structure given in the "end goals" section as follows: 
 - $bucketname: {analysis\_name}
 - $path\_to\_input: {group\_name}/inputs/name\_of\_dataset
 - $path\_to\_result\_dir: results/job\_{timestamp}
