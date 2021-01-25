@@ -4,6 +4,10 @@ on:
   issue_comment:
     types: [created]
 
+  #on:
+  #  issue_comment:
+  #  types: [created]
+
 jobs:
   deploy-check:
     runs-on: ubuntu-latest
