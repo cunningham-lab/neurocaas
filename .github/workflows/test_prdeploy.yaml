@@ -32,7 +32,9 @@ jobs:
         id: get_pull_request_ref
         uses: octokit/request-action@v2.x
         with:
-          route: GET /repos/:repository/pulls/:issue_id
+          route: GET /repos/{owner}/{repo}/pulls/{issue_id}
+          owner: cunningham-lab
+          repo: neurocaas
           repository: ${{ github.repository }}
           issue_id: ${{ github.event.issue.number }}
         env:
