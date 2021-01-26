@@ -16,7 +16,7 @@ jobs:
         id: check
         uses: khan/pull-request-comment-trigger@master
         with:
-          trigger: "@deploy:"
+          trigger: "#deploy:"
           prefix_only: true
           reaction: rocket
         env:
@@ -74,13 +74,6 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: check output
-        run: |
-          echo ${{ needs.deploy-check.outputs.comment_body }}
-          echo "this is the comment body. "
-          echo "${{ needs.deploy-check.outputs.comment_body }}"
-          echo "this is the comment body in quotes. "
-
       - name: get stack name 
         uses: jungwinter/split@v1
         id: split
@@ -95,6 +88,46 @@ jobs:
           sleep 10
           # instead we randomly succeed or fail the deployment
           exit $(( $RANDOM % 10 >= 5 ))
+            # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+            
+      - uses: actions/checkout@v2
+
+      - name: setup python.
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
+
+      # Log in to docker hub. 
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:  
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} 
+
+      - name: Install Repo.
+        run: |
+          cd $GITHUB_WORKSPACE
+          wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+          bash miniconda.sh -b -p $HOME/miniconda
+          source "$HOME/miniconda/etc/profile.d/conda.sh"
+          hash -r
+          conda config --set always_yes yes --set changeps1 no
+          conda update -q conda
+          conda config --append envs_dirs $HOME/miniconda/envs 
+          conda create -n neurocaas
+          conda activate neurocaas
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install aws-sam-cli==0.53.0 
+          pip install localstack==0.12.3
+          pip install ./ 
+          sudo apt-get install jq    
+          
+      - name: Deploy stack
+        run: |
+          cd ncap_iac/ncap_blueprints
+          bash iac_utils/fulldeploy.sh ${{ steps.split.outputs._1 }}     
+          
       - name: set deployment status to success
         id: successful_deployment
         uses: octokit/request-action@v2.x
