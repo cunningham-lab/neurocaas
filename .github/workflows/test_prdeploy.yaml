@@ -130,7 +130,7 @@ jobs:
           repository: ${{ github.repository }}
           deployment: ${{ fromJson(steps.create_deployment.outputs.data).id }}
           environment: dev
-          environment_url: https://example.com
+          environment_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           log_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           mediaType: '{"previews": ["ant-man"]}'
           state: success
