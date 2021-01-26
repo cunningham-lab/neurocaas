@@ -79,7 +79,7 @@ jobs:
         id: split
         with:
           msg: needs.deploy-check.outputs.triggered
-          separator: ':'
+          seperator: ':'
           
       - name: deploy the pull request
         run: |
