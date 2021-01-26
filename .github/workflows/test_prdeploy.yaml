@@ -16,12 +16,14 @@ jobs:
         id: check
         uses: khan/pull-request-comment-trigger@master
         with:
-          trigger: "/deploy"
+          trigger: "@deploy:"
+          prefix_only: true
           reaction: rocket
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
     outputs:
       triggered: ${{ steps.check.outputs.triggered }}
+      comment_body: ${{ steps.check.outputs.comment_body }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -72,9 +74,17 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
+      - name: get stack name 
+        uses: jungwinter/split@v1
+        id: split
+        with:
+          msg: needs.deploy-check.outputs.triggered
+          separator: ':'
+          
       - name: deploy the pull request
         run: |
           # deployment logic goes here
+          echo ${{ steps.split.outputs._1 }}
           sleep 10
           # instead we randomly succeed or fail the deployment
           exit $(( $RANDOM % 10 >= 5 ))
