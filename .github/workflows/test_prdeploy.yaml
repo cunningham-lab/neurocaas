@@ -74,11 +74,18 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
+      - name: check output
+        run: |
+          echo ${{ needs.deploy-check.outputs.comment_body }}
+          echo "this is the comment body. "
+          echo "${{ needs.deploy-check.outputs.comment_body }}"
+          echo "this is the comment body in quotes. "
+
       - name: get stack name 
         uses: jungwinter/split@v1
         id: split
         with:
-          msg: "${{ needs.deploy-check.outputs.comment_body }}"
+          msg: ${{ needs.deploy-check.outputs.comment_body }}
           seperator: ':'
           
       - name: deploy the pull request
