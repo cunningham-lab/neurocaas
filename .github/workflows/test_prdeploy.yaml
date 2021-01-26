@@ -23,7 +23,7 @@ jobs:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
     outputs:
       triggered: ${{ steps.check.outputs.triggered }}
-      comment_body: ${{ steps.check.outputs.comment_body }}
+      comment_body: ${{ github.event.comment.body }}
 
   deploy:
     runs-on: ubuntu-latest
