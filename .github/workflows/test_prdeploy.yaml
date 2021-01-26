@@ -82,7 +82,7 @@ jobs:
           seperator: ':'
           
       - name: pull the repo.  
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
 
       - name: setup python.
         uses: actions/setup-python@v2
