@@ -9,6 +9,7 @@ storagebucketname=$(jq .bucketname "$ncaprootdir/global_params_initialized.json"
 source "$scriptdir"/paths.sh
 ## Get the path to this particular file. 
 ## NOTE: Add the anaconda path if running as admin.  
+export PATH="/miniconda/bin:$PATH"
 source activate neurocaas
 
 ## Input management: 
