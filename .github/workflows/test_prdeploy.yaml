@@ -81,15 +81,7 @@ jobs:
           msg: ${{ needs.deploy-check.outputs.comment_body }}
           seperator: ':'
           
-      - name: deploy the pull request
-        run: |
-          # deployment logic goes here
-          echo ${{ steps.split.outputs._1 }}
-          sleep 10
-          # instead we randomly succeed or fail the deployment
-          exit $(( $RANDOM % 10 >= 5 ))
-            # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-            
+      - name: pull the repo.  
       - uses: actions/checkout@v2
 
       - name: setup python.
