@@ -85,17 +85,18 @@ class NeuroCaaSAMI(object):
             raise
         self.instance = instance
 
-    def launch_devinstance(self,ami = None,dataset_size = None):
+    def launch_devinstance(self,ami = None,volume_size = None):
         """
         Launches an instance from an ami. If ami is not given, launches the default ami of the pipeline as indicated in the stack configuration file. Launches on the instance type given in this same stack configuration file.
 
         Inputs:
         ami (str): (Optional) if not given, will be the default ami of the path. This has several text options to be maximally useful. 
-        [amis recent as of 3/16]
-        ubuntu18: ubuntu linux 18.06, 64 bit x86 (ami-07ebfd5b3428b6f4d)
-        ubuntu16: ubuntu linux 16.04, 64 bit x86 (ami-08bc77a2c7eb2b1da)
-        dlami18: ubuntu 18.06 version 27 (ami-0dbb717f493016a1a)
-        dlami16: ubuntu 16.04 version 27 (ami-0a79b70001264b442)
+            [amis recent as of 3/16]
+            ubuntu18: ubuntu linux 18.06, 64 bit x86 (ami-07ebfd5b3428b6f4d)
+            ubuntu16: ubuntu linux 16.04, 64 bit x86 (ami-08bc77a2c7eb2b1da)
+            dlami18: ubuntu 18.06 version 27 (ami-0dbb717f493016a1a)
+            dlami16: ubuntu 16.04 version 27 (ami-0a79b70001264b442)
+        volume_size (int): (Optional) the size of the volume to attach to this devinstance.      
         """
         ## Get ami id
         if ami is None:
@@ -116,7 +117,7 @@ class NeuroCaaSAMI(object):
         instance_type = self.config['Lambda']['LambdaConfig']['INSTANCE_TYPE']
         ec2_resource = boto3.resource('ec2')
         assert self.check_clear()
-        if dataset_size is None:
+        if volume_size is None:
             out = ec2_resource.create_instances(ImageId=ami_id,
                     InstanceType = instance_type,
                     MinCount=1,
@@ -134,7 +135,7 @@ class NeuroCaaSAMI(object):
                             "DeviceName": "/dev/sda1",
                             "Ebs": {
                                 "DeleteOnTermination": True,
-                                "VolumeSize":dataset_size,
+                                "VolumeSize":volume_size,
                                 "VolumeType":"gp2",
                                 "Encrypted": False
                                 }
