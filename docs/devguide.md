@@ -238,7 +238,7 @@ Launching a machine image
 If you are working with a blueprint where you have already specified an
 AMI, you can simply call :
 
-`>>> devami.launch_ami()`
+`>>> devami.launch_devinstance()`
 
 Which will launch the AMI listed in your blueprint.
 
@@ -248,7 +248,7 @@ instance type from the available list:
 
 Then call:
 
-`>>> devami.launch_ami(ami = string) TODO: Add in ec2 instance options, or set a default. `
+`>>> devami.launch_devinstance(ami = string) TODO: Add in ec2 instance options, or set a default. `
 
 Where string is the id of an AMI you like, formatted as (“ami-xxxxxxxx”)
 (you can find many on the AWS marketplace). If you do not have a
@@ -269,7 +269,9 @@ NOTE: These codes have been tested with a variety of x86 (intel based)
 instances (m5 series, m5a series, p2 and p3 series). If you plan to use
 non-x86 based instances, (such as the ARM based a1 series) please look
 up the AMI id for the relevant OS distribution, and pass this id as an
-argument. Calling this method will initialize an instance for you, and
+argument. 
+
+Calling this method will initialize an instance for you, and
 then provide you with the ip address of that initialized instance. You
 can then ssh into the instance with the key that you retrieved when
 initializing NeuroCAAS, like so:
@@ -278,6 +280,17 @@ initializing NeuroCAAS, like so:
 
 Please note that if you use a custom ami, you may be prompted to log in
 as root, or ec2-user instead of ubuntu.
+
+If you ever need to close the ipython console, you can always
+re-associate a new instance of the NeuroCaaSAMI object to your development 
+instance with the following code: 
+
+```
+>>> devami = NeuroCaaSAMI("../path_to_configured_folder")
+>>> devami.assign_instance(instance_id)
+>>> devami.start_devinstance()
+>>> ip = devami.ip
+```
 
 Developing a machine image into an immutable analysis environment
 -----------------------------------------------------------------
