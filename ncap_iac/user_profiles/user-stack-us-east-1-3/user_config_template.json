@@ -7,6 +7,13 @@
             "Pipelines":["dlc"],
             "PipelineDir":["dlc"],
             "ContactEmail":"The email that we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"achurchlandlab",
+            "UserNames":["jcouto"],
+            "Pipelines":["dlc"],
+            "PipelineDir":["dlc"],
+            "ContactEmail":"The email that we should notify regarding processing status."
         }
     ]
     },

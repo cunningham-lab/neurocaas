@@ -1,7 +1,7 @@
 {
     "PipelineName": "epi-ncap-web",
     "REGION": "us-east-1",
-    "STAGE": "webdev",
+    "STAGE": "websubstack",
     "Lambda": {
         "CodeUri": "../../protocols",
         "Handler": "submit_start.handler_develop",
