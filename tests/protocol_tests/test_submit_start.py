@@ -4,7 +4,7 @@ import subprocess
 import json
 from botocore.exceptions import ClientError
 import ncap_iac.protocols.utilsparam.env_vars
-from ncap_iac.protocols import submit_start
+from ncap_iac.protocols import submit_start, submit_start_legacy_wfield_preprocess
 from ncap_iac.protocols.utilsparam import s3
 from ncap_iac.protocols.utilsparam import ec2,ssm 
 import pytest
@@ -16,6 +16,7 @@ blueprint_path = os.path.join(loc,"test_mats","stack_config_template.json")
 with open(os.path.join(loc,"../../ncap_iac/global_params_initialized.json")) as f:
     gpdict = json.load(f)
 bucket_name = "test-submitlambda-analysis"
+bucket_name_legacy = "test-submitlambda-analysis-legacy"
 key_name = "test_user/submissions/submit.json"
 fakedatakey_name = "test_user/submissions/fakedatasubmit.json"
 fakeconfigkey_name = "test_user/submissions/fakeconfigsubmit.json"
@@ -133,6 +134,85 @@ def setup_testing_bucket(monkeypatch):
             logging.error(e)
             raise
     yield bucket_name,os.path.join(user_name,"submissions/submit.json")        
+    
+@pytest.fixture
+def setup_testing_bucket_legacy(monkeypatch):
+    """Sets up a localstack bucket called test-submitlambda-analysis with the following directory structure (needed for legacy application):
+    /
+    |-test_user
+      |-inputs
+        |-data.json
+      |-configs
+        |-config.json
+      |-submissions
+        |-submissions2
+          |-submit.json
+    |-logs
+      |-test_user
+        |-joblog1
+        |-joblog2
+        ...
+
+    """
+    subkeys = {
+            "inputs/data1.zip":{"data":"value"}, ## Takes only zip files.
+            "inputs/data2.zip":{"data":"value"},
+            "configs/config.json":{"param":"p1"},
+            "submissions/submissions2/submit.json":{
+                "dataname":os.path.join(user_name,"inputs"), ## big difference: takes everything in the folder.
+                "configname":os.path.join(user_name,"configs","config.json"),
+                "instance_type":"t2.micro",
+                "timestamp":"testtimestamp"},
+            "submissions/submissions2/{}".format(os.path.basename(fakedatakey_name)):{
+                "dataname":[os.path.join(user_name,"inputs",d) for d in ["data21.json","data22.json"]],
+                "configname":os.path.join(user_name,"configs","config.json"),
+                "instance_type":"t2.micro",
+                "timestamp":"testtimestamp"},
+            "submissions/submissions2/{}".format(os.path.basename(fakeconfigkey_name)):{
+                "dataname":[os.path.join(user_name,"inputs",d) for d in ["data1.json","data2.json"]],
+                "configname":os.path.join(user_name,"configs","config22.json"),
+                "instance_type":"t2.micro",
+                "timestamp":"testtimestamp"},
+            "submissions/submissions2/{}".format(os.path.basename(nodatakey_name)):{
+                "configname":os.path.join(user_name,"configs","config22.json"),
+                "instance_type":"t2.micro",
+                "timestamp":"testtimestamp"},
+            "submissions/submissions2/{}".format(os.path.basename(noconfigkey_name)):{
+                "dataname":[os.path.join(user_name,"inputs",d) for d in ["data1.json","data2.json"]],
+                "instance_type":"t2.micro",
+                "timestamp":"testtimestamp"},
+            "submissions/submissions2/{}".format(os.path.basename(notimestampkey_name)):{
+                "dataname":[os.path.join(user_name,"inputs",d) for d in ["data1.json","data2.json"]],
+                "instance_type":"t2.micro",
+                "configname":os.path.join(user_name,"configs","config22.json")}
+            }
+
+    session = localstack_client.session.Session()
+    s3_client = session.client("s3")
+    s3_resource = session.resource("s3")
+    monkeypatch.setattr(s3, "s3_client", session.client("s3")) ## TODO I don't think these are scoped correctly w/o a context manager.
+    monkeypatch.setattr(s3, "s3_resource", session.resource("s3"))
+    try:
+        for sk in subkeys:
+            obj = s3_client.get_object(Bucket = bucket_name_legacy,Key = os.path.join(user_name,sk))
+        s3_client.get_object(Bucket = bucket_name_legacy,Key="logs/test_user/i-0ff308d5c9b5786f3.json")    
+    except ClientError:    
+        ## Write data files
+        s3_client.create_bucket(Bucket = bucket_name_legacy)
+        for sk in subkeys:
+            key = os.path.join(user_name,sk)
+            writeobj = s3_resource.Object(bucket_name_legacy,key)
+            content = bytes(json.dumps(subkeys[sk]).encode("UTF-8"))
+            writeobj.put(Body = content)
+        ## Write logs    
+        log_paths = get_paths(test_log_mats) 
+        try:
+            for f in log_paths:
+                s3_client.upload_file(os.path.join(test_log_mats,f),bucket_name_legacy,Key = f)
+        except ClientError as e:        
+            logging.error(e)
+            raise
+    yield bucket_name_legacy,os.path.join(user_name,"submissions/submissions2/submit.json")        
 
 @pytest.fixture
 def check_instances():
@@ -272,4 +352,29 @@ class Test_Submission_dev():
         monkeypatch.setenv("MAXCOST",str(1300))
         assert sd.get_costmonitoring()
 
+
+class Test_Submission_Launch_Monitor():
+    def test_Submission_Launch_Monitor(self,setup_lambda_env,setup_testing_bucket_legacy,check_instances):
+        ## set up the os environment correctly. 
+        bucket_name,submit_path = setup_testing_bucket_legacy[0],setup_testing_bucket_legacy[1]
+        sd = submit_start_legacy_wfield_preprocess.Submission_Launch_folder(bucket_name,submit_path)
+
+    def test_Submission_Launch_Monitor_get_costmonitoring(self,setup_lambda_env,setup_testing_bucket_legacy,check_instances,monkeypatch):
+        ## set up the os environment correctly. 
+        bucket_name,submit_path = setup_testing_bucket_legacy[0],setup_testing_bucket_legacy[1]
+        sd = submit_start_legacy_wfield_preprocess.Submission_Launch_folder(bucket_name,submit_path)
+        monkeypatch.setenv("MAXCOST",str(1300))
+        assert sd.get_costmonitoring()
+    def test_Submission_Launch_Monitor_get_costmonitoring_fail(self,setup_lambda_env,setup_testing_bucket_legacy,check_instances,monkeypatch):
+        ## set up the os environment correctly. 
+        bucket_name,submit_path = setup_testing_bucket_legacy[0],setup_testing_bucket_legacy[1]
+        sd = submit_start_legacy_wfield_preprocess.Submission_Launch_folder(bucket_name,submit_path)
+        monkeypatch.setenv("MAXCOST",str(1200))
+        assert not sd.get_costmonitoring()
+    def test_Submission_Launch_Monitor_log_jobs(self,setup_lambda_env,setup_testing_bucket_legacy,check_instances,monkeypatch):
+        ## set up the os environment correctly. 
+        bucket_name,submit_path = setup_testing_bucket_legacy[0],setup_testing_bucket_legacy[1]
+        sd = submit_start_legacy_wfield_preprocess.Submission_Launch_folder(bucket_name,submit_path)
+        sd.acquire_instance()
+        sd.log_jobs()
 
