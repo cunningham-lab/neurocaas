@@ -4,6 +4,7 @@ import subprocess
 import json
 from botocore.exceptions import ClientError
 import ncap_iac.protocols.utilsparam.env_vars
+import ncap_iac.utils.environment_check as env_check
 from ncap_iac.protocols import submit_start, submit_start_legacy_wfield_preprocess
 from ncap_iac.protocols.utilsparam import s3
 from ncap_iac.protocols.utilsparam import ec2,ssm 
@@ -352,7 +353,7 @@ class Test_Submission_dev():
         monkeypatch.setenv("MAXCOST",str(1300))
         assert sd.get_costmonitoring()
 
-
+@pytest.mark.skipif(env_check.get_context() == "ci",reason= "aws creds not provided to github actions..")
 class Test_Submission_Launch_Monitor():
     def test_Submission_Launch_Monitor(self,setup_lambda_env,setup_testing_bucket_legacy,check_instances):
         ## set up the os environment correctly. 
