@@ -10,11 +10,61 @@ import subprocess
 import json
 import pathlib
 
+ec2_resource = boto3.resource('ec2')
+ec2_client = boto3.client("ec2")
+
 ## Get global parameters:
 utildir = pathlib.Path(__file__).parent.absolute()
 basedir = os.path.dirname(os.path.dirname(utildir))
 with open(os.path.join(basedir,"global_params_initialized.json")) as gp:
     gpdict = json.load(gp)
+
+def return_tags(timeout):    
+    """Formats tags to launch instances in a way that will not be shut down by neurocaas AWS account monitoring. 
+
+    :param timeout: The amount of time, in minutes, for which you are requesting this instance to be up. Should be given as an integer. 
+    """
+    assert type(timeout) == int, "timeout must be a positive integer."
+    assert timeout > 0, "timeout must be a positive integer."
+    arn = boto3.client("sts").get_caller_identity()["Arn"]
+    tags = [
+                {
+                    "ResourceType":"volume",
+                    "Tags":[
+                    {
+                        "Key":"PriceTracking",
+                        "Value": "On"
+                    },
+                    {
+                        "Key":"Timeout",
+                        "Value":str(timeout),
+                    },
+                    {
+                        "Key":"OwnerArn",
+                        "Value":arn,
+                    }
+                    ]
+                },
+                {
+                    "ResourceType":"instance",
+                    "Tags":[
+                    {
+                        "Key":"PriceTracking",
+                        "Value": "On"
+                    },
+                    {
+                        "Key":"Timeout",
+                        "Value":str(timeout),
+                    },
+                    {
+                        "Key":"OwnerArn",
+                        "Value":arn,
+                    }
+                    ]
+                }
+            ]
+    return tags
+
 
 
 ## New class to develop an ami.
@@ -76,7 +126,6 @@ class NeuroCaaSAMI(object):
         if self.instance is not None:
             self.instance_hist.append(self.instance)
             self.instance_saved = False ## Defaults to assuming the instance has not been saved. 
-        ec2_resource = boto3.resource("ec2")
         instance = ec2_resource.Instance(instance_id)
         try:
             instance.state
@@ -84,72 +133,75 @@ class NeuroCaaSAMI(object):
             print("Instance with id {} can't be loaded".format(instance_id))
             raise
         self.instance = instance
+    
 
-    def launch_devinstance(self,ami = None,volume_size = None):
+    def launch_devinstance(self,ami = None,volume_size = None,timeout = 60,DryRun = False):
         """
         Launches an instance from an ami. If ami is not given, launches the default ami of the pipeline as indicated in the stack configuration file. Launches on the instance type given in this same stack configuration file.
 
         Inputs:
-        ami (str): (Optional) if not given, will be the default ami of the path. This has several text options to be maximally useful. 
+        :param ami (str): (Optional) if not given, will be the default ami of the path. This has several text options to be maximally useful. 
             [amis recent as of 3/16]
             ubuntu18: ubuntu linux 18.06, 64 bit x86 (ami-07ebfd5b3428b6f4d)
             ubuntu16: ubuntu linux 16.04, 64 bit x86 (ami-08bc77a2c7eb2b1da)
             dlami18: ubuntu 18.06 version 27 (ami-0dbb717f493016a1a)
             dlami16: ubuntu 16.04 version 27 (ami-0a79b70001264b442)
-        volume_size (int): (Optional) the size of the volume to attach to this devinstance.      
+        :param volume_size (int): (Optional) the size of the volume to attach to this devinstance.      
+        timeout (int): (Optional) the amount of time for which you are requesting this instance, in minutes. default is 1 hour. INTANCE WILL BE STOPPED AFTER THIS TIMEOUT COMPLETES.
+        :param DryRun (bool): for debugging. if dryrun will not launch an instance.
         """
         ## Get ami id
+        ami_mapping = {
+                "ubuntu18":"ami-07ebfd5b3428b6f4d",
+                "ubuntu16":"ami-08bc77a2c7eb2b1da",
+                "dlami18":"ami-0dbb717f493016a1a",
+                "dlami16":"ami-0a79b70001264b442"
+                }
+
+
         if ami is None:
             ami_id = self.config['Lambda']['LambdaConfig']['AMI']
-        elif ami == "ubuntu18":
-            ami_id = "ami-07ebfd5b3428b6f4d"
-        elif ami == "ubuntu16":
-            ami_id = "ami-08bc77a2c7eb2b1da"
-        elif ami == "dlami18":
-            ami_id = "ami-0dbb717f493016a1a"
-        elif ami == "dlami16":
-            ami_id = "ami-0a79b70001264b442"
+            print("checking image is available...")
+            waiter = ec2_client.get_waiter("image_available")
+            waiter.wait(ImageIds = [ami_id])
+            proceed = True
+
+        elif ami in ami_mapping.keys():    
+            ami_id = ami_mapping[ami]
         else:
-            # Let boto3 handle this error when it comes. 
+            # Assume this is a real id: let boto3 handle this error when it comes. 
             ami_id = ami
 
         ## Get default instance type:
         instance_type = self.config['Lambda']['LambdaConfig']['INSTANCE_TYPE']
-        ec2_resource = boto3.resource('ec2')
         assert self.check_clear()
+        argdict = {
+                 "ImageId":ami_id,
+                 "InstanceType":instance_type,
+                 "MinCount":1,
+                 "MaxCount":1,
+                 "DryRun":DryRun,
+                 "KeyName": "testkeystack-custom-dev-key-pair",
+                 "SecurityGroups":[gpdict["securitygroupdevname"]],
+                 "IamInstanceProfile":{'Name':'SSMRole'},
+                 "TagSpecifications" : return_tags(timeout)
+                 }
         if volume_size is None:
-            out = ec2_resource.create_instances(ImageId=ami_id,
-                    InstanceType = instance_type,
-                    MinCount=1,
-                    MaxCount=1,
-                    DryRun=False,
-                    KeyName = "testkeystack-custom-dev-key-pair", 
-                    #SecurityGroups=['testsgstack-SecurityGroupDev-1NQJIDBJG16KK'],
-                    SecurityGroups=[gpdict["securitygroupdevname"]],
-                    IamInstanceProfile={
-                        'Name':'SSMRole'})
+            pass
         else: 
-            out = ec2_resource.create_instances(
-                    BlockDeviceMappings=[
-                        {
-                            "DeviceName": "/dev/sda1",
-                            "Ebs": {
-                                "DeleteOnTermination": True,
-                                "VolumeSize":volume_size,
-                                "VolumeType":"gp2",
-                                "Encrypted": False
-                                }
-                            
-                            }],
-                    ImageId=ami_id,
-                    InstanceType=instance_type,
-                    MinCount=1,
-                    MaxCount=1,
-                    DryRun=False,
-                    KeyName="testkeystack-custom-dev-key-pair",
-                    SecurityGroups=[gpdict["securitygroupdevname"]],
-                    IamInstanceProfile={'Name': "SSMRole"}
-                )
+            argdict["BlockDeviceMappings"]= [
+                            {
+                                "DeviceName": "/dev/sda1",
+                                "Ebs": {
+                                    "DeleteOnTermination": True,
+                                    "VolumeSize":volume_size,
+                                    "VolumeType":"gp2",
+                                    "Encrypted": False
+                                    }
+                            }]
+
+        out = ec2_resource.create_instances(**argdict)    
+
 # Now get the instance id:
         self.instance = out[0]
         ## Add to the history:
@@ -157,31 +209,81 @@ class NeuroCaaSAMI(object):
         ami_instance_id = self.instance.instance_id
 
         ## Wait until this thing is started:
-        started = False
-        time.sleep(1)
-        while not started:
-            self.instance.load()
-            state = self.instance.state["Name"]
-            print("current state is: "+str(state))
-
-            started = state == 'running'
-            self.deployed = state == 'running'
-            time.sleep(1)
-
-        print('initializing instance')
-        time.sleep(60) ## We need to wait until the instance gets set up.
+        waiter = ec2_client.get_waiter('instance_running')
+        print("Instance starting up: please wait")
+        waiter.wait(InstanceIds = [self.instance.instance_id])
+        self.instance.load()
         response = "Instance {} is running".format(self.instance.instance_id)
         print(response)
 
         ## Now associate a public ip address:
-        ec2_client = boto3.client("ec2")
 
-        #allocation = ec2_client.allocate_address(Domain="vpc")
-        #response = ec2_client.associate_address(AllocationId=allocation["AllocationId"],InstanceId=self.instance.instance_id)
-        #self.ip = allocation['PublicIp']
         self.ip = self.instance.public_ip_address
         print("instance running at {}".format(self.ip))
         self.instance_saved = False
+
+    def get_lifetime(self):
+        """Describe the amount of time remaining on this instance. 
+
+        """
+        instance_info = ec2_client.describe_instances(InstanceIds=[self.instance.instance_id])
+        info_dict = instance_info["Reservations"][0]["Instances"][0]
+        launch_time = info_dict["LaunchTime"]
+        current_time = datetime.datetime.now(datetime.timezone.utc)
+        ## get current elapsed time. 
+        diff = current_time-launch_time
+        seconds_in_day = 24 * 60 * 60
+        currmins,currsecs = divmod(diff.days*seconds_in_day+diff.seconds,60)
+        ## get assigned time: 
+        tags = info_dict["Tags"]
+        tagdict = {d["Key"]:d["Value"] for d in tags}
+        try:
+            timeout = tagdict["Timeout"]
+        except KeyError:    
+            raise Exception("Timeout not give; not a valid development instance.")
+        expiretime = launch_time + datetime.timedelta(minutes=int(timeout))
+        tildiff = expiretime - current_time 
+        tilmins,tilsecs = divmod(tildiff.days*seconds_in_day+tildiff.seconds,60)
+        message = "Instance has been on for {} minutes and {} seconds. Will be stopped in {} minutes and {} seconds with the current timeout.".format(currmins,currsecs,tilmins,tilsecs)
+
+        return message 
+
+    def change_owner(self,owner,DryRun = True):
+        """Change the owner of a pipeline. Currently does not work with testdev permissions; included for testing purposes
+        """
+        resp = ec2_client.create_tags(Resources = [self.instance.instance_id],
+                Tags = [
+                    {
+                        "Key":"OwnerArn",
+                        "Value":owner
+                        }
+                    ],
+                DryRun = DryRun)
+        return resp        
+
+    def extend_lifetime(self,additional_time,DryRun = False):
+        """If you need more time to develop, extend the requested lifetime of your instance by `additional_time minutes.`
+
+        :param additional_time (additional_time): The amount of time that you woul 
+        """
+        instance_info = ec2_client.describe_instances(InstanceIds=[self.instance.instance_id])
+        info_dict = instance_info["Reservations"][0]["Instances"][0]
+        tags = info_dict["Tags"]
+        tagdict = {d["Key"]:d["Value"] for d in tags}
+        try:
+            timeout = int(tagdict["Timeout"])
+        except KeyError:    
+            raise Exception("Timeout not give; not a valid development instance.")
+        new_timeout = timeout + additional_time
+        resp = ec2_client.create_tags(Resources = [self.instance.instance_id],
+                Tags = [
+                    {
+                        "Key":"Timeout",
+                        "Value":str(new_timeout)
+                        }
+                    ],
+                DryRun = DryRun)
+        return resp        
 
     def submit_job(self,submitpath):
         """
@@ -295,24 +397,32 @@ class NeuroCaaSAMI(object):
         return output
 
 
-    def start_devinstance(self):
+    def start_devinstance(self,timeout = 60):
         """
-        method to stop the current development instance.
+        method to stop the current development instance. Specify a timeout for how long you expect the instance to be active. 
+
         """
         assert not self.check_running()
 
-        ec2_client = boto3.client("ec2",region_name = self.config['Lambda']['LambdaConfig']['REGION'])
         response = ec2_client.start_instances(InstanceIds = [self.instance.instance_id])
+        resp = ec2_client.create_tags(Resources = [self.instance.instance_id],
+                Tags = [
+                    {
+                        "Key":"Timeout",
+                        "Value":str(timeout)
+                        }
+                    ],
+                )
         print("instance {} is starting".format(self.instance.instance_id))
         ## Now wait until running.
-        time.sleep(1)
+        waiter = ec2_client.get_waiter('instance_running')
+        print("Instance starting: please wait")
+        waiter.wait(InstanceIds = [self.instance.instance_id])
         self.instance.load()
-        while self.instance.state["Name"] == "pending":
-            print("Instance starting: please wait")
-            self.instance.load()
-            time.sleep(10)
         self.ip = self.instance.public_ip_address
-        print("Instance is now in state: {}".format(self.instance.state["Name"]))
+        message = "Instance is now in state: {}".format(self.instance.state["Name"])
+        print(message)
+        return message
 
     def stop_devinstance(self):
         """
@@ -320,17 +430,16 @@ class NeuroCaaSAMI(object):
         """
         assert self.check_running()
 
-        ec2_client = boto3.client("ec2",region_name = self.config['Lambda']['LambdaConfig']['REGION'])
         response = ec2_client.stop_instances(InstanceIds = [self.instance.instance_id])
         print("instance {} is stopping".format(self.instance.instance_id))
         ## Now wait until stopped
-        time.sleep(1)
+        print("Instance stopping: please wait")
+        waiter = ec2_client.get_waiter('instance_stopped')
+        waiter.wait(InstanceIds = [self.instance.instance_id])
         self.instance.load()
-        while self.instance.state["Name"] == "stopping":
-            print("Instance stopping: please wait")
-            self.instance.load()
-            time.sleep(10)
-        print("Instance is now in state: {}".format(self.instance.state["Name"]))
+        message = "Instance is now in state: {}".format(self.instance.state["Name"])
+        print(message)
+        return message
 
     def terminate_devinstance(self,force = False):
         """
@@ -345,22 +454,29 @@ class NeuroCaaSAMI(object):
                 print("dev history not saved as ami, will not delete (override with force = True)")
                 proceed = False
             else:
+                ## Check that the most recent ami is available before deleting:  
+                print("waiting for created image to become available...")
+                imageid = self.ami_hist[-1]["ImageId"]
+                waiter = ec2_client.get_waiter("image_available")
+                waiter.wait(ImageIds = [imageid])
                 proceed = True
         else:
             proceed = True
 
         if proceed == True:
-            ec2_client = boto3.client("ec2",region_name = self.config['Lambda']['LambdaConfig']['REGION'])
             response = ec2_client.terminate_instances(InstanceIds = [self.instance.instance_id])
             print("Instance {} is terminating".format(self.instance.instance_id))
             ## Now wait until terminated:
-            time.sleep(1)
+            waiter = ec2_client.get_waiter('instance_terminated')
+            waiter.wait(InstanceIds = [self.instance.instance_id])
             self.instance.load()
-            while self.instance.state["Name"] == "shutting-down":
-                print("Instances terminating: please wait")
-                self.instance.load()
-                time.sleep(10)
-            print("Instance is now in state: {}".format(self.instance.state["Name"]))
+            message = "Instance is now in state: {}".format(self.instance.state["Name"])
+            print(message)
+            return message 
+        else:
+            message = "No state change."
+            print(message)
+            return message 
 
     def create_devami(self,name):
         """
@@ -370,14 +486,12 @@ class NeuroCaaSAMI(object):
         name (str): the name to give to the new ami.
         """
         ## first get the ec2 client:
-        ec2_client = boto3.client("ec2",region_name = self.config['Lambda']['LambdaConfig']['REGION'])
 
         ## Now create an image
         response = ec2_client.create_image(InstanceId=self.instance.instance_id,Name=name,Description = "AMI created at {}".format(str(datetime.datetime.now())))
 
         self.ami_hist.append(response)
         self.instance_saved = True
-        print(response)
 
     def update_blueprint(self,ami_id=None,message=None):
         """

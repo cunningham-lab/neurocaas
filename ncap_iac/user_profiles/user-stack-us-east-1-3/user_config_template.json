@@ -1,9 +1,18 @@
 {
+    "STAGE":"webusercentric",
     "UXData":{
     "Affiliates":[
         {
             "AffiliateName":"henlabncapuser",
             "UserNames":["sl2993"],
+            "KeySerialNumber":2,
+            "Pipelines":["dlc-ncap-web"],
+            "PipelineDir":["dlc"],
+            "ContactEmail":"The email that we should notify regarding processing status."
+        },
+        {
+            "AffiliateName":"achurchlandlab",
+            "UserNames":["jcouto"],
             "Pipelines":["dlc"],
             "PipelineDir":["dlc"],
             "ContactEmail":"The email that we should notify regarding processing status."

@@ -238,9 +238,11 @@ Launching a machine image
 If you are working with a blueprint where you have already specified an
 AMI, you can simply call :
 
-`>>> devami.launch_devinstance()`
+`>>> devami.launch_devinstance(timeout =60)`
 
-Which will launch the AMI listed in your blueprint.
+Which will launch the AMI listed in your blueprint. CAUTION: The timeout parameter is the amount of time you are requesting that a development instance be active for, in minutes. By default, it is set at 1 hour. After this timeout passes, your instance can be stopped at any time, so be careful! 
+
+If you need to check the time remaining on your instance, run the command `devami.get_lifetime()`. You can also extend the lifetime of your instance by running `devami.extend_lifetime(additional_time)`, where additional time is the additional number of minutes you are requesting.
 
 If starting with a newly configured blueprint, first select an EC2
 instance type from the available list:
@@ -248,7 +250,7 @@ instance type from the available list:
 
 Then call:
 
-`>>> devami.launch_devinstance(ami = string) TODO: Add in ec2 instance options, or set a default. `
+`>>> devami.launch_devinstance(ami = string, timeout = 60)`
 
 Where string is the id of an AMI you like, formatted as (“ami-xxxxxxxx”)
 (you can find many on the AWS marketplace). If you do not have a
@@ -288,9 +290,11 @@ instance with the following code:
 ```
 >>> devami = NeuroCaaSAMI("../path_to_configured_folder")
 >>> devami.assign_instance(instance_id)
->>> devami.start_devinstance()
+>>> devami.start_devinstance(timeout =60)
 >>> ip = devami.ip
 ```
+
+Note that if you restart your development instance, the requested timeout will be reset (default is 1 hour again).
 
 Developing a machine image into an immutable analysis environment
 -----------------------------------------------------------------

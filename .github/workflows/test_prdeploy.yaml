@@ -4,10 +4,6 @@ on:
   issue_comment:
     types: [created]
 
-# on:
-#   issue_comment:
-#     types: [created]
-
 jobs:
   deploy-check:
     runs-on: ubuntu-latest
@@ -41,7 +37,6 @@ jobs:
           issue_id: ${{ github.event.issue.number }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          ACTIONS_STEP_DEBUG: true
 
       - name: create deployment
         id: create_deployment
