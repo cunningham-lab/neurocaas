@@ -209,7 +209,7 @@ class NeuroCaaSAMI(object):
         ami_instance_id = self.instance.instance_id
 
         ## Wait until this thing is started:
-        waiter = ec2_client.get_waiter('instance_running')
+        waiter = ec2_client.get_waiter('instance_status_ok')
         print("Instance starting up: please wait")
         waiter.wait(InstanceIds = [self.instance.instance_id])
         self.instance.load()
