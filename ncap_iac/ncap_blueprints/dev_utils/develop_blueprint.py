@@ -235,9 +235,9 @@ class NeuroCaaSAMI(object):
         seconds_in_day = 24 * 60 * 60
         currmins,currsecs = divmod(diff.days*seconds_in_day+diff.seconds,60)
         ## get assigned time: 
-        tags = info_dict["Tags"]
-        tagdict = {d["Key"]:d["Value"] for d in tags}
         try:
+            tags = info_dict["Tags"]
+            tagdict = {d["Key"]:d["Value"] for d in tags}
             timeout = tagdict["Timeout"]
         except KeyError:    
             raise Exception("Timeout not give; not a valid development instance.")
@@ -268,9 +268,9 @@ class NeuroCaaSAMI(object):
         """
         instance_info = ec2_client.describe_instances(InstanceIds=[self.instance.instance_id])
         info_dict = instance_info["Reservations"][0]["Instances"][0]
-        tags = info_dict["Tags"]
-        tagdict = {d["Key"]:d["Value"] for d in tags}
         try:
+            tags = info_dict["Tags"]
+            tagdict = {d["Key"]:d["Value"] for d in tags}
             timeout = int(tagdict["Timeout"])
         except KeyError:    
             raise Exception("Timeout not give; not a valid development instance.")
