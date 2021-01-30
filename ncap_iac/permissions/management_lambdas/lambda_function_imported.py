@@ -7,6 +7,7 @@ from datetime import datetime,timedelta,timezone
 
 ## Retrieve environment variables from context: 
 graceperiod = os.environ["graceperiod"]
+ssm_exempt = "exempt_instances"
 exempt = os.environ["exemptlist"].split(",")
 assert os.environ["dryrun"] in ["0","1"]
 topicarn = os.environ["topicarn"]
@@ -14,7 +15,7 @@ topicarn = os.environ["topicarn"]
 
 ## Import according to test or deploy mode: 
 if int(os.environ['localstack']) == 1:
-    session = boto3.Session(aws_access_key_id = "foo",aws_secret_access_key = "bar",region_name = "us-east-1")
+    session = boto3.Session(region_name = "us-east-1")
     endpoint_url = 'http://%s:4566' % os.environ['LOCALSTACK_HOSTNAME']
 
     ec2_client = session.client("ec2",endpoint_url=endpoint_url)
@@ -45,7 +46,7 @@ def lambda_handler(event, context):
 
     """
     ##
-    instances_info = get_active_instances()
+    instances_info = get_rogue_instances()
 
     if len(instances_info) == 0:
         pass
@@ -115,22 +116,59 @@ def get_active_instances():
         
     return instances_active
 
+def get_rogue_instances():
+    """
+    Get rogue ec2 instances, and classify them based on if they should be stopped or not.
+    """
+    instances = ec2_client.describe_instances(Filters = [{'Name':'instance-state-name',
+                                             'Values':["running"]}]
+                                             )
+    ## Get out just the ids instances as a flat list
+    ## Check if there are any active at all:
+    try:
+        assert len(instances["Reservations"]) > 0
+        instances_flatlist = [inst for res in instances["Reservations"] for inst in res["Instances"]]
+        print([i["InstanceId"] for i in instances_flatlist])
+    except AssertionError:
+        print("no instances active")
+        instances_flatlist = []
+    
+    ## Now check which are active:
+    try: 
+        instances_notexempt = [i for i in instances_flatlist if not_exempt(i)]
+        instances_nossm = [i for i in instances_notexempt if no_command(i)]
+        instances_rogue = [i for i in instances_nossm if active_past_timeout(i)]
+        assert len(instances_rogue) > 0
+    except AssertionError:
+        print("no instances active for longer than {} minutes".format(os.environ["graceperiod"]))
+        instances_rogue = []
+        
+    return instances_rogue
+
 ## Checking conditions
 def not_exempt(instance_info):
     """Check if id is exempt, from a hardcoded list. 
 
     :param instance_info: the dictionary of instance-specific information returned by ec2_client.describe_instances- i.e. response["Reservations"][N]["Instances"][N]
     """
+    try:
+        elist = ssm_client.get_parameter(Name = ssm_exempt)["Parameter"]["Value"]
+        einst = elist.split(",")
+    except ClientError as e:    
+        print(e.response["Error"])
+        einst = exempt
     id = instance_info["InstanceId"]
-    not_exempt = id not in exempt
+    not_exempt = id not in einst
     return not_exempt
 
 def no_command(instance_info):
-    """Determines if this instance has ever seen an ssm command. 
+    """Determines if this instance has ever seen an ssm command; alternatively if the command has completed already. 
 
     """
-    id = instance_info["InstanceId"]
-    response = ssm_client.list_commands(InstanceId = id)
+    instid = instance_info["InstanceId"]
+    response = ssm_client.list_commands(InstanceId = instid,Filters = [{"key":"ExecutionStage", "value":"Executing"}]) ## This didn't work with localstack.
+    no_command = len(response["Commands"]) == 0
+    return no_command
 
 def active_past_graceperiod(instance_info):
     """Determines if the instance has been active longer than the system wide graceperiod. 
@@ -150,18 +188,19 @@ def active_past_timeout(instance_info):
 
     :param instance_info: the dictionary of instance-specific information returned by ec2_client.describe_instances- i.e. response["Reservations"][N]["Instances"][N]
     """
-    tags = instance_info["Tags"]
-    tagdict = {d["Key"]:d["Value"] for d in tags}
     try:
+        tags = instance_info["Tags"]
+        tagdict = {d["Key"]:d["Value"] for d in tags}
         timeout = int(tagdict["Timeout"])
     except KeyError:    
-        raise Exception("Timeout not given, not a valid development instance. Will be terminated at end of grace period.")
+        print("Timeout not given, not a valid development instance. Will be terminated at end of grace period.")
         timeout = graceperiod
     ltime = instance_info["LaunchTime"]
     difference = datetime.now(timezone.utc) - ltime
     difference_minutes = difference.total_seconds()/60
     return difference_minutes > float(timeout)
 
+## Not used for the moment. 
 def get_metricdata_dict(instance_id):
     """
     When supplied with the id of an ec2 instance (assumed active), gets the correctly formatted dictionary 
