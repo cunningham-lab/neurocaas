@@ -300,7 +300,7 @@ class Submission_dev():
             self.logger.write()
             raise ValueError("[JOB TERMINATE REASON] Instance requests greater than pipeline bandwidth. Too many simultaneously deployed analyses.")
         
-        instances = utilsparamec2.launch_new_instances(
+        instances = utilsparamec2.launch_new_instances_with_tags(
         instance_type=self.instance_type, 
         ami=os.environ['AMI'],
         logger=  self.logger,
