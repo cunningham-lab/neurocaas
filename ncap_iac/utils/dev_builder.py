@@ -14,9 +14,9 @@ import secrets
 import os
 import boto3
 import pathlib
+import logging
 
 current_dir=pathlib.Path(__file__).parent.absolute()
-print(current_dir)
 
 ## Import global parameters: 
 with open(os.path.join(os.path.dirname(current_dir),"global_params_initialized.json")) as gp:
@@ -62,6 +62,9 @@ class NeuroCaaSTemplate(object):
             self.add_affiliate(affdict)
         self.figurelamb = self.add_figure_lambda()
         self.add_submit_lambda()
+        ## New branch for if there is a postprocessing routine determined. 
+        if self.config["Lambda"].get("PostCodeUri",False) and self.config["Lambda"].get("PostHandler",False):
+            self.add_search_lambda()
         
     def get_config(self,filename):
         with open(filename,'r') as f:
@@ -333,10 +336,10 @@ class NeuroCaaSTemplate(object):
 
         ## Now we need to configure this function as a potential target. 
         ## Initialize role to send events to cloudwatch
-        with open('policies/cloudwatch_events_assume_role_doc.json','r') as f:
+        with open(os.path.join(current_dir,'policies/cloudwatch_events_assume_role_doc.json'),'r') as f:
             cloudwatchassume_role_doc = json.load(f)
         ## Now get the actual policy: 
-        with open('policies/cloudwatch_events_policy_doc.json','r') as f:
+        with open(os.path.join(current_dir,'policies/cloudwatch_events_policy_doc.json'),'r') as f:
             cloudwatch_policy_doc = json.load(f)
         cloudwatchpolicy = ManagedPolicy("CloudwatchBusPolicy",
                 Description = Join(" ",["Base Policy for all lambda function roles in",Ref(AWS_STACK_NAME)]),
@@ -349,6 +352,49 @@ class NeuroCaaSTemplate(object):
         cwrole_attached = self.template.add_resource(cwrole)
         self.cwrole = cwrole_attached
         return figurelamb
+
+    def add_search_lambda(self,output_file = "end.txt"):
+        """
+        Add in a lambda function to do postprocessing and return output to the user.  
+        Pasted in directly from ./postprocess_lambda.py. 
+        :param output_file: the name of the file to trigger further lambda on. by default it is end.txt. 
+
+        """
+        ## We will make event triggers for all affiliates. 
+        all_affiliates = self.config["UXData"]["Affiliates"]
+        ## Make Rule sets for each affiliate: 
+        all_events = {}
+        for affiliate in all_affiliates: 
+            ## Get necessary properties: 
+            affiliatename = affiliate["AffiliateName"]
+            ## If user input, reads directly from input directory. If other function output, reads from output directory.
+            readdir = self.config['Lambda']['LambdaConfig']['OUTDIR'] 
+
+            aff_filter = Filter('Filter'+affiliatename,
+                    S3Key = S3Key('S3Key'+affiliatename,
+                        Rules= [Rules('PrefixRule'+affiliatename,Name = 'prefix',Value = affiliatename+'/'+readdir),
+                                Rules('SuffixRule'+affiliatename,Name = 'suffix',Value =output_file)])) 
+            event_name = 'BucketEvent'+affiliatename+"AnalysisEnd"
+            all_events[event_name] = {'Type':'S3',
+                                      'Properties':{
+                                          'Bucket':Ref('PipelineMainBucket'),
+                                          'Events':['s3:ObjectCreated:*'],
+                                          'Filter':aff_filter}}
+        ## We're going to add in all of the lambda configuration items to the runtime environment.
+        lambdaconfig = self.config['Lambda']['LambdaConfig']
+        ## Now add to a lambda function: 
+        function = Function('SearchLambda',
+                CodeUri = self.config['Lambda']["PostCodeUri"],
+                Runtime = 'python3.6',
+                Handler = self.config['Lambda']["PostHandler"],
+                Description = 'Postprocessing Lambda Function for Serverless',
+                MemorySize = 128,
+                Timeout = self.config["Lambda"]['LambdaConfig']["EXECUTION_TIMEOUT"],
+                Role = 'arn:aws:iam::739988523141:role/lambda_dataflow', ## TODO: Create this in template
+                Events= all_events,
+                Environment = Environment(Variables=lambdaconfig)
+                )         
+        self.template.add_resource(function)
 
 ## First define a function that loads the relevant config file into memory: 
 class DevTemplate(NeuroCaaSTemplate):
@@ -374,6 +420,8 @@ class DevTemplate(NeuroCaaSTemplate):
         self.add_log_folder(affiliatedicts)
         self.figurelamb = self.add_figure_lambda()
         self.add_submit_lambda()
+        if self.config["Lambda"].get("PostCodeUri",False) and self.config["Lambda"].get("PostHandler",False):
+            self.add_search_lambda()
 
     def initialize_template(self):
         """
@@ -385,7 +433,7 @@ class DevTemplate(NeuroCaaSTemplate):
         ## Make role for custom resources. 
         ## Initialize the resources necessary to make directories. 
         ## First get the trust agreement: 
-        with open('policies/lambda_role_assume_role_doc.json',"r") as f:
+        with open(os.path.join(current_dir,'policies/lambda_role_assume_role_doc.json'),"r") as f:
             mkdirassume_role_doc = json.load(f)
         ## Base lambda policy
         base_policy = lambda_basepolicy("LambdaBaseRole")
@@ -462,7 +510,6 @@ class DevTemplate(NeuroCaaSTemplate):
 
         ## Make a folder for each affiliate so they can be assigned completed jobs too. 
         for affdict in affiliatedicts:
-            print(affdict,"dict here")
             affiliatename = affdict["AffiliateName"]
             logaffmake = CustomResource(logfoldername+affiliatename,
                                      ServiceToken=GetAtt(self.mkdirfunc,"Arn"),
@@ -521,7 +568,7 @@ class DevTemplate(NeuroCaaSTemplate):
         subdir = self.config['Lambda']['LambdaConfig']['SUBMITDIR']
         condir = self.config['Lambda']['LambdaConfig']['CONFIGDIR']
         ## First get the template policy 
-        with open('policies/iam_user_base_policy_doc.json','r') as f:
+        with open(os.path.join(current_dir,'policies/iam_user_base_policy_doc.json'),'r') as f:
             obj = json.load(f)
         ## The following policies are not iterated for readability:
         ## Give LIST permissions for the affiliate folder and subdirectories.  
@@ -574,7 +621,7 @@ class DevTemplate(NeuroCaaSTemplate):
                          'arn:aws:s3:::'+bucketname+'/'+affiliatename+'/'+condir+'/*',
                          ]
              })
-        with open('policies/'+affiliatename+'_policy.json','w') as fw: 
+        with open(os.path.join(current_dir,'policies/'+affiliatename+'_policy.json'),'w') as fw: 
             json.dump(obj,fw,indent = 2)
         return obj
     
@@ -602,6 +649,8 @@ class WebDevTemplate(NeuroCaaSTemplate):
         self.add_log_folder(affiliatedicts)
         self.figurelamb = self.add_figure_lambda()
         self.add_submit_lambda()
+        if self.config["Lambda"].get("PostCodeUri",False) and self.config["Lambda"].get("PostHandler",False):
+            self.add_search_lambda()
 
     def generate_usergroup(self,affiliatedict):
         identifier = "{}".format(self.config["PipelineName"].replace("-",""))
@@ -621,7 +670,7 @@ class WebDevTemplate(NeuroCaaSTemplate):
         ## Make role for custom resources. 
         ## Initialize the resources necessary to make directories. 
         ## First get the trust agreement: 
-        with open('policies/lambda_role_assume_role_doc.json',"r") as f:
+        with open(os.path.join(current_dir,'policies/lambda_role_assume_role_doc.json'),"r") as f:
             mkdirassume_role_doc = json.load(f)
         ## Base lambda policy
         base_policy = lambda_basepolicy("LambdaBaseRole")
@@ -750,7 +799,7 @@ class WebDevTemplate(NeuroCaaSTemplate):
         subdir = self.config['Lambda']['LambdaConfig']['SUBMITDIR']
         condir = self.config['Lambda']['LambdaConfig']['CONFIGDIR']
         ## First get the template policy 
-        with open('policies/iam_user_base_policy_doc.json','r') as f:
+        with open(os.path.join(current_dir,'policies/iam_user_base_policy_doc.json'),'r') as f:
             obj = json.load(f)
         ## The following policies are not iterated for readability:
         ## Give LIST permissions for the affiliate folder and subdirectories.  
@@ -803,7 +852,7 @@ class WebDevTemplate(NeuroCaaSTemplate):
                          'arn:aws:s3:::'+bucketname+'/'+affiliatename+'/'+condir+'/*',
                          ]
              })
-        with open('policies/'+affiliatename+'_policy.json','w') as fw: 
+        with open(os.path.join(current_dir,'policies/'+affiliatename+'_policy.json'),'w') as fw: 
             json.dump(obj,fw,indent = 2)
         return obj
     
@@ -900,7 +949,7 @@ class WebSubstackTemplate(NeuroCaaSTemplate):
         ## Make role for custom resources. 
         ## Initialize the resources necessary to make directories. 
         ## First get the trust agreement: 
-        with open('policies/lambda_role_assume_role_doc.json',"r") as f:
+        with open(os.path.join(current_dir,'policies/lambda_role_assume_role_doc.json'),"r") as f:
             mkdirassume_role_doc = json.load(f)
         ## Base lambda policy
         base_policy = lambda_basepolicy("LambdaBaseRole")
@@ -1230,7 +1279,6 @@ class ReferenceUserSubstackTemplate(NeuroCaaSTemplate):
 
         ## Make a folder for each affiliate so they can be assigned completed jobs too. 
         for affdict in affiliatedicts:
-            print(affdict,"dict here")
             affiliatename = affdict["AffiliateName"]
             logaffmake = CustomResource(logfoldername+"AffiliateTemplate",
                                      ServiceToken=self.makefuncarn,
