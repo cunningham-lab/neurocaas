@@ -1,10 +1,12 @@
 {
-    "PipelineName": "ensemble_dgp",
+    "PipelineName": "ensemble-dgp",
     "REGION": "us-east-1",
     "STAGE": "webdev",
     "Lambda": {
         "CodeUri": "../../protocols",
         "Handler": "submit_start.handler_develop",
+        "PostCodeUri": "../../protocols",
+        "PostHandler": "postprocess.epipostprocess",
         "Launch": true,
         "LambdaConfig": {
             "AMI": "ami-086ae948121bbfb82",
@@ -36,15 +38,6 @@
                 ],
                 "UserInput": true,
                 "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
-            },
-            {
-                "AffiliateName": "developergroup1",
-                "UserNames": [
-                    "liam",
-                    "john"
-                ],
-                "UserInput": true,
-                "ContactEmail": "The email we should notify regarding processing status."
             }
         ]
     }
