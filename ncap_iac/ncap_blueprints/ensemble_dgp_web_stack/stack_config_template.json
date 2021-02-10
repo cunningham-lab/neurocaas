@@ -4,7 +4,7 @@
     "STAGE": "webdev",
     "Lambda": {
         "CodeUri": "../../protocols",
-        "Handler": "submit_start.handler_develop",
+        "Handler": "submit_start.handler_ensemble",
         "PostCodeUri": "../../protocols",
         "PostHandler": "postprocess.epipostprocess",
         "Launch": true,
