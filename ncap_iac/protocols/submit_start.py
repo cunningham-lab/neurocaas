@@ -458,7 +458,7 @@ class Submission_ensemble(Submission_dev):
         preconfigs = [dict(passed_config.items()) for i in range(self.ensemble_size)]
         [pc.update({"jobnb":i}) for i,pc in enumerate(preconfigs)]
         configdir = os.path.dirname(self.config_name)
-        self.ensembleconfigs = {os.path.join(configdir,"inst{}config.json".format(i)):preconfigs[i] for i in range(self.ensemble_size)}
+        self.ensembleconfigs = {os.path.join(configdir,"inst{}config.json".format(i+1)):preconfigs[i] for i in range(self.ensemble_size)} ## need to start at 1 because this parameter is parsed in analysis later. 
         for cfig in self.ensembleconfigs:
             utilsparams3.put_json(self.bucket_name,cfig,self.ensembleconfigs[cfig])
             
@@ -481,12 +481,12 @@ class Submission_ensemble(Submission_dev):
         configdir = os.path.dirname(self.config_name)
 
         print([os.environ['COMMAND'].format(
-              self.bucket_name, filename, outpath_full, os.path.join(configdir,"inst{}config.json".format(f))
+              self.bucket_name, filename, outpath_full, os.path.join(configdir,"inst{}config.json".format(f+1)) ## have to be consistent with parse_config. 
               ) for f,filename in enumerate(self.filenames)],"command send")
         for f,filename in enumerate(self.filenames):
             response = utilsparamssm.execute_commands_on_linux_instances(
                 commands=[os.environ['COMMAND'].format(
-                    self.bucket_name, filename, outpath_full, os.path.join(configdir,"inst{}config.json".format(f))
+                    self.bucket_name, filename, outpath_full, os.path.join(configdir,"inst{}config.json".format(f+1)) ## have to be consistent with parse_config
                     )], # TODO: variable outdir as option
                 instance_ids=[self.instances[f].instance_id],
                 working_dirs=[os.environ['WORKING_DIRECTORY']],
