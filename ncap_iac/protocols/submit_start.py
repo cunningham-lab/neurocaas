@@ -456,7 +456,7 @@ class Submission_ensemble(Submission_dev):
         ## Now change the filenames parameter accordingly.
         self.filenames = self.filenames*self.ensemble_size
         preconfigs = [dict(passed_config.items()) for i in range(self.ensemble_size)]
-        [pc.update({"jobnb":i}) for i,pc in enumerate(preconfigs)]
+        [pc.update({"jobnb":i+1}) for i,pc in enumerate(preconfigs)]
         configdir = os.path.dirname(self.config_name)
         self.ensembleconfigs = {os.path.join(configdir,"inst{}config.json".format(i+1)):preconfigs[i] for i in range(self.ensemble_size)} ## need to start at 1 because this parameter is parsed in analysis later. 
         for cfig in self.ensembleconfigs:
