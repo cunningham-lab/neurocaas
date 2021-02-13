@@ -16,7 +16,7 @@
             "IAM_ROLE": "SSMRole",
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
             "WORKING_DIRECTORY": "~/bin",
-            "COMMAND": "cd /home/ubuntu; neurocaas_contrib/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\" neurocaas_contrib/dgp/run_dgp_ensemble.sh; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
+            "COMMAND": "cd /home/ubuntu; neurocaas_contrib/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\" neurocaas_contrib/dgp/run_dgp_ensemble.sh; . neurocaas_contrib/ncap_utils/workflow.sh; cleanup",
             "SHUTDOWN_BEHAVIOR": "terminate",
             "CONFIG": "config.yaml",
             "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
@@ -25,7 +25,7 @@
             "LAUNCH": true,
             "LOGFILE": "lambda_log.txt",
             "DEPLOY_LIMIT": 100,
-            "MAXCOST": "maximum per user allowed cost (integer) before lockout. Set to 300 by default.",
+            "MAXCOST": "300",
             "MONITOR": true
         }
     },
