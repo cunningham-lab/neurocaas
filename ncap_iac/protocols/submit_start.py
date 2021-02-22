@@ -458,7 +458,8 @@ class Submission_ensemble(Submission_dev):
         preconfigs = [dict(passed_config.items()) for i in range(self.ensemble_size)]
         [pc.update({"jobnb":i+1}) for i,pc in enumerate(preconfigs)]
         configdir = os.path.dirname(self.config_name)
-        self.ensembleconfigs = {os.path.join(configdir,"inst{}config.json".format(i+1)):preconfigs[i] for i in range(self.ensemble_size)} ## need to start at 1 because this parameter is parsed in analysis later. 
+        ## As is, this actually does not separate by jobname. Leads to overwrites and issues in processing :(
+        self.ensembleconfigs = {os.path.join(configdir,"job{}inst{}config.json".format(self.jobname,i+1)):preconfigs[i] for i in range(self.ensemble_size)} ## need to start at 1 because this parameter is parsed in analysis later. 
         for cfig in self.ensembleconfigs:
             utilsparams3.put_json(self.bucket_name,cfig,self.ensembleconfigs[cfig])
             
