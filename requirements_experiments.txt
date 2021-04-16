@@ -45,7 +45,7 @@ py==1.8.1
 pyasn1==0.4.5
 pycparser==2.19
 pydoc-markdown==2.0.5
-Pygments==2.4.2
+Pygments==2.7.4
 pyOpenSSL==19.0.0
 pyparsing==2.4.0
 PySocks==1.7.0
