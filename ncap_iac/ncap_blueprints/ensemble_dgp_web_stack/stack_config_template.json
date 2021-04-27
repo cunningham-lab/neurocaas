@@ -31,14 +31,37 @@
     },
     "UXData": {
         "Affiliates": [
-            {
-                "AffiliateName": "debuggers",
-                "UserNames": [
-                    "dummyuser"
-                ],
-                "UserInput": true,
-                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
-            }
+          {
+            "AffiliateName": "debuggers",
+            "UserNames": [
+              "dummyuser"
+            ],
+            "UserInput": true,
+            "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
+          },
+          {
+            "AffiliateName": "bendeskylab",
+            "UserNames": [
+              "ps3121",
+              "aln2128",
+              "fh3050"
+            ],
+            "PipelinePath": "",
+            "PipelineDir": "trackingfolder",
+            "UserInput": true,
+            "ContactEmail": "The email we should notify regarding processing status."
+          },
+          {
+            "AffiliateName": "reviewers",
+            "UserNames": [
+              "editornn",
+              "reviewersnn"
+            ],
+            "PipelinePath": "",
+            "PipelineDir": "trackingfolder",
+            "UserInput": true,
+            "ContactEmail": "The email we should notify regarding processing status."
+          }
         ]
     }
 }
