@@ -61,6 +61,16 @@
             "PipelineDir": "trackingfolder",
             "UserInput": true,
             "ContactEmail": "The email we should notify regarding processing status."
+          },
+          {
+            "AffiliateName": "ekb2154columbiaedu1610734759",
+            "UserNames": [
+              "ekb2154columbia"
+            ],
+            "PipelinePath": "",
+            "PipelineDir": "trackingfolder",
+            "UserInput": true,
+            "ContactEmail": "The email we should notify regarding processing status."
           }
         ]
     }
