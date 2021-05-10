@@ -1,5 +1,5 @@
 {
-    "STAGE":"dev",
+    "STAGE":"webusercentric",
     "UXData": {
         "Affiliates": [
             {
@@ -8,7 +8,8 @@
                     "cipermauser1",
                     "cipermauser2"
                 ],
-                "Pipelines": "Path to processing directory. If processing directory lives at root, can be \"\"",
+                "KeySerialNumber":2,
+                "Pipelines": ["epi-ncap-web"],
                 "PipelineDir": "Directory where pipeline should be built",
                 "ContactEmail": "The email that we should notify regarding processing status."
             }

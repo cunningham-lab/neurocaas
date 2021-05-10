@@ -1,0 +1,62 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:RunInstances",
+                "ec2:CreateVolume"
+            ],
+            "Resource": [
+                "arn:aws:ec2:*:*:instance/*",
+                "arn:aws:ec2:*:*:volume/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/PriceTracking": "On"
+                },
+                "ForAnyValue:StringEquals": {
+                    "aws:TagKeys": "Timeout"
+                }
+            }
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": "ec2:CreateTags",
+            "Resource": [
+                "arn:aws:ec2:*:*:instance/*",
+                "arn:aws:ec2:*:*:volume/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "ec2:CreateAction": "RunInstances"
+                }
+            }
+        },
+        {
+            "Sid": "VisualEditor2",
+            "Effect": "Allow",
+            "Action": "ec2:Describe*",
+            "Resource": "*"
+        },
+        {
+            "Sid": "VisualEditor3",
+            "Effect": "Allow",
+            "Action": [
+                "iam:PassRole",
+                "ec2:RunInstances"
+            ],
+            "Resource": [
+                "arn:aws:iam::739988523141:role/testutilsstack-SSMRole-1GG0BKY7GL634",
+                "arn:aws:ec2:*:*:subnet/*",
+                "arn:aws:ec2:*:*:key-pair/*",
+                "arn:aws:ec2:*::snapshot/*",
+                "arn:aws:ec2:*:*:security-group/*",
+                "arn:aws:ec2:*:*:network-interface/*",
+                "arn:aws:ec2:*::image/*"
+            ]
+        }
+    ]
+}

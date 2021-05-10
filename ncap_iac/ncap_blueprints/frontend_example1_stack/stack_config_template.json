@@ -1,6 +1,7 @@
 {
     "PipelineName":"ctnfrontendexample1",
     "REGION":"us-east-1",
+    "STAGE":"websubstack",
     "Lambda":{
         "CodeUri":"../lambda_repo",
         "Handler":"submit_start.handler_log",

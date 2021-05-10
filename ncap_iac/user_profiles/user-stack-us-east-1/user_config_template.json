@@ -1,59 +1,68 @@
 {
+    "STAGE":"webusercentric",
     "UXData":{
     "Affiliates":[
         {
             "AffiliateName":"ctnncapdev",
             "UserNames":["ta2507"],
-            "Pipelines":["dlc","caiman"],
+            "Pipelines":["dlc-ncap-web","caiman-ncap-web"],
+            "KeySerialNumber":2,
             "PipelineDir":["dlc","caiman"],
             "ContactEmail":"The email that we should notify regarding processing status."
         },
         {
             "AffiliateName":"brunolabncapuser",
             "UserNames":["rb2604","sb4096","dk2643"],
-            "Pipelines":["dlc","caiman"],
+            "Pipelines":["dlc-ncap-web","caiman-ncap-web"],
+            "KeySerialNumber":2,
             "PipelineDir":["dlc","caiman"],
             "ContactEmail":"The email that we should notify regarding processing status."
         },
         {
             "AffiliateName":"mannlabncapuser",
             "UserNames":["sz2835"],
-            "Pipelines":["dlc"],
+            "Pipelines":["dlc-ncap-web"],
+            "KeySerialNumber":2,
             "PipelineDir":["dlc"],
             "ContactEmail":"The email we should notify regarding processing status."
         },
         {
             "AffiliateName":"bendeskylabncapuser",
             "UserNames":["fh3050","nkw2113","aln2128","cg3161","kh2920","ps3121","ht2513"],
-            "Pipelines":["dlc"],
+            "Pipelines":["dlc-ncap-web"],
+            "KeySerialNumber":2,
             "PipelineDir":["dlc"],
             "ContactEmail":"The email we should notify regarding processing status."
         },
         {
             "AffiliateName":"peterkagroupncapuser",
             "UserNames":["dsp","va2371","ioc2104"],
-            "Pipelines":["caiman"],
+            "Pipelines":["caiman-ncap-web"],
+            "KeySerialNumber":2,
             "PipelineDir":["caiman"],
             "ContactEmail":"The email we should notify regarding processing status."
         },
         {
             "AffiliateName":"carcealabncapuser",
             "UserNames":["ioanacarcea","zahraadahman"],
-            "Pipelines":["dlccarcea"],
+            "Pipelines":["carceamonitored"],
+            "KeySerialNumber":2,
             "PipelineDir":["dlccarcea"],
             "ContactEmail":"The email we should notify regarding processing status."
         },
         {
             "AffiliateName":"polleuxlabncapuser",
             "UserNames":["av2686"],
-            "Pipelines":["dlcpolleux"],
+            "Pipelines":["polleuxmonitored"],
+            "KeySerialNumber":2,
             "PipelineDir":["dlcpolleux"],
             "ContactEmail":"The email we should notify regarding processing status."
         },
         {
             "AffiliateName":"wooleylabncapuser",
             "UserNames":["sw2277"],
-            "Pipelines":["caiman"],
+            "Pipelines":["caiman-ncap-web"],
+            "KeySerialNumber":2,
             "PipelineDir":["caiman"],
             "ContactEmail":"The email we should notify regarding processing status."
         }

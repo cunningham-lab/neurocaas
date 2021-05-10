@@ -1,24 +1,28 @@
 {
+    "STAGE":"webusercentric",
     "UXData":{
     "Affiliates":[
         {
             "AffiliateName":"sawtelllabncapuser",
             "UserNames":["aw3057","raw2163","hxh2001","qz2311"],
-            "Pipelines":["dlc"],
+            "Pipelines":["dlc-ncap-web"],
+            "KeySerialNumber":2,
             "PipelineDir":["dlc"],
             "ContactEmail":"The email we should notify regarding processing status."
         },
         {
             "AffiliateName":"frontenddevgroup",
             "UserNames":["johannes","taiga"],
-            "Pipelines":["dlc"],
+            "Pipelines":["dlc-ncap-web"],
+            "KeySerialNumber":2,
             "PipelineDir":["dlc"],
             "ContactEmail":"The email we should notify regarding processing status."
         },
         {
             "AffiliateName":"hillmanlabncapuser",
             "UserNames":["hillmanlabaccount"],
-            "Pipelines":["dlc"],
+            "Pipelines":["dlc-ncap-web"],
+            "KeySerialNumber":2,
             "PipelineDir":["dlc"],
             "ContactEmail":"The email we should notify regarding processing status."
         }

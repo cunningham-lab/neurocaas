@@ -1,11 +1,12 @@
 {
-    "STAGE":"web",
+    "STAGE":"webusercentric",
     "UXData":{
     "Affiliates":[
         {
             "AffiliateName":"cunninghamlab",
             "UserNames":["jpccosyne","srbcosyne","tacosyne"],
-            "Pipelines":["epi-ncap"],
+            "KeySerialNumber":2,
+            "Pipelines":["epi-ncap-web"],
             "PipelineDir":["Directory where pipeline should be built"],
             "ContactEmail":"The email that we should notify regarding processing status."
         }

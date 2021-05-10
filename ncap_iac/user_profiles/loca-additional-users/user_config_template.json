@@ -1,10 +1,12 @@
 {
+    "STAGE": "webusercentric",
     "UXData":{
     "Affiliates":[
         {
             "AffiliateName":"neurotheoryworkshopadditionalusers",
             "UserNames":["wy2303","awl2145","jeremforest","rachelaswanson","wx2203","rn2446","md3681","fs2545","re2365","mwhiteway","cm3746"],
-            "Pipelines":["Path to processing directory. If processing directory lives at root, can be \"\""],
+            "KeySerialNumber":2,
+            "Pipelines":["locanmf-ncap-web"],
             "PipelineDir":["Directory where pipeline should be built"],
             "ContactEmail":"The email that we should notify regarding processing status."
         }
