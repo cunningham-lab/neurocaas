@@ -2,6 +2,22 @@
     "Version": "2012-10-17",
     "Statement": [
         {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:DescribeParameters"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:DescribeParameters",
+                "ssm:GetParameters",
+                "ssm:GetParameter"
+            ],
+            "Resource": "arn:aws:ssm:us-east-1:739988523141:parameter/testkeystack/neurocaas/private-dev-key"
+        },
+        {
             "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": [
