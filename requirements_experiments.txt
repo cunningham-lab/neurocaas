@@ -41,7 +41,7 @@ pickleshare==0.7.5
 pluggy==0.13.1
 prompt-toolkit==2.0.9
 ptyprocess==0.6.0
-py==1.8.1
+py==1.10.0
 pyasn1==0.4.5
 pycparser==2.19
 pydoc-markdown==2.0.5
