@@ -41,7 +41,7 @@ pickleshare==0.7.5
 pluggy==0.13.1
 prompt-toolkit==2.0.9
 ptyprocess==0.6.0
-py==1.8.1
+py==1.10.0
 pyasn1==0.4.5
 pycparser==2.19
 pydoc-markdown==2.0.5
@@ -54,13 +54,13 @@ python-dateutil==2.8.0
 pytz==2019.1
 PyYAML==5.4
 requests==2.23.0
-rsa==4.1
+rsa==4.7
 s3transfer==0.2.0
 six==1.12.0
 snowballstemmer==2.0.0
 tornado==6.0.3
 traitlets==4.3.2
 troposphere==2.5.0
-urllib3==1.25.3
+urllib3==1.25.8
 wcwidth==0.1.7
 zipp==3.1.0
