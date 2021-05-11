@@ -117,6 +117,7 @@ jobs:
           
       - name: Deploy stack
         run: |
+          conda activate neurocaas
           cd ncap_iac/ncap_blueprints
           bash iac_utils/fulldeploy.sh ${{ steps.split.outputs._1 }}     
           
