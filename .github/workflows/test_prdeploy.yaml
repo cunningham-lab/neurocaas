@@ -8,6 +8,10 @@ jobs:
   deploy-check:
     runs-on: ubuntu-latest
     steps:
+      - name: vet commenter 
+        id: vet
+        if: github.event.comment.user.login == "cellistigs"
+        run: exit 1
       - name: acknowledge deployment request to commenter
         id: check
         uses: khan/pull-request-comment-trigger@master
