@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: vet commenter 
         id: vet
-        if: github.event.comment.user.login == 'cellistigs'
+        if: github.event.comment.user.login != 'cellistigs'
         run: exit 1
       - name: acknowledge deployment request to commenter
         id: check
