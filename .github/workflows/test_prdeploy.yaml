@@ -82,8 +82,9 @@ jobs:
           
       - name: pull the repo.  
         uses: actions/checkout@v2
-        with:                                                                                                                                                                                                     
-           ref: ${{ github.head_ref }} 
+        with:                    
+           persist-credentials: false
+           ref: refs/heads/${{ github.event.pull_request.head.ref }}
 
       - name: setup python.
         uses: actions/setup-python@v2
