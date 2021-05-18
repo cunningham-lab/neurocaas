@@ -14,7 +14,7 @@
             "IAM_ROLE": "SSMRole",
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
             "WORKING_DIRECTORY": "~/bin",
-            "COMMAND": "cd /home/ubuntu; neurocaas_contrib/run_main_cli.sh \"{}\" \"{}\" \"{}\" \"{}\" /home/ubuntu/neurocaas_contrib/dgp/run_dgp_cli.sh; . neurocaas_config/ncap_utils/workflow.sh; cleanup",
+            "COMMAND": "cd /home/ubuntu; neurocaas_contrib/run_main_cli.sh \"{}\" \"{}\" \"{}\" \"{}\" /home/ubuntu/neurocaas_contrib/dgp/run_dgp_cli.sh; . neurocaas_contrib/ncap_utils/workflow.sh; cleanup",
             "SHUTDOWN_BEHAVIOR": "terminate",
             "CONFIG": "config.yaml",
             "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
