@@ -215,3 +215,21 @@ def epipostprocess(event, context):
         'body': json.dumps('message: {}, data: {}'.format(message,results_msg))
 
     }
+
+
+def postprocess_samebucket(event, context):
+    """Postprocessing to create another job in the same bucket
+
+    """
+    
+    for record in event['Records']:
+        time = record['eventTime']
+        bucket_name = record['s3']['bucket']['name']
+        key = record['s3']['object']['key']
+        
+    ## Declare the bucket 
+    bucket = s3_resource.Bucket(bucket_name)
+    
+    ## Now key should be altered find the path two dirs up.    
+    jobpath = os.path.dirname(os.path.dirname(os.path.dirname(key)))
+    jobpath_corrected = ':'.join(jobpath.split("%3A"))
