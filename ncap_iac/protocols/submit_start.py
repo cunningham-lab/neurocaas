@@ -898,7 +898,13 @@ def handler_ensemble(event,context):
         key = record['s3']['object']['key']
         submit_file = utilsparams3.load_json(bucket_name, key)
         configpath = submit_file["configname"]
-        configfile = utilsparams3.load_json(bucket_name,configpath)
+        try:
+            configfile = utilsparams3.load_json(bucket_name,configpath)
+        except ValueError:    
+            try:
+                configfile = utilsparams3.load_yaml(bucket_name, configpath)
+            except Exception:    
+                raise Exception("Config is not json or yaml.")
         if configfile["mode"] == "train":
             #print("handler_params",bucket_name,key,time)
             #print(event,context,'event, context')
