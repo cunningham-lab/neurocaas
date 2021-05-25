@@ -286,5 +286,6 @@ def test_postprocess_prediction_run(setup_testing_bucket):
     submitcontent = json.loads(submitobject.get()["Body"].read().decode("utf-8"))
     s3_resource.Object(bucket_name,submitcontent["dataname"][0]).load()
     s3_resource.Object(bucket_name,submitcontent["configname"]).load()
+    assert pp.check_postprocess(), "Assert now marked as postprocessed."
     assert submitcontent["timestamp"] == "timestamp1"
 

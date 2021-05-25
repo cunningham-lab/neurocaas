@@ -393,7 +393,7 @@ def postprocess_prediction_run(bucket_name,key):
     """Full packaging of all steps necessary to make postprocessing happen.
     """
     pp = PostProcess_EnsembleDGPPredict(bucket_name,key,bucket_name,"prediction")
-    pp.check_postprocess()
+    assert not pp.check_postprocess(), "Will only run postprocessing if not already marked as having postprocessed. "
     pp.copy_logs()
     config = pp.make_config()
     configpath = pp.write_config(config)
