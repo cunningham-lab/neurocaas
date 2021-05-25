@@ -889,14 +889,23 @@ def handler_develop(event,context):
 def handler_ensemble(event,context):
     """
     Newest version of handler that logs outputs to a subfolder of the result folder that is indexed by the job submission date and the submit name.
+    Update 05/25: first check the config file to see if this is predict mode or train mode. 
     """
+
     for record in event['Records']:
         time = record['eventTime']
         bucket_name = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
-        #print("handler_params",bucket_name,key,time)
-        #print(event,context,'event, context')
-        exitcode = process_upload_ensemble(bucket_name, key, time);
-        print("processing returned exit code {}".format(exitcode))
+        submit_file = utilsparams3.load_json(bucket_name, key)
+        configpath = submit_file["configname"]
+        configfile = utilsparams3.load_json(bucket_name,configpath)
+        if configfile["mode"] == "train":
+            #print("handler_params",bucket_name,key,time)
+            #print(event,context,'event, context')
+            exitcode = process_upload_ensemble(bucket_name, key, time);
+            print("processing returned exit code {}".format(exitcode))
+        else:    
+            exitcode = process_upload_dev(bucket_name, key, time);
+            print("processing returned exit code {}".format(exitcode))
     return exitcode 
 
