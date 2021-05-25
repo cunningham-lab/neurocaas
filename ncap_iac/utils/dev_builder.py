@@ -41,8 +41,8 @@ class NeuroCaaSTemplate(object):
     2. There is an AWS Custom Resource that sets up user folders inside this bucket with input, config, submission, result and log folders. 
     3. There is a user group per affiliate that we have, to which we add users. All users in a given user group only have access to their folder, and furthermore only have write access to the input folder and get access from the output folder. Additional "users" can include lambda functions from other pipelines.  
     4. There is a lambda function that is triggered by submit files when they are passed to the input folder. We should be able to add event sources to it as we update the number of users. In addition to the standard behavior, it should set up a cloudwatch events rule to monitor given instances for state change behavior.  
-    ##### TODO: 
     5. Output management. A secondary lambda function that sends notifications to an end user when processing is done. Additionally, we can use this to route output from a pipeline to another one.  
+    ##### TODO: 
     6. Centralized function source control. Create an AMI_updater custom resource, that takes the ami id associated with a given stack, instantiates it, pulls from the repository, and runs tests to make sure that everything is still fine. Compare with instantiating via CodeCommit/CodePipeline. 
     The differences in this version are that we are only allowing ourselves to attach new users, not to define them.  
 
@@ -893,6 +893,8 @@ class WebSubstackTemplate(NeuroCaaSTemplate):
             self.template.add_resource(substack)
         self.figurelamb = self.add_figure_lambda()
         self.add_submit_lambda()
+        if self.config["Lambda"].get("PostCodeUri",False) and self.config["Lambda"].get("PostHandler",False):
+            self.add_search_lambda()
 
     def initialize_template(self):
         """
