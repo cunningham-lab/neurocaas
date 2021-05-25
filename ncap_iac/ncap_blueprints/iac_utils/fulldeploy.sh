@@ -10,7 +10,8 @@ source "$scriptdir"/paths.sh
 ## Get the path to this particular file. 
 ## NOTE: Add the anaconda path if running as admin.  
 export PATH="/miniconda/bin:$PATH"
-source activate neurocaas
+source "$HOME/miniconda/etc/profile.d/conda.sh"
+conda activate neurocaas
 
 ## Input management: 
 ## Get the path to the directory where user data is stored: 
