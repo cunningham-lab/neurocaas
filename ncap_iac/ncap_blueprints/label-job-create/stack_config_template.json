@@ -1,5 +1,5 @@
 {
-    "PipelineName": "label-job-create",
+    "PipelineName": "label-job-create-web",
     "REGION": "us-east-1",
     "STAGE": "webdev",
     "Lambda": {
