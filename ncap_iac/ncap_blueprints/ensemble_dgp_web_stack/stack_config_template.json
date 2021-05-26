@@ -6,7 +6,7 @@
         "CodeUri": "../../protocols",
         "Handler": "submit_start.handler_ensemble",
         "PostCodeUri": "../../protocols",
-        "PostHandler": "postprocess.epipostprocess",
+        "PostHandler": "postprocess.postprocess_prediction",
         "Launch": true,
         "LambdaConfig": {
             "AMI": "ami-044006fff2d950df9",
@@ -16,7 +16,7 @@
             "IAM_ROLE": "SSMRole",
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
             "WORKING_DIRECTORY": "~/bin",
-            "COMMAND": "cd /home/ubuntu; neurocaas_contrib/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\" neurocaas_contrib/dgp/run_dgp_ensemble.sh; . neurocaas_contrib/ncap_utils/workflow.sh; cleanup",
+            "COMMAND": "cd /home/ubuntu; neurocaas_contrib/run_main_cli.sh \"{}\" \"{}\" \"{}\" \"{}\" neurocaas_contrib/dgp/run_dgp_ensemble_cli.sh; . neurocaas_contrib/ncap_utils/workflow.sh; cleanup",
             "SHUTDOWN_BEHAVIOR": "terminate",
             "CONFIG": "config.yaml",
             "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
