@@ -553,6 +553,7 @@ def process_upload_dev(bucket_name, key,time):
         submission.logger.printlatest()
         submission.logger.write()
     except AssertionError as e:
+        print(e)
         e = "Error: Job is not covered by budget. Contact NeuroCAAS administrator."
         submission.logger.append(internalerrormessage.format(s= step,e = e))
         submission.logger.printlatest()
@@ -717,6 +718,7 @@ def process_upload_ensemble(bucket_name, key,time):
         submission.logger.printlatest()
         submission.logger.write()
     except AssertionError as e:
+        print(e)
         e = "Error: Job is not covered by budget. Contact NeuroCAAS administrator."
         submission.logger.append(internalerrormessage.format(s= step,e = e))
         submission.logger.printlatest()
@@ -906,6 +908,7 @@ def handler_ensemble(event,context):
                 configfile = utilsparams3.load_yaml(bucket_name, configpath)
             except Exception:    
                 raise Exception("Config is not json or yaml.")
+        print("Processing in {} mode".format(configfile["mode"]))    
         if configfile["mode"] == "train":
             #print("handler_params",bucket_name,key,time)
             #print(event,context,'event, context')
