@@ -458,7 +458,8 @@ class Submission_ensemble(Submission_dev):
         preconfigs = [dict(passed_config.items()) for i in range(self.ensemble_size)]
         [pc.update({"jobnb":i+1}) for i,pc in enumerate(preconfigs)]
         configdir = os.path.dirname(self.config_name)
-        self.ensembleconfigs = {os.path.join(configdir,"inst{}config.json".format(i+1)):preconfigs[i] for i in range(self.ensemble_size)} ## need to start at 1 because this parameter is parsed in analysis later. 
+        ## As is, this actually does not separate by jobname. Leads to overwrites and issues in processing :(
+        self.ensembleconfigs = {os.path.join(configdir,"{}inst{}config.json".format(self.jobname,i+1)):preconfigs[i] for i in range(self.ensemble_size)} ## need to start at 1 because this parameter is parsed in analysis later. 
         for cfig in self.ensembleconfigs:
             utilsparams3.put_json(self.bucket_name,cfig,self.ensembleconfigs[cfig])
             
@@ -481,12 +482,12 @@ class Submission_ensemble(Submission_dev):
         configdir = os.path.dirname(self.config_name)
 
         print([os.environ['COMMAND'].format(
-              self.bucket_name, filename, outpath_full, os.path.join(configdir,"inst{}config.json".format(f+1)) ## have to be consistent with parse_config. 
+              self.bucket_name, filename, outpath_full, os.path.join(configdir,"{}inst{}config.json".format(self.jobname,f+1)) ## have to be consistent with parse_config. 
               ) for f,filename in enumerate(self.filenames)],"command send")
         for f,filename in enumerate(self.filenames):
             response = utilsparamssm.execute_commands_on_linux_instances(
                 commands=[os.environ['COMMAND'].format(
-                    self.bucket_name, filename, outpath_full, os.path.join(configdir,"inst{}config.json".format(f+1)) ## have to be consistent with parse_config
+                    self.bucket_name, filename, outpath_full, os.path.join(configdir,"{}inst{}config.json".format(self.jobname,f+1)) ## have to be consistent with parse_config
                     )], # TODO: variable outdir as option
                 instance_ids=[self.instances[f].instance_id],
                 working_dirs=[os.environ['WORKING_DIRECTORY']],
@@ -889,29 +890,14 @@ def handler_develop(event,context):
 def handler_ensemble(event,context):
     """
     Newest version of handler that logs outputs to a subfolder of the result folder that is indexed by the job submission date and the submit name.
-    Update 05/25: first check the config file to see if this is predict mode or train mode. 
     """
-
     for record in event['Records']:
         time = record['eventTime']
         bucket_name = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
-        submit_file = utilsparams3.load_json(bucket_name, key)
-        configpath = submit_file["configname"]
-        try:
-            configfile = utilsparams3.load_json(bucket_name,configpath)
-        except ValueError:    
-            try:
-                configfile = utilsparams3.load_yaml(bucket_name, configpath)
-            except Exception:    
-                raise Exception("Config is not json or yaml.")
-        if configfile["mode"] == "train":
-            #print("handler_params",bucket_name,key,time)
-            #print(event,context,'event, context')
-            exitcode = process_upload_ensemble(bucket_name, key, time);
-            print("processing returned exit code {}".format(exitcode))
-        else:    
-            exitcode = process_upload_dev(bucket_name, key, time);
-            print("processing returned exit code {}".format(exitcode))
+        #print("handler_params",bucket_name,key,time)
+        #print(event,context,'event, context')
+        exitcode = process_upload_ensemble(bucket_name, key, time);
+        print("processing returned exit code {}".format(exitcode))
     return exitcode 
 
