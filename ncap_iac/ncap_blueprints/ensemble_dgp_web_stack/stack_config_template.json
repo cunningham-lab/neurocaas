@@ -9,7 +9,7 @@
         "PostHandler": "postprocess.postprocess_prediction",
         "Launch": true,
         "LambdaConfig": {
-            "AMI": "ami-044006fff2d950df9",
+            "AMI": "ami-083e6241496f5b02b",
             "INSTANCE_TYPE": "p3.2xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
@@ -31,47 +31,47 @@
     },
     "UXData": {
         "Affiliates": [
-          {
-            "AffiliateName": "debuggers",
-            "UserNames": [
-              "dummyuser"
-            ],
-            "UserInput": true,
-            "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
-          },
-          {
-            "AffiliateName": "bendeskylab",
-            "UserNames": [
-              "ps3121",
-              "aln2128",
-              "fh3050"
-            ],
-            "PipelinePath": "",
-            "PipelineDir": "trackingfolder",
-            "UserInput": true,
-            "ContactEmail": "The email we should notify regarding processing status."
-          },
-          {
-            "AffiliateName": "reviewers",
-            "UserNames": [
-              "editornn",
-              "reviewersnn"
-            ],
-            "PipelinePath": "",
-            "PipelineDir": "trackingfolder",
-            "UserInput": true,
-            "ContactEmail": "The email we should notify regarding processing status."
-          },
-          {
-            "AffiliateName": "ekb2154columbiaedu1610734759",
-            "UserNames": [
-              "ekb2154columbia"
-            ],
-            "PipelinePath": "",
-            "PipelineDir": "trackingfolder",
-            "UserInput": true,
-            "ContactEmail": "The email we should notify regarding processing status."
-          }
+            {
+                "AffiliateName": "debuggers",
+                "UserNames": [
+                    "dummyuser"
+                ],
+                "UserInput": true,
+                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
+            },
+            {
+                "AffiliateName": "bendeskylab",
+                "UserNames": [
+                    "ps3121",
+                    "aln2128",
+                    "fh3050"
+                ],
+                "PipelinePath": "",
+                "PipelineDir": "trackingfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
+            },
+            {
+                "AffiliateName": "reviewers",
+                "UserNames": [
+                    "editornn",
+                    "reviewersnn"
+                ],
+                "PipelinePath": "",
+                "PipelineDir": "trackingfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
+            },
+            {
+                "AffiliateName": "ekb2154columbiaedu1610734759",
+                "UserNames": [
+                    "ekb2154columbia"
+                ],
+                "PipelinePath": "",
+                "PipelineDir": "trackingfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
+            }
         ]
     }
 }
