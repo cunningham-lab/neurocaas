@@ -262,7 +262,15 @@ class Test_PostProcess_EnsembleDGPPredict():
                 "__duration__": 400,
                 "mode":"predict",
                 "modelpath":"results/job__test-searchlambda-analysis_timestamp1/process_results/",
-                "modelnames": ["1","2","3","4","5","6","7","8","9"],
+                "modelnames": ["ensemble-model1-2030-01-01",
+                    "ensemble-model2-2030-01-02",
+                    "ensemble-model3-2030-01-03",
+                    "ensemble-model4-2030-01-04",
+                    "ensemble-model5-2030-01-05",
+                    "ensemble-model6-2030-01-06",
+                    "ensemble-model7-2030-01-07",
+                    "ensemble-model8-2030-01-08",
+                    "ensemble-model9-2030-01-09"],
                 "jobnb": 1}
     def test_write_config(self,setup_testing_bucket):    
         bucket_name,endfilepre,endfilepost = setup_testing_bucket
