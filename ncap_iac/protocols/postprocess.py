@@ -2,9 +2,6 @@ import json
 import os
 import boto3
 from botocore.exceptions import ClientError
-import numpy as np
-import pandas as pd
-import csv
 
 try:
     ## Works when running in lambda:
@@ -156,7 +153,7 @@ class PostProcess_EnsembleDGPPredict(PostProcess):
         ensemblesize = max(configdict["ensemble_size"],9)
         configdict["mode"] = "predict"
         configdict["modelpath"] = os.path.join(self.jobdir,"process_results/").split("/",1)[-1]
-        modelnames = [str(i+1) for i in range(ensemblesize)]
+        modelnames = ["ensemble-model{}-2030-01-0{}".format(str(i+1),str(i+1)) for i in range(ensemblesize)]
         configdict["modelnames"] = modelnames
         return configdict
 
