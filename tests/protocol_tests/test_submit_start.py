@@ -11,6 +11,9 @@ from ncap_iac.protocols.utilsparam import ec2,ssm
 import pytest
 import os
 
+ec2_resource = localstack_client.session.resource("ec2")
+ec2_client = localstack_client.session.client("ec2")
+
 loc = os.path.dirname(os.path.realpath(__file__))
 test_log_mats = os.path.join(loc,"test_mats","logfolder")
 blueprint_path = os.path.join(loc,"test_mats","stack_config_template.json")
@@ -47,6 +50,12 @@ def get_paths(rootpath):
                 localfile = os.path.join(relpath,f)
                 paths.append(localfile)
     return paths            
+
+@pytest.fixture
+def create_ami():
+    instance = ec2_resource.create_instances(MaxCount = 1,MinCount=1)[0]
+    ami = ec2_client.create_image(InstanceId=instance.instance_id,Name = "dummy")
+    yield ami["ImageId"]
 
 @pytest.fixture
 def setup_lambda_env(monkeypatch,autouse = True):
@@ -86,6 +95,11 @@ def setup_testing_bucket(monkeypatch):
             "inputs/data1.json":{"data":"value"},
             "inputs/data2.json":{"data":"value"},
             "configs/config.json":{"param":"p1"},
+            "configs/fullconfig.json":{"param":"p1","__duration__":360,"__dataset_size__":20,"ensemble_size":5},
+            "submissions/singlesubmit.json":{
+                "dataname":os.path.join(user_name,"inputs","data1.json"),
+                "configname":os.path.join(user_name,"configs","config.json"),
+                "timestamp":"testtimestamp"},
             "submissions/submit.json":{
                 "dataname":[os.path.join(user_name,"inputs",d) for d in ["data1.json","data2.json"]],
                 "configname":os.path.join(user_name,"configs","config.json"),
@@ -310,6 +324,34 @@ class Test_Submission_dev():
         with pytest.raises(ValueError):
             sd = submit_start.Submission_dev(bucket_name,notimestampkey_name,"111111111")
 
+
+### Testing check_existence. 
+    @pytest.mark.parametrize("submitname,path",[("submit.json",[os.path.join("test_user/inputs/",d) for d in ["data1.json","data2.json"]]),("singlesubmit.json",[os.path.join("test_user/inputs/","data1.json")])])
+    def test_Submission_dev_check_existence(self,setup_lambda_env,setup_testing_bucket,check_instances,submitname,path):        
+        """check existence of data in s3."""
+        bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
+        submit_path = os.path.join(user_name,"submissions",submitname)
+        sd = submit_start.Submission_dev(bucket_name,submit_path,"111111111")
+        sd.check_existence()
+        assert sd.filenames == path 
+
+    @pytest.mark.parametrize("dataname,error",[(1,TypeError),("fake",ValueError),(["fake","fake"],ValueError)])
+    def test_Submission_dev_check_existence_wrongdata(self,setup_lambda_env,setup_testing_bucket,check_instances,dataname,error):        
+        """check existence of data in s3."""
+        bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
+        sd = submit_start.Submission_dev(bucket_name,submit_path,"111111111")
+        sd.data_name = dataname
+        with pytest.raises(error):
+            sd.check_existence()
+
+    def test_Submission_dev_check_existence_wrongconfig(self,setup_lambda_env,setup_testing_bucket,check_instances):        
+        """check existence of data in s3."""
+        bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
+        sd = submit_start.Submission_dev(bucket_name,submit_path,"111111111")
+        sd.config_name = "trash.yaml"
+        with pytest.raises(ValueError):
+            sd.check_existence()
+
 ### Testing function get_costmonitoring
     def test_Submission_dev_get_costmonitoring(self,setup_lambda_env,setup_testing_bucket,check_instances,monkeypatch):
         session = localstack_client.session.Session()
@@ -353,6 +395,81 @@ class Test_Submission_dev():
         monkeypatch.setenv("MAXCOST",str(1300))
         assert sd.get_costmonitoring()
 
+    def test_Submission_dev_parse_config(self,setup_lambda_env,setup_testing_bucket):
+        bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
+        sd = submit_start.Submission_dev(bucket_name,key_name,"111111111")
+        sd.parse_config()
+        assert sd.jobduration is None
+        assert sd.jobsize is None
+
+    def test_Submission_dev_parse_config_full(self,setup_lambda_env,setup_testing_bucket):
+        bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
+        sd = submit_start.Submission_dev(bucket_name,key_name,"111111111")
+        sd.config_name = os.path.join(user_name,"configs","fullconfig.json")
+        sd.parse_config()
+        assert sd.jobduration == 360
+        assert sd.jobsize == 20
+
+
+class Test_Submission_ensemble():
+    def test_Submission_ensemble(self,setup_lambda_env,setup_testing_bucket):
+        """check existence of data in s3."""
+        bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
+        sd = submit_start.Submission_ensemble(bucket_name,submit_path,"111111111")
+
+    @pytest.mark.parametrize("submitname,path",[("submit.json",None),("singlesubmit.json",[os.path.join("test_user/inputs/","data1.json")])])
+    def test_Submission_ensemble_check_existence(self,setup_lambda_env,setup_testing_bucket,check_instances,submitname,path):        
+        """check existence of data in s3."""
+        bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
+        submit_path = os.path.join(user_name,"submissions",submitname)
+        sd = submit_start.Submission_ensemble(bucket_name,submit_path,"111111111")
+        if path is not None:
+            sd.check_existence()
+            assert sd.filenames == path 
+        else:    
+            with pytest.raises(AssertionError):
+                sd.check_existence()
+
+    def test_Submission_ensemble_parse_config(self,setup_lambda_env,setup_testing_bucket):
+        bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
+        submit_path = os.path.join(user_name,"submissions","singlesubmit.json")
+        sd = submit_start.Submission_ensemble(bucket_name,submit_path,"111111111")
+        sd.config_name = os.path.join(user_name,"configs","fullconfig.json")
+        sd.check_existence()
+        sd.parse_config()
+        assert sd.jobduration == 360
+        assert sd.jobsize == 20 
+        for cfig in sd.ensembleconfigs:
+            assert s3.exists(bucket_name,cfig)
+            data = s3.load_json(bucket_name,cfig)
+            assert "jobnb" in data.keys()
+            s3.s3_resource.Object(bucket_name,cfig).delete()
+        
+    def test_Submission_ensemble_process_inputs(self,monkeypatch,setup_lambda_env,setup_testing_bucket,create_ami):
+        ami = create_ami
+        session = localstack_client.session.Session()
+        monkeypatch.setattr(ec2,"ec2_client",session.client("ec2"))
+        monkeypatch.setattr(ec2,"ec2_resource",session.resource("ec2"))
+        monkeypatch.setattr(ssm,"ssm_client",session.client("ssm"))
+        
+        
+        bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
+        submit_path = os.path.join(user_name,"submissions","singlesubmit.json")
+        sd = submit_start.Submission_ensemble(bucket_name,submit_path,"111111111")
+        monkeypatch.setenv("AMI",ami)
+        sd.config_name = os.path.join(user_name,"configs","fullconfig.json")
+        sd.check_existence()
+        sd.parse_config()
+        sd.compute_volumesize()
+        sd.acquire_instances()
+        sd.process_inputs()
+        for cfig in sd.ensembleconfigs:
+            assert s3.exists(bucket_name,cfig)
+            data = s3.load_json(bucket_name,cfig)
+            assert "jobnb" in data.keys()
+            s3.s3_resource.Object(bucket_name,cfig).delete()
+
+
 @pytest.mark.skipif(env_check.get_context() == "ci",reason= "aws creds not provided to github actions..")
 class Test_Submission_Launch_Monitor():
     def test_Submission_Launch_Monitor(self,setup_lambda_env,setup_testing_bucket_legacy,check_instances):
@@ -364,7 +481,7 @@ class Test_Submission_Launch_Monitor():
         ## set up the os environment correctly. 
         bucket_name,submit_path = setup_testing_bucket_legacy[0],setup_testing_bucket_legacy[1]
         sd = submit_start_legacy_wfield_preprocess.Submission_Launch_folder(bucket_name,submit_path)
-        monkeypatch.setenv("MAXCOST",str(1300))
+        monkeypatch.setenv("MAXCOST",str(1301))
         assert sd.get_costmonitoring()
     def test_Submission_Launch_Monitor_get_costmonitoring_fail(self,setup_lambda_env,setup_testing_bucket_legacy,check_instances,monkeypatch):
         ## set up the os environment correctly. 
