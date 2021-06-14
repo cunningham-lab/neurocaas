@@ -38,6 +38,7 @@ def lambda_handler(event, context):
     #print(df)
     response = s3.put_object(Body = df.to_csv(), Bucket = target_bucket, Key = "data/labeled-data/" + video_name + "/CollectedData.csv")
     return
+
 test_event = {
   "Records": [
     {

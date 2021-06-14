@@ -20,14 +20,14 @@
         "s3SchemaVersion": "1.0",
         "configurationId": "testConfigRule",
         "bucket": {
-          "name": "ctnncap213example",
+          "name": "label-job-create-web",
           "ownerIdentity": {
             "principalId": "EXAMPLE"
           },
-          "arn": "arn:aws:s3:::ncapctnteststack"
+          "arn": "arn:aws:s3:::label-job-create-web"
         },
         "object": {
-          "key": "examplegroup2/inputs/examplejobsubmit.json",
+          "key": "examplegroup/results/job__timestamp/process_results/end.txt",
           "size": 1024,
           "eTag": "0123456789abcdef0123456789abcdef",
           "sequencer": "0A1B2C3D4E5F678901"

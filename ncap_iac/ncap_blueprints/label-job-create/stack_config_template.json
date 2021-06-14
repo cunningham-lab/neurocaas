@@ -5,6 +5,8 @@
     "Lambda": {
         "CodeUri": "../../protocols",
         "Handler": "submit_start.handler_develop",
+        "PostCodeUri": "../../protocols",
+        "PostHandler": "data_format_lambda.lambda_handler",
         "Launch": true,
         "LambdaConfig": {
             "AMI": "ami-0000ba269f8e840ef",
