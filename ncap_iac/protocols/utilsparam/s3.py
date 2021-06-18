@@ -200,6 +200,16 @@ def load_yaml(bucket_name, key):
         raise ValueError("[JOB TERMINATE REASON] Could not load config file. YAML is misformatted.".format(ve))
     return yaml_content
 
+def put_json(bucket_name,key,dictionary):
+    """Given a bucket name, key and dictionary, writes a json file to that location
+    :param bucket_name: name of the s3 bucket to write to.
+    :param key: name of the key we will use.
+    :param dictionary: dictionary we will write to s3. 
+    """
+    writeobj = s3_resource.Object(bucket_name,key)
+    content = bytes(json.dumps(dictionary).encode("UTF-8")) 
+    writeobj.put(Body=content)
+
 def extract_files(bucket_name,prefix,ext = None):
     """Filters out the actual filenames being used to process data from the prefix that is given. 
 
