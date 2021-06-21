@@ -38,7 +38,16 @@
                 ],
                 "UserInput": true,
                 "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
+            },
+	    {
+                "AffiliateName": "newgroup",
+                "UserNames": [
+                    "dummyuser"
+                ],
+                "UserInput": true,
+                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
             }
+		
         ]
     }
 }
