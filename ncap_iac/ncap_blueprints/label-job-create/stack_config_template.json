@@ -9,7 +9,7 @@
         "PostHandler": "data_format_lambda.lambda_handler",
         "Launch": true,
         "LambdaConfig": {
-            "AMI": "ami-0c8543c49e556debe",
+            "AMI": "ami-0efaf05a85c66a19a",
             "INSTANCE_TYPE": "m5.large",
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
@@ -39,7 +39,7 @@
                 "UserInput": true,
                 "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
             },
-	    {
+            {
                 "AffiliateName": "newgroup",
                 "UserNames": [
                     "nrg2148columbia"
@@ -47,7 +47,7 @@
                 "UserInput": true,
                 "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
             },
-	    {
+            {
                 "AffiliateName": "testgroup6",
                 "UserNames": [
                     "nrg2148columbia"
@@ -55,7 +55,7 @@
                 "UserInput": true,
                 "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
             },
-	    {
+            {
                 "AffiliateName": "victorygroup",
                 "UserNames": [
                     "nrg2148columbia"
