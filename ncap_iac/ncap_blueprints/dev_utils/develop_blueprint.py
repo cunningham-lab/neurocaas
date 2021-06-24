@@ -183,7 +183,7 @@ class NeuroCaaSAMI(object):
                  "DryRun":DryRun,
                  "KeyName": "testkeystack-custom-dev-key-pair",
                  "SecurityGroups":[gpdict["securitygroupdevname"]],
-                 "IamInstanceProfile":{'Name':'SSMRole'},
+                 "IamInstanceProfile":{'Name':self.config["Lambda"]["LambdaConfig"]["IAM_ROLE"]},
                  "TagSpecifications" : return_tags(timeout)
                  }
         if volume_size is None:

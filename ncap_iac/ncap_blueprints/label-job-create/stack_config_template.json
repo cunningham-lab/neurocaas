@@ -1,12 +1,13 @@
 {
     "PipelineName": "label-job-create-web",
     "REGION": "us-east-1",
-    "STAGE": "webdev",
+    "STAGE": "websubstack",
     "Lambda": {
         "CodeUri": "../../protocols",
         "Handler": "submit_start.handler_develop",
         "PostCodeUri": "../../protocols",
         "PostHandler": "data_format_lambda.lambda_handler",
+        "Requirements": "requirements_label.txt",
         "Launch": true,
         "LambdaConfig": {
             "AMI": "ami-04e102416ac399dd6",
@@ -41,7 +42,9 @@
             },
             {
                 "AffiliateName": "newgroup",
-                "UserNames": [],
+                "UserNames": [
+                    "nrg2148columbia"
+                ],
                 "UserInput": true,
                 "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
             }
