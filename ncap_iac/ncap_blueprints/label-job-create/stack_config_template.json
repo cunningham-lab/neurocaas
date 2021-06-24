@@ -17,7 +17,7 @@
             "IAM_ROLE": "SagemakerRole",
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
             "WORKING_DIRECTORY": "~/bin",
-            "COMMAND": "ls; cd /home/ubuntu/; source .bashrc; neurocaas_contrib/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\" AWSLabeljobCreation/run_label_job_creation.sh",
+            "COMMAND": "ls; cd /home/ubuntu/; source .bashrc; neurocaas_contrib/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\" AWSLabeljobCreation/run_label_job_creation.sh; . neurocaas_contrib/ncap_utils/workflow.sh; cleanup",
             "SHUTDOWN_BEHAVIOR": "terminate",
             "CONFIG": "config.yaml",
             "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
@@ -34,30 +34,6 @@
         "Affiliates": [
             {
                 "AffiliateName": "debuggers",
-                "UserNames": [
-                    "dummyuser"
-                ],
-                "UserInput": true,
-                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
-            },
-            {
-                "AffiliateName": "newgroup",
-                "UserNames": [
-                    "nrg2148columbia"
-                ],
-                "UserInput": true,
-                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
-            },
-            {
-                "AffiliateName": "testgroup6",
-                "UserNames": [
-                    "nrg2148columbia"
-                ],
-                "UserInput": true,
-                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
-            },
-            {
-                "AffiliateName": "victorygroup",
                 "UserNames": [
                     "nrg2148columbia"
                 ],
