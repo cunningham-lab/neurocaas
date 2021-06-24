@@ -11,14 +11,14 @@ def lambda_handler(event, context):
     group_name = event["Records"][0]["s3"]["object"]['key'].split('/')[0]
     label_job_config_file = yaml.load(s3.get_object(Bucket = data_bucket, Key = group_name + '/configs/config.yaml')["Body"].read())
     target_bucket = label_job_config_file["finaldatabucket"]
-    model_config_file = yaml.load((s3.get_object(Bucket = target_bucket, Key = 'data/config.yaml')["Body"].read()))
     job_name = label_job_config_file["jobname"]
+    model_config_file = yaml.load((s3.get_object(Bucket = target_bucket, Key = job_name + '/data/config.yaml')["Body"].read()))
     output_path = model_config_file["process_dir"]
     video_name = model_config_file["video_name"]
     bucket_contents = s3.list_objects(Bucket = data_bucket, Prefix = group_name + '/inputs/' + video_name + '/')
     objects = bucket_contents['Contents']
     for bucket_object in objects:
-        s3.copy_object(Bucket = target_bucket, CopySource = {"Bucket" : data_bucket, "Key": bucket_object['Key']}, Key = "data/labeled-data/" + video_name + "/" + bucket_object['Key'].split('/')[-1]) #copies with same name
+        s3.copy_object(Bucket = target_bucket, CopySource = {"Bucket" : data_bucket, "Key": bucket_object['Key']}, Key = job_name + "/data/labeled-data/" + video_name + "/" + bucket_object['Key'].split('/')[-1]) #copies with same name
     seqlabel = json.loads(s3.get_object(Bucket = data_bucket, Key = group_name + '/' + output_path + '/' + job_name + '/annotations/consolidated-annotation/output/0/SeqLabel.json')["Body"].read())
     parts = label_job_config_file['bodyparts'] #['Hand', 'Finger1', 'Tongue', 'Joystick1', 'Joystick2']
     coords = ['x', 'y']
@@ -36,7 +36,7 @@ def lambda_handler(event, context):
             df_row["Mackenzie", label, 'y'] = annotation["y"]
         df = df.append(df_row, ignore_index = False)
     #print(df)
-    response = s3.put_object(Body = df.to_csv(), Bucket = target_bucket, Key = "data/labeled-data/" + video_name + "/CollectedData.csv")
+    response = s3.put_object(Body = df.to_csv(), Bucket = target_bucket, Key = job_name + "/data/labeled-data/" + video_name + "/CollectedData.csv")
     return
 
 test_event = {
@@ -61,7 +61,7 @@ test_event = {
         "s3SchemaVersion": "1.0",
         "configurationId": "testConfigRule",
         "bucket": {
-          "name": "label-job-create", #changed from label-job-create-web
+          "name": "label-job-create-web", #changed from label-job-create-web
           "ownerIdentity": {
             "principalId": "EXAMPLE"
           },
@@ -79,5 +79,5 @@ test_event = {
 }
 #event = {"label_job_input": "reachingvideo1/", "video_bucket": "sagemakerneurocaastest", "video_path": "username/inputs/reachingvideo1.avi",  "data_bucket" : "nickneurocaastest2", "label_bucket" : "nickneurocaastest2", "label_output_key": "output/GeneralTestAWS14/annotations/consolidated-annotation/output/0/SeqLabelMod.json", "dgp_input": "dgp-input-test"}
 context = {}
-lambda_handler(test_event, context)
+#lambda_handler(test_event, context)
 
