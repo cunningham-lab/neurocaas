@@ -1,0 +1,323 @@
+Resources:
+  CWPermissions:
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: FigLambda
+      Principal: events.amazonaws.com
+    Type: AWS::Lambda::Permission
+  CloudWatchBusRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - events.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - Ref: CloudwatchBusPolicy
+    Type: AWS::IAM::Role
+  CloudwatchBusPolicy:
+    Properties:
+      Description:
+        Fn::Join:
+        - ' '
+        - - Base Policy for all lambda function roles in
+          - Ref: AWS::StackName
+      PolicyDocument:
+        Statement:
+        - Action: events:*
+          Effect: Allow
+          Resource: '*'
+          Sid: CloudWatchEventsFullAccess
+        - Action: iam:PassRole
+          Effect: Allow
+          Resource: arn:aws:iam::*:role/AWS_Events_Invoke_Targets
+          Sid: IAMPassRoleForCloudWatchEvents
+        Version: '2012-10-17'
+    Type: AWS::IAM::ManagedPolicy
+  DeleteCustomResource:
+    DependsOn: PipelineMainBucket
+    Properties:
+      BucketName: wfield-preprocess
+      ServiceToken:
+        Fn::GetAtt:
+        - S3DelObjectFunction
+        - Arn
+    Type: AWS::CloudFormation::CustomResource
+  FigLambda:
+    Properties:
+      CodeUri: s3://neurocaas-cfn-deployment-resources739988523141/1850f2d427c9fb6a20835d45b615f5b6
+      Description: Lambda Function logging start/stop for NCAP
+      Environment:
+        Variables:
+          BUCKET_NAME: wfield-preprocess
+          INDIR: inputs
+          REGION: us-east-1
+      Events: {}
+      Handler: log.monitor_updater
+      MemorySize: 128
+      Role: arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ
+      Runtime: python3.6
+      Timeout: 90
+    Type: AWS::Serverless::Function
+  FignameLogGroup:
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/${FigLambda}
+    Type: AWS::Logs::LogGroup
+  LambdaBaseRole:
+    Properties:
+      Description:
+        Fn::Join:
+        - ' '
+        - - Base Policy for all lambda function roles in
+          - Ref: AWS::StackName
+      PolicyDocument:
+        Statement:
+        - Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Effect: Allow
+          Resource: arn:aws:logs:*:*:*
+        Version: '2012-10-17'
+    Type: AWS::IAM::ManagedPolicy
+  MainLambda:
+    Properties:
+      CodeUri: s3://neurocaas-cfn-deployment-resources739988523141/1850f2d427c9fb6a20835d45b615f5b6
+      Description: Main Lambda Function for Serverless
+      Environment:
+        Variables:
+          AMI: ami-09e84035c8757bca4
+          COMMAND: /home/ubuntu/bin/run.sh "{}" "{}" "{}"; sudo poweroff
+          CONFIG: config.yaml
+          CONFIGDIR: configs
+          EXECUTION_TIMEOUT: 900
+          IAM_ROLE: SSMRole
+          INDIR: inputs
+          INSTANCE_TYPE: r5.16xlarge
+          KEY_NAME: iak-lab
+          LAUNCH: true
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MAXCOST: 300
+          MISSING_CONFIG_ERROR: We need a config file to analyze data.
+          MONITOR: true
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: launch-wizard-15
+          SHUTDOWN_BEHAVIOR: terminate
+          SSM_TIMEOUT: 172000
+          SUBMITDIR: submissions
+          WORKING_DIRECTORY: ~/bin
+          cwrolearn:
+            Fn::GetAtt:
+            - CloudWatchBusRole
+            - Arn
+          figlambarn:
+            Fn::GetAtt:
+            - FigLambda
+            - Arn
+          figlambid:
+            Ref: FigLambda
+          versionid: '28e9aa2e56b2752766363d5795834afa73cc4179
+
+            '
+      Events:
+        BucketEventSubmit:
+          Properties:
+            Bucket:
+              Ref: PipelineMainBucket
+            Events:
+            - s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: suffix
+                  Value: submit.json
+          Type: S3
+      Handler: submit_start_legacy_wfield_preprocess.handler
+      MemorySize: 128
+      Role: arn:aws:iam::739988523141:role/testutilsstack-LambdaRole-1I7AHKZQN6WOJ
+      Runtime: python3.6
+      Timeout: 900
+    Type: AWS::Serverless::Function
+  PipelineMainBucket:
+    Properties:
+      AccessControl: Private
+      BucketName: wfield-preprocess
+      CorsConfiguration:
+        CorsRules:
+        - AllowedHeaders:
+          - '*'
+          AllowedMethods:
+          - GET
+          - PUT
+          - POST
+          - DELETE
+          AllowedOrigins:
+          - '*'
+          ExposedHeaders:
+          - ETag
+          MaxAge: 3000
+    Type: AWS::S3::Bucket
+  S3DelObjectFunction:
+    Properties:
+      CodeUri: s3://neurocaas-cfn-deployment-resources739988523141/1850f2d427c9fb6a20835d45b615f5b6
+      Description: Deletes Objects from S3
+      Environment:
+        Variables:
+          AMI: ami-09e84035c8757bca4
+          COMMAND: /home/ubuntu/bin/run.sh "{}" "{}" "{}"; sudo poweroff
+          CONFIG: config.yaml
+          CONFIGDIR: configs
+          EXECUTION_TIMEOUT: 900
+          IAM_ROLE: SSMRole
+          INDIR: inputs
+          INSTANCE_TYPE: r5.16xlarge
+          KEY_NAME: iak-lab
+          LAUNCH: true
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MAXCOST: 300
+          MISSING_CONFIG_ERROR: We need a config file to analyze data.
+          MONITOR: true
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: launch-wizard-15
+          SHUTDOWN_BEHAVIOR: terminate
+          SSM_TIMEOUT: 172000
+          SUBMITDIR: submissions
+          WORKING_DIRECTORY: ~/bin
+          cwrolearn:
+            Fn::GetAtt:
+            - CloudWatchBusRole
+            - Arn
+          figlambarn:
+            Fn::GetAtt:
+            - FigLambda
+            - Arn
+          figlambid:
+            Ref: FigLambda
+          versionid: '28e9aa2e56b2752766363d5795834afa73cc4179
+
+            '
+      Handler: helper.handler_delbucket
+      Role:
+        Fn::GetAtt:
+        - S3MakePathRole
+        - Arn
+      Runtime: python3.6
+      Timeout: 30
+    Type: AWS::Serverless::Function
+  S3MakePathRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - Ref: LambdaBaseRole
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - s3:DeleteObject
+            - s3:ListBucket
+            - s3:PutObject
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: write_s3_policy
+    Type: AWS::IAM::Role
+  S3PutObjectFunction:
+    Properties:
+      CodeUri: s3://neurocaas-cfn-deployment-resources739988523141/1850f2d427c9fb6a20835d45b615f5b6
+      Description: Puts Objects in S3
+      Environment:
+        Variables:
+          AMI: ami-09e84035c8757bca4
+          COMMAND: /home/ubuntu/bin/run.sh "{}" "{}" "{}"; sudo poweroff
+          CONFIG: config.yaml
+          CONFIGDIR: configs
+          EXECUTION_TIMEOUT: 900
+          IAM_ROLE: SSMRole
+          INDIR: inputs
+          INSTANCE_TYPE: r5.16xlarge
+          KEY_NAME: iak-lab
+          LAUNCH: true
+          LOGDIR: logs
+          LOGFILE: lambda_log.txt
+          MAXCOST: 300
+          MISSING_CONFIG_ERROR: We need a config file to analyze data.
+          MONITOR: true
+          OUTDIR: results
+          REGION: us-east-1
+          SECURITY_GROUPS: launch-wizard-15
+          SHUTDOWN_BEHAVIOR: terminate
+          SSM_TIMEOUT: 172000
+          SUBMITDIR: submissions
+          WORKING_DIRECTORY: ~/bin
+          cwrolearn:
+            Fn::GetAtt:
+            - CloudWatchBusRole
+            - Arn
+          figlambarn:
+            Fn::GetAtt:
+            - FigLambda
+            - Arn
+          figlambid:
+            Ref: FigLambda
+          versionid: '28e9aa2e56b2752766363d5795834afa73cc4179
+
+            '
+      Handler: helper.handler_mkdir
+      Role:
+        Fn::GetAtt:
+        - S3MakePathRole
+        - Arn
+      Runtime: python3.6
+      Timeout: 30
+    Type: AWS::Serverless::Function
+  UserSubstack0:
+    DependsOn:
+    - PipelineMainBucket
+    - S3PutObjectFunction
+    - S3DelObjectFunction
+    Properties:
+      Parameters:
+        BucketName: wfield-preprocess
+        MakeFuncArn:
+          Fn::GetAtt:
+          - S3PutObjectFunction
+          - Arn
+        Name: ChurchlandGroup
+        UserNames: coutouclaus-east-1
+      TemplateURL: https://s3.amazonaws.com/neurocaas-cfn-deployment-resources739988523141/4d981a299d2e88e23b87902288bb374f.template
+    Type: AWS::CloudFormation::Stack
+  UserSubstack1:
+    DependsOn:
+    - PipelineMainBucket
+    - S3PutObjectFunction
+    - S3DelObjectFunction
+    Properties:
+      Parameters:
+        BucketName: wfield-preprocess
+        MakeFuncArn:
+          Fn::GetAtt:
+          - S3PutObjectFunction
+          - Arn
+        Name: coutouclaedu1603838351
+        UserNames: coutouclaus-east-1
+      TemplateURL: https://s3.amazonaws.com/neurocaas-cfn-deployment-resources739988523141/4d981a299d2e88e23b87902288bb374f.template
+    Type: AWS::CloudFormation::Stack
+Transform: AWS::Serverless-2016-10-31

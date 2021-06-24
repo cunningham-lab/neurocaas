@@ -1,0 +1,19 @@
+2021-06-11 17:18:10.546937:         [Internal (get_costmonitoring)] Customized budget not found. Using default budget value of 300.0
+
+2021-06-11 17:18:10.547005:         [Internal (get_costmonitoring)] Incurred cost so far: $9.83136. Remaining budget: $290.16864
+
+2021-06-11 17:18:10.649606: Acquiring new r5.16xlarge instance from ami-01588334d7e1593b5 ...
+
+2021-06-11 17:18:12.784315: New instance ec2.Instance(id='i-01c84c8ba0cbdab8a') created!
+
+2021-06-11 17:18:13.222466: Setting up monitoring on instance ec2.Instance(id='i-01c84c8ba0cbdab8a')
+
+2021-06-11 17:18:13.566436: Instance State: pending...
+
+2021-06-11 17:18:13.566453: Starting Instance...
+
+2021-06-11 17:18:29.665673: Instance started!
+
+2021-06-11 17:19:29.725954: Instances Initialized
+
+2021-06-11 17:19:29.726184: Sending command: /home/ubuntu/bin/run.sh "wfield-preprocess" "ChurchlandGroup/inputs/test" "test.zip"; sudo poweroff

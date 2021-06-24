@@ -1,0 +1,41 @@
+11/06/2021 17:19:46 -- Instance booted -- 
+11/06/2021 17:19:46 -- Downloading -- 
+11/06/2021 17:20:03 -- Decompressing -- 
+Archive:  /home/ubuntu/tmp/input/test.zip
+ extracting: /home/ubuntu/tmp/input/20201221_JC018_axons_00000102_2_540_640_uint16.dat  
+ extracting: /home/ubuntu/tmp/input/dorsal_cortex_landmarks.json  
+11/06/2021 17:20:26 -- Output From Pipeline -- 
+[21-06-11 17:21:26] - Loading configuration file (/home/ubuntu/tmp/input/config.yaml)...
+[21-06-11 17:21:26] - Configuration file successfully loaded.
+[21-06-11 17:21:26] - Checking required fields...
+[21-06-11 17:21:26] - All required fields have been provided.
+[21-06-11 17:21:26] - Inserting defaults for missing optional arguments
+[21-06-11 17:21:26] - Using default chunksize = 15000
+[21-06-11 17:21:26] - Using default center = True
+[21-06-11 17:21:26] - Using default scale = True
+[21-06-11 17:21:26] - Using default background_rank = 0
+[21-06-11 17:21:26] - Using default sim_conf = 5
+[21-06-11 17:21:26] - Using default spatial_thresh = None
+[21-06-11 17:21:26] - Using default temporal_thresh = None
+[21-06-11 17:21:26] - Using default d_sub = 1
+[21-06-11 17:21:26] - Using default t_sub = 1
+[21-06-11 17:21:26] - Using default max_iters_init = 40
+[21-06-11 17:21:26] - Using default max_iters_main = 10
+[21-06-11 17:21:26] - Using default consec_failures = 3
+[21-06-11 17:21:26] - Using default tol = 0.005
+[21-06-11 17:21:26] - Using default post_selection_threshold = 0.999
+[21-06-11 17:21:26] - ---> Motion correction
+
+[21-06-11 17:21:26] - Loading 512 frames
+[21-06-11 17:21:26] - Performing motion correction
+Motion correction:   0%|          | 0/1 [00:00<?, ?it/s]Motion correction: 100%|██████████| 1/1 [00:08<00:00,  8.67s/it]Motion correction: 100%|██████████| 1/1 [00:08<00:00,  8.67s/it]
+[21-06-11 17:21:41] - ---> Compressing and denoising
+[21-06-11 17:21:41] - Validating user-provided parameters...
+
+Traceback (most recent call last):
+  File "/home/ubuntu/bin/compress.py", line 640, in <module>
+    validate_param_compatibility(params, data)
+  File "/home/ubuntu/bin/compress.py", line 122, in validate_param_compatibility
+    raise Exception("Window length cannot exceed number of frames")
+Exception: Window length cannot exceed number of frames
+11/06/2021 17:21:42 -- Sending results to S3 -- 
