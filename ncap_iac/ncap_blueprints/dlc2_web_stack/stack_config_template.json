@@ -41,6 +41,26 @@
                 "PipelineDir": "trackingfolder",
                 "UserInput": true,
                 "ContactEmail": "The email we should notify regarding processing status."
+            },
+            {
+                "AffiliateName": "jhahnemuni-frankfurtde1626090220",
+                "UserNames": [
+                    "j"
+                ],
+                "PipelinePath": "",
+                "PipelineDir": "trackingfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
+            },
+            {
+                "AffiliateName": "neurocaasreviewer1gmailcom1626731968",
+                "UserNames": [
+                    "neurocaasreviewer1gmail"
+                ],
+                "PipelinePath": "",
+                "PipelineDir": "trackingfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
             }
         ]
     }
