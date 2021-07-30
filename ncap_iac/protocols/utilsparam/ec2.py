@@ -1,6 +1,7 @@
 import time
 import os
 from math import ceil
+#from .env_vars import *
 
 import boto3
 import botocore
@@ -34,6 +35,7 @@ def start_instance_if_stopped(instance, logger):
         time.sleep(60)
         logger.append('Instance started!')
         
+
 def start_instances_if_stopped(instances, logger):
     """ Check instance state, start if stopped & wait until ready """
     for instance in instances: 
@@ -172,7 +174,7 @@ def launch_new_instances(instance_type, ami, logger, number, add_size, duration 
     if spot_duration is None:
         logger.append("        [Utils] save not available (duration not given or greater than 6 hours). Launching standard instance.")
         logger.write()
-        response = ec2_client.describe_images(ImageIds = [ami])
+        response = ec2_client.describe_images(ImageIds = [os.environ["AMI"]])
         root = response["Images"][0]["RootDeviceName"]
         instances = ec2_resource.create_instances(
             BlockDeviceMappings=[
@@ -261,15 +263,12 @@ def launch_new_instances(instance_type, ami, logger, number, add_size, duration 
     logger.write()
     return instances
 
-def launch_new_instances_with_tags(instance_type, ami, logger, number, add_size, duration = 20):
+def launch_new_instances_with_tags(instance_type, ami, logger, number, add_size, duration = None):
     """ Script To Launch New Instance From Image
-    If duration parameter is specified, will launch the appropriate cost instance. If not specified, assumes active for 20 minutes. 
+    If duration parameter is specified, will launch the appropriate cost instance
     If number parameter is specified, will try to launch the requested number of instances. If not available, then will return none. 
     """
     logger.append("        [Utils] Acquiring new {} instances from {} ...".format(instance_type, ami))
-    #assert type(duration) == int,"Duration must be an integer."
-    if duration is None:
-        duration = 20
 
     ## First parse the duration and figure out if there's anything we can do for it. 
     ## The duration should be given as the max number of minutes the job is expected to take. 
@@ -291,7 +290,7 @@ def launch_new_instances_with_tags(instance_type, ami, logger, number, add_size,
 
 
     ## Now we will take the parsed duration and use it to launch instances.  
-    response = ec2_client.describe_images(ImageIds = [ami])
+    response = ec2_client.describe_images(ImageIds = [os.environ["AMI"]])
     root = response["Images"][0]["RootDeviceName"]
     bdm = [
             {
@@ -306,6 +305,7 @@ def launch_new_instances_with_tags(instance_type, ami, logger, number, add_size,
                 }
             ]
 
+    assert type(duration) == int
     tag_specifications = [
          {
         "ResourceType":"volume",

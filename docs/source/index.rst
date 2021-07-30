@@ -12,15 +12,11 @@ Welcome to NeuroCAAS's documentation!
 
    develop/installation
    develop/quickstart
-   develop/big_picture
-   develop/link
-   develop/clidevguide
-   develop/devguide
    develop/users
    develop/publish
 
-   reference/protocols
    reference/blueprints
+   reference/protocols
    reference/userprofiles
    reference/devtools
 

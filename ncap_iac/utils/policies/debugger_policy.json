@@ -30,16 +30,16 @@
         "StringEquals": {
           "s3:prefix": [
             "",
-            "debuggers/",
-            "debuggers/inputs",
-            "debuggers/results",
+            "debugger/",
+            "debugger/inputs",
+            "debugger/results",
             "logs",
-            "debuggers/submissions",
-            "debuggers/configs",
-            "debuggers/inputs/",
-            "debuggers/results/",
-            "debuggers/submissions/",
-            "debuggers/configs/"
+            "debugger/submissions",
+            "debugger/configs",
+            "debugger/inputs/",
+            "debugger/results/",
+            "debugger/submissions/",
+            "debugger/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -57,10 +57,10 @@
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "debuggers/inputs/*",
-            "debuggers/results/*",
-            "debuggers/configs/*",
-            "debuggers/submissions/*"
+            "debugger/inputs/*",
+            "debugger/results/*",
+            "debugger/configs/*",
+            "debugger/submissions/*"
           ]
         }
       }
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::john-dev-test/debuggers/inputs/*",
-        "arn:aws:s3:::john-dev-test/debuggers/configs/*",
-        "arn:aws:s3:::john-dev-test/debuggers/submissions/*"
+        "arn:aws:s3:::john-dev-test/debugger/inputs/*",
+        "arn:aws:s3:::john-dev-test/debugger/configs/*",
+        "arn:aws:s3:::john-dev-test/debugger/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::john-dev-test/debuggers/results/*",
-        "arn:aws:s3:::john-dev-test/debuggers/configs/*"
+        "arn:aws:s3:::john-dev-test/debugger/results/*",
+        "arn:aws:s3:::john-dev-test/debugger/configs/*"
       ]
     }
   ]

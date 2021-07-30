@@ -24,22 +24,22 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::john-dev-test"
+        "arn:aws:s3:::yass-test"
       ],
       "Condition": {
         "StringEquals": {
           "s3:prefix": [
             "",
-            "debuggers/",
-            "debuggers/inputs",
-            "debuggers/results",
+            "developergroup/",
+            "developergroup/inputs",
+            "developergroup/results",
             "logs",
-            "debuggers/submissions",
-            "debuggers/configs",
-            "debuggers/inputs/",
-            "debuggers/results/",
-            "debuggers/submissions/",
-            "debuggers/configs/"
+            "developergroup/submissions",
+            "developergroup/configs",
+            "developergroup/inputs/",
+            "developergroup/results/",
+            "developergroup/submissions/",
+            "developergroup/configs/"
           ],
           "s3:delimiter": [
             "/"
@@ -52,15 +52,15 @@
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::john-dev-test"
+        "arn:aws:s3:::yass-test"
       ],
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "debuggers/inputs/*",
-            "debuggers/results/*",
-            "debuggers/configs/*",
-            "debuggers/submissions/*"
+            "developergroup/inputs/*",
+            "developergroup/results/*",
+            "developergroup/configs/*",
+            "developergroup/submissions/*"
           ]
         }
       }
@@ -73,9 +73,9 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::john-dev-test/debuggers/inputs/*",
-        "arn:aws:s3:::john-dev-test/debuggers/configs/*",
-        "arn:aws:s3:::john-dev-test/debuggers/submissions/*"
+        "arn:aws:s3:::yass-test/developergroup/inputs/*",
+        "arn:aws:s3:::yass-test/developergroup/configs/*",
+        "arn:aws:s3:::yass-test/developergroup/submissions/*"
       ]
     },
     {
@@ -86,8 +86,8 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::john-dev-test/debuggers/results/*",
-        "arn:aws:s3:::john-dev-test/debuggers/configs/*"
+        "arn:aws:s3:::yass-test/developergroup/results/*",
+        "arn:aws:s3:::yass-test/developergroup/configs/*"
       ]
     }
   ]
