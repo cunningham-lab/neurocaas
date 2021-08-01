@@ -8,6 +8,10 @@ jobs:
   deploy-check:
     runs-on: ubuntu-latest
     steps:
+      - name: vet commenter 
+        id: vet
+        if: github.event.comment.user.login != 'cellistigs'
+        run: exit 1
       - name: acknowledge deployment request to commenter
         id: check
         uses: khan/pull-request-comment-trigger@master
@@ -78,6 +82,9 @@ jobs:
           
       - name: pull the repo.  
         uses: actions/checkout@v2
+        with:                    
+           persist-credentials: false
+           ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.ref }}
 
       - name: setup python.
         uses: actions/setup-python@v2
@@ -90,6 +97,15 @@ jobs:
         with:  
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} 
+          
+      # Configure AWS credentials. 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.DEPLOY_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.DEPLOY_AWS_SECRET_ACCESS_KEY }}
+          # aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }} # if you have/need it
+          aws-region: us-east-1
 
       - name: Install Repo.
         run: |
@@ -113,6 +129,8 @@ jobs:
       - name: Deploy stack
         run: |
           cd ncap_iac/ncap_blueprints
+          source "$HOME/miniconda/etc/profile.d/conda.sh"
+          conda activate neurocaas
           bash iac_utils/fulldeploy.sh ${{ steps.split.outputs._1 }}     
           
       - name: set deployment status to success

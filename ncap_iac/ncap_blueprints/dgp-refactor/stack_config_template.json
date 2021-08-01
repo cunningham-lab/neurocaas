@@ -1,26 +1,24 @@
 {
-    "PipelineName": "ensemble-dgp",
+    "PipelineName": "dgp-refactor",
     "REGION": "us-east-1",
-    "STAGE": "webdev",
+    "STAGE": "websubstack",
     "Lambda": {
         "CodeUri": "../../protocols",
-        "Handler": "submit_start.handler_ensemble",
-        "PostCodeUri": "../../protocols",
-        "PostHandler": "postprocess.postprocess_prediction",
+        "Handler": "submit_start.handler_develop",
         "Launch": true,
         "LambdaConfig": {
-            "AMI": "ami-048d86f71fa3f50d0",
+            "AMI": "ami-0cd1336c0bb8761d1",
             "INSTANCE_TYPE": "p3.2xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
             "IAM_ROLE": "SSMRole",
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
             "WORKING_DIRECTORY": "~/bin",
-            "COMMAND": "cd /home/ubuntu; neurocaas_contrib/run_main_cli.sh \"{}\" \"{}\" \"{}\" \"{}\" neurocaas_contrib/dgp/run_dgp_ensemble_cli.sh; . neurocaas_contrib/ncap_utils/workflow.sh; cleanup",
+            "COMMAND": "cd /home/ubuntu; neurocaas_contrib/run_main_cli.sh \"{}\" \"{}\" \"{}\" \"{}\" /home/ubuntu/neurocaas_contrib/dgp/run_dgp_cli.sh; . neurocaas_contrib/ncap_utils/workflow.sh; cleanup",
             "SHUTDOWN_BEHAVIOR": "terminate",
             "CONFIG": "config.yaml",
             "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
-            "EXECUTION_TIMEOUT": 180,
+            "EXECUTION_TIMEOUT": 900,
             "SSM_TIMEOUT": 172000,
             "LAUNCH": true,
             "LOGFILE": "lambda_log.txt",
@@ -32,45 +30,37 @@
     "UXData": {
         "Affiliates": [
             {
-                "AffiliateName": "debuggers",
+                "AffiliateName": "traviscipermagroup",
                 "UserNames": [
-                    "dummyuser"
+                    "cipermauser1",
+                    "cipermauser2"
                 ],
                 "UserInput": true,
                 "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
             },
             {
-                "AffiliateName": "bendeskylab",
+                "AffiliateName": "forouzanvfarahanigmailcom1610594776",
                 "UserNames": [
-                    "ps3121",
-                    "aln2128",
-                    "fh3050"
+                    "forouzan"
                 ],
-                "PipelinePath": "",
-                "PipelineDir": "trackingfolder",
                 "UserInput": true,
-                "ContactEmail": "The email we should notify regarding processing status."
+                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
             },
             {
                 "AffiliateName": "reviewers",
                 "UserNames": [
-                    "editornn",
                     "reviewersnn"
                 ],
-                "PipelinePath": "",
-                "PipelineDir": "trackingfolder",
                 "UserInput": true,
-                "ContactEmail": "The email we should notify regarding processing status."
+                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
             },
             {
-                "AffiliateName": "ekb2154columbiaedu1610734759",
+                "AffiliateName": "samuelminkowicz2022unorthwesternedu1617031775",
                 "UserNames": [
-                    "ekb2154columbia"
+                    "samuelminkowicz2022u"
                 ],
-                "PipelinePath": "",
-                "PipelineDir": "trackingfolder",
                 "UserInput": true,
-                "ContactEmail": "The email we should notify regarding processing status."
+                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
             }
         ]
     }

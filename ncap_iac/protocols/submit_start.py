@@ -553,6 +553,7 @@ def process_upload_dev(bucket_name, key,time):
         submission.logger.printlatest()
         submission.logger.write()
     except AssertionError as e:
+        print(e)
         e = "Error: Job is not covered by budget. Contact NeuroCAAS administrator."
         submission.logger.append(internalerrormessage.format(s= step,e = e))
         submission.logger.printlatest()
@@ -717,6 +718,7 @@ def process_upload_ensemble(bucket_name, key,time):
         submission.logger.printlatest()
         submission.logger.write()
     except AssertionError as e:
+        print(e)
         e = "Error: Job is not covered by budget. Contact NeuroCAAS administrator."
         submission.logger.append(internalerrormessage.format(s= step,e = e))
         submission.logger.printlatest()
@@ -890,14 +892,30 @@ def handler_develop(event,context):
 def handler_ensemble(event,context):
     """
     Newest version of handler that logs outputs to a subfolder of the result folder that is indexed by the job submission date and the submit name.
+    Update 05/25: first check the config file to see if this is predict mode or train mode. 
     """
+
     for record in event['Records']:
         time = record['eventTime']
         bucket_name = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
-        #print("handler_params",bucket_name,key,time)
-        #print(event,context,'event, context')
-        exitcode = process_upload_ensemble(bucket_name, key, time);
-        print("processing returned exit code {}".format(exitcode))
+        submit_file = utilsparams3.load_json(bucket_name, key)
+        configpath = submit_file["configname"]
+        try:
+            configfile = utilsparams3.load_json(bucket_name,configpath)
+        except ValueError:    
+            try:
+                configfile = utilsparams3.load_yaml(bucket_name, configpath)
+            except Exception:    
+                raise Exception("Config is not json or yaml.")
+        print("Processing in {} mode".format(configfile["mode"]))    
+        if configfile["mode"] == "train":
+            #print("handler_params",bucket_name,key,time)
+            #print(event,context,'event, context')
+            exitcode = process_upload_ensemble(bucket_name, key, time);
+            print("processing returned exit code {}".format(exitcode))
+        else:    
+            exitcode = process_upload_dev(bucket_name, key, time);
+            print("processing returned exit code {}".format(exitcode))
     return exitcode 
 

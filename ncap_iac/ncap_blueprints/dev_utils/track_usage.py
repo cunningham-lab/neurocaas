@@ -99,6 +99,8 @@ def get_month(start):
 def calculate_usage(bucket_name,usage_list,user):
     """
     gets the json files containing the usage for a particular user, and returns the total (number of hours, cost, and number of jobs run) per month.   
+    :param bucket_name: the name of the bucket where the json file lives. 
+    :type bucket_name: str
     """
 
     months = ["January","February","March","April","May","June","July","August","September","October","November","December"]
