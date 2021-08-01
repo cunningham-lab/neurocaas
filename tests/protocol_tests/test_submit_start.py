@@ -445,7 +445,7 @@ class Test_Submission_ensemble():
             assert "jobnb" in data.keys()
             s3.s3_resource.Object(bucket_name,cfig).delete()
         
-    def test_Submission_ensemble_process_inputs(self,monkeypatch,setup_lambda_env,setup_testing_bucket,create_ami):
+    def test_Submission_ensemble_process_inputs(self,monkeypatch,setup_lambda_env,setup_testing_bucket,create_ami,check_instances):
         ami = create_ami
         session = localstack_client.session.Session()
         monkeypatch.setattr(ec2,"ec2_client",session.client("ec2"))
