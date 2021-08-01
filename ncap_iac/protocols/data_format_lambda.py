@@ -2,6 +2,7 @@ import json
 import sys
 import boto3
 import pandas as pd
+import os
 import yaml
 
 def lambda_handler(event, context):
@@ -9,7 +10,10 @@ def lambda_handler(event, context):
     #copies frame jpegs from labeling job input folder
     data_bucket = event["Records"][0]["s3"]["bucket"]["name"]
     group_name = event["Records"][0]["s3"]["object"]['key'].split('/')[0]
-    label_job_config_file = yaml.load(s3.get_object(Bucket = data_bucket, Key = group_name + '/configs/config.yaml')["Body"].read())
+    config_path = os.path.join(os.path.dirname(event["Records"][0]["s3"]["object"]['key']),"config.yaml")
+    print("config", config_path)
+    #label_job_config_file = yaml.load(s3.get_object(Bucket = data_bucket, Key = group_name + '/configs/config.yaml')["Body"].read())
+    label_job_config_file = yaml.load(s3.get_object(Bucket = data_bucket, Key = config_path)["Body"].read())
     target_bucket = label_job_config_file["finaldatabucket"]
     model_config_file = yaml.load((s3.get_object(Bucket = target_bucket, Key = 'data/config.yaml')["Body"].read()))
     job_name = label_job_config_file["jobname"]
@@ -19,6 +23,7 @@ def lambda_handler(event, context):
     objects = bucket_contents['Contents']
     for bucket_object in objects:
         s3.copy_object(Bucket = target_bucket, CopySource = {"Bucket" : data_bucket, "Key": bucket_object['Key']}, Key = "data/labeled-data/" + video_name + "/" + bucket_object['Key'].split('/')[-1]) #copies with same name
+    print("vars:",data_bucket,group_name,output_path,job_name)    
     seqlabel = json.loads(s3.get_object(Bucket = data_bucket, Key = group_name + '/' + output_path + '/' + job_name + '/annotations/consolidated-annotation/output/0/SeqLabel.json')["Body"].read())
     parts = label_job_config_file['bodyparts'] #['Hand', 'Finger1', 'Tongue', 'Joystick1', 'Joystick2']
     coords = ['x', 'y']
@@ -39,45 +44,45 @@ def lambda_handler(event, context):
     response = s3.put_object(Body = df.to_csv(), Bucket = target_bucket, Key = "data/labeled-data/" + video_name + "/CollectedData.csv")
     return
 
-test_event = {
-  "Records": [
-    {
-      "eventVersion": "2.0",
-      "eventSource": "aws:s3",
-      "awsRegion": "us-east-1",
-      "eventTime": "1970-01-01T00:00:00.000Z",
-      "eventName": "ObjectCreated:Put",
-      "userIdentity": {
-        "principalId": "EXAMPLE"
-      },
-      "requestParameters": {
-        "sourceIPAddress": "127.0.0.1"
-      },
-      "responseElements": {
-        "x-amz-request-id": "EXAMPLE123456789",
-        "x-amz-id-2": "EXAMPLE123/5678abcdefghijklambdaisawesome/mnopqrstuvwxyzABCDEFGH"
-      },
-      "s3": {
-        "s3SchemaVersion": "1.0",
-        "configurationId": "testConfigRule",
-        "bucket": {
-          "name": "label-job-create", #changed from label-job-create-web
-          "ownerIdentity": {
-            "principalId": "EXAMPLE"
-          },
-          "arn": "arn:aws:s3:::label-job-create-web"
-        },
-        "object": {
-          "key": "testgroup/results/job__timestamp/process_results/end.txt", #changed to testgroup from examplegroup
-          "size": 1024,
-          "eTag": "0123456789abcdef0123456789abcdef",
-          "sequencer": "0A1B2C3D4E5F678901"
-        }
-      }
-    }
-  ]
-}
-#event = {"label_job_input": "reachingvideo1/", "video_bucket": "sagemakerneurocaastest", "video_path": "username/inputs/reachingvideo1.avi",  "data_bucket" : "nickneurocaastest2", "label_bucket" : "nickneurocaastest2", "label_output_key": "output/GeneralTestAWS14/annotations/consolidated-annotation/output/0/SeqLabelMod.json", "dgp_input": "dgp-input-test"}
-context = {}
-lambda_handler(test_event, context)
-
+#test_event = {
+#  "Records": [
+#    {
+#      "eventVersion": "2.0",
+#      "eventSource": "aws:s3",
+#      "awsRegion": "us-east-1",
+#      "eventTime": "1970-01-01T00:00:00.000Z",
+#      "eventName": "ObjectCreated:Put",
+#      "userIdentity": {
+#        "principalId": "EXAMPLE"
+#      },
+#      "requestParameters": {
+#        "sourceIPAddress": "127.0.0.1"
+#      },
+#      "responseElements": {
+#        "x-amz-request-id": "EXAMPLE123456789",
+#        "x-amz-id-2": "EXAMPLE123/5678abcdefghijklambdaisawesome/mnopqrstuvwxyzABCDEFGH"
+#      },
+#      "s3": {
+#        "s3SchemaVersion": "1.0",
+#        "configurationId": "testConfigRule",
+#        "bucket": {
+#          "name": "label-job-create", #changed from label-job-create-web
+#          "ownerIdentity": {
+#            "principalId": "EXAMPLE"
+#          },
+#          "arn": "arn:aws:s3:::label-job-create-web"
+#        },
+#        "object": {
+#          "key": "testgroup/results/job__timestamp/process_results/end.txt", #changed to testgroup from examplegroup
+#          "size": 1024,
+#          "eTag": "0123456789abcdef0123456789abcdef",
+#          "sequencer": "0A1B2C3D4E5F678901"
+#        }
+#      }
+#    }
+#  ]
+#}
+##event = {"label_job_input": "reachingvideo1/", "video_bucket": "sagemakerneurocaastest", "video_path": "username/inputs/reachingvideo1.avi",  "data_bucket" : "nickneurocaastest2", "label_bucket" : "nickneurocaastest2", "label_output_key": "output/GeneralTestAWS14/annotations/consolidated-annotation/output/0/SeqLabelMod.json", "dgp_input": "dgp-input-test"}
+#context = {}
+#lambda_handler(test_event, context)
+#
