@@ -1,0 +1,1 @@
+In this folder, test_submit_start tests all of the big lambda functions we use to submit jobs. The folder test_create.py creates a local lambda function, which is useful to test the monitoring functions we have. 
