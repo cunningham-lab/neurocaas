@@ -1,5 +1,6 @@
-[![Build Status](https://travis-ci.com/cunningham-lab/neurocaas.svg?branch=master)](https://travis-ci.com/cunningham-lab/neurocaas)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
+[![example workflow](https://github.com/cunningham-lab/neurocaas/actions/workflows/test_ci.yml/badge.svg)](https://github.com/cunningham-lab/neurocaas/actions/workflows/test_ci.yml)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](ContributorCovenant.md)
+[![rtd](https://readthedocs.org/projects/pip/badge/?version=latest&style=plastic)](https://neurocaas.readthedocs.io)
 
 Main repository for the [NeuroCAAS project](http://www.neurocaas.org), providing a neuroscience analysis platform using Infrastructure-as-Code (IaC).
 
@@ -12,13 +13,16 @@ Structure:
 - docs (documentation and developer guides)
 - media (demo movies, slides, etc.)
 - experiments (benchmarking code for NeuroCAAS on existing algorithms)
-- ncap\_iac (the core code of the project)
+- ncap_iac (the core code of the project)
     - ncap blueprints (code representing analysis pipelines.)
     - user profiles (code representing users.)
     - protocols (code representing job management coordination analysis pipelines and users.)
     - utils (utilities to compile the above code into the corresponding infrastructure. Interfaces with troposphere and the AWS CLI)
 
-### To Reproduce Experiments: 
+### To Contribute Analyses: 
+See the [developer guide](https://neurocaas.readthedocs.io/en/latest/index.html).
+
+### To Reproduce Experiments (Figure 10): 
 You will need to install the dependencies found in the requirements_experiments.txt file in order to run experiments and compare NeuroCAAS to your own infrastructure. We recommend doing so in a [conda](https://www.anaconda.com) virtual environment. Once you have installed conda, check your installation by running:
 
 ```
@@ -63,11 +67,30 @@ cd /path/to/local/repo/neurocaas/experiments
 python generate_customcomparison.py /path/to/your/costfile.yaml
 ```
 
+### To Calculate Analysis Usage (Figure 6): 
+Developers can calculate analysis usage and parallelism for their own analyses once deployed on NeuroCAAS, as shown in Figure 6. 
+First install the neurocaas contrib package. Instructions found at https://github.com/cunningham-lab/neurocaas_contrib. 
+Then generate log files for your analysis, to be written to some folder: 
+
+```
+neurocaas-contrib init ## enter the name of your analysis
+neurocaas-contrib monitor visualize-parallism -p /path/to/logfolder
+```
+
+Running this command will generate JSON files that describe individual jobs run by individual users in analysis buckets as: 
+`{analysis_name}_{user_name}_{job_timestamp}_parallel_logs.json`, where each log contains individual jobs. 
+
+Then, use the script `neurocaas_contrib/figures/parallelized.py` to create an analogue to Figure 6: 
+
+```
+python /path/to/neurocaas_contrib/figures/parallelized.py /path/to/logfolder
+```
+To generate a figure in that same folder, `parallelism_figure_{date time}.png`. If you have multiple analyses, you can generate the logs for all of them into the same log folder, and the script `parallelized.py` will create a graph that includes all of them. 
+
+Note that the script parallelized.py includes conditional statements to exclude debugging jobs run in the course of creating NeuroCAAS infrastructure as well. 
+
 ### Customized Infrastructure Comparisons
 To run our comparison analysis on your own infrastructure, navigate to the "experiments" directory and follow the directions found in the guide there. 
-
-### To Contribute Analyses: 
-See the [developer guide](docs/devguide.md).
 
 ### Project Roadmap.
 See the [roadmap](Project_Roadmap.md) for expected timeline of new analyses, new features, and supplementary packages for this project. 
