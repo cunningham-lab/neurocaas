@@ -41,12 +41,25 @@ def respond(err, res=None):
 class Submission_dev():
     """
     Specific lambda for purposes of development.  
+    
+    :param bucket_name: name of the S3 bucket that this is a submission for (corresponds to an analysis). 
+    :param key: key of submit file within this bucket. 
+    :param time: some unique identifier that distinguishes this job from all others. 
+    :ivar bucket_name: initial_value: bucket_name
+    :ivar path: name of the group responsible for this job.  
+    :ivar time: initial value: time  ## TODO Remove this field. 
+    :ivar jobname: "job_{}_{}_{}".format(submit_name,bucket_name,self.timestamp)
+    :ivar jobpath: os.path.join(path,"outputs",jobname)
+    :ivar logger: s3.Logger object
+    :ivar instance_type: either given in submit file, or default option of analysis. 
+    :ivar data_name: submit file's dataname field. 
+    :ivar config_name: submit file's configname field. 
     """
     def __init__(self,bucket_name,key,time):
         ## Initialize as before:
         # Get Upload Location Information
         self.bucket_name = bucket_name
-        ## Get directory above the input directory. 
+        ## Get directory above the input directory: self.path is the groupname. 
         try:
             self.path = re.findall('.+?(?=/'+os.environ["SUBMITDIR"]+')',key)[0] 
         except IndexError:    
