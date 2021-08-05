@@ -11,6 +11,16 @@ ec2_client = session.client("ec2")
 ec2_resource = session.resource("ec2")
 
 @pytest.fixture
+def kill_instances():
+    """Kill if unattended instances have been left running."""
+    yield "kill uncleaned instances"
+    session = localstack_client.session.Session()
+    ec2_resource = session.resource("ec2")
+    instances = ec2_resource.instances.filter(Filters = [{"Name":"instance-state-name","Values":["running"]}]) 
+    for instance in instances:
+        instance.terminate()
+
+@pytest.fixture
 def patch_boto3_ec2(monkeypatch):
     ec2_client = session.client("ec2")
     ec2_resource = session.resource("ec2")
@@ -36,7 +46,7 @@ def loggerfactory():
     yield logger()        
 
 
-def test_launch_new_instances(patch_boto3_ec2,loggerfactory,create_ami):
+def test_launch_new_instances(patch_boto3_ec2,loggerfactory,create_ami,kill_instances):
     instance_type = "t2.micro"
     ami = create_ami 
     logger = loggerfactory 
@@ -54,7 +64,7 @@ def test_launch_new_instances(patch_boto3_ec2,loggerfactory,create_ami):
     assert info_instance["ImageId"] == ami
     assert info_instance["InstanceType"] == instance_type
     
-def test_launch_new_instances_spot(patch_boto3_ec2,loggerfactory,create_ami):
+def test_launch_new_instances_spot(patch_boto3_ec2,loggerfactory,create_ami,kill_instances):
     """This doesn't actually check if the instance is spot, just that the code works.   
     """
     instance_type = "t2.micro"
@@ -75,7 +85,7 @@ def test_launch_new_instances_spot(patch_boto3_ec2,loggerfactory,create_ami):
     assert info_instance["InstanceType"] == instance_type
 
 @pytest.mark.parametrize("duration,value",([10,"10"],[None,"20"]))
-def test_launch_new_instances_with_tags(patch_boto3_ec2,loggerfactory,create_ami,duration,value):
+def test_launch_new_instances_with_tags(patch_boto3_ec2,loggerfactory,create_ami,duration,value,kill_instances):
     instance_type = "t2.micro"
     ami = create_ami 
     logger = loggerfactory 
@@ -93,6 +103,34 @@ def test_launch_new_instances_with_tags(patch_boto3_ec2,loggerfactory,create_ami
     assert info_instance["InstanceType"] == instance_type
     assert info_instance["Tags"] == [
             {"Key":"PriceTracking","Value":"On"},
-            {"Key":"Timeout","Value":value}
+            {"Key":"Timeout","Value":value} ## check for the exact keys and values. This is a filter on the kinds of stack updates we allow.
             ]
     
+@pytest.mark.parametrize("duration,value,group,analysis,job",([10,"10",None,None,None],[None,"20",None,None,None],[None,"20","usergroup",None,None],[None,"20","usergroup","analysis1",None],[None,"20","usergroup","analysis1","job15__analysis1"],[None,"20",None,"analysis1","job15__analysis1"],[None,"20",None,"analysis1",None],[None,"20",None,None,"job15__analysis1"]))
+def test_launch_new_instances_with_tags_additional(patch_boto3_ec2,loggerfactory,create_ami,duration,value,group,analysis,job,kill_instances):
+    instance_type = "t2.micro"
+    ami = create_ami 
+    logger = loggerfactory 
+    number = 1
+    add_size = 200
+    message = patch_boto3_ec2
+
+    response = ec2.launch_new_instances_with_tags_additional(instance_type,ami,logger,number,add_size,duration,group,analysis,job)
+    info = ec2_client.describe_instances(InstanceIds=[response[0].id])
+
+    assert len(info["Reservations"][0]["Instances"]) == 1
+    info_instance = info["Reservations"][0]["Instances"][0]
+    
+    tags = [
+        {"Key":"PriceTracking","Value":"On"},
+        {"Key":"Timeout","Value":value} ## check for the exact keys and values. This is a filter on the kinds of stack updates we allow.
+    ]
+    
+    additional_tags = {"group":group,"analysis":analysis,"job":job}
+    for at in additional_tags.items():
+        if at[1] is not None:
+            tags.append({"Key":at[0],"Value":at[1]})
+    
+    assert info_instance["ImageId"] == ami
+    assert info_instance["InstanceType"] == instance_type
+    assert info_instance["Tags"] == tags   

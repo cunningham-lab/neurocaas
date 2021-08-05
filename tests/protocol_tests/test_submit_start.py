@@ -6,8 +6,7 @@ from botocore.exceptions import ClientError
 import ncap_iac.protocols.utilsparam.env_vars
 import ncap_iac.utils.environment_check as env_check
 from ncap_iac.protocols import submit_start, submit_start_legacy_wfield_preprocess
-from ncap_iac.protocols.utilsparam import s3
-from ncap_iac.protocols.utilsparam import ec2,ssm 
+from ncap_iac.protocols.utilsparam import s3,ssm,ec2,events,pricing
 import pytest
 import os
 
@@ -96,6 +95,9 @@ def setup_testing_bucket(monkeypatch):
             "inputs/data2.json":{"data":"value"},
             "configs/config.json":{"param":"p1"},
             "configs/fullconfig.json":{"param":"p1","__duration__":360,"__dataset_size__":20,"ensemble_size":5},
+            "configs/duration10config.json":{"param":"p1","__duration__":10,"__dataset_size__":20},
+            "configs/duration600config.json":{"param":"p1","__duration__":600,"__dataset_size__":20},
+            "configs/durationnoneconfig.json":{"param":"p1","__dataset_size__":20},
             "submissions/singlesubmit.json":{
                 "dataname":os.path.join(user_name,"inputs","data1.json"),
                 "configname":os.path.join(user_name,"configs","config.json"),
@@ -120,7 +122,19 @@ def setup_testing_bucket(monkeypatch):
                 "timestamp":"testtimestamp"},
             "submissions/{}".format(os.path.basename(notimestampkey_name)):{
                 "dataname":[os.path.join(user_name,"inputs",d) for d in ["data1.json","data2.json"]],
-                "configname":os.path.join(user_name,"configs","config22.json")}
+                "configname":os.path.join(user_name,"configs","config22.json")},
+            "submissions/10_10submit.json":{ ## These are submit files for testing costmonitoring that takes into account the other instances in a job.
+                "dataname":[os.path.join(user_name,"inputs","data1.json") for d in range(10)],
+                "configname":os.path.join(user_name,"configs","duration10config.json"),
+                "timestamp":"testtimestamp"},
+            "submissions/10_600submit.json":{
+                "dataname":[os.path.join(user_name,"inputs","data1.json") for d in range(10)],
+                "configname":os.path.join(user_name,"configs","duration600config.json"),
+                "timestamp":"testtimestamp"},
+            "submissions/10_nonesubmit.json":{
+                "dataname":[os.path.join(user_name,"inputs","data1.json") for d in range(10)],
+                "configname":os.path.join(user_name,"configs","durationnoneconfig.json"),
+                "timestamp":"testtimestamp"},
             }
 
     session = localstack_client.session.Session()
@@ -228,6 +242,16 @@ def setup_testing_bucket_legacy(monkeypatch):
             logging.error(e)
             raise
     yield bucket_name_legacy,os.path.join(user_name,"submissions/submissions2/submit.json")        
+
+@pytest.fixture
+def kill_instances():
+    """Kill if unattended instances have been left running."""
+    yield "kill uncleaned instances"
+    session = localstack_client.session.Session()
+    ec2_resource = session.resource("ec2")
+    instances = ec2_resource.instances.filter(Filters = [{"Name":"instance-state-name","Values":["running"]}]) 
+    for instance in instances:
+        instance.terminate()
 
 @pytest.fixture
 def check_instances():
@@ -360,6 +384,8 @@ class Test_Submission_dev():
         bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
         sd = submit_start.Submission_dev(bucket_name,key_name,"111111111")
         monkeypatch.setenv("MAXCOST",str(1300))
+        sd.check_existence() ## check existence of dataset files. Necessary bc we project costs of this job. 
+        sd.parse_config()
         assert sd.get_costmonitoring()
 
     def test_Submission_dev_get_costmonitoring_fail(self,setup_lambda_env,setup_testing_bucket,check_instances,monkeypatch):
@@ -369,31 +395,53 @@ class Test_Submission_dev():
         bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
         sd = submit_start.Submission_dev(bucket_name,key_name,"111111111")
         monkeypatch.setenv("MAXCOST",str(1200))
+        sd.check_existence()
+        sd.parse_config()
         assert not sd.get_costmonitoring()
 
     def test_Submission_dev_get_costmonitoring_ssm_fail(self,setup_lambda_env,setup_testing_bucket,check_instances,monkeypatch,set_ssm_budget_under):
         bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
         sd = submit_start.Submission_dev(bucket_name,key_name,"111111111")
         monkeypatch.setenv("MAXCOST",str(1300))
+        sd.check_existence()
+        sd.parse_config()
         assert not sd.get_costmonitoring()
 
     def test_Submission_dev_get_costmonitoring_ssm(self,setup_lambda_env,setup_testing_bucket,check_instances,monkeypatch,set_ssm_budget_over):
         bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
         sd = submit_start.Submission_dev(bucket_name,key_name,"111111111")
         monkeypatch.setenv("MAXCOST",str(1200))
+        sd.check_existence()
+        sd.parse_config()
         assert sd.get_costmonitoring()
     
     def test_Submission_dev_get_costmonitoring_ssm_default_fail(self,setup_lambda_env,setup_testing_bucket,check_instances,monkeypatch,set_ssm_budget_other):
         bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
         sd = submit_start.Submission_dev(bucket_name,key_name,"111111111")
         monkeypatch.setenv("MAXCOST",str(1200))
+        sd.check_existence()
+        sd.parse_config()
         assert not sd.get_costmonitoring()
 
     def test_Submission_dev_get_costmonitoring_ssm_default(self,setup_lambda_env,setup_testing_bucket,check_instances,monkeypatch,set_ssm_budget_other):
         bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
         sd = submit_start.Submission_dev(bucket_name,key_name,"111111111")
         monkeypatch.setenv("MAXCOST",str(1300))
+        sd.check_existence()
+        sd.parse_config()
         assert sd.get_costmonitoring()
+
+    @pytest.mark.parametrize("submitname,maxcost,response",[("10_10submit.json",1265,False),("10_600submit.json",1266,False),("10_nonesubmit.json",1265,False),("10_10submit.json",1266,True),("10_600submit.json",1267,True),("10_nonesubmit.json",1266,True)]) ## These calculated with a base cost very close to 1265. The default timing (shown at top) is 60 mins.
+    def test_Submission_dev_get_costmonitoring_allinsts(self,setup_lambda_env,setup_testing_bucket,check_instances,monkeypatch,set_ssm_budget_other,submitname,maxcost,response):    
+        bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
+        submit_dir = os.path.dirname(submit_path)
+        ## use submit files submissions/{10_10submit.json,10_600submit.json,10_nonesubmit.json}
+
+        sd = submit_start.Submission_dev(bucket_name,os.path.join(submit_dir,submitname),"111111111")
+        monkeypatch.setenv("MAXCOST",str(maxcost))
+        sd.check_existence()
+        sd.parse_config()
+        assert sd.get_costmonitoring() == response
 
     def test_Submission_dev_parse_config(self,setup_lambda_env,setup_testing_bucket):
         bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
@@ -410,6 +458,32 @@ class Test_Submission_dev():
         assert sd.jobduration == 360
         assert sd.jobsize == 20
 
+    def test_Submission_dev_acquire_instances(self,monkeypatch,setup_lambda_env,setup_testing_bucket,create_ami,kill_instances):
+        """For this test, we generate fake instances. We need to monkeypatch into ec2 in order to do so.  
+
+        """
+        bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
+        ami = create_ami
+
+        session = localstack_client.session.Session()
+        monkeypatch.setattr(ec2,"ec2_client",session.client("ec2"))
+        monkeypatch.setattr(ec2,"ec2_resource",session.resource("ec2"))
+
+        sd = submit_start.Submission_dev(bucket_name,submit_path,"111111111")
+        monkeypatch.setenv("AMI",ami)
+        sd.config_name = os.path.join(user_name,"configs","fullconfig.json")
+        sd.check_existence()
+        sd.parse_config()
+        sd.compute_volumesize()
+        sd.acquire_instances()
+        info= ec2_client.describe_instances(InstanceIds = [i.id for i in sd.instances])
+        for instanceinfo in info["Reservations"][0]["Instances"]:
+            tags = instanceinfo["Tags"]
+            assert {"Key":"PriceTracking","Value":"On"} in tags
+            assert {"Key":"Timeout","Value":"360"} in tags
+            assert {"Key":"group","Value":sd.path} in tags
+            assert {"Key":"job","Value":sd.jobname} in tags
+            assert {"Key":"analysis","Value":sd.bucket_name} in tags
 
 class Test_Submission_ensemble():
     def test_Submission_ensemble(self,setup_lambda_env,setup_testing_bucket):
@@ -445,7 +519,10 @@ class Test_Submission_ensemble():
             assert "jobnb" in data.keys()
             s3.s3_resource.Object(bucket_name,cfig).delete()
         
-    def test_Submission_ensemble_process_inputs(self,monkeypatch,setup_lambda_env,setup_testing_bucket,create_ami,check_instances):
+    def test_Submission_ensemble_process_inputs(self,monkeypatch,setup_lambda_env,setup_testing_bucket,create_ami,kill_instances):
+        """This test is expected to leave something running. Kill afterwards. 
+
+        """
         ami = create_ami
         session = localstack_client.session.Session()
         monkeypatch.setattr(ec2,"ec2_client",session.client("ec2"))
@@ -472,7 +549,7 @@ class Test_Submission_ensemble():
 
 @pytest.mark.skipif(env_check.get_context() == "ci",reason= "aws creds not provided to github actions..")
 class Test_Submission_Launch_Monitor():
-    def test_Submission_Launch_Monitor(self,setup_lambda_env,setup_testing_bucket_legacy,check_instances):
+    def test_Submission_Launch_Monitor(self,setup_lambda_env,setup_testing_bucket_legacy,kill_instances,check_instances):
         ## set up the os environment correctly. 
         bucket_name,submit_path = setup_testing_bucket_legacy[0],setup_testing_bucket_legacy[1]
         sd = submit_start_legacy_wfield_preprocess.Submission_Launch_folder(bucket_name,submit_path)
