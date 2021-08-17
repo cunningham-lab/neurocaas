@@ -1,6 +1,6 @@
-![example workflow](https://github.com/cunningham-lab/neurocaas/actions/workflows/test_ci.yml/badge.svg)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
-![rtd](https://readthedocs.org/projects/pip/badge/?version=latest&style=plastic) 
+[![example workflow](https://github.com/cunningham-lab/neurocaas/actions/workflows/test_ci.yml/badge.svg)](https://github.com/cunningham-lab/neurocaas/actions/workflows/test_ci.yml)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](ContributorCovenant.md)
+[![rtd](https://readthedocs.org/projects/pip/badge/?version=latest&style=plastic)](https://neurocaas.readthedocs.io)
 
 Main repository for the [NeuroCAAS project](http://www.neurocaas.org), providing a neuroscience analysis platform using Infrastructure-as-Code (IaC).
 
