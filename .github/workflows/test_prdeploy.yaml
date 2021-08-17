@@ -85,6 +85,8 @@ jobs:
         with:                    
            persist-credentials: false
            ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.ref }}
+           repository: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.repo.full_name }}  
+
 
       - name: setup python.
         uses: actions/setup-python@v2
