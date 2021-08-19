@@ -11,9 +11,12 @@ Every time you want to start a remote development session, you should run the fo
 
 .. code-block:: 
 
-   neurocaas-contrib remote develop-remote
+   neurocaas-contrib remote start-session
 
 This lets the CLI tool know that you would like to start working on a blueprint remotely, and initializes the relevant parameters.    
+
+Note- this is a change as of 8/19/21. If your neurocaas-contrib version was built from source before this, you should update it. The `start-session` command deprecates `develop-remote`. 
+
 
 Launching a machine 
 -------------------
@@ -278,7 +281,14 @@ with this pair of git commits for readability.
 Cleaning up
 -----------
 
-After you have saved your machine image and updated your blueprint, you
+To clean up after finishing a session, you can delete your instance and reset your cli state by running: 
+.. code-block:: bash
+
+   neurocaas-contrib remote end-session 
+
+Note- this is a change as of 8/19/21. If your neurocaas-contrib version was built from source before this, you should update it. 
+
+Alternatively, after you have saved your machine image and updated your blueprint, you
 can terminate it by running:
 
 .. code-block:: bash
