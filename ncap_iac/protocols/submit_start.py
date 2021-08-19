@@ -201,6 +201,17 @@ class Submission_dev():
             self.filenames = self.data_name
         assert len(self.filenames) > 0, "[JOB TERMINATE REASON] The folder indicated is empty, or does not contain analyzable data."
 
+    def prices_active_instances_ami(self,ami):
+        """Calculate the price of each instance directly. 
+
+        :param ami: (str) the id giving the number of instances with that ami. 
+        :returns: float giving number of instances*minutes*price that they will be active.  
+        """
+        instances = utilsparamec2.get_active_instances_ami(ami)
+        prices = [(int(tag["Value"])/60)*utilsparampricing.get_price(utilsparampricing.get_region_name(utilsparampricing.region_id),instance.instance_type,os = "Linux") for instance in instances for tag in instance.tags if tag["Key"] == "Timeout"]
+
+        return sum(prices)
+
     def get_costmonitoring(self):
         """
         Gets the cost incurred by a given group so far by looking at the logs bucket of the appropriate s3 folder.  
@@ -238,21 +249,6 @@ class Submission_dev():
                 instcost = price
             cost+= instcost
         
-        ## Now compare with budget:
-        try:
-            budget = float(utilsparamssm.get_budget_parameter(self.path,self.bucket_name))
-        except ClientError as e:    
-            try:
-                assert e.response["Error"]["Code"] == "ParameterNotFound"
-                budget = float(os.environ["MAXCOST"])
-                message = "        [Internal (get_costmonitoring)] Customized budget not found. Using default budget value of {}".format(budget)
-                self.logger.append(message)
-                self.logger.printlatest()
-            except:    
-                raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to get budget.")
-        except Exception:    
-            raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to get budget.")
-
         ## Now compare against the cost of the job you're currently running: 
         ## need duration from config (self.parse_config), self.instance_type, and self.nb_instances
         ## By assuming they're all standard instances we upper bound the cost. 
@@ -268,6 +264,38 @@ class Submission_dev():
         except Exception as e:     
             print(e)
             raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to estimate cost of current job.")
+
+        ## Now compare agains the expected cost of instances with the current ami: 
+        try:
+            ami = os.environ["AMI"]
+            total_activeprice = self.prices_active_instances_ami(ami)
+
+        except Exception as e:    
+            print(e)
+            try:
+                activeprice = utilsparampricing.get_price(utilsparampricing.get_region_name(utilsparampricing.region_id),self.instance_type,os = "Linux")
+                number = len([i for i in utilsparamec2.get_active_instances_ami(ami)])
+                activeduration = defaultduration*number/60 ## default to the default duration instead if not given. 
+                total_activeprice = activeprice*activeduration
+            except Exception as e:    
+                raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to estimate cost of active jobs.")
+
+        cost += total_activeprice   
+
+        ## Now compare with budget:
+        try:
+            budget = float(utilsparamssm.get_budget_parameter(self.path,self.bucket_name))
+        except ClientError as e:    
+            try:
+                assert e.response["Error"]["Code"] == "ParameterNotFound"
+                budget = float(os.environ["MAXCOST"])
+                message = "        [Internal (get_costmonitoring)] Customized budget not found. Using default budget value of {}".format(budget)
+                self.logger.append(message)
+                self.logger.printlatest()
+            except:    
+                raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to get budget.")
+        except Exception:    
+            raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to get budget.")
 
         if cost < budget:
             message = "        [Internal (get_costmonitoring)] Projected total costs: ${}. Remaining budget: ${}".format(cost,budget-cost)

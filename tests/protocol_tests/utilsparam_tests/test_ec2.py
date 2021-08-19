@@ -4,6 +4,7 @@ import logging
 import os
 import ncap_iac.protocols.utilsparam.ec2 as ec2
 import ncap_iac.protocols.utilsparam.env_vars
+from ncap_iac.protocols.utilsparam.pricing import get_price, get_region_name, region_id
 
 session = localstack_client.session.Session()
 
@@ -32,6 +33,15 @@ def patch_boto3_ec2(monkeypatch):
 def create_ami():
     instance = ec2_resource.create_instances(MaxCount = 1,MinCount=1)[0]
     ami = ec2_client.create_image(InstanceId=instance.instance_id,Name = "dummy")
+    yield ami["ImageId"]
+
+@pytest.fixture
+def create_ami_2():
+    """Just bc we want two different ones. 
+
+    """
+    instance = ec2_resource.create_instances(MaxCount = 1,MinCount=1)[0]
+    ami = ec2_client.create_image(InstanceId=instance.instance_id,Name = "dummy2")
     yield ami["ImageId"]
 
 @pytest.fixture
@@ -133,4 +143,35 @@ def test_launch_new_instances_with_tags_additional(patch_boto3_ec2,loggerfactory
     
     assert info_instance["ImageId"] == ami
     assert info_instance["InstanceType"] == instance_type
-    assert info_instance["Tags"] == tags   
+    assert info_instance["Tags"] == tags; "Tags are not formatted correctly!"   
+
+
+def test_get_active_instances(patch_boto3_ec2,monkeypatch,loggerfactory,create_ami,create_ami_2,kill_instances):    
+    instance_type = "t2.micro"
+    ami = create_ami 
+    ami2 = create_ami_2
+    logger = loggerfactory 
+    number = 5
+    add_size = 200
+    duration = 5
+    group = "usergroup" 
+    analysis = "ana1"
+    job = "job1"
+
+    message = patch_boto3_ec2
+    response1 = ec2.launch_new_instances_with_tags_additional(instance_type,ami,logger,number,add_size,duration,group,analysis,job)
+    response2 = ec2.launch_new_instances_with_tags_additional(instance_type,ami2,logger,1,add_size,duration,group,analysis,job)
+    assert len([i for i in ec2.get_active_instances_ami(ami)]) == 5
+    assert ec2.duration_active_instances_ami(ami) == 5*5
+    assert len([i for i in ec2.get_active_instances_ami(ami2)]) == 1
+    response1 = ec2.launch_new_instances_with_tags_additional("p2.xlarge",ami,logger,number,add_size,duration,group,analysis,job)
+    assert len([i for i in ec2.get_active_instances_ami(ami)]) == 10 
+
+
+
+
+
+
+
+
+

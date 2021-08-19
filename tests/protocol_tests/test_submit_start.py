@@ -1,6 +1,7 @@
 ## Import and test the lambda business logic in a local environment. Not ideal, but important
 import localstack_client.session
 import subprocess
+import logging
 import json
 from botocore.exceptions import ClientError
 import ncap_iac.protocols.utilsparam.env_vars
@@ -49,6 +50,25 @@ def get_paths(rootpath):
                 localfile = os.path.join(relpath,f)
                 paths.append(localfile)
     return paths            
+
+@pytest.fixture
+def patch_boto3_ec2(monkeypatch):
+    ec2_client = localstack_client.session.client("ec2")
+    ec2_resource = localstack_client.session.resource("ec2")
+    monkeypatch.setattr(ec2,"ec2_resource",localstack_client.session.resource("ec2"))
+    monkeypatch.setattr(ec2,"ec2_client",localstack_client.session.client("ec2"))
+    yield "patching resources."
+
+@pytest.fixture
+def loggerfactory():
+    class logger():
+        def __init__(self):
+            self.logs = []
+        def append(self,message):    
+            self.logs.append(message)
+        def write(self): 
+            logging.warning("SEE Below: \n"+str("\n".join(self.logs)))
+    yield logger()        
 
 @pytest.fixture
 def create_ami():
@@ -308,6 +328,12 @@ def set_ssm_budget_other(monkeypatch):
     yield
     ssm_client.delete_parameter(Name = "random")
 
+@pytest.fixture    
+def set_price(monkeypatch):
+    def staticpricing(region,instance,os):
+        return 1 
+    monkeypatch.setattr(pricing,"get_price",staticpricing)
+
 class Test_Submission_dev():
     def test_Submission_dev(self,setup_lambda_env,setup_testing_bucket,check_instances):
         ## set up the os environment correctly. 
@@ -388,7 +414,7 @@ class Test_Submission_dev():
         sd.parse_config()
         assert sd.get_costmonitoring()
 
-    def test_Submission_dev_get_costmonitoring_fail(self,setup_lambda_env,setup_testing_bucket,check_instances,monkeypatch):
+    def test_Submission_dev_get_costmonitoring_fail(self,setup_lambda_env,setup_testing_bucket,check_instances,monkeypatch,set_price):
         session = localstack_client.session.Session()
         ssm_client = session.client("ssm")
         monkeypatch.setattr(ssm, "ssm_client", session.client("ssm")) 
@@ -442,6 +468,56 @@ class Test_Submission_dev():
         sd.check_existence()
         sd.parse_config()
         assert sd.get_costmonitoring() == response
+
+    def test_Submission_dev_prices_active_instances_ami(self,create_ami,setup_lambda_env,setup_testing_bucket,loggerfactory,check_instances,monkeypatch,set_ssm_budget_other,patch_boto3_ec2,kill_instances):    
+        instance_type = "p3.2xlarge"
+        ami = create_ami
+        monkeypatch.setenv("AMI",ami)
+
+        logger = loggerfactory 
+        number = 20
+        add_size = 200
+        duration = 5*60
+        group = "usergroup" 
+        analysis = "ana1"
+        job = "job1"
+
+        message = patch_boto3_ec2
+        response1 = ec2.launch_new_instances_with_tags_additional(instance_type,ami,logger,number,add_size,duration,group,analysis,job)
+
+        bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
+        submit_dir = os.path.dirname(submit_path)
+        ## use submit files submissions/{10_10submit.json,10_600submit.json,10_nonesubmit.json}
+
+        sd = submit_start.Submission_dev(bucket_name,os.path.join(submit_dir,"10_10submit.json"),"111111111")
+        price = sd.prices_active_instances_ami(ami)
+        assert price > 300 
+
+    def test_Submission_dev_get_costmonitoring__many_active(self,create_ami,setup_lambda_env,setup_testing_bucket,loggerfactory,check_instances,monkeypatch,set_ssm_budget_other,patch_boto3_ec2,kill_instances):    
+        instance_type = "p3.2xlarge"
+        ami = create_ami
+        monkeypatch.setenv("AMI",ami)
+
+        logger = loggerfactory 
+        number = 10
+        add_size = 200
+        duration = 5*60
+        group = "usergroup" 
+        analysis = "ana1"
+        job = "job1"
+
+        message = patch_boto3_ec2
+        response1 = ec2.launch_new_instances_with_tags_additional(instance_type,ami,logger,number,add_size,duration,group,analysis,job)
+
+        bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
+        submit_dir = os.path.dirname(submit_path)
+        ## use submit files submissions/{10_10submit.json,10_600submit.json,10_nonesubmit.json}
+
+        sd = submit_start.Submission_dev(bucket_name,os.path.join(submit_dir,"10_10submit.json"),"111111111")
+        monkeypatch.setenv("MAXCOST",str(1296))
+        sd.check_existence()
+        sd.parse_config()
+        assert sd.get_costmonitoring() == False
 
     def test_Submission_dev_parse_config(self,setup_lambda_env,setup_testing_bucket):
         bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]

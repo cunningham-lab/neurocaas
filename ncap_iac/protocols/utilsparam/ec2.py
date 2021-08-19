@@ -540,13 +540,32 @@ def launch_new_instances_with_tags_additional(instance_type, ami, logger, number
 def count_active_instances(instance_type):
     """
     Counts how many active [including transition in and out] isntances there are of a certain type. 
-    Inputs:
-    instance_type (str): string specifying instance type
-    Outputs: 
-    (int): integer giving number of instances currently active. 
+    :param instance_type: (str): string specifying instance type
+    :returns: int integer giving number of instances currently active. 
     """
     instances = ec2_resource.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running','pending','stopping','shutting-down']},{'Name':'instance-type',"Values":[instance_type]}])
     return len([i for i in instances])
+
+def get_active_instances_ami(ami):
+    """Gets the active instances there are of a certain type with a certain ami. 
+
+    :param ami: (str) the id giving the number of instances with that ami. 
+    :returns: int integer giving number of instances currently active. 
+    """
+    instances = ec2_resource.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running','pending','stopping','shutting-down']},{"Name": "image-id","Values":[ami]}])
+    return instances
+
+def duration_active_instances_ami(ami):
+    """Calculate how many active instances there are of a certain ami, and how long they will be on. 
+
+    :param ami: (str) the id giving the number of instances with that ami. 
+    :returns: int integer giving number of instances*minutes that they will be active.  
+    """
+    instances = get_active_instances_ami(ami)
+    durations = [int(tag["Value"]) for instance in instances for tag in instance.tags if tag["Key"] == "Timeout"]
+    return sum(durations)
+
+        
 
 def prepare_volumes(instances_info):
     """
