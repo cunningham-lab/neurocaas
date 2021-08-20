@@ -278,6 +278,7 @@ class Submission_dev():
                 activeduration = defaultduration*number/60 ## default to the default duration instead if not given. 
                 total_activeprice = activeprice*activeduration
             except Exception as e:    
+                print(e)
                 raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to estimate cost of active jobs.")
 
         cost += total_activeprice   
