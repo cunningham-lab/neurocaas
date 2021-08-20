@@ -223,6 +223,7 @@ def test_get_rogue_instances(monkeypatch, create_mockinstance, create_mockinstan
     untagged_id = create_mockinstance_untagged[0].instance_id
     untagged_info = ec2_client_local.describe_instances(InstanceIds=[untagged_id])['Reservations'][0]['Instances'][0]
     monkeypatch.setattr(lambda_function_imported, 'ec2_client', ec2_client_local)
+
     instances = lambda_function_imported.get_rogue_instances()
     instanceids = [i['InstanceId'] for i in instances]
     print(normal_id, deploy_id, doomed_id, untagged_id, 'normal,deploy,doomed,untagged')

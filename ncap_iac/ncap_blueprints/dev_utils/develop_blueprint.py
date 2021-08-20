@@ -65,8 +65,6 @@ def return_tags(timeout):
             ]
     return tags
 
-
-
 ## New class to develop an ami.
 class NeuroCaaSAMI(object):
     """
