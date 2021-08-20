@@ -478,7 +478,7 @@ class Test_Submission_dev():
         sd.parse_config()
         assert sd.get_costmonitoring()
 
-    @pytest.mark.parametrize("submitname,maxcost,response",[("10_10submit.json",1265,False),("10_600submit.json",1266,False),("10_nonesubmit.json",1265,False),("10_10submit.json",1266,True),("10_600submit.json",1267,True),("10_nonesubmit.json",1266,True)]) ## These calculated with a base cost very close to 1265. The default timing (shown at top) is 60 mins.
+    @pytest.mark.parametrize("submitname,maxcost,response",[("10_10submit.json",1265,False),("10_600submit.json",1266,False),("10_nonesubmit.json",1265,False),("10_10submit.json",1267,True),("10_600submit.json",1365,True),("10_nonesubmit.json",1275,True)]) ## These calculated with a base cost very close to 1265. The default timing (shown at top) is 60 mins.
     def test_Submission_dev_get_costmonitoring_allinsts(self,setup_lambda_env,setup_testing_bucket,check_instances,monkeypatch,set_ssm_budget_other,submitname,maxcost,response,set_price,patch_boto3_ec2):    
         bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
         submit_dir = os.path.dirname(submit_path)
@@ -512,7 +512,7 @@ class Test_Submission_dev():
 
         sd = submit_start.Submission_dev(bucket_name,os.path.join(submit_dir,"10_10submit.json"),"111111111")
         price = sd.prices_active_instances_ami(ami)
-        assert price > 300 
+        assert price == number*duration/60 
 
     def test_Submission_dev_get_costmonitoring__many_active(self,create_ami,setup_lambda_env,setup_testing_bucket,loggerfactory,check_instances,monkeypatch,set_ssm_budget_other,set_price,patch_boto3_ec2,kill_instances):    
         instance_type = "p3.2xlarge"
