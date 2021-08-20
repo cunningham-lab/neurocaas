@@ -5,6 +5,15 @@ on:
     types: [created]
 
 jobs:
+  printJob:    
+    name: Print event
+    runs-on: ubuntu-latest
+    steps:
+    - name: Dump GitHub context
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: |
+        echo "$GITHUB_CONTEXT" 
   deploy-check:
     runs-on: ubuntu-latest
     steps:
@@ -21,6 +30,9 @@ jobs:
           reaction: rocket
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      - name: check outputs      
+        run: echo ${{ steps.check.outputs.triggered }}
+
     outputs:
       triggered: ${{ steps.check.outputs.triggered }}
       comment_body: ${{ github.event.comment.body }}
@@ -32,7 +44,7 @@ jobs:
     steps:
       - name: get pull request ref
         id: get_pull_request_ref
-        uses: octokit/request-action@v2.x
+        uses: octokit/request-action@v2.1.0
         with:
           route: GET /repos/{owner}/{repo}/pulls/{issue_id}
           owner: cunningham-lab
@@ -44,7 +56,7 @@ jobs:
 
       - name: create deployment
         id: create_deployment
-        uses: octokit/request-action@v2.x
+        uses: octokit/request-action@v2.1.0
         with:
           route: POST /repos/{owner}/{repo}/deployments
           owner: cunningham-lab
@@ -58,7 +70,7 @@ jobs:
 
       - name: set deployment status to in progress
         id: start_deployment
-        uses: octokit/request-action@v2.x
+        uses: octokit/request-action@v2.1.0
         with:
           route: POST /repos/{owner}/{repo}/deployments/{deployment}/statuses
           owner: cunningham-lab
@@ -84,7 +96,8 @@ jobs:
         uses: actions/checkout@v2
         with:                    
            persist-credentials: false
-           ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.ref }}
+           ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.sha }}
+
 
       - name: setup python.
         uses: actions/setup-python@v2
