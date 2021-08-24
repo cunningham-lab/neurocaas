@@ -1,4 +1,4 @@
-## tests the dev_builder module that compiles cfn templates through cloudformation. 
+# tests the dev_builder module that compiles cfn templates through cloudformation. 
 from ncap_iac.utils import dev_builder
 import pytest 
 import os
@@ -20,6 +20,10 @@ def test_DevTemplate(postprocess,field):
     print(tdict["Resources"].keys())
     if field is not None:
         assert tdict["Resources"].get(field,False)
+
+def test_InitTemplate():        
+    config = "stack_config_template.json"
+    template = dev_builder.InitTemplate(os.path.join(test_mats,config))
     
 def test_WebDevTemplate(): 
     config = "stack_config_template.json"
