@@ -144,7 +144,7 @@ jobs:
           cd ncap_iac/ncap_blueprints
           source "$HOME/miniconda/etc/profile.d/conda.sh"
           conda activate neurocaas
-          bash iac_utils/fulltest.sh ${{ steps.split.outputs._1 }}     
+          bash iac_utils/fulldeploy.sh ${{ steps.split.outputs._1 }}     
           
       - name: set test status to success
         id: successful_test
