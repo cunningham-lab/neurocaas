@@ -14,9 +14,10 @@ storagebucketname=$(jq .bucketname "$ncaprootdir/global_params_initialized.json"
 source "$scriptdir"/paths.sh
 ## Get the path to this particular file. 
 ## NOTE: Add the anaconda path if running as admin.  
-export PATH="/miniconda/bin:$PATH"
-source "$HOME/miniconda/etc/profile.d/conda.sh"
-conda activate neurocaas
+#export PATH="/miniconda/bin:$PATH"
+#source "$HOME/miniconda/etc/profile.d/conda.sh"
+#conda activate neurocaas
+source activate neurocaas
 
 ## Input management: 
 ## Get the path to the directory where user data is stored: 
@@ -35,23 +36,26 @@ python "$scriptdir"/checkpath.py "$PIPENAME"
 ## Give the path to the root directory for ncap (we like absolute paths) 
 
 cd $ncaprootdir/utils
-stage=$(jq ".STAGE" "$PIPEDIR"/stack_config_template.json ) 
-stagestr=$(echo $stage | tr -d '"')
-echo $stagestr
-python dev_builder.py $PIPEDIR/stack_config_template.json "$stagestr"
+#stage=$(jq ".STAGE" "$PIPEDIR"/stack_config_template.json ) 
+#stagestr=$(echo $stage | tr -d '"')
+#echo $stagestr
+#python dev_builder.py $PIPEDIR/stack_config_template.json "$stagestr"
 cd $PIPEDIR
 
-## main lambda test
-sam local invoke MainLambda --event test_resources/s3_putevent.json -n test_resources/main_func_env_vars.json 
-
-## search lambda test 
-aws s3 cp test_resources/i-1234567890abcdef0.json s3://"$stackname"/logs/active/
-
-sam local invoke FigLambda --template .aws-sam/build/template.yaml --event test_resources/cloudwatch_startevent.json -n test_resources/main_func_env_vars.json
-sam local invoke FigLambda --template .aws-sam/build/template.yaml --event test_resources/cloudwatch_termevent.json -n test_resources/main_func_env_vars.json
+## Functions below should be tested on build of the fulldeploy function, not here. 
+### main lambda test
+#sam local invoke MainLambda --event test_resources/s3_putevent.json -n test_resources/main_func_env_vars.json 
+#
+### search lambda test 
+#aws s3 cp test_resources/i-1234567890abcdef0.json s3://"$stackname"/logs/active/
+#
+#sam local invoke FigLambda --template .aws-sam/build/template.yaml --event test_resources/cloudwatch_startevent.json -n test_resources/main_func_env_vars.json
+#sam local invoke FigLambda --template .aws-sam/build/template.yaml --event test_resources/cloudwatch_termevent.json -n test_resources/main_func_env_vars.json
 
 ## Make tests for jobs. 
+### check tags 
+
 ### check budgeting function can't launch too many jobs at once. 
 
-### check tags 
+
 

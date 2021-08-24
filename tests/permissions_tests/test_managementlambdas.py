@@ -18,7 +18,7 @@ env_vars = {'graceperiod':'10',
 for var in env_vars.items():
     os.environ[var[0]] = var[1]
 
-import ncap_iac.permissions.management_lambdas.lambda_function_imported as lambda_function_imported
+import ncap_iac.permissions.management_lambdas.ec2_rogue_killer as ec2_rogue_killer ## this is eseentially the function ec2_rogue_killer
 session = localstack_client.session.Session()
 ec2_resource_local = session.resource('ec2')
 ec2_client_local = session.client('ec2')
@@ -26,7 +26,7 @@ ssm_client_local = session.client('ssm')
 
 @pytest.fixture()
 def set_ssm_exempt(monkeypatch):
-    monkeypatch.setattr(lambda_function_imported, 'ssm_client', ssm_client_local)
+    monkeypatch.setattr(ec2_rogue_killer, 'ssm_client', ssm_client_local)
     ssm_client_local.put_parameter(Name='exempt_instances', Type='String',
       Overwrite=True,
       Value=(env_vars['exemptlist']))
@@ -58,7 +58,7 @@ def create_mockinstance_doomed(monkeypatch):
     session = localstack_client.session.Session()
     ec2_resource = session.resource('ec2')
     ec2_client = session.client('ec2')
-    monkeypatch.setattr(lambda_function_imported, 'ec2_client', session.client('ec2'))
+    monkeypatch.setattr(ec2_rogue_killer, 'ec2_client', session.client('ec2'))
     output = ec2_resource.create_instances(ImageId='garbage', InstanceType='t2.micro',
       MinCount=1,
       MaxCount=1,
@@ -78,7 +78,7 @@ def create_mockinstance_ssm(monkeypatch):
     session = localstack_client.session.Session()
     ec2_resource = session.resource('ec2')
     ec2_client = session.client('ec2')
-    monkeypatch.setattr(lambda_function_imported, 'ec2_client', session.client('ec2'))
+    monkeypatch.setattr(ec2_rogue_killer, 'ec2_client', session.client('ec2'))
     output = ec2_resource.create_instances(ImageId='garbage', InstanceType='t2.micro',
       MinCount=1,
       MaxCount=1)
@@ -106,7 +106,7 @@ def create_mockinstance(monkeypatch):
     session = localstack_client.session.Session()
     ec2_resource = session.resource('ec2')
     ec2_client = session.client('ec2')
-    monkeypatch.setattr(lambda_function_imported, 'ec2_client', session.client('ec2'))
+    monkeypatch.setattr(ec2_rogue_killer, 'ec2_client', session.client('ec2'))
     output = ec2_resource.create_instances(ImageId='garbage', InstanceType='t2.micro',
       MinCount=1,
       MaxCount=1,
@@ -126,7 +126,7 @@ def create_mockinstance_untagged(monkeypatch):
     session = localstack_client.session.Session()
     ec2_resource = session.resource('ec2')
     ec2_client = session.client('ec2')
-    monkeypatch.setattr(lambda_function_imported, 'ec2_client', session.client('ec2'))
+    monkeypatch.setattr(ec2_rogue_killer, 'ec2_client', session.client('ec2'))
     output = ec2_resource.create_instances(ImageId='garbage', InstanceType='t2.micro',
       MinCount=1,
       MaxCount=1)
@@ -134,129 +134,131 @@ def create_mockinstance_untagged(monkeypatch):
     instance_id = output[0].instance_id
     ec2_client.terminate_instances(InstanceIds=[instance_id])
 
+class Test_ec2_rogue_killer:
 
-def test_not_exempt_ssm(create_lambda_env, create_mockinstance, set_ssm_exempt):
-    """
+    def test_not_exempt_ssm(self,create_lambda_env, create_mockinstance, set_ssm_exempt):
+        """
 
-    """
-    inst_id = create_mockinstance[0].instance_id
-    response = ec2_client_local.describe_instances(InstanceIds=[inst_id])
-    instance_info = response['Reservations'][0]['Instances'][0]
-    print(instance_info['InstanceId'], os.environ['exemptlist'])
-    assert lambda_function_imported.not_exempt(instance_info)
-    copy_dict = {}
-    for key, val in instance_info.items():
-        copy_dict[key] = val
+        """
+        inst_id = create_mockinstance[0].instance_id
+        response = ec2_client_local.describe_instances(InstanceIds=[inst_id])
+        instance_info = response['Reservations'][0]['Instances'][0]
+        print(instance_info['InstanceId'], os.environ['exemptlist'])
+        assert ec2_rogue_killer.not_exempt(instance_info)
+        copy_dict = {}
+        for key, val in instance_info.items():
+            copy_dict[key] = val
 
-    copy_dict['InstanceId'] = 'i-029339d0ff4fa4318'
-    assert not lambda_function_imported.not_exempt(copy_dict)
-
-
-def test_not_exempt(monkeypatch, create_lambda_env, create_mockinstance):
-    """
-
-    """
-    inst_id = create_mockinstance[0].instance_id
-    response = ec2_client_local.describe_instances(InstanceIds=[inst_id])
-    instance_info = response['Reservations'][0]['Instances'][0]
-    print(instance_info['InstanceId'], os.environ['exemptlist'])
-    assert lambda_function_imported.not_exempt(instance_info)
-    copy_dict = {}
-    for key, val in instance_info.items():
-        copy_dict[key] = val
-
-    copy_dict['InstanceId'] = 'i-029339d0ff4fa4318'
-    assert not lambda_function_imported.not_exempt(copy_dict)
+        copy_dict['InstanceId'] = 'i-029339d0ff4fa4318'
+        assert not ec2_rogue_killer.not_exempt(copy_dict)
 
 
-def test_no_command(create_lambda_env, create_mockinstance):
-    inst_id = create_mockinstance[0].instance_id
-    response = ec2_client_local.describe_instances(InstanceIds=[inst_id])
-    instance_info = response['Reservations'][0]['Instances'][0]
-    assert lambda_function_imported.no_command(instance_info)
-    ssm_client_local.send_command(InstanceIds=[inst_id], DocumentName='AWS-RunShellScript', Parameters={'commands': ['ls']})
-    assert not lambda_function_imported.no_command(instance_info)
-    ec2_client_local.terminate_instances(InstanceIds=[inst_id])
+    def test_not_exempt(self,monkeypatch, create_lambda_env, create_mockinstance):
+        """
+
+        """
+        inst_id = create_mockinstance[0].instance_id
+        response = ec2_client_local.describe_instances(InstanceIds=[inst_id])
+        instance_info = response['Reservations'][0]['Instances'][0]
+        print(instance_info['InstanceId'], os.environ['exemptlist'])
+        assert ec2_rogue_killer.not_exempt(instance_info)
+        copy_dict = {}
+        for key, val in instance_info.items():
+            copy_dict[key] = val
+
+        copy_dict['InstanceId'] = 'i-029339d0ff4fa4318'
+        assert not ec2_rogue_killer.not_exempt(copy_dict)
 
 
-@pytest.mark.parametrize('graceperiod,condition', [(-1, True), (10, False)])
-def test_active_past_graceperiod(monkeypatch, create_lambda_env, create_mockinstance, graceperiod, condition):
-    inst_id = create_mockinstance[0].instance_id
-    response = ec2_client_local.describe_instances(InstanceIds=[inst_id])
-    instance_info = response['Reservations'][0]['Instances'][0]
-    monkeypatch.setattr(lambda_function_imported, 'graceperiod', graceperiod)
-    assert lambda_function_imported.active_past_graceperiod(instance_info) == condition
+    def test_no_command(self,create_lambda_env, create_mockinstance):
+        inst_id = create_mockinstance[0].instance_id
+        response = ec2_client_local.describe_instances(InstanceIds=[inst_id])
+        instance_info = response['Reservations'][0]['Instances'][0]
+        assert ec2_rogue_killer.no_command(instance_info)
+        ssm_client_local.send_command(InstanceIds=[inst_id], DocumentName='AWS-RunShellScript', Parameters={'commands': ['ls']})
+        assert not ec2_rogue_killer.no_command(instance_info)
+        ec2_client_local.terminate_instances(InstanceIds=[inst_id])
 
 
-def test_active_past_timeout(monkeypatch, create_lambda_env, create_mockinstance, create_mockinstance_doomed, create_mockinstance_untagged):
-    inst_id = create_mockinstance[0].instance_id
-    response = ec2_client_local.describe_instances(InstanceIds=[inst_id])
-    instance_info = response['Reservations'][0]['Instances'][0]
-    assert not lambda_function_imported.active_past_timeout(instance_info)
-
-    inst_id = create_mockinstance_doomed[0].instance_id
-    response = ec2_client_local.describe_instances(InstanceIds=[inst_id])
-    instance_info = response['Reservations'][0]['Instances'][0]
-    assert lambda_function_imported.active_past_timeout(instance_info)
-
-    inst_id = create_mockinstance_untagged[0].instance_id
-    response = ec2_client_local.describe_instances(InstanceIds=[inst_id])
-    instance_info = response['Reservations'][0]['Instances'][0]
-    assert not lambda_function_imported.active_past_timeout(instance_info)
-
-    inst_id = create_mockinstance_untagged[0].instance_id
-    response = ec2_client_local.describe_instances(InstanceIds=[inst_id])
-    instance_info = response['Reservations'][0]['Instances'][0]
-    monkeypatch.setattr(lambda_function_imported, 'graceperiod', -1)
-    assert lambda_function_imported.active_past_timeout(instance_info)
+    @pytest.mark.parametrize('graceperiod,condition', [(-1, True), (10, False)])
+    def test_active_past_graceperiod(self,monkeypatch, create_lambda_env, create_mockinstance, graceperiod, condition):
+        inst_id = create_mockinstance[0].instance_id
+        response = ec2_client_local.describe_instances(InstanceIds=[inst_id])
+        instance_info = response['Reservations'][0]['Instances'][0]
+        monkeypatch.setattr(ec2_rogue_killer, 'graceperiod', graceperiod)
+        assert ec2_rogue_killer.active_past_graceperiod(instance_info) == condition
 
 
-def test_get_rogue_instances(monkeypatch, create_mockinstance, create_mockinstance_doomed, create_mockinstance_untagged, create_mockinstance_ssm):
-    normal_id = create_mockinstance[0].instance_id
-    exempt_info = ec2_client_local.describe_instances(InstanceIds=[normal_id])['Reservations'][0]['Instances'][0]
-    deploy_id = create_mockinstance_ssm[0][0].instance_id
-    mockfunc = create_mockinstance_ssm[1]
-    monkeypatch.setattr(lambda_function_imported, 'no_command', mockfunc)
-    deploy_info = ec2_client_local.describe_instances(InstanceIds=[deploy_id])['Reservations'][0]['Instances'][0]
-    doomed_id = create_mockinstance_doomed[0].instance_id
-    doomed_info = ec2_client_local.describe_instances(InstanceIds=[doomed_id])['Reservations'][0]['Instances'][0]
-    untagged_id = create_mockinstance_untagged[0].instance_id
-    untagged_info = ec2_client_local.describe_instances(InstanceIds=[untagged_id])['Reservations'][0]['Instances'][0]
-    monkeypatch.setattr(lambda_function_imported, 'ec2_client', ec2_client_local)
+    def test_active_past_timeout(self,monkeypatch, create_lambda_env, create_mockinstance, create_mockinstance_doomed, create_mockinstance_untagged):
+        inst_id = create_mockinstance[0].instance_id
+        response = ec2_client_local.describe_instances(InstanceIds=[inst_id])
+        instance_info = response['Reservations'][0]['Instances'][0]
+        assert not ec2_rogue_killer.active_past_timeout(instance_info)
 
-    instances = lambda_function_imported.get_rogue_instances()
-    instanceids = [i['InstanceId'] for i in instances]
-    print(normal_id, deploy_id, doomed_id, untagged_id, 'normal,deploy,doomed,untagged')
-    assert instanceids == [doomed_id]
+        inst_id = create_mockinstance_doomed[0].instance_id
+        response = ec2_client_local.describe_instances(InstanceIds=[inst_id])
+        instance_info = response['Reservations'][0]['Instances'][0]
+        assert ec2_rogue_killer.active_past_timeout(instance_info)
 
-    with monkeypatch.context() as m:
-        m.setattr(lambda_function_imported, 'exempt', [normal_id])
-        instances = lambda_function_imported.get_rogue_instances()
+        inst_id = create_mockinstance_untagged[0].instance_id
+        response = ec2_client_local.describe_instances(InstanceIds=[inst_id])
+        instance_info = response['Reservations'][0]['Instances'][0]
+        assert not ec2_rogue_killer.active_past_timeout(instance_info)
+
+        inst_id = create_mockinstance_untagged[0].instance_id
+        response = ec2_client_local.describe_instances(InstanceIds=[inst_id])
+        instance_info = response['Reservations'][0]['Instances'][0]
+        monkeypatch.setattr(ec2_rogue_killer, 'graceperiod', -1)
+        assert ec2_rogue_killer.active_past_timeout(instance_info)
+
+
+    def test_get_rogue_instances(self,monkeypatch, create_mockinstance, create_mockinstance_doomed, create_mockinstance_untagged, create_mockinstance_ssm):
+        normal_id = create_mockinstance[0].instance_id
+        exempt_info = ec2_client_local.describe_instances(InstanceIds=[normal_id])['Reservations'][0]['Instances'][0]
+        deploy_id = create_mockinstance_ssm[0][0].instance_id
+        mockfunc = create_mockinstance_ssm[1]
+        monkeypatch.setattr(ec2_rogue_killer, 'no_command', mockfunc)
+        deploy_info = ec2_client_local.describe_instances(InstanceIds=[deploy_id])['Reservations'][0]['Instances'][0]
+        doomed_id = create_mockinstance_doomed[0].instance_id
+        doomed_info = ec2_client_local.describe_instances(InstanceIds=[doomed_id])['Reservations'][0]['Instances'][0]
+        untagged_id = create_mockinstance_untagged[0].instance_id
+        untagged_info = ec2_client_local.describe_instances(InstanceIds=[untagged_id])['Reservations'][0]['Instances'][0]
+        monkeypatch.setattr(ec2_rogue_killer, 'ec2_client', ec2_client_local)
+
+        instances = ec2_rogue_killer.get_rogue_instances()
         instanceids = [i['InstanceId'] for i in instances]
+        print(normal_id, deploy_id, doomed_id, untagged_id, 'normal,deploy,doomed,untagged')
         assert instanceids == [doomed_id]
 
-    with monkeypatch.context() as m:
-        m.setattr(lambda_function_imported, 'exempt', [doomed_id])
-        instances = lambda_function_imported.get_rogue_instances()
-        instanceids = [i['InstanceId'] for i in instances]
-        assert instanceids == []
+        with monkeypatch.context() as m:
+            m.setattr(ec2_rogue_killer, 'exempt', [normal_id])
+            instances = ec2_rogue_killer.get_rogue_instances()
+            instanceids = [i['InstanceId'] for i in instances]
+            assert instanceids == [doomed_id]
 
-    with monkeypatch.context() as m:
-        m.setattr(lambda_function_imported, 'graceperiod', -1)
-        instances = lambda_function_imported.get_rogue_instances()
-        instanceids = [i['InstanceId'] for i in instances]
-        assert set(instanceids) == set([doomed_id,untagged_id])
+        with monkeypatch.context() as m:
+            m.setattr(ec2_rogue_killer, 'exempt', [doomed_id])
+            instances = ec2_rogue_killer.get_rogue_instances()
+            instanceids = [i['InstanceId'] for i in instances]
+            assert instanceids == []
 
-    with monkeypatch.context() as m:
-        m.setattr(lambda_function_imported, 'exempt', [doomed_id, untagged_id])
-        m.setattr(lambda_function_imported, 'graceperiod', -1)
-        instances = lambda_function_imported.get_rogue_instances()
-        instanceids = [i['InstanceId'] for i in instances]
-        assert set(instanceids) == set([])
+        with monkeypatch.context() as m:
+            m.setattr(ec2_rogue_killer, 'graceperiod', -1)
+            instances = ec2_rogue_killer.get_rogue_instances()
+            instanceids = [i['InstanceId'] for i in instances]
+            assert set(instanceids) == set([doomed_id,untagged_id])
 
-    with monkeypatch.context() as (m):
-        m.setattr(lambda_function_imported, 'exempt', [normal_id])
-        m.setattr(lambda_function_imported, 'graceperiod', -1)
-        instances = lambda_function_imported.get_rogue_instances()
-        instanceids = [i['InstanceId'] for i in instances]
-        assert set(instanceids) == set([doomed_id,untagged_id])
+        with monkeypatch.context() as m:
+            m.setattr(ec2_rogue_killer, 'exempt', [doomed_id, untagged_id])
+            m.setattr(ec2_rogue_killer, 'graceperiod', -1)
+            instances = ec2_rogue_killer.get_rogue_instances()
+            instanceids = [i['InstanceId'] for i in instances]
+            assert set(instanceids) == set([])
+
+        with monkeypatch.context() as (m):
+            m.setattr(ec2_rogue_killer, 'exempt', [normal_id])
+            m.setattr(ec2_rogue_killer, 'graceperiod', -1)
+            instances = ec2_rogue_killer.get_rogue_instances()
+            instanceids = [i['InstanceId'] for i in instances]
+            assert set(instanceids) == set([doomed_id,untagged_id])
+
