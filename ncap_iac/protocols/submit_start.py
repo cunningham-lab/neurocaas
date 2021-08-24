@@ -711,6 +711,7 @@ def process_upload_ensemble(bucket_name, key,time):
     step = "STEP 2/4 (Validation)"
     try:
         submission.check_existence()
+        submission.parse_config()
         valid = submission.get_costmonitoring()
         assert valid
         submission.logger.append(donemessage.format(s = step))
@@ -738,7 +739,6 @@ def process_upload_ensemble(bucket_name, key,time):
     # Step 3: Setup: Getting the volumesize, hardware specs of immutable analysis environments. 
     step = "STEP 3/4 (Environment Setup)"
     try:
-        submission.parse_config()
         submission.compute_volumesize()
         submission.logger.append(donemessage.format(s = step))
         submission.logger.printlatest()
