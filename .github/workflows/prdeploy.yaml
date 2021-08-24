@@ -144,10 +144,10 @@ jobs:
           cd ncap_iac/ncap_blueprints
           source "$HOME/miniconda/etc/profile.d/conda.sh"
           conda activate neurocaas
-          bash iac_utils/fulldeploy.sh ${{ steps.split.outputs._1 }}     
+          bash iac_utils/fulltest.sh ${{ steps.split.outputs._1 }}     
           
-      - name: set deployment status to success
-        id: successful_deployment
+      - name: set test status to success
+        id: successful_test
         uses: octokit/request-action@v2.x
         with:
           route: POST /repos/{owner}/{repo}/deployments/{deployment}/statuses 
@@ -163,8 +163,8 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: set deployment status to failure
-        id: failed_deployment
+      - name: set test status to failure
+        id: failed_test
         uses: octokit/request-action@v2.x
         if: failure()
         with:
