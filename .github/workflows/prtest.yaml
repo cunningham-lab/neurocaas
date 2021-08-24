@@ -80,7 +80,7 @@ jobs:
         uses: jungwinter/split@v1
         id: split
         with:
-          msg: ${{ needs.test-check.outputs.comment_body }}
+          msg: "#test:test-tags-bucket" #${{ needs.test-check.outputs.comment_body }}
           seperator: ':'
           
       - name: pull the repo.  
