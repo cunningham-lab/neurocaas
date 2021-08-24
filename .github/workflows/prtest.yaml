@@ -1,4 +1,4 @@
-name: pr-deployment
+name: pr-test
 
 on:
   issue_comment:
@@ -83,11 +83,11 @@ jobs:
           msg: "#test:test-tags-bucket" #${{ needs.test-check.outputs.comment_body }}
           seperator: ':'
           
-      - name: pull the repo.  
+      - name: Use the master repo to test.   
         uses: actions/checkout@v2
         with:                    
            persist-credentials: false
-           ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.sha }}
+           ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).base.sha }}
 
 
       - name: setup python.
