@@ -1,0 +1,32 @@
+{
+    "PipelineName": "ssl-dgp",
+    "REGION": "us-east-1",
+    "STAGE": "websubstack",
+    "Lambda": {
+        "CodeUri": "../../protocols",
+        "Handler": "submit_start.handler_develop",
+        "Launch": true,
+        "LambdaConfig": {
+            "AMI": "ami-048d86f71fa3f50d0",
+            "INSTANCE_TYPE": "p3.2xlarge",
+            "REGION": "us-east-1",
+            "IAM_ROLE": "SSMRole",
+            "KEY_NAME": "testkeystack-custom-dev-key-pair",
+            "WORKING_DIRECTORY": "~/bin",
+            "COMMAND": "cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup"
+        }
+    },
+    "UXData": {
+        "Affiliates": [
+            {
+                "AffiliateName": "traviscipermagroup",
+                "UserNames": [
+                    "cipermauser1",
+                    "cipermauser2"
+                ],
+                "UserInput": true,
+                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
+            }
+        ]
+    }
+}
