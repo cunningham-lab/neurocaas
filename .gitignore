@@ -149,6 +149,8 @@ cost_investigation/*
 paper/README.txt
 paper/README.pdf
 paper/Figures/
+paper/experiments/*.png
+paper/experiments/*/*.png
 paper/NeuroCAAS_manuscript_5_19_final.pdf
 tests/protocol_tests/test_mats/
 tests/unit_tests/fixture_dir/
