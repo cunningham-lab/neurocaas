@@ -148,7 +148,11 @@ ncap_iac/user_profiles/*/compiled_users.yaml
 cost_investigation/*
 paper/README.txt
 paper/README.pdf
+paper/Figures/
 paper/NeuroCAAS_manuscript_5_19_final.pdf
+tests/protocol_tests/test_mats/
+tests/unit_tests/fixture_dir/
+website_resources/
 
 # external media files
 media/*
