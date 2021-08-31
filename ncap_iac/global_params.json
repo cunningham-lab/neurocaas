@@ -1,7 +1,7 @@
 {
-        "input_directory":"inputs",
-        "output_directory":"results",
-        "log_directory":"logs",
-        "config_directory":"configs",
-        "submission_directory":"submissions"
-        }
+    "input_directory":"inputs",
+    "output_directory":"results",
+    "log_directory":"logs",
+    "config_directory":"configs",
+    "submission_directory":"submissions"
+    }

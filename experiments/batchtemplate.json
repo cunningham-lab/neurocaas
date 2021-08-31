@@ -8,7 +8,7 @@
 "DatasetKeys":["keys of datasets. Include full paths"],
 "DatasetSizes":["sizes of datasets. In GB"],
 "ResultSizes":["sizes of results files to be extracted from S3"],
-"UploadTime":"amount of time it took to upload data to S3",
+"UploadTime":"amount of time it took to upload data to S3 (seconds)",
 "InstanceComputeTimes":[["start","stop"], "amount of time in seconds that the instance ran for (EC2 instances are billed in seconds)"],
 "LambdaComputeTimes":["amount of time in milliseconds that the submit lambda function ran for"],
 "LambdaMemory":"Memory allowance of Lambda Function. In MB"

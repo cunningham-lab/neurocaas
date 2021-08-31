@@ -96,20 +96,20 @@ def get_metricdata_dict(instance_id):
     }
     return MetricDataDict
 
-def get_instance_activity(instanceid):
-    """
-    Provided with an instance id, returns the activity of that instance over the last hour
-    """
-    end = datetime.now()
-    start = end-timedelta(hours = 1)
-    data = cloudwatch_client.get_metric_data(MetricDataQueries = [get_metricdata_dict(instanceid)],
-                                        StartTime = start,
-                                        EndTime = end
-        )
-    ## less than 5% utilization across the last hour. 
-    
-    idle = all([entry <5 for entry in data["MetricDataResults"][0]["Values"]])
-    return idle
+#def get_instance_activity(instanceid):
+#    """
+#    Provided with an instance id, returns the activity of that instance over the last hour
+#    """
+#    end = datetime.now()
+#    start = end-timedelta(hours = 1)
+#    data = cloudwatch_client.get_metric_data(MetricDataQueries = [get_metricdata_dict(instanceid)],
+#                                        StartTime = start,
+#                                        EndTime = end
+#        )
+#    ## less than 5% utilization across the last hour. 
+#    
+#    idle = all([entry <5 for entry in data["MetricDataResults"][0]["Values"]])
+#    return idle
     
 def publish_message(message,events = 1):
     print(message)
