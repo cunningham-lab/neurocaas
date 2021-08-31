@@ -1,7 +1,14 @@
 {
-        "input_directory":"inputs",
-        "output_directory":"results",
-        "log_directory":"logs",
-        "config_directory":"configs",
-        "submission_directory":"submissions"
-        }
+    "input_directory":"inputs",
+    "output_directory":"results",
+    "log_directory":"logs",
+    "config_directory":"configs",
+    "submission_directory":"submissions",
+    "EXECUTION_TIMEOUT": 900,
+    "SSM_TIMEOUT": 172000,
+    "LAUNCH": true,
+    "LOGFILE": "lambda_log.txt",
+    "DEPLOY_LIMIT": 100,
+    "MAXCOST": "300",
+    "MONITOR": true
+}
