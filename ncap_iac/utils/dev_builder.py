@@ -106,9 +106,14 @@ class NeuroCaaSTemplate(object):
                 gpdict["log_directory"],
                 gpdict["config_directory"],
                 gpdict["submission_directory"]]
-        #vals = ['inputs','results','logs',"configs","submissions"]
         appenddict = {k:v for k,v in zip(keys,vals)}
         obj['Lambda']['LambdaConfig'].update(appenddict)
+        ## Now append the other fields: 
+        default_fixed = ["EXECUTION_TIMEOUT","SSM_TIMEOUT","LAUNCH","LOGFILE","DEPLOY_LIMIT","MAXCOST","MONITOR"]
+        for field in default_fixed:
+            if not obj["Lambda"]["LambdaConfig"].get(field,False):
+                obj["Lambda"]["LambdaConfig"][field] = gpdict[field]
+                print("Using default value for field {}: {}".format(field,gpdict[field]))
 
         return obj
 
