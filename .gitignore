@@ -156,7 +156,6 @@ ncap_iac/ncap_blueprints/*/compiled_packaged.yaml
 ncap_iac/user_profiles/*/compiled_users.json
 ncap_iac/user_profiles/*/.aws-sam/
 ncap_iac/user_profiles/*/compiled_users.yaml
-docs/
 !docs/source/
 !docs/devguide.md
 !docs/Makefile
