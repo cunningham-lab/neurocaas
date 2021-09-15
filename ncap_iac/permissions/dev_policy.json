@@ -21,10 +21,6 @@
             "Effect": "Allow",
             "Action": [
                 "ec2:RunInstances",
-                "ec2:StartInstances",
-                "ec2:StopInstances",
-                "ec2:RebootInstances",
-                "ec2:TerminateInstances",
                 "ec2:CreateVolume"
             ],
             "Resource": [
@@ -37,6 +33,25 @@
                 },
                 "ForAnyValue:StringEquals": {
                     "aws:TagKeys": "Timeout"
+                }
+            }
+        },
+        {
+            "Sid": "statemanage",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:StartInstances",
+                "ec2:StopInstances",
+                "ec2:RebootInstances",
+                "ec2:TerminateInstances"
+            ],
+            "Resource": [
+                "arn:aws:ec2:*:*:instance/*",
+                "arn:aws:ec2:*:*:volume/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/PriceTracking": "On"
                 }
             }
         },
@@ -65,7 +80,11 @@
             "Effect": "Allow",
             "Action": [
                 "iam:PassRole",
-                "ec2:RunInstances"
+                "ec2:RunInstances",
+                "ec2:StartInstances",
+                "ec2:StopInstances",
+                "ec2:RebootInstances",
+                "ec2:TerminateInstances"
             ],
             "Resource": [
                 "arn:aws:iam::739988523141:role/testutilsstack-SSMRole-1GG0BKY7GL634",
