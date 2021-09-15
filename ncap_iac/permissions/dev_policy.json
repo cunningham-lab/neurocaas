@@ -4,24 +4,27 @@
         {
             "Effect": "Allow",
             "Action": [
-                "ssm:DescribeParameters"
+                "ssm:GetParameter",
+                "ssm:GetParameters"
             ],
-            "Resource": "*"
+            "Resource": "arn:aws:ssm:us-east-1:739988523141:parameter/testkeystack/neurocaas/*"
         },
         {
             "Effect": "Allow",
             "Action": [
-                "ssm:DescribeParameters",
-                "ssm:GetParameters",
-                "ssm:GetParameter"
+                "ssm:DescribeParameters"
             ],
-            "Resource": "arn:aws:ssm:us-east-1:739988523141:parameter/testkeystack/neurocaas/private-dev-key"
+            "Resource": "*"
         },
         {
             "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": [
                 "ec2:RunInstances",
+                "ec2:StartInstances",
+                "ec2:StopInstances",
+                "ec2:RebootInstances",
+                "ec2:TerminateInstances",
                 "ec2:CreateVolume"
             ],
             "Resource": [
