@@ -32,3 +32,46 @@ def test_WebDevTemplate():
 def test_WebSubstackTemplate(): 
     config = "stack_config_template.json"
     template = dev_builder.WebSubstackTemplate(os.path.join(test_mats,config))
+
+def test_Dev_Template_Trunc():
+    config = "stack_config_template.json"
+    config_trunc = "stack_config_template_trunc.json"
+    template = dev_builder.DevTemplate(os.path.join(test_mats,config))
+    template_trunc = dev_builder.DevTemplate(os.path.join(test_mats,config_trunc))
+    orig = template.config
+    new = template_trunc.config
+    for key in ["cwrolearn","figlambarn","figlambid"]:
+        orig["Lambda"]["LambdaConfig"].pop(key)
+        new["Lambda"]["LambdaConfig"].pop(key)
+    assert template.config == template_trunc.config
+
+def test_Init_Template_Trunc():
+    config = "stack_config_template.json"
+    config_trunc = "stack_config_template_trunc.json"
+    template = dev_builder.InitTemplate(os.path.join(test_mats,config))
+    template_trunc = dev_builder.InitTemplate(os.path.join(test_mats,config_trunc))
+    assert template.config == template_trunc.config
+
+def test_WebDev_Template_Trunc():
+    config = "stack_config_template.json"
+    config_trunc = "stack_config_template_trunc.json"
+    template = dev_builder.WebDevTemplate(os.path.join(test_mats,config))
+    template_trunc = dev_builder.WebDevTemplate(os.path.join(test_mats,config_trunc))
+    orig = template.config
+    new = template_trunc.config
+    for key in ["cwrolearn","figlambarn","figlambid"]:
+        orig["Lambda"]["LambdaConfig"].pop(key)
+        new["Lambda"]["LambdaConfig"].pop(key)
+    assert template.config == template_trunc.config
+
+def test_WebSubstack_Template_Trunc():
+    config = "stack_config_template.json"
+    config_trunc = "stack_config_template_trunc.json"
+    template = dev_builder.WebSubstackTemplate(os.path.join(test_mats,config))
+    template_trunc = dev_builder.WebSubstackTemplate(os.path.join(test_mats,config_trunc))
+    orig = template.config
+    new = template_trunc.config
+    for key in ["cwrolearn","figlambarn","figlambid"]:
+        orig["Lambda"]["LambdaConfig"].pop(key)
+        new["Lambda"]["LambdaConfig"].pop(key)
+    assert template.config == template_trunc.config

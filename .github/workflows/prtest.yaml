@@ -1,0 +1,173 @@
+name: pr-test
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  test-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: vet commenter 
+        id: vet
+        if: github.event.comment.user.login != 'cellistigs'
+        run: exit 1
+      - name: acknowledge test request to commenter
+        id: check
+        uses: khan/pull-request-comment-trigger@master
+        with:
+          trigger: "#test:"
+          prefix_only: true
+          reaction: rocket
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      - name: check outputs      
+        run: echo ${{ steps.check.outputs.triggered }}
+
+    outputs:
+      triggered: ${{ steps.check.outputs.triggered }}
+      comment_body: ${{ github.event.comment.body }}
+
+  test:
+    runs-on: ubuntu-latest
+    needs: test-check
+    if: needs.test-check.outputs.triggered == 'true'
+    steps:
+      - name: get pull request ref
+        id: get_pull_request_ref
+        uses: octokit/request-action@v2.1.0
+        with:
+          route: GET /repos/{owner}/{repo}/pulls/{issue_id}
+          owner: cunningham-lab
+          repo: neurocaas
+          repository: ${{ github.repository }}
+          issue_id: ${{ github.event.issue.number }}
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: create test
+        id: create_test
+        uses: octokit/request-action@v2.1.0
+        with:
+          route: POST /repos/{owner}/{repo}/deployments
+          owner: cunningham-lab
+          repo: neurocaas
+          repository: ${{ github.repository }}
+          ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.ref }}
+          environment: dev
+          auto_merge: false
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: set test status to in progress
+        id: start_test
+        uses: octokit/request-action@v2.1.0
+        with:
+          route: POST /repos/{owner}/{repo}/deployments/{deployment}/statuses
+          owner: cunningham-lab
+          repo: neurocaas
+          repository: ${{ github.repository }}
+          deployment: ${{ fromJson(steps.create_test.outputs.data).id }}
+          environment: dev
+          environment_url: https://example.com
+          log_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          state: in_progress
+          mediaType: '{"previews": ["flash", "ant-man"]}'
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: get stack name 
+        uses: jungwinter/split@v1
+        id: split
+        with:
+          msg: "#test:test-tags-bucket" #${{ needs.test-check.outputs.comment_body }}
+          seperator: ':'
+          
+      - name: Use the master repo to test.   
+        uses: actions/checkout@v2
+        with:                    
+           persist-credentials: false
+           ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).base.sha }}
+
+
+      - name: setup python.
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
+
+      # Log in to docker hub. 
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:  
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} 
+          
+      # Configure AWS credentials. 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.DEPLOY_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.DEPLOY_AWS_SECRET_ACCESS_KEY }}
+          # aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }} # if you have/need it
+          aws-region: us-east-1
+
+      - name: Install Repo.
+        run: |
+          cd $GITHUB_WORKSPACE
+          wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+          bash miniconda.sh -b -p $HOME/miniconda
+          source "$HOME/miniconda/etc/profile.d/conda.sh"
+          hash -r
+          conda config --set always_yes yes --set changeps1 no
+          conda update -q conda
+          conda config --append envs_dirs $HOME/miniconda/envs 
+          conda create -n neurocaas
+          conda activate neurocaas
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install aws-sam-cli==0.53.0 
+          pip install localstack==0.12.3
+          pip install ./ 
+          sudo apt-get install jq    
+          
+      - name: Test stack
+        run: |
+          cd ncap_iac/ncap_blueprints
+          source "$HOME/miniconda/etc/profile.d/conda.sh"
+          conda activate neurocaas
+          bash iac_utils/fulltest.sh ${{ steps.split.outputs._1 }}     
+          
+      - name: Set test status to success
+        id: successful_test
+        uses: octokit/request-action@v2.x
+        with:
+          route: POST /repos/{owner}/{repo}/deployments/{deployment}/statuses 
+          owner: cunningham-lab
+          repo: neurocaas
+          repository: ${{ github.repository }}
+          deployment: ${{ fromJson(steps.create_test.outputs.data).id }}
+          environment: dev
+          environment_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          log_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          mediaType: '{"previews": ["ant-man"]}'
+          state: success
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: set test status to failure
+        id: failed_test
+        uses: octokit/request-action@v2.x
+        if: failure()
+        with:
+          route: POST /repos/{owner}/{repo}/deployments/{deployment}/statuses
+          owner: cunningham-lab
+          repo: neurocaas
+          repository: ${{ github.repository }}
+          deployment: ${{ fromJson(steps.create_test.outputs.data).id }}
+          environment: dev
+          environment_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          log_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          mediaType: '{"previews": ["ant-man"]}'
+          state: failure
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
