@@ -139,6 +139,7 @@ dmypy.json
 
 # Permissions files: 
 ncap_iac/utils/policies
+!ncap_iac/utils/policies/lambda_role_assume_role_doc.json
 ncap_iac/user_profiles/*
 !ncap_iac/user_profiles/*/user_config_template.json
 
