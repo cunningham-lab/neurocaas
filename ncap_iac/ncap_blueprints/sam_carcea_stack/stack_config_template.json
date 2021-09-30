@@ -1,12 +1,12 @@
 {
-    "STAGE":"develop",
+    "STAGE": "develop",
     "PipelineName": "carceamonitored",
     "REGION": "us-east-1",
     "Lambda": {
         "CodeUri": "../../protocols",
         "Handler": "submit_start.handler_develop",
         "LambdaConfig": {
-            "AMI": "ami-08d7824d0e981d147",
+            "AMI": "ami-0680072181ab67547",
             "INSTANCE_TYPE": "p3.2xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "launch-wizard-34",
