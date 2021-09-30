@@ -13,7 +13,7 @@
             "IAM_ROLE": "pmd-s3-ssm",
             "KEY_NAME": "ta_testkey",
             "WORKING_DIRECTORY": "/home/ubuntu",
-            "COMMAND": "ls; bin/run.sh \"{}\" \"{}\" \"{}\" \"{}\"; sudo poweroff",
+            "COMMAND": "ls; bin/run_new.sh \"{}\" \"{}\" \"{}\" \"{}\"; sudo poweroff",
             "SHUTDOWN_BEHAVIOR": "terminate",
             "CONFIG": "config.yaml",
             "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
