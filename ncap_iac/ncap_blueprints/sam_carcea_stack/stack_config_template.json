@@ -17,7 +17,7 @@
             "SHUTDOWN_BEHAVIOR": "terminate",
             "CONFIG": "config.yaml",
             "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
-            "EXECUTION_TIMEOUT": 180,
+            "EXECUTION_TIMEOUT": 900,
             "SSM_TIMEOUT": 172000,
             "LAUNCH": true,
             "LOGFILE": "lambda_log.txt",
