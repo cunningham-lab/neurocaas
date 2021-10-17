@@ -15,7 +15,7 @@
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
             "IAM_ROLE": "SagemakerRole",
-            "KEY_NAME": "testkeystack-custom-dev-key-pair",
+            "KEY_NAME": "labeljobcreate",
             "WORKING_DIRECTORY": "~/bin",
             "COMMAND": "ls; cd /home/ubuntu/; source .bashrc; neurocaas_contrib/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\" AWSLabeljobCreation/run_label_job_creation.sh",
             "SHUTDOWN_BEHAVIOR": "terminate",
