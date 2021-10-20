@@ -105,7 +105,7 @@ All NeuroCAAS analyses should be triggered by running a central bash script call
 This script ensures that all jobs run on NeuroCAAS are managed and logged correctly. 
 This script takes 5 arguments, as follows:   
 
-`% bash run_main.sh $bucketname $path_to_input $path_to_result_dir $path_to_config_file $path_to_analysis_script`
+`% bash run_main_cli.sh $bucketname $path_to_input $path_to_result_dir $path_to_config_file $path_to_analysis_script`
 
 The first four parameters refer to locations in Amazon S3 where the inputs and results of this analysis will be stored. 
 These parameters correspond to the directory structure given in the "End Goals" section as follows: 
@@ -248,6 +248,7 @@ As a worked example, we can look at the processing script for the analysis DeepG
     fi
 
     echo "----UPLOADING RESULTS----"
+    neurocaas-contrib workflow put-result -r "/home/ubuntu/results_$taskname.zip"
 
 
 
