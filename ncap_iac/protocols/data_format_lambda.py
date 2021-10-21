@@ -3,40 +3,81 @@ import sys
 import boto3
 import pandas as pd
 import yaml
+import collections
 
+#call this once per job created
 def lambda_handler(event, context):
     s3 = boto3.client('s3')
     #copies frame jpegs from labeling job input folder
     data_bucket = event["Records"][0]["s3"]["bucket"]["name"]
-    group_name = event["Records"][0]["s3"]["object"]['key'].split('/')[0]
-    label_job_config_file = yaml.load(s3.get_object(Bucket = data_bucket, Key = group_name + '/configs/config.yaml')["Body"].read())
-    target_bucket = label_job_config_file["finaldatabucket"]
-    job_name = label_job_config_file["jobname"]
-    model_config_file = yaml.load((s3.get_object(Bucket = target_bucket, Key = job_name + '/data/config.yaml')["Body"].read()))
-    output_path = model_config_file["process_dir"]
-    video_name = model_config_file["video_name"]
-    bucket_contents = s3.list_objects(Bucket = data_bucket, Prefix = group_name + '/inputs/' + video_name + '/')
+    seqlabel_path = event["Records"][0]["s3"]["object"]['key']
+    path_split_indices = []
+    start = 0
+    while seqlabel_path.find('/', start) != -1:
+        idx = seqlabel_path.find('/', start)
+        path_split_indices.append(idx)
+        start = idx + 1
+    neurocaas_job_output_directory = seqlabel_path[:path_split_indices[3] + 1]
+    label_job_output_directory = seqlabel_path[:path_split_indices[4] + 1]
+    path_from_label_job_direct_to_seqlabel = seqlabel_path[path_split_indices[4] + 1:]
+    group_name = seqlabel_path.split('/')[0]
+    neurocaas_job_name = seqlabel_path.split('/')[2]
+    label_job_name = seqlabel_path.split('/')[4]
+    neurocaas_job_config_file = yaml.load(s3.get_object(Bucket = data_bucket, Key = group_name + '/configs/' + label_job_name + '/config.yaml')["Body"].read()) #assumes config.yaml, talk to taiga about this, maybe just assume finaldatabucket stays constant and read config.yaml file there
+    #target_bucket = neurocaas_job_config_file["finaldatabucket"]
+    labeling_job_info = neurocaas_job_config_file["jobs_info"][label_job_name]
+    dataset_name = labeling_job_info["datasetname"]
+    labeled_datasetname = labeling_job_info["labeled_datasetname"]
+    bucket_contents = s3.list_objects(Bucket = data_bucket, Prefix = group_name + '/inputs/' + label_job_name + '/' + dataset_name + '/')
     objects = bucket_contents['Contents']
     for bucket_object in objects:
-        s3.copy_object(Bucket = target_bucket, CopySource = {"Bucket" : data_bucket, "Key": bucket_object['Key']}, Key = job_name + "/data/labeled-data/" + video_name + "/" + bucket_object['Key'].split('/')[-1]) #copies with same name
-    seqlabel = json.loads(s3.get_object(Bucket = data_bucket, Key = group_name + '/' + output_path + '/' + job_name + '/annotations/consolidated-annotation/output/0/SeqLabel.json')["Body"].read())
-    parts = label_job_config_file['bodyparts'] #['Hand', 'Finger1', 'Tongue', 'Joystick1', 'Joystick2']
+        s3.copy_object(Bucket = data_bucket, CopySource = {"Bucket" : data_bucket, "Key": bucket_object['Key']}, Key = neurocaas_job_output_directory + "labeled_data/" + dataset_name + "/" + bucket_object['Key'].split('/')[-1])
+    
+    final_dataset_dict = collections.defaultdict(list)
+    for job_name, job_info in neurocaas_job_config_file["jobs_info"].items():
+        final_dataset_dict[job_info["labeled_datasetname"]].append(job_name)
+    
+    seqlabel_dict = {}
+    all_frames = []
+    for job_name in final_dataset_dict[labeling_job_info["labeled_datasetname"]]:
+        try:
+            seqlabel = json.loads(s3.get_object(Bucket = data_bucket, Key = neurocaas_job_output_directory + job_name + "/" + path_from_label_job_direct_to_seqlabel)["Body"].read())
+            seqlabel_dict[neurocaas_job_config_file["jobs_info"][job_name]["datasetname"]] = seqlabel
+        except:
+            #s3 resource not found
+            return #returning because not all labeling jobs are completed for this dataset yet
+
+    parts = labeling_job_info['bodyparts']
     coords = ['x', 'y']
+    if "bad_frame" in parts:
+        parts.remove("bad_frame")
     header = pd.MultiIndex.from_product([parts, coords])
     df = pd.DataFrame()
-    frames = seqlabel["tracking-annotations"]
-    num_frames = len(frames)
-    for frame in frames:
-        df_row = pd.DataFrame(columns = header, index = [frame["frame"]])
-        cols = [("Mackenzie", ) + col for col in df_row.columns]
-        df_row.columns = pd.MultiIndex.from_tuples(cols, names =['scorer','bodyparts','coords'])
-        for annotation in frame["keypoints"]: #assuming no duplicate annotations
-            label = annotation["object-name"].split(':')[0]
-            df_row["Mackenzie", label, 'x'] = annotation["x"]
-            df_row["Mackenzie", label, 'y'] = annotation["y"]
-        df = df.append(df_row, ignore_index = False)
+    print(len(seqlabel_dict))
+    for dataset_name, seqlabel in seqlabel_dict.items():
+        frames = seqlabel["tracking-annotations"]
+        for frame in frames:
+            df_row = pd.DataFrame(columns = header, index = [dataset_name + "/" + frame["frame"]])
+            cols = [("Mackenzie", ) + col for col in df_row.columns]
+            df_row.columns = pd.MultiIndex.from_tuples(cols, names =['scorer','bodyparts','coords'])
+            bad_frame = False
+            for annotation in frame["keypoints"]: #assuming no duplicate annotations
+                label = annotation["object-name"].split(':')[0]
+                if label == "bad_frame":
+                    bad_frame = True
+                    break
+                df_row["Mackenzie", label, 'x'] = annotation["x"]
+                df_row["Mackenzie", label, 'y'] = annotation["y"]
+            if bad_frame:
+              continue
+            df = df.append(df_row, ignore_index = False)
     #print(df)
-    response = s3.put_object(Body = df.to_csv(), Bucket = target_bucket, Key = job_name + "/data/labeled-data/" + video_name + "/CollectedData.csv")
+
+    s3.put_object(Body = df.to_csv(), Bucket = data_bucket, Key = neurocaas_job_output_directory + "labeled_data/" + labeled_datasetname + ".csv")
+    #hdf_store = pd.HDFStore()
+    #s3.put_object(Body = df.to_hdf(path=hdf_store), Bucket = data_bucket, Key = neurocaas_job_output_directory + "labeled_data/" +labeled_datasetname + ".h5")
+    # s3.put_object(Body = df.to_csv(), Bucket = target_bucket, Key = job_name + "/data/labeled-data/" + video_name + "/CollectedData.csv")
+    # s3.put_object(Body = df.to_hdf(key='data', mode='w'), Bucket = target_bucket, Key = job_name + "/data/labeled-data/" + video_name + "/CollectedData.h5")
     return
 
 test_event = {
@@ -68,7 +109,7 @@ test_event = {
           "arn": "arn:aws:s3:::label-job-create-web"
         },
         "object": {
-          "key": "testgroup/results/job__timestamp/process_results/end.txt", #changed to testgroup from examplegroup
+          "key":"testgroup/results/job_1001/process_results/videojobnew2/annotations/consolidated-annotation/output/0/SeqLabel.json",  #"testgroup/results/job__1202/process_results/videojobnew20211017054406945421/annotations/consolidated-annotation/output/0/SeqLabel.json",
           "size": 1024,
           "eTag": "0123456789abcdef0123456789abcdef",
           "sequencer": "0A1B2C3D4E5F678901"
@@ -79,5 +120,5 @@ test_event = {
 }
 #event = {"label_job_input": "reachingvideo1/", "video_bucket": "sagemakerneurocaastest", "video_path": "username/inputs/reachingvideo1.avi",  "data_bucket" : "nickneurocaastest2", "label_bucket" : "nickneurocaastest2", "label_output_key": "output/GeneralTestAWS14/annotations/consolidated-annotation/output/0/SeqLabelMod.json", "dgp_input": "dgp-input-test"}
 context = {}
-#lambda_handler(test_event, context)
+lambda_handler(test_event, context)
 
