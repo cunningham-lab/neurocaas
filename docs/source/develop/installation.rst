@@ -46,7 +46,7 @@ Now that you've got the contrib repo set up, let's move on to the source repo. U
 
     % conda activate neurocaas
     % cd path/to/your/neurocaas 
-    % pip install ./ncap_iac # install neurocaas python package 
+    % pip install . # install neurocaas python package 
 
 Now, at the end of this process, you should have both the source and contrib repos on your local machine, with their python packages installed, like so: 
 

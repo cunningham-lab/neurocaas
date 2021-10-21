@@ -20,6 +20,8 @@ PIPESTR=$(jq ".PipelineName" "$PIPEDIR"/stack_config_template.json)
 
 PIPENAME=$(echo "$PIPESTR" | tr -d '"')
 
+REQUIREMENTS=$(jq ".Requirements" "$PIPEDIR"/stack_config_template.json)
+
 ## Check this is alphanumeric: 
 python "$scriptdir"/checkpath.py "$PIPENAME"
 
@@ -35,4 +37,4 @@ python dev_builder.py $PIPEDIR/stack_config_template.json "$stagestr"
 cd $PIPEDIR
 echo $ncaprootdir "rootdir"
 
-sam build -t compiled_template.json -m "$ncaprootdir"/protocols/requirements.txt --use-container --debug 
+sam build -t compiled_template.json -m "$ncaprootdir"/protocols/requirements_label.txt --use-container --debug 
