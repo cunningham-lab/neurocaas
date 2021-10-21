@@ -7,6 +7,7 @@
         "Handler": "submit_start.handler_develop",
         "PostCodeUri": "../../protocols",
         "PostHandler": "data_format_lambda.lambda_handler",
+        "PostTrigger":"SeqLabel.json",
         "Requirements": "requirements_label.txt",
         "Launch": true,
         "LambdaConfig": {

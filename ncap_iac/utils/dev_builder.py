@@ -421,7 +421,11 @@ class DevTemplate(NeuroCaaSTemplate):
         self.figurelamb = self.add_figure_lambda()
         self.add_submit_lambda()
         if self.config["Lambda"].get("PostCodeUri",False) and self.config["Lambda"].get("PostHandler",False):
-            self.add_search_lambda()
+            post_trigger_file = self.config["Lambda"].get("PostTrigger",False)
+            if post_trigger_file:
+                self.add_search_lambda(post_trigger_file)
+            else:
+                self.add_search_lambda()
 
     def initialize_template(self):
         """
@@ -650,7 +654,11 @@ class WebDevTemplate(NeuroCaaSTemplate):
         self.figurelamb = self.add_figure_lambda()
         self.add_submit_lambda()
         if self.config["Lambda"].get("PostCodeUri",False) and self.config["Lambda"].get("PostHandler",False):
-            self.add_search_lambda()
+            post_trigger_file = self.config["Lambda"].get("PostTrigger",False)
+            if post_trigger_file:
+                self.add_search_lambda(post_trigger_file)
+            else:
+                self.add_search_lambda()
 
     def generate_usergroup(self,affiliatedict):
         identifier = "{}".format(self.config["PipelineName"].replace("-",""))
@@ -894,7 +902,11 @@ class WebSubstackTemplate(NeuroCaaSTemplate):
         self.figurelamb = self.add_figure_lambda()
         self.add_submit_lambda()
         if self.config["Lambda"].get("PostCodeUri",False) and self.config["Lambda"].get("PostHandler",False):
-            self.add_search_lambda()
+            post_trigger_file = self.config["Lambda"].get("PostTrigger",False)
+            if post_trigger_file:
+                self.add_search_lambda(post_trigger_file)
+            else:
+                self.add_search_lambda()
 
     def initialize_template(self):
         """
