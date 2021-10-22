@@ -40,4 +40,4 @@ def test_WebSubstackTemplate(postprocess,field,file):
         config = "stack_config_template.json"
     template = dev_builder.WebSubstackTemplate(os.path.join(test_mats,config))
     tdict = template.template.to_dict()
-    assert tdict["Resources"]["SearchLambda"]["Properties"]["Events"]["BucketEventnewgroupAnalysisEnd"]["Properties"]["Filter"]["S3Key"]["Rules"][1]["Value"] == file
+    assert tdict["Resources"]["SearchLambda"]["Properties"]["Events"]["BucketEventAnalysisEnd"]["Properties"]["Filter"]["S3Key"]["Rules"][0]["Value"] == file
