@@ -315,7 +315,7 @@ All NeuroCAAS analyses should be triggered by running a central bash script call
 This script ensures that all jobs run on NeuroCAAS are managed and logged correctly. 
 This script takes 5 arguments, as follows:   
 
-`% bash run_main.sh $bucketname $path_to_input $path_to_result_dir $path_to_config_file $path_to_analysis_script`
+`% bash run_main_cli.sh $bucketname $path_to_input $path_to_result_dir $path_to_config_file $path_to_analysis_script`
 
 The first four parameters refer to locations in Amazon S3 where the inputs and results of this analysis will be stored. 
 These parameters correspond to the directory structure given in the "end goals" section as follows: 
@@ -612,7 +612,7 @@ after terminating your current one to prevent losing track of
 development.
 
 Deploying your blueprint
-========================
+------------------------
 
 Once you have a working image, it is useful to deploy it as a NeuroCAAS
 analysis, to perform further testing using the access configuration a
@@ -625,8 +625,7 @@ This will run all the steps necessary to build the cloud resources
 corresponding to your blueprint, and you can test it further from the
 python API after adding some test users.
 
-Testing a machine image
------------------------
+#### Testing a machine image
 
 IMPORTANT NOTE: this step can only be done AFTER initially deploying a
 blueprint (Step 6). Our Python development API has the capacity to
@@ -667,8 +666,7 @@ is -1, the most recent). The results themselves will be returned to AWS
 S3 upon job completion.
 
 
-Adding users
-------------
+#### Adding users
 
 Once your blueprint has successfully been deployed, you can authorize
 some users to access it. Additionally, if it is ready you can publish your analysis to the neurocaas website, and have it accessible by default to interested users. 

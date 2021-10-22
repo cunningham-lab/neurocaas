@@ -1,29 +1,10 @@
 {
-<<<<<<< HEAD
-    "PipelineName": "label-job-create-web",
-=======
-    "PipelineName": "cianalysispermastack",
->>>>>>> 9e631943ac68770a40b00088d9520fdbaefe4cd9
+    "PipelineName": "test-tags-budget",
     "REGION": "us-east-1",
     "STAGE": "websubstack",
     "Lambda": {
         "CodeUri": "../../protocols",
         "Handler": "submit_start.handler_develop",
-<<<<<<< HEAD
-        "PostCodeUri": "../../protocols",
-        "PostHandler": "data_format_lambda.lambda_handler",
-        "Requirements": "requirements_label.txt",
-        "Launch": true,
-        "LambdaConfig": {
-            "AMI": "ami-0c70eea33ea5c9deb",
-            "INSTANCE_TYPE": "m5.large",
-            "REGION": "us-east-1",
-            "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
-            "IAM_ROLE": "SagemakerRole",
-            "KEY_NAME": "labeljobcreate",
-            "WORKING_DIRECTORY": "~/bin",
-            "COMMAND": "ls; cd /home/ubuntu/; source .bashrc; neurocaas_contrib/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\" AWSLabeljobCreation/run_label_job_creation.sh",
-=======
         "Launch": true,
         "LambdaConfig": {
             "AMI": "ami-061f98a1f90c0d6fd",
@@ -34,11 +15,10 @@
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
             "WORKING_DIRECTORY": "~/bin",
             "COMMAND": "cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
->>>>>>> 9e631943ac68770a40b00088d9520fdbaefe4cd9
             "SHUTDOWN_BEHAVIOR": "terminate",
             "CONFIG": "config.yaml",
             "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
-            "EXECUTION_TIMEOUT": 900,
+            "EXECUTION_TIMEOUT": 180,
             "SSM_TIMEOUT": 172000,
             "LAUNCH": true,
             "LOGFILE": "lambda_log.txt",
@@ -50,16 +30,10 @@
     "UXData": {
         "Affiliates": [
             {
-<<<<<<< HEAD
-                "AffiliateName": "newgroup",
-                "UserNames": [
-                    "nrg2148columbia"
-=======
                 "AffiliateName": "traviscipermagroup",
                 "UserNames": [
                     "cipermauser1",
                     "cipermauser2"
->>>>>>> 9e631943ac68770a40b00088d9520fdbaefe4cd9
                 ],
                 "UserInput": true,
                 "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"

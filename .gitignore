@@ -137,15 +137,36 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Permissions files: 
+ncap_iac/utils/policies
+ncap_iac/user_profiles/*
+!ncap_iac/user_profiles/*/user_config_template.json
 
 # Build files: 
-ncap_iac/ncap_blueprints/*/.aws-sam/build
-ncap_iac/user_profiles/*/.aws-sam/build
+ncap_iac/ncap_blueprints/*/.aws-sam/build/*
+ncap_iac/user_profiles/*/.aws-sam/build/*
+ncap_iac/ncap_blueprints/*/*
+!ncap_iac/ncap_blueprints/*/stack_config_template.json
+!ncap_iac/ncap_blueprints/*/test_resources
+!ncap_iac/ncap_blueprints/iac_utils
+!ncap_iac/ncap_blueprints/utils_stack
+!ncap_iac/ncap_blueprints/__init__.py
 ncap_iac/ncap_blueprints/*/compiled_template.json
 ncap_iac/ncap_blueprints/*/compiled_packaged.yaml
 ncap_iac/user_profiles/*/compiled_users.json
+ncap_iac/user_profiles/*/.aws-sam/
 ncap_iac/user_profiles/*/compiled_users.yaml
+!docs/source/
+!docs/devguide.md
+!docs/Makefile
+!docs/make.bat
+!docs/images/
+!docs/NeuroCAAS_Developer_Guide.pdf
 cost_investigation/*
-paper/README.txt
-paper/README.pdf
-paper/NeuroCAAS_manuscript_5_19_final.pdf
+paper/
+tests/protocol_tests/test_mats/
+tests/unit_tests/fixture_dir/
+website_resources/
+
+# external media files
+media/*
