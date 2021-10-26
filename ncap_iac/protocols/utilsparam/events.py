@@ -33,6 +33,13 @@ def put_instance_rule(instance_id):
 
 ## Create event rule for multiple instances. index by the job id instead. 
 def put_instances_rule(instances,jobid):
+    """Put a monitoring rule on multiple instances. 
+
+    :param instances: a list of EC2 instance objects with parameter instance.instance_id 
+    :param jobid: an id for the job given in terms of its analysis stack name, submission name, and timestamp.
+    :returns: (response of events.put_rule,name)
+
+    """
     jobname = jobid.replace(":","_") ## TODO: Kind of messy. 
     event_pattern = {
             "source": ["aws.ec2"],
@@ -53,6 +60,11 @@ def put_instances_rule(instances,jobid):
 
 ## Create target: 
 def put_instance_target(rulename):
+    """Takes an existing rule, and sets as its targets the arn and id of the appropriate lambda function. This lambda function info is populated by cloudformation when it creates the lambdas, and provided as environment variables to the submit lambda as it runs. 
+
+    :param rulename: name of the rule that we want to collect outputs for. 
+
+    """
     response = events.put_targets(
             Rule = rulename,
             Targets = [

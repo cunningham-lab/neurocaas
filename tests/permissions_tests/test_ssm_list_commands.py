@@ -89,6 +89,9 @@ def get_commanded_instance_done():
 
 @pytest.fixture
 def get_commanded_instance_timeout():
+    """Tests associated with this timeout don't terminate. 
+
+    """
     instances = ec2_resource.create_instances(
         ImageId="ami-0bd85124dbe51618d",
         InstanceType="t2.micro",

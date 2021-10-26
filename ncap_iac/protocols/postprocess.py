@@ -174,7 +174,7 @@ class PostProcess_EnsembleDGPPredict(PostProcess):
         configdict = self.load_config()
         ensemblesize = max(configdict["ensemble_size"],9)
         ## video list: assumed identical bc we copied all from the same.  
-        vidlist = utilsparams3.ls_name(self.bucket,os.path.join(self.jobdir,"process_results","ensemble-model1-2030-01-01","videos/"))
+        vidlist = utilsparams3.ls_name(self.bucket,os.path.join(self.jobdir,"process_results","ensemble-model1-2030-01-01","videos/")) ## this is assumed to be a fixed output of dgp models. 
         return vidlist
 
 def postprocess_prediction_run(bucket_name,key):

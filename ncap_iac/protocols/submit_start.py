@@ -6,6 +6,8 @@ from botocore.exceptions import ClientError
 import re
 from datetime import datetime
 
+defaultduration = 60 ## this should be picked up and set as a global parameter later. 
+
 try:
     ## Works when running in lambda:
     from utilsparam import s3 as utilsparams3
@@ -41,12 +43,25 @@ def respond(err, res=None):
 class Submission_dev():
     """
     Specific lambda for purposes of development.  
+    
+    :param bucket_name: name of the S3 bucket that this is a submission for (corresponds to an analysis). 
+    :param key: key of submit file within this bucket. 
+    :param time: some unique identifier that distinguishes this job from all others. 
+    :ivar bucket_name: initial_value: bucket_name
+    :ivar path: name of the group responsible for this job.  
+    :ivar time: initial value: time  ## TODO Remove this field. 
+    :ivar jobname: "job_{}_{}_{}".format(submit_name,bucket_name,self.timestamp)
+    :ivar jobpath: os.path.join(path,"outputs",jobname)
+    :ivar logger: s3.Logger object
+    :ivar instance_type: either given in submit file, or default option of analysis. 
+    :ivar data_name: submit file's dataname field. 
+    :ivar config_name: submit file's configname field. 
     """
     def __init__(self,bucket_name,key,time):
         ## Initialize as before:
         # Get Upload Location Information
         self.bucket_name = bucket_name
-        ## Get directory above the input directory. 
+        ## Get directory above the input directory: self.path is the groupname. 
         try:
             self.path = re.findall('.+?(?=/'+os.environ["SUBMITDIR"]+')',key)[0] 
         except IndexError:    
@@ -186,6 +201,17 @@ class Submission_dev():
             self.filenames = self.data_name
         assert len(self.filenames) > 0, "[JOB TERMINATE REASON] The folder indicated is empty, or does not contain analyzable data."
 
+    def prices_active_instances_ami(self,ami):
+        """Calculate the price of each instance directly. 
+
+        :param ami: (str) the id giving the number of instances with that ami. 
+        :returns: float giving number of instances*minutes*price that they will be active.  
+        """
+        instances = utilsparamec2.get_active_instances_ami(ami)
+        prices = [(int(tag["Value"])/60)*utilsparampricing.get_price(utilsparampricing.get_region_name(utilsparampricing.region_id),instance.instance_type,os = "Linux") for instance in instances for tag in instance.tags if tag["Key"] == "Timeout"]
+
+        return sum(prices)
+
     def get_costmonitoring(self):
         """
         Gets the cost incurred by a given group so far by looking at the logs bucket of the appropriate s3 folder.  
@@ -217,9 +243,46 @@ class Submission_dev():
                 instcost = price*duration/3600.
             except TypeError:
                 ## In rare cases it seems one or the other of these things don't actually have entries. This is a problem. for now, charge for the hour: 
+                message = "        [Internal (get_costmonitoring)] Duration of past jobs not found. Pricing for an hour"
+                self.logger.append(message)
+                self.logger.printlatest()
                 instcost = price
             cost+= instcost
         
+        ## Now compare against the cost of the job you're currently running: 
+        ## need duration from config (self.parse_config), self.instance_type, and self.nb_instances
+        ## By assuming they're all standard instances we upper bound the cost. 
+        try:
+            price = utilsparampricing.get_price(utilsparampricing.get_region_name(utilsparampricing.region_id),self.instance_type,os = "Linux")
+            nb_instances = len(self.filenames)
+            if self.jobduration is None:
+                duration = defaultduration/60 ## in hours. 
+            else:    
+                duration = self.jobduration/60
+            jobpricebound = duration*price*nb_instances    
+            cost += jobpricebound
+        except Exception as e:     
+            print(e)
+            raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to estimate cost of current job.")
+
+        ## Now compare agains the expected cost of instances with the current ami: 
+        try:
+            ami = os.environ["AMI"]
+            total_activeprice = self.prices_active_instances_ami(ami)
+
+        except Exception as e:    
+            print(e)
+            try:
+                activeprice = utilsparampricing.get_price(utilsparampricing.get_region_name(utilsparampricing.region_id),self.instance_type,os = "Linux")
+                number = len([i for i in utilsparamec2.get_active_instances_ami(ami)])
+                activeduration = defaultduration*number/60 ## default to the default duration instead if not given. 
+                total_activeprice = activeprice*activeduration
+            except Exception as e:    
+                print(e)
+                raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to estimate cost of active jobs.")
+
+        cost += total_activeprice   
+
         ## Now compare with budget:
         try:
             budget = float(utilsparamssm.get_budget_parameter(self.path,self.bucket_name))
@@ -234,16 +297,15 @@ class Submission_dev():
                 raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to get budget.")
         except Exception:    
             raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to get budget.")
-            
 
         if cost < budget:
-            message = "        [Internal (get_costmonitoring)] Incurred cost so far: ${}. Remaining budget: ${}".format(cost,budget-cost)
+            message = "        [Internal (get_costmonitoring)] Projected total costs: ${}. Remaining budget: ${}".format(cost,budget-cost)
             self.logger.append(message)
             self.logger.printlatest()
             self.logger.write()
             validjob = True
         elif cost >= budget:
-            message = "        [Internal (get_costmonitoring)] Incurred cost so far: ${}. Over budget (${}), cancelling job. Contact administrator.".format(cost,budget)
+            message = "        [Internal (get_costmonitoring)] Projected total costs: ${}. Over budget (${}), cancelling job. Contact administrator.".format(cost,budget)
             self.logger.append(message)
             self.logger.printlatest()
             self.logger.write()
@@ -300,14 +362,25 @@ class Submission_dev():
             self.logger.write()
             raise ValueError("[JOB TERMINATE REASON] Instance requests greater than pipeline bandwidth. Too many simultaneously deployed analyses.")
         
-        instances = utilsparamec2.launch_new_instances_with_tags(
+        instances = utilsparamec2.launch_new_instances_with_tags_additional(
         instance_type=self.instance_type, 
         ami=os.environ['AMI'],
         logger=  self.logger,
         number = nb_instances,
         add_size = self.full_volumesize,
-        duration = self.jobduration
+        duration = self.jobduration,
+        group = self.path,
+        analysis = self.bucket_name,
+        job = self.jobname
         )
+        #instances = utilsparamec2.launch_new_instances_with_tags(
+        #instance_type=self.instance_type, 
+        #ami=os.environ['AMI'],
+        #logger=  self.logger,
+        #number = nb_instances,
+        #add_size = self.full_volumesize,
+        #duration = self.jobduration
+        #)
 
         ## Even though we have a check in place, also check how many were launched:
         try:
@@ -547,6 +620,7 @@ def process_upload_dev(bucket_name, key,time):
     step = "STEP 2/4 (Validation)"
     try:
         submission.check_existence()
+        submission.parse_config()
         valid = submission.get_costmonitoring()
         assert valid
         submission.logger.append(donemessage.format(s = step))
@@ -575,7 +649,6 @@ def process_upload_dev(bucket_name, key,time):
     # Step 3: Setup: Getting the volumesize, hardware specs of immutable analysis environments. 
     step = "STEP 3/4 (Environment Setup)"
     try:
-        submission.parse_config()
         submission.compute_volumesize()
         submission.logger.append(donemessage.format(s = step))
         submission.logger.printlatest()
@@ -712,6 +785,7 @@ def process_upload_ensemble(bucket_name, key,time):
     step = "STEP 2/4 (Validation)"
     try:
         submission.check_existence()
+        submission.parse_config()
         valid = submission.get_costmonitoring()
         assert valid
         submission.logger.append(donemessage.format(s = step))
@@ -740,7 +814,6 @@ def process_upload_ensemble(bucket_name, key,time):
     # Step 3: Setup: Getting the volumesize, hardware specs of immutable analysis environments. 
     step = "STEP 3/4 (Environment Setup)"
     try:
-        submission.parse_config()
         submission.compute_volumesize()
         submission.logger.append(donemessage.format(s = step))
         submission.logger.printlatest()

@@ -2,6 +2,21 @@
     "Version": "2012-10-17",
     "Statement": [
         {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:GetParameter",
+                "ssm:GetParameters"
+            ],
+            "Resource": "arn:aws:ssm:us-east-1:739988523141:parameter/testkeystack/neurocaas/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:DescribeParameters"
+            ],
+            "Resource": "*"
+        },
+        {
             "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": [
@@ -18,6 +33,39 @@
                 },
                 "ForAnyValue:StringEquals": {
                     "aws:TagKeys": "Timeout"
+                }
+            }
+        },
+        {
+            "Sid": "statemanage",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:StartInstances",
+                "ec2:StopInstances",
+                "ec2:RebootInstances",
+                "ec2:TerminateInstances"
+            ],
+            "Resource": [
+                "arn:aws:ec2:*:*:instance/*",
+                "arn:aws:ec2:*:*:volume/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/PriceTracking": "On"
+                }
+            }
+        },
+        {
+            "Sid": "CreateTagsStartup",
+            "Effect": "Allow",
+            "Action": "ec2:CreateTags",
+            "Resource": [
+                "arn:aws:ec2:*:*:instance/*",
+                "arn:aws:ec2:*:*:volume/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "ec2:CreateAction": "StartInstances"
                 }
             }
         },
@@ -46,7 +94,11 @@
             "Effect": "Allow",
             "Action": [
                 "iam:PassRole",
-                "ec2:RunInstances"
+                "ec2:RunInstances",
+                "ec2:StartInstances",
+                "ec2:StopInstances",
+                "ec2:RebootInstances",
+                "ec2:TerminateInstances"
             ],
             "Resource": [
                 "arn:aws:iam::739988523141:role/testutilsstack-SSMRole-1GG0BKY7GL634",
@@ -57,6 +109,16 @@
                 "arn:aws:ec2:*:*:network-interface/*",
                 "arn:aws:ec2:*::image/*"
             ]
+        },
+        {
+          "Sid": "CreateAMI",
+          "Effect": "Allow",
+          "Action": [
+            "ec2:CreateImage"
+          ],
+          "Resource": [
+            "*"
+          ]
         }
     ]
 }

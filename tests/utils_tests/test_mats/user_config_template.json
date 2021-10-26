@@ -1,0 +1,29 @@
+{
+    "STAGE":"webusercentric",
+    "UXData":{
+    "Affiliates":[
+        {
+            "AffiliateName":"localstack1",
+            "UserNames":["lsuser1","lsuser2"],
+            "ContactEmail":[],
+            "KeySerialNumber":2,
+            "Pipelines":["caiman-ncap-web","dlc-ncap-web"],
+            "PipelineDir":"Directory where pipeline should be built"
+        }
+    ]
+    },
+    "Lambda":{
+        "LambdaConfig":{
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS":"Type of instance to launch.",
+            "IAM_ROLE":"iam role with ssm and s3 access",
+            "EXECUTION_TIMEOUT":"172800",
+            "LOGDIR":"logs",
+            "OUTDIR":"results",
+            "INDIR":"inputs",
+            "LOGFILE":"lambda_log.txt",
+            "MONITOR":true
+        }
+    }
+}
+

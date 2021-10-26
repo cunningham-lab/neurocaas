@@ -1,38 +1,41 @@
-name: pr-deployment
+name: pr-test
 
 on:
   issue_comment:
     types: [created]
 
 jobs:
-  deploy-check:
+  test-check:
     runs-on: ubuntu-latest
     steps:
       - name: vet commenter 
         id: vet
         if: github.event.comment.user.login != 'cellistigs'
         run: exit 1
-      - name: acknowledge deployment request to commenter
+      - name: acknowledge test request to commenter
         id: check
         uses: khan/pull-request-comment-trigger@master
         with:
-          trigger: "#deploy:"
+          trigger: "#test:"
           prefix_only: true
           reaction: rocket
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      - name: check outputs      
+        run: echo ${{ steps.check.outputs.triggered }}
+
     outputs:
       triggered: ${{ steps.check.outputs.triggered }}
       comment_body: ${{ github.event.comment.body }}
 
-  deploy:
+  test:
     runs-on: ubuntu-latest
-    needs: deploy-check
-    if: needs.deploy-check.outputs.triggered == 'true'
+    needs: test-check
+    if: needs.test-check.outputs.triggered == 'true'
     steps:
       - name: get pull request ref
         id: get_pull_request_ref
-        uses: octokit/request-action@v2.x
+        uses: octokit/request-action@v2.1.0
         with:
           route: GET /repos/{owner}/{repo}/pulls/{issue_id}
           owner: cunningham-lab
@@ -42,9 +45,9 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: create deployment
-        id: create_deployment
-        uses: octokit/request-action@v2.x
+      - name: create test
+        id: create_test
+        uses: octokit/request-action@v2.1.0
         with:
           route: POST /repos/{owner}/{repo}/deployments
           owner: cunningham-lab
@@ -56,15 +59,15 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: set deployment status to in progress
-        id: start_deployment
-        uses: octokit/request-action@v2.x
+      - name: set test status to in progress
+        id: start_test
+        uses: octokit/request-action@v2.1.0
         with:
           route: POST /repos/{owner}/{repo}/deployments/{deployment}/statuses
           owner: cunningham-lab
           repo: neurocaas
           repository: ${{ github.repository }}
-          deployment: ${{ fromJson(steps.create_deployment.outputs.data).id }}
+          deployment: ${{ fromJson(steps.create_test.outputs.data).id }}
           environment: dev
           environment_url: https://example.com
           log_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -77,14 +80,15 @@ jobs:
         uses: jungwinter/split@v1
         id: split
         with:
-          msg: ${{ needs.deploy-check.outputs.comment_body }}
+          msg: "#test:test-tags-bucket" #${{ needs.test-check.outputs.comment_body }}
           seperator: ':'
           
-      - name: pull the repo.  
+      - name: Use the master repo to test.   
         uses: actions/checkout@v2
         with:                    
            persist-credentials: false
-           ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.ref }}
+           ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).base.sha }}
+
 
       - name: setup python.
         uses: actions/setup-python@v2
@@ -126,22 +130,22 @@ jobs:
           pip install ./ 
           sudo apt-get install jq    
           
-      - name: Deploy stack
+      - name: Test stack
         run: |
           cd ncap_iac/ncap_blueprints
           source "$HOME/miniconda/etc/profile.d/conda.sh"
           conda activate neurocaas
-          bash iac_utils/fulldeploy.sh ${{ steps.split.outputs._1 }}     
+          bash iac_utils/fulltest.sh ${{ steps.split.outputs._1 }}     
           
-      - name: set deployment status to success
-        id: successful_deployment
+      - name: Set test status to success
+        id: successful_test
         uses: octokit/request-action@v2.x
         with:
           route: POST /repos/{owner}/{repo}/deployments/{deployment}/statuses 
           owner: cunningham-lab
           repo: neurocaas
           repository: ${{ github.repository }}
-          deployment: ${{ fromJson(steps.create_deployment.outputs.data).id }}
+          deployment: ${{ fromJson(steps.create_test.outputs.data).id }}
           environment: dev
           environment_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           log_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -150,8 +154,8 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: set deployment status to failure
-        id: failed_deployment
+      - name: set test status to failure
+        id: failed_test
         uses: octokit/request-action@v2.x
         if: failure()
         with:
@@ -159,7 +163,7 @@ jobs:
           owner: cunningham-lab
           repo: neurocaas
           repository: ${{ github.repository }}
-          deployment: ${{ fromJson(steps.create_deployment.outputs.data).id }}
+          deployment: ${{ fromJson(steps.create_test.outputs.data).id }}
           environment: dev
           environment_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           log_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
