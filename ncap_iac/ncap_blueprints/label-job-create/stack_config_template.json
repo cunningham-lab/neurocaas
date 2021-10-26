@@ -10,7 +10,7 @@
         "Requirements": "requirements_label.txt",
         "Launch": true,
         "LambdaConfig": {
-            "AMI": "ami-0ae809eaccd7ccd1f",
+            "AMI": "ami-08ab352242fa1396e",
             "INSTANCE_TYPE": "m5.4xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
