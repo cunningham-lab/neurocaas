@@ -1,0 +1,48 @@
+{
+    "PipelineName": "neurocaas-livestream",
+    "REGION": "us-east-1",
+    "STAGE": "websubstack",
+    "Lambda": {
+        "CodeUri": "../../protocols",
+        "Handler": "submit_start.handler_develop",
+        "Launch": true,
+        "LambdaConfig": {
+            "AMI": "ami-08420afa05e60fd37",
+            "INSTANCE_TYPE": "p3.2xlarge",
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS": "neurocaas_rtmp",
+            "IAM_ROLE": "SSMRole",
+            "KEY_NAME": "testkeystack-custom-dev-key-pair",
+            "WORKING_DIRECTORY": "/home/ubuntu",
+            "COMMAND": "ls; cd /home/ubuntu; neurocaas_contrib/run_main_cli.sh \"{}\" \"{}\" \"{}\" \"{}\" \"neurocaas_contrib/ncap_live/run_webrtc_cli.sh\"; . neurocaas_contrib/ncap_utils/workflow.sh; cleanup",
+            "SHUTDOWN_BEHAVIOR": "terminate",
+            "CONFIG": "config.yaml",
+            "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+            "EXECUTION_TIMEOUT": 900,
+            "SSM_TIMEOUT": 172000,
+            "LAUNCH": true,
+            "LOGFILE": "lambda_log.txt",
+            "DEPLOY_LIMIT": 300,
+            "MAXCOST": 600,
+            "MONITOR": true,
+            "LOGDIR": "logs",
+            "OUTDIR": "results",
+            "INDIR": "inputs"
+        }
+    },
+    "UXData": {
+        "Affiliates": [
+            {
+                "AffiliateName": "traviscipermagroup",
+                "UserNames": [
+                    "cipermauser1",
+		            "cipermauser2"
+                ],
+                "PipelinePath": "",
+                "PipelineDir": "trackingfolder",
+                "UserInput": true,
+                "ContactEmail": "The email we should notify regarding processing status."
+            }
+        ]
+    }
+}
