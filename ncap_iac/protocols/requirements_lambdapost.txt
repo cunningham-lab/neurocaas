@@ -4,3 +4,4 @@ boto3==1.9.199
 docker==4.2.1
 numpy==1.16.4
 pandas
+tables
