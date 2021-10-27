@@ -32,6 +32,7 @@ def lambda_handler(event, context):
     labeled_datasetname = labeling_job_info["labeled_datasetname"]
     bucket_contents = s3.list_objects(Bucket = data_bucket, Prefix = group_name + '/inputs/' + label_job_name + '/' + dataset_name + '/')
     objects = bucket_contents['Contents']
+    print(len(objects))
     for bucket_object in objects:
         s3.copy_object(Bucket = data_bucket, CopySource = {"Bucket" : data_bucket, "Key": bucket_object['Key']}, Key = neurocaas_job_output_directory + "labeled_data/" + dataset_name + "/" + bucket_object['Key'].split('/')[-1])
     
@@ -41,15 +42,18 @@ def lambda_handler(event, context):
     
     seqlabel_dict = {}
     all_frames = []
+    print(final_dataset_dict[labeling_job_info["labeled_datasetname"]])
     for job_name in final_dataset_dict[labeling_job_info["labeled_datasetname"]]:
         try:
             seqlabel = json.loads(s3.get_object(Bucket = data_bucket, Key = neurocaas_job_output_directory + job_name + "/" + path_from_label_job_direct_to_seqlabel)["Body"].read())
             seqlabel_dict[neurocaas_job_config_file["jobs_info"][job_name]["datasetname"]] = seqlabel
         except:
+            print("Not all labeling jobs completed for this labeled dataset yet", flush = True)
             #s3 resource not found
             return #returning because not all labeling jobs are completed for this dataset yet
-
+    print("Finished copying data to labeled data folder", flush = True)
     #parts = labeling_job_info['bodyparts']
+    print(seqlabel_dict.keys())
     coords = ['x', 'y']
     if "bad_frame" in parts:
         parts.remove("bad_frame")
@@ -75,8 +79,10 @@ def lambda_handler(event, context):
             df = df.append(df_row, ignore_index = False)
 
     s3.put_object(Body = df.to_csv(), Bucket = data_bucket, Key = neurocaas_job_output_directory + "labeled_data/" + labeled_datasetname + ".csv")
+    print("uploaded csv!", flush=True)
     df.to_hdf(path_or_buf=labeled_datasetname + ".h5", key='df', mode='w')
     s3.upload_file(labeled_datasetname + ".h5", data_bucket, neurocaas_job_output_directory + "labeled_data/" + labeled_datasetname + ".h5")
+    print("uploaded h5!", flush=True)
     os.remove(labeled_datasetname + ".h5")
     # s3.put_object(Body = df.to_csv(), Bucket = target_bucket, Key = job_name + "/data/labeled-data/" + video_name + "/CollectedData.csv")
     # s3.put_object(Body = df.to_hdf(key='data', mode='w'), Bucket = target_bucket, Key = job_name + "/data/labeled-data/" + video_name + "/CollectedData.h5")
@@ -111,7 +117,7 @@ test_event = {
           "arn": "arn:aws:s3:::label-job-create-web"
         },
         "object": {
-          "key":"testgroup/results/job_2001/process_results/nickjob720211026032128594428/annotations/consolidated-annotation/output/0/SeqLabel.json",  #"testgroup/results/job__1202/process_results/videojobnew20211017054406945421/annotations/consolidated-annotation/output/0/SeqLabel.json",
+          "key":"testgroup/results/job_2002/process_results/nickjob920211026212303415002/annotations/consolidated-annotation/output/0/SeqLabel.json",  #"testgroup/results/job__1202/process_results/videojobnew20211017054406945421/annotations/consolidated-annotation/output/0/SeqLabel.json",
           "size": 1024,
           "eTag": "0123456789abcdef0123456789abcdef",
           "sequencer": "0A1B2C3D4E5F678901"
