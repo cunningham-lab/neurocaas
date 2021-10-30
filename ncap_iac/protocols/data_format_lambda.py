@@ -25,8 +25,11 @@ def lambda_handler(event, context):
     neurocaas_job_name = seqlabel_path.split('/')[2]
     label_job_name = seqlabel_path.split('/')[4]
     neurocaas_job_config_file = yaml.load(s3.get_object(Bucket = data_bucket, Key = group_name + '/configs/' + label_job_name + '/config.yaml')["Body"].read()) #assumes config.yaml, talk to taiga about this, maybe just assume finaldatabucket stays constant and read config.yaml file there
-    #target_bucket = neurocaas_job_config_file["finaldatabucket"]
     parts = neurocaas_job_config_file["bodyparts"]
+    if "prevneurocaasjobID" in neurocaas_job_config_file.keys():
+      prevneurocaasjobnum = neurocaas_job_config_file["prevneurocaasjobID"]
+    else:
+      prevneurocaasjobnum = None
     labeling_job_info = neurocaas_job_config_file["jobs_info"][label_job_name]
     dataset_name = labeling_job_info["datasetname"]
     labeled_datasetname = labeling_job_info["labeled_datasetname"]
@@ -52,13 +55,23 @@ def lambda_handler(event, context):
             #s3 resource not found
             return #returning because not all labeling jobs are completed for this dataset yet
     print("Finished copying data to labeled data folder", flush = True)
-    #parts = labeling_job_info['bodyparts']
     print(seqlabel_dict.keys())
+    
     coords = ['x', 'y']
     if "bad_frame" in parts:
         parts.remove("bad_frame")
     header = pd.MultiIndex.from_product([parts, coords])
     df = pd.DataFrame()
+
+    if prevneurocaasjobnum != None:
+      try:
+        print(group_name + '/results/job__label-job-create-web_' + str(prevneurocaasjobnum) + "/process_results/labeled_data/" + labeled_datasetname + ".csv")
+        s3.download_file(data_bucket, group_name + '/results/job__label-job-create-web_' + str(prevneurocaasjobnum) + "/process_results/labeled_data/" + labeled_datasetname + ".csv", 'tmp/' + labeled_datasetname + ".csv")
+        existing_df = pd.read_csv(filepath_or_buffer = 'tmp/' + labeled_datasetname + ".csv", header = [0, 1, 2], index_col = 0)
+        os.remove('tmp/' + labeled_datasetname + ".csv")
+      except:
+        print("labeled dataset with this name does not already exist, creating from scratch")
+        existing_df = df
     print(len(seqlabel_dict))
     for dataset_name, seqlabel in seqlabel_dict.items():
         frames = seqlabel["tracking-annotations"]
@@ -66,26 +79,19 @@ def lambda_handler(event, context):
             df_row = pd.DataFrame(columns = header, index = [dataset_name + "/" + frame["frame"]])
             cols = [("Default_Name", ) + col for col in df_row.columns]
             df_row.columns = pd.MultiIndex.from_tuples(cols, names =['scorer','bodyparts','coords'])
-            bad_frame = False
             for annotation in frame["keypoints"]: #assuming no duplicate annotations
                 label = annotation["object-name"].split(':')[0]
-                if label == "bad_frame":
-                    bad_frame = True
-                    break
                 df_row["Default_Name", label, 'x'] = annotation["x"]
                 df_row["Default_Name", label, 'y'] = annotation["y"]
-            if bad_frame:
-              continue
             df = df.append(df_row, ignore_index = False)
-
+    if prevneurocaasjobnum != None:
+      df = pd.concat([existing_df, df])
     s3.put_object(Body = df.to_csv(), Bucket = data_bucket, Key = neurocaas_job_output_directory + "labeled_data/" + labeled_datasetname + ".csv")
     print("uploaded csv!", flush=True)
-    df.to_hdf(path_or_buf=labeled_datasetname + ".h5", key='df', mode='w')
-    s3.upload_file(labeled_datasetname + ".h5", data_bucket, neurocaas_job_output_directory + "labeled_data/" + labeled_datasetname + ".h5")
+    df.to_hdf(path_or_buf='tmp/' + labeled_datasetname + ".h5", key='df', mode='w')
+    s3.upload_file('tmp/' + labeled_datasetname + ".h5", data_bucket, neurocaas_job_output_directory + "labeled_data/" + labeled_datasetname + ".h5")
     print("uploaded h5!", flush=True)
-    os.remove(labeled_datasetname + ".h5")
-    # s3.put_object(Body = df.to_csv(), Bucket = target_bucket, Key = job_name + "/data/labeled-data/" + video_name + "/CollectedData.csv")
-    # s3.put_object(Body = df.to_hdf(key='data', mode='w'), Bucket = target_bucket, Key = job_name + "/data/labeled-data/" + video_name + "/CollectedData.h5")
+    os.remove('tmp/' + labeled_datasetname + ".h5")
     return
 
 test_event = {
@@ -117,7 +123,7 @@ test_event = {
           "arn": "arn:aws:s3:::label-job-create-web"
         },
         "object": {
-          "key":"testgroup/results/job_2002/process_results/nickjob920211026212303415002/annotations/consolidated-annotation/output/0/SeqLabel.json",  #"testgroup/results/job__1202/process_results/videojobnew20211017054406945421/annotations/consolidated-annotation/output/0/SeqLabel.json",
+          "key":"nrg2148columbiaedu1620315589/results/job_2003/process_results/costajob1b/annotations/consolidated-annotation/output/0/SeqLabel.json",  #"testgroup/results/job__1202/process_results/videojobnew20211017054406945421/annotations/consolidated-annotation/output/0/SeqLabel.json",
           "size": 1024,
           "eTag": "0123456789abcdef0123456789abcdef",
           "sequencer": "0A1B2C3D4E5F678901"
