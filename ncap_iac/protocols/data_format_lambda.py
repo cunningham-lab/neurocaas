@@ -12,6 +12,7 @@ def lambda_handler(event, context):
     #copies frame jpegs from labeling job input folder
     data_bucket = event["Records"][0]["s3"]["bucket"]["name"]
     seqlabel_path = event["Records"][0]["s3"]["object"]['key']
+    print(seqlabel_path)
     path_split_indices = []
     start = 0
     while seqlabel_path.find('/', start) != -1:
@@ -25,6 +26,7 @@ def lambda_handler(event, context):
     neurocaas_job_name = seqlabel_path.split('/')[2]
     label_job_name = seqlabel_path.split('/')[4]
     neurocaas_job_config_file = yaml.load(s3.get_object(Bucket = data_bucket, Key = group_name + '/configs/' + label_job_name + '/config.yaml')["Body"].read()) #assumes config.yaml, talk to taiga about this, maybe just assume finaldatabucket stays constant and read config.yaml file there
+    print(neurocaas_job_config_file)
     parts = neurocaas_job_config_file["bodyparts"]
     if "prevneurocaasjobID" in neurocaas_job_config_file.keys():
       prevneurocaasjobnum = neurocaas_job_config_file["prevneurocaasjobID"]
@@ -66,9 +68,9 @@ def lambda_handler(event, context):
     if prevneurocaasjobnum != None:
       try:
         print(group_name + '/results/job__label-job-create-web_' + str(prevneurocaasjobnum) + "/process_results/labeled_data/" + labeled_datasetname + ".csv")
-        s3.download_file(data_bucket, group_name + '/results/job__label-job-create-web_' + str(prevneurocaasjobnum) + "/process_results/labeled_data/" + labeled_datasetname + ".csv", 'tmp/' + labeled_datasetname + ".csv")
-        existing_df = pd.read_csv(filepath_or_buffer = 'tmp/' + labeled_datasetname + ".csv", header = [0, 1, 2], index_col = 0)
-        os.remove('tmp/' + labeled_datasetname + ".csv")
+        s3.download_file(data_bucket, group_name + '/results/job__label-job-create-web_' + str(prevneurocaasjobnum) + "/process_results/labeled_data/" + labeled_datasetname + ".csv", '/tmp/' + labeled_datasetname + ".csv")
+        existing_df = pd.read_csv(filepath_or_buffer = '/tmp/' + labeled_datasetname + ".csv", header = [0, 1, 2], index_col = 0)
+        os.remove('/tmp/' + labeled_datasetname + ".csv")
       except:
         print("labeled dataset with this name does not already exist, creating from scratch")
         existing_df = df
@@ -88,10 +90,10 @@ def lambda_handler(event, context):
       df = pd.concat([existing_df, df])
     s3.put_object(Body = df.to_csv(), Bucket = data_bucket, Key = neurocaas_job_output_directory + "labeled_data/" + labeled_datasetname + ".csv")
     print("uploaded csv!", flush=True)
-    df.to_hdf(path_or_buf='tmp/' + labeled_datasetname + ".h5", key='df', mode='w')
-    s3.upload_file('tmp/' + labeled_datasetname + ".h5", data_bucket, neurocaas_job_output_directory + "labeled_data/" + labeled_datasetname + ".h5")
+    df.to_hdf(path_or_buf='/tmp/' + labeled_datasetname + ".h5", key='df', mode='w')
+    s3.upload_file('/tmp/' + labeled_datasetname + ".h5", data_bucket, neurocaas_job_output_directory + "labeled_data/" + labeled_datasetname + ".h5")
     print("uploaded h5!", flush=True)
-    os.remove('tmp/' + labeled_datasetname + ".h5")
+    os.remove('/tmp/' + labeled_datasetname + ".h5")
     return
 
 test_event = {
