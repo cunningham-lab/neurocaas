@@ -96,45 +96,45 @@ def lambda_handler(event, context):
     os.remove('/tmp/' + labeled_datasetname + ".h5")
     return
 
-test_event = {
-  "Records": [
-    {
-      "eventVersion": "2.0",
-      "eventSource": "aws:s3",
-      "awsRegion": "us-east-1",
-      "eventTime": "1970-01-01T00:00:00.000Z",
-      "eventName": "ObjectCreated:Put",
-      "userIdentity": {
-        "principalId": "EXAMPLE"
-      },
-      "requestParameters": {
-        "sourceIPAddress": "127.0.0.1"
-      },
-      "responseElements": {
-        "x-amz-request-id": "EXAMPLE123456789",
-        "x-amz-id-2": "EXAMPLE123/5678abcdefghijklambdaisawesome/mnopqrstuvwxyzABCDEFGH"
-      },
-      "s3": {
-        "s3SchemaVersion": "1.0",
-        "configurationId": "testConfigRule",
-        "bucket": {
-          "name": "label-job-create-web", #changed from label-job-create-web
-          "ownerIdentity": {
-            "principalId": "EXAMPLE"
-          },
-          "arn": "arn:aws:s3:::label-job-create-web"
-        },
-        "object": {
-          "key":"nrg2148columbiaedu1620315589/results/job_2003/process_results/costajob1b/annotations/consolidated-annotation/output/0/SeqLabel.json",  #"testgroup/results/job__1202/process_results/videojobnew20211017054406945421/annotations/consolidated-annotation/output/0/SeqLabel.json",
-          "size": 1024,
-          "eTag": "0123456789abcdef0123456789abcdef",
-          "sequencer": "0A1B2C3D4E5F678901"
-        }
-      }
-    }
-  ]
-}
-#event = {"label_job_input": "reachingvideo1/", "video_bucket": "sagemakerneurocaastest", "video_path": "username/inputs/reachingvideo1.avi",  "data_bucket" : "nickneurocaastest2", "label_bucket" : "nickneurocaastest2", "label_output_key": "output/GeneralTestAWS14/annotations/consolidated-annotation/output/0/SeqLabelMod.json", "dgp_input": "dgp-input-test"}
-context = {}
-lambda_handler(test_event, context)
+# test_event = {
+#   "Records": [
+#     {
+#       "eventVersion": "2.0",
+#       "eventSource": "aws:s3",
+#       "awsRegion": "us-east-1",
+#       "eventTime": "1970-01-01T00:00:00.000Z",
+#       "eventName": "ObjectCreated:Put",
+#       "userIdentity": {
+#         "principalId": "EXAMPLE"
+#       },
+#       "requestParameters": {
+#         "sourceIPAddress": "127.0.0.1"
+#       },
+#       "responseElements": {
+#         "x-amz-request-id": "EXAMPLE123456789",
+#         "x-amz-id-2": "EXAMPLE123/5678abcdefghijklambdaisawesome/mnopqrstuvwxyzABCDEFGH"
+#       },
+#       "s3": {
+#         "s3SchemaVersion": "1.0",
+#         "configurationId": "testConfigRule",
+#         "bucket": {
+#           "name": "label-job-create-web", #changed from label-job-create-web
+#           "ownerIdentity": {
+#             "principalId": "EXAMPLE"
+#           },
+#           "arn": "arn:aws:s3:::label-job-create-web"
+#         },
+#         "object": {
+#           "key":"nrg2148columbiaedu1620315589/results/job_2003/process_results/costajob1b/annotations/consolidated-annotation/output/0/SeqLabel.json",  #"testgroup/results/job__1202/process_results/videojobnew20211017054406945421/annotations/consolidated-annotation/output/0/SeqLabel.json",
+#           "size": 1024,
+#           "eTag": "0123456789abcdef0123456789abcdef",
+#           "sequencer": "0A1B2C3D4E5F678901"
+#         }
+#       }
+#     }
+#   ]
+# }
+# #event = {"label_job_input": "reachingvideo1/", "video_bucket": "sagemakerneurocaastest", "video_path": "username/inputs/reachingvideo1.avi",  "data_bucket" : "nickneurocaastest2", "label_bucket" : "nickneurocaastest2", "label_output_key": "output/GeneralTestAWS14/annotations/consolidated-annotation/output/0/SeqLabelMod.json", "dgp_input": "dgp-input-test"}
+# context = {}
+#lambda_handler(test_event, context)
 
