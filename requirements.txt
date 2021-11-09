@@ -29,6 +29,7 @@ kiwisolver==1.1.0
 livereload==2.6.1
 localstack==0.12.3
 localstack-client==1.10
+localstack-ext==0.12.15.7
 Markdown==3.1.1
 MarkupSafe==1.1.1
 matplotlib>=3.1.0
