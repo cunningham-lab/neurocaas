@@ -1,5 +1,5 @@
 {
-    "PipelineName": "RADICaL",
+    "PipelineName": "radical",
     "REGION": "us-east-1",
     "STAGE": "webdev",
     "Lambda": {
@@ -7,22 +7,23 @@
         "Handler": "submit_start.handler_develop",
         "Launch": true,
         "LambdaConfig": {
-            "AMI": "ami-061f98a1f90c0d6fd",
-            "INSTANCE_TYPE": "p2.xlarge",
+            "AMI": "ami-00ebbd99060f0219c",
+            "INSTANCE_TYPE": "p3.8xlarge",
             "REGION": "us-east-1",
+            "SECURITY_GROUPS": "testsgstack-SecurityGroupDev-1NQJIDBJG16KK",
             "IAM_ROLE": "SSMRole",
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
             "WORKING_DIRECTORY": "~/bin",
-            "COMMAND": "cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup"
+            "COMMAND": "cd /home/ubuntu; models/radical/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . neurocaas_contrib/ncap_utils/workflow.sh; cleanup"
         }
     },
     "UXData": {
         "Affiliates": [
             {
-                "AffiliateName": "debuggers",
+                "AffiliateName": "traviscipermagroup",
                 "UserNames": [
-                    "feng",
-                    "anjali"
+                    "cipermauser1",
+                    "cipermauser2"
                 ],
                 "UserInput": true,
                 "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
