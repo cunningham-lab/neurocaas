@@ -1,5 +1,5 @@
 {
-    "PipelineName": "radical",
+    "PipelineName": "radical-snel",
     "REGION": "us-east-1",
     "STAGE": "webdev",
     "Lambda": {
