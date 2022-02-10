@@ -350,6 +350,19 @@ The easiest way to do this is to use the AWS CLI that you already have installed
 
 See `this page <https://docs.aws.amazon.com/cli/latest/reference/s3/>`_ for more detailed info on interacting with AWS S3. 
 
+For your analyses, the parameter :code:`{bucket}` corresponds to the :code:`PipelineName` you passed in the blueprint. If you list the contents of your bucket, you will see the group name that you passed to your blueprint under :code:`AffiliateName`, and the following directory organization: 
+
+.. code-block::
+
+    s3://{analysis_name}   ## This is the name of the S3 bucket
+    |- {group_name}        ## Each NeuroCAAS user is a member of a group (i.e. lab, research group, etc.)
+       |- configs
+       |- inputs
+       |- submissions
+       |- results
+
+You should upload all configuration files to the :code:`configs` directory, and all data to the :code:`inputs` directory.        
+
 2. Write a submit.json file, like below:
 
 .. code-block:: json
