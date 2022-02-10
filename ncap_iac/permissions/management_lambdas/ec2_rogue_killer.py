@@ -86,35 +86,35 @@ def lambda_handler(event, context):
     return message
 
 ## Main function to check for instances that should be stopped.
-def get_active_instances():
-    """
-    Get active ec2 instances with the specified security group, and classify them based on if they should be stopped or not.
-    """
-    instances = ec2_client.describe_instances(Filters = [{'Name':'instance-state-name',
-                                             'Values':["running"]}]
-                                             )
-    ## Get out just the ids instances as a flat list
-    ## Check if there are any active at all:
-    try:
-        assert len(instances["Reservations"]) > 0
-        instances_flatlist = [inst for res in instances["Reservations"] for inst in res["Instances"]]
-    except AssertionError:
-        print("no instances active")
-        instances_flatlist = []
-    
-    ## Now check which are active:
-    try: 
-        instances_notexempt = [i for i in instances_flatlist if not_exempt(i)]
-        if len(instances_notexempt) > 80:
-            return instances_notexempt
-        else:
-            instances_active = [i for i in instances_notexempt if active_past_graceperiod(i)]
-        assert len(instances_active) > 0
-    except AssertionError:
-        print("no instances active for longer than {} minutes".format(os.environ["graceperiod"]))
-        instances_active = []
-        
-    return instances_active
+#def get_active_instances():
+#    """
+#    Get active ec2 instances with the specified security group, and classify them based on if they should be stopped or not.
+#    """
+#    instances = ec2_client.describe_instances(Filters = [{'Name':'instance-state-name',
+#                                             'Values':["running"]}]
+#                                             )
+#    ## Get out just the ids instances as a flat list
+#    ## Check if there are any active at all:
+#    try:
+#        assert len(instances["Reservations"]) > 0
+#        instances_flatlist = [inst for res in instances["Reservations"] for inst in res["Instances"]]
+#    except AssertionError:
+#        print("no instances active")
+#        instances_flatlist = []
+#    
+#    ## Now check which are active:
+#    try: 
+#        instances_notexempt = [i for i in instances_flatlist if not_exempt(i)]
+#        if len(instances_notexempt) > 80:
+#            return instances_notexempt
+#        else:
+#            instances_active = [i for i in instances_notexempt if active_past_graceperiod(i)]
+#        assert len(instances_active) > 0
+#    except AssertionError:
+#        print("no instances active for longer than {} minutes".format(os.environ["graceperiod"]))
+#        instances_active = []
+#        
+#    return instances_active
 
 def get_rogue_instances():
     """
@@ -226,18 +226,18 @@ def get_metricdata_dict(instance_id):
     }
     return MetricDataDict
 
-def get_instance_activity(instanceid):
-    """
-    Provided with an instance id, returns the activity of that instance over the last hour
-    """
-    end = datetime.now()
-    start = end-timedelta(hours = 1)
-    data = cloudwatch_client.get_metric_data(MetricDataQueries = [get_metricdata_dict(instanceid)],
-                                        StartTime = start,
-                                        EndTime = end
-        )
-    ## less than 5% utilization across the last hour. 
-    
-    idle = all([entry <5 for entry in data["MetricDataResults"][0]["Values"]])
-    return idle
+#def get_instance_activity(instanceid):
+#    """
+#    Provided with an instance id, returns the activity of that instance over the last hour
+#    """
+#    end = datetime.now()
+#    start = end-timedelta(hours = 1)
+#    data = cloudwatch_client.get_metric_data(MetricDataQueries = [get_metricdata_dict(instanceid)],
+#                                        StartTime = start,
+#                                        EndTime = end
+#        )
+#    ## less than 5% utilization across the last hour. 
+#    
+#    idle = all([entry <5 for entry in data["MetricDataResults"][0]["Values"]])
+#    return idle
 

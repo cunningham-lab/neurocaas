@@ -1,7 +1,0 @@
-xlabel	Upload	Compute
-8.39 x 1 Local	0	2201
-8.39 x 1 NCAP	205	499.0
-35.8 x 1 Local	0	5944.5
-35.8 x 1 NCAP	885	1364.0
-78.7 x 1 Local	0	13044.9
-78.7 x 1 NCAP	1810	3928.0

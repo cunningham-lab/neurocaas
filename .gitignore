@@ -139,7 +139,8 @@ dmypy.json
 
 # Permissions files: 
 ncap_iac/utils/policies
-ncap_iac/user_profiles/*
+!ncap_iac/utils/policies/lambda_role_assume_role_doc.json
+!ncap_iac/utils/policies/lambda_role_base_policy_doc_minimal.json
 !ncap_iac/user_profiles/*/user_config_template.json
 
 # Build files: 
@@ -156,7 +157,8 @@ ncap_iac/ncap_blueprints/*/compiled_packaged.yaml
 ncap_iac/user_profiles/*/compiled_users.json
 ncap_iac/user_profiles/*/.aws-sam/
 ncap_iac/user_profiles/*/compiled_users.yaml
-!docs/source/
+docs/build
+!docs/source
 !docs/devguide.md
 !docs/Makefile
 !docs/make.bat

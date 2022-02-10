@@ -5,9 +5,9 @@ from troposphere.serverless import Function,Environment
 from troposphere.awslambda import Permission
 from troposphere.logs import LogGroup
 from troposphere.cloudformation import CustomResource,Stack
-from config_handler import NCAPTemplate
-from dev_builder import NeuroCaaSTemplate
-from lambda_policies import lambda_basepolicy,lambda_writeS3
+from .config_handler import NCAPTemplate
+from .dev_builder import NeuroCaaSTemplate
+from .lambda_policies import lambda_basepolicy,lambda_writeS3
 import sys
 import json 
 import secrets
@@ -16,8 +16,10 @@ import re
 import boto3
 from botocore.exceptions import ClientError
 
+loc = os.path.dirname(__file__)
+
 ## Import global parameters: 
-with open("../global_params_initialized.json") as gp:
+with open(os.path.join(loc,"../global_params_initialized.json")) as gp:
     gpdict = json.load(gp)
 
 def return_alphanumeric(string):
@@ -458,77 +460,6 @@ class ReferenceUserCreationTemplate():
                         "Name":name,
                         "BucketName":bucketname})
             self.template.add_resource(substack)
-
-    #def attach_folder_creator_function(self,folderlogicalid,bucketname,path,dirname,dependson):
-    #    """attach_folder_creator_function. Creates a lambda backed custom resource to make folders when this stack is created/updated. Subsequently attached it to the template represented by this resource.  
-
-    #    :param folderlogicalid: the logical id that we will give to the folder create resources, identifying it within the cloudformation stack. 
-    #    :param bucketname: the bucket within which we will make the folder related resource. 
-    #    :param path: the path to the location where we will create a folder. use "" if creating a folder in the base directory. 
-    #    :param dirname: the name of the folder that we are making. Do not suffix with a slash.
-    #    :return: the template-attached custom resource, as a troposphere object. 
-    #    """
-    #    if dependson is None:
-    #        basemake = CustomResource(folderlogicalid,
-    #                                  ServiceToken=self.makefuncarn,
-    #                                  BucketName = bucketname,
-    #                                  Path = path,
-    #                                  DirName = dirname)
-    #    else:
-    #        basemake = CustomResource(folderlogicalid,
-    #                                  ServiceToken=self.makefuncarn,
-    #                                  BucketName = bucketname,
-    #                                  Path = path,
-    #                                  DirName = dirname,
-    #                                  DependsOn = dependson)
-    #    basefolder_creator = self.template.add_resource(basemake)
-    #    return basefolder_creator
-
-    #def attach_folder_deleter_function(self,folderlogicalid,bucketname,path,dirname,dependson):
-    #    """attach_folder_creator_function. Creates a lambda backed custom resource to delete folders when this stack is deleted. Subsequently attached it to the template represented by this resource.  
-
-    #    :param folderlogicalid: the logical id that we will give to the folder create resources, identifying it within the cloudformation stack. 
-    #    :param bucketname: the bucket within which we will make the folder related resource. 
-    #    :param path: the path to the location where we will create a folder. use "" if creating a folder in the base directory. 
-    #    :param dirname: the name of the folder that we are making. Do not suffix with a slash.
-    #    :return: the template-attached custom resource, as a troposphere object. 
-    #    """
-    #    if dependson is None:
-    #        basemake = CustomResource(folderlogicalid,
-    #                                  ServiceToken=self.delfuncarn,
-    #                                  BucketName = bucketname,
-    #                                  Path = path,
-    #                                  DirName = dirname)
-    #    else:
-    #        basemake = CustomResource(folderlogicalid,
-    #                                  ServiceToken=self.delfuncarn,
-    #                                  BucketName = bucketname,
-    #                                  Path = path,
-    #                                  DirName = dirname,
-    #                                  DependsOn=dependson)
-    #    basefolder_deleter = self.template.add_resource(basemake)
-    #    return basefolder_deleter
-
-    #def attach_folder_resources(self,folderid,bucketname,path,dirname,dependson = None):
-    #    """attach_folder_resources. Creates two lambda backed custom resources to create and delete folders corresponding to stack events. Subsequently attaches these to the template represented by this resource. Assumes that dependencies passed to this function were created with the same function, and will modify names accordingly.  
-
-    #    :param affiliatename: The name of the affiliate user or group. 
-    #    :param bucketname: the name of the s3 bucket that we are creating a folder in. 
-    #    :param path: the path to the location where we will create a folder. use "" if creating a folder in the base directory. 
-    #    :param dirname: the name of the folder that we are making. Do not suffix with a slash.
-    #    :return: the template-attached custom resources for folder create and delete, as troposphere objects. 
-    #    """
-    #    folderid_alnum = ''.join(ch for ch in folderid if ch.isalnum())
-    #    makeid = folderid_alnum+"make"
-    #    delid = folderid_alnum+"del"
-    #    if dependson is None:
-    #        makeattached = self.attach_folder_creator_function(makeid,bucketname,path,dirname,dependson)
-    #        delattached = self.attach_folder_deleter_function(delid,bucketname,path,dirname,dependson)
-    #    else:
-    #        dependson_alnum = ''.join(ch for ch in dependson if ch.isalnum())
-    #        makeattached = self.attach_folder_creator_function(makeid,bucketname,path,dirname,dependson_alnum+"make")
-    #        delattached = self.attach_folder_deleter_function(delid,bucketname,path,dirname,dependson_alnum+"del")
-    #    return makeattached,delattached
 
     def validate_parameters(self,affiliatedict):
         """validate_parameters. Validates the parameters in this dictionary:

@@ -26,10 +26,7 @@ except Exception as e:
         err = {"message": message}
         print(err)
 
-
-
 ## Lambda function to cleanup after all processing is done. Importantly also sends the signal back to the user that the job has been completed. 
-
 
 ## Strip the event of relevant information.  
 def eventshandler(event,context):
@@ -46,17 +43,15 @@ def eventshandler(event,context):
     writer.append('State: '+statechange)
     writer.write()
     
-    
 
 ## 
 def monitor_updater(event,context):
     """
     Newest version of events monitoring that updates pre-existing logs. 
-
     """
     ## 1. First, find the instance id. 
     ## 2. Go find the appropriate log folder in the bucket [bucket available through os. ]
-    ## 3. Now figure out if this is an "running" or "shutting-down" statechange. "
+    ## 3. Now figure out if this is an "running" or "shutting-down" statechange.
     ## 4. accordingly, either update the log [running] or update the log and move it to the appropriate folder [given by the log contents.]
     ## Include exception handling for the case where one of the fields is not completed. 
     try: 
@@ -91,7 +86,7 @@ def monitor_updater(event,context):
                 rulename = "Monitor{}".format(jobname)
                 instances_under_rule = utilsparamevents.get_monitored_instances(rulename) 
                 condition = [utilsparams3.exists(bucket_name,os.path.join("logs","active","{}.json".format(inst))) for inst in instances_under_rule]
-                ## Delete the rule
+                ## Delete the rule and write endfile
                 if not any(condition):
                     ## get the target:
                     response = utilsparamevents.full_delete_rule(rulename)
