@@ -71,6 +71,6 @@ sphinxcontrib-serializinghtml==1.1.4
 git+https://github.com/sphinx-contrib/video.git
 tornado==6.0.3
 traitlets==4.3.2
-troposphere<=2.5.0
+troposphere>=2.5.0
 wcwidth==0.1.7
 zipp==3.1.0
