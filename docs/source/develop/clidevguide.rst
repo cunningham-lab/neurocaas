@@ -105,18 +105,22 @@ All NeuroCAAS analyses should be triggered by running a central bash script call
 This script ensures that all jobs run on NeuroCAAS are managed and logged correctly. 
 This script takes 5 arguments, as follows:   
 
-`% bash run_main_cli.sh $bucketname $path_to_input $path_to_result_dir $path_to_config_file $path_to_analysis_script`
+.. code-block::
+
+  `% bash run_main_cli.sh $bucketname $path_to_input $path_to_result_dir $path_to_config_file $path_to_analysis_script`
 
 The first four parameters refer to locations in Amazon S3 where the inputs and results of this analysis will be stored. 
 These parameters correspond to the directory structure given in the "End Goals" section as follows: 
-- $bucketname: {analysis\_name}
-- $path\_to\_input: {group\_name}/inputs/name\_of\_dataset
-- $path\_to\_result\_dir: results/job\_{timestamp}
-- $path\_to\_config\_file: {group\_name}/configs/name\_of\_config\_file
+
+- :code:`$bucketname: {analysis\_name}`
+- :code:`$path\_to\_input`: {group\_name}/inputs/name\_of\_dataset`
+- :code:`$path\_to\_result\_dir`: results/job\_{timestamp}`
+- :code:`$path\_to\_config\_file`: {group\_name}/configs/name\_of\_config\_file`
+
 These will be automatically filled in by NeuroCAAS when users request jobs, 
 but can be manually filled in for certain test cases. For more info see the section, "Testing a machine image."
 
-The fifth parameter, $path\_to\_analysis\_script, is a analysis-specific bash script, that will be run inside the run\_main.sh script. It will call all of the analysis source code
+The fifth parameter, :code:`$path\_to\_analysis\_script`, is a analysis-specific bash script, that will be run inside the :code:`run\_main.sh` script. It will call all of the analysis source code
 , transfer data in to the instance, etc. This will be the subject of the next subsection, Analysis script. 
 
 If we look at the contents of :code:`run\_main\_cli.sh`, they are as follows: 
@@ -146,9 +150,9 @@ This script-in-a-script organization ensures two things:
 - Reliability of logging. Logging progress mid-analysis can be a delicate process, and standardizing it 
 in a single main script helps to ensure that developers will not have to worry about this step.
 
-- Correct error handling. In the event that analysis scripting runs into an error, we want to be able to detect and 
-catch these errors. We can do so much more easily if all relevant code is executed in a separate script, ensuring that
-the relevant steps necessary to report the error to the user, and run appropriate cleanup on the instance are carried out. 
+- Correct error handling. In the event that analysis scripting runs into an error, we want to be able to detect and catch these errors. We can do so much more easily if all relevant code is executed in a separate script, ensuring that the relevant steps necessary to report the error to the user, and run appropriate cleanup on the instance are carried out.
+
+ 
 
 See the CLI --help command for in depth info on each of these CLI commands, or the API docs `here <https://neurocaas-contrib.readthedocs.io/en/latest/>`_
 
@@ -283,6 +287,7 @@ Cleaning up
 -----------
 
 To clean up after finishing a session, you can delete your instance and reset your cli state by running: 
+
 .. code-block:: bash
 
    neurocaas-contrib remote end-session 
@@ -323,8 +328,8 @@ analysis to perform further testing using the access configuration a
 user would have (see “Testing a machine image”).
 Deployment is managed centrally by the NeuroCAAS Team. 
 Once you are ready to deploy your blueprint, and see how your analysis performs, 
-push your blueprint to an active pull request in the NeuroCAAS repo, or create a new one. 
-A NeuroCAAS admin will then review your blueprint, and deploy it so that you can monitor the results. 
+push your blueprint to an active pull request in the NeuroCAAS repo, or create a new one and notify your NeuroCAAS admin. 
+A NeuroCAAS admin will then review your blueprint and associated code changes, and deploy it so that you can monitor the results. 
 
 Testing a machine image
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -333,9 +338,35 @@ IMPORTANT NOTE: this step can only be done AFTER initially deploying a
 blueprint (Step 6). Our Python development API has the capacity to
 *mock* the job managers that parse user input. In order to test your
 machine image including the inputs and outputs that a user would see,
-follow these steps: 1) you upload data and configuration files to the deployed s3
-bucket, just as a user would. 2) you manually write a submit.json file,
-like below:
+follow these steps: 
+
+1. Upload data and configuration files to the deployed s3 bucket, just as a user would.
+
+The easiest way to do this is to use the AWS CLI that you already have installed as part of your setup. In particular, the following commands are useful: 
+
+- :code:`aws s3 ls s3://{bucket}/{path}`. This command will list the contents of a certain bucket under a specific paths prefix.   
+- :code:`aws s3 ls {local/file/path} s3://{bucket}/{path}/{filename}`. This command will upload a local file to the given s3 location.   
+- :code:`aws s3 ls s3://{bucket}/{path}/{filename} {local/file/path}`. This command will download a file from the given s3 location to your local computer.   
+
+See `this page <https://docs.aws.amazon.com/cli/latest/reference/s3/>`_ for more detailed info on interacting with AWS S3. 
+
+For your analyses, the parameter :code:`{bucket}` corresponds to the :code:`PipelineName` you passed in the blueprint. If you list the contents of your bucket, you will see the group name that you passed to your blueprint under :code:`AffiliateName`, and the following directory organization: 
+
+.. code-block::
+
+    s3://{analysis_name}   ## This is the name of the S3 bucket
+    |- {group_name}        ## Each NeuroCAAS user is a member of a group (i.e. lab, research group, etc.)
+       |- configs
+       |- inputs
+       |- submissions
+       |- results
+
+You should upload all configuration files to the :code:`configs` directory, and all data to the :code:`inputs` directory.        
+
+2. Write a submit.json file, like below:
+
+.. code-block:: json
+
 
     {
         "dataname":"{group_name}/inputs/data.zip",

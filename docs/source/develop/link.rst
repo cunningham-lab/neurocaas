@@ -41,22 +41,21 @@ and services that will support your analysis. When initializing an analysis,
 we can leave most of these fixed, but there are a few that we should go over: 
 The parameters that you will probably change are:
 
-- PipelineName: This should be the name of your analysis, or something similar. 
+- :code:`PipelineName`: This should be the name of your analysis, or something similar. 
 
-- REGION: The global region (An AWS parameter) where you want to develop. By default "us-east-1" is a good choice.   
+- :code:`REGION`: The global region (An AWS parameter) where you want to develop. By default "us-east-1" is a good choice.   
 
-- STAGE: This parameter describes different stages of pipeline development. It should be set to "webdev" while initializing a blueprint.
+- :code:`STAGE`: This parameter describes different stages of pipeline development. It should be set to "webdev" while initializing a blueprint.
 
-- Lambda.LambdaConfig.INSTANCE\_TYPE: INSTANCE\_TYPE specifies the hardware configuration that is run by
-default (can be changed on demand) and is selected from a list of instance types available on AWS. A good default choice is :code:`m5.xlarge`, and a good choice with access to a GPU is :code:`p2.xlarge`. 
+- :code:`Lambda.LambdaConfig.INSTANCE\_TYPE`: :code:`INSTANCE\_TYPE` specifies the hardware configuration that is run by default (can be changed on demand) and is selected from a list of instance types available on AWS. A good default choice is :code:`m5.xlarge`, and a good choice with access to a GPU is :code:`p2.xlarge`. 
 
 Important parameters to keep in mind for later: 
-- Lambda.LambdaConfig.AMI: AMI specifies the Amazon Machine Image where your software and dependencies are installed, and contains most of the analysis-specific configuration details that you must specify. As you develop, you will save your progress into different AMIs so they can be linked to the blueprint through this parameter. 
+- :code:`Lambda.LambdaConfig.AMI`: :code:`AMI` specifies the Amazon Machine Image where your software and dependencies are installed, and contains most of the analysis-specific configuration details that you must specify. As you develop, you will save your progress into different AMIs so they can be linked to the blueprint through this parameter. 
 
-- Lambda.LambdaConfig.COMMAND: COMMAND specifies a bash command that will be run on your remote instance [with parameters specified in the main script section] to generate data analysis. You will most likely not have to change this command, but it is the principal way in which we will be starting analyses on a remote instance. 
+- :code:`Lambda.LambdaConfig.COMMAND`: :code:`COMMAND` specifies a bash command that will be run on your remote instance [with parameters specified in the main script section] to generate data analysis. You will most likely not have to change this command, but it is the principal way in which we will be starting analyses on a remote instance. 
 
-For now, remove all Affiliates from the UXData area except for
-“debuggers” we will return to these later.
+- :code:`Affiliates`: This field describes users of the analysis. It is largely used for testing, as when it is deployed later, all users will be able to access this analysis by default. For now, remove all :code:`Affiliates` from the :code:`UXData` area except for “debuggers”; we will return to this later in this section.
+ 
 
 
 Linking your blueprint to cloud resources
@@ -64,17 +63,31 @@ Linking your blueprint to cloud resources
 
 We have now reached the point where you will have to start interacting with cloud resources, which means that you will need AWS account credentials. 
 This portion of the process should take about 10 minutes, and response time from the NeuroCAAS Team (within 24h), or setup time of an AWS account (about 1-2h). 
-You can get AWS account credentials by letting the NeuroCAAS team know that you have an initialized blueprint in place. 
-We accomplish this using pull requests through Github `(in depth explanation here) <https://blog.axosoft.com/learning-git-pull-request/>`_ . 
 
+Developing within the main NeuroCAAS account (recommended)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+We recommend you develop your analysis within the main NeuroCAAS account. By doing so, you can use AWS resources to develop the optimal configuration to deploy your analysis for free. 
+
+You can get AWS account credentials by: 
+
+1. Signing up for a user account at `neurocaas.org <https://www.neurocaas.org/>`_  
+2. Letting the NeuroCAAS team know that you have an initialized blueprint in place at :code:`neurocaas@gmail.com`. 
+
+Once this process is done, you will be able to access important details that will be used to link your account to cloud resources through your profile on the NeuroCAAS website. You can access your profile by clicking on your name in the top right hand corner of the NeuroCAAS website, or navigating `here <http://www.neurocaas.org/profile/>`_.
+
+At this point, we can revisit the :code:`Affiliates` section of the blueprint. From your NeuroCAAS website profile, take the value of the fields `AWS User Name`, and `S3 Bucket For Datasets and config files`. We will refer to this as your user name and group name. Within your blueprint, replace the :code:`AffiliateName` :code:`debuggers` with your group name, and replace the given :code:`UserNames` with your user name (make sure you don't delete the brackets- user names must be formatted as a list). Linking your AWS credentials to the blueprint in this way will ensure that you can test your analysis after deployment. In the future, you can add other testers to your analysis in the same way. 
+
+We will now prepare your blueprint for cloud-based development using Github pull requests `(in depth explanation here) <https://blog.axosoft.com/learning-git-pull-request/>`_ . 
 First, go ahead and push your new blueprint to your version of the neurocaas repo if you haven't already: 
+
 .. code-block:: bash
+
     git add /path/to/neurocaas/ncap_iac/ncap_blueprints/<analysis_name>/
     git commit -m "intialized blueprint for <analysis_name>" # or something like that
     git push 
 
 Then, you can go ahead and open a pull request on the original neurocaas Github page (see step 7 `here <https://jarv.is/notes/how-to-pull-request-fork-github/>`_).  
-Add a comment to your pull request that specifies what your analysis does, and we will get back to you with AWS account credentials. 
+Add a comment to your pull request that specifies what your analysis does, and we will be ready to start working with you! 
 
 Note that if you develop more blueprints later, you will still submit pull requests, but you can use the same credentials. 
 
@@ -86,13 +99,14 @@ To proceed with your own AWS account, you will need admin permissions.
 To initialize NeuroCAAS on a separate AWS account, first follow the installation instructions for
 the binxio secret provider stack:
 <https://github.com/binxio/cfn-secret-provider>. Navigate within the
-repository to:
-
-`neurocaas/ncap_iac/ncap_blueprints/utils_stack`
+repository to: `neurocaas/ncap_iac/ncap_blueprints/utils_stack`.
+    
 
 Now run the following command:
 
-`% bash initialize_neurocaas.sh`
+.. code-block:: bash
+
+    % bash initialize_neurocaas.sh
 
 This will create the cloud resources necessary to deploy your resources
 regularly and handle the permissions necessary to manage and deploy
@@ -155,4 +169,5 @@ later. Finally, change the permissions on this file with:
     % chmod 400 securefilelocation/securefilename.pem
 
 
+    
 With these credentials in place, you are now ready to choose the hardware and computing environment for your analysis.     
