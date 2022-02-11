@@ -48,12 +48,18 @@ special codes as an argument:
 -   “dlami16”: like dlami18, but on ubuntu16, x86.
 
 These latter two AMIs are pre-configured with CUDA drivers, which can 
-save lots of time for GPU based analyses. 
-NOTE: These codes have been tested with a variety of x86 (intel based)
-instances (m5 series, m5a series, p2 and p3 series). If you plan to use
-non-x86 based instances, (such as the ARM based a1 series) please look
-up the AMI id for the relevant OS distribution, and pass this id as an
-argument. 
+save lots of time for GPU based analyses.
+
+.. note:: 
+    If you choose to start with the Deep Learning AMIs, you do not need to do any configuration to start using GPUs (installing nvidia toolkits, etc.). If you run the command :code:`watch nvidia-smi`, you should be able to see GPUs available for use, and you can check on their usage throughout processing.  
+    If you require a specific CUDA version, please follow these instructions to detect and change the active CUDA version `here <https://docs.aws.amazon.com/dlami/latest/devguide/tutorial-base.html>`_. CUDA versions are pre-installed, and this process should take only a few minutes.  
+
+.. warning::
+    These codes have been tested with a variety of x86 (intel based)
+    instances (m5 series, m5a series, p2 and p3 series). If you plan to use
+    non-x86 based instances, (such as the ARM based a1 series) please look
+    up the AMI id for the relevant OS distribution, and pass this id as an
+    argument. 
 
 Calling this method will initialize an instance for you, and
 then provide you with the ip address of that initialized instance. You
@@ -118,7 +124,7 @@ These parameters correspond to the directory structure given in the "End Goals" 
 - :code:`$path\_to\_config\_file`: {group\_name}/configs/name\_of\_config\_file`
 
 These will be automatically filled in by NeuroCAAS when users request jobs, 
-but can be manually filled in for certain test cases. For more info see the section, "Testing a machine image."
+but can be manually filled in for certain test cases. For more info see the sections "Testing your script (locally)" and "Testing a machine image".
 
 The fifth parameter, :code:`$path\_to\_analysis\_script`, is a analysis-specific bash script, that will be run inside the :code:`run\_main.sh` script. It will call all of the analysis source code
 , transfer data in to the instance, etc. This will be the subject of the next subsection, Analysis script. 
@@ -151,8 +157,6 @@ This script-in-a-script organization ensures two things:
 in a single main script helps to ensure that developers will not have to worry about this step.
 
 - Correct error handling. In the event that analysis scripting runs into an error, we want to be able to detect and catch these errors. We can do so much more easily if all relevant code is executed in a separate script, ensuring that the relevant steps necessary to report the error to the user, and run appropriate cleanup on the instance are carried out.
-
- 
 
 See the CLI --help command for in depth info on each of these CLI commands, or the API docs `here <https://neurocaas-contrib.readthedocs.io/en/latest/>`_
 
@@ -187,7 +191,7 @@ TL;DR from the previous section:
 
 
 There are more features that you can dig into to parse multiple input files, or multiple result files. 
-See the CLI --help command for in depth info on each of these CLI commands, or the API docs `here <https://neurocaas-contrib.readthedocs.io/en/latest/>`_
+See the CLI --help command for in depth info on each of these CLI commands, or the API docs `here <https://neurocaas-contrib.readthedocs.io/en/latest/>`_.
  
 As a worked example, we can look at the processing script for the analysis DeepGraphPose. This analysis uses all of the commands above, and conditionally performs training or prediction based on the value of a configuration file parameter: 
 
@@ -254,8 +258,34 @@ As a worked example, we can look at the processing script for the analysis DeepG
     echo "----UPLOADING RESULTS----"
     neurocaas-contrib workflow put-result -r "/home/ubuntu/results_$taskname.zip"
 
+Testing your script (locally)
+-----------------------------
 
+At this point, it's a good idea to run a few more tests to ensure that your script is behaving as intended. A nice feature of the analysis script is that it is input independent- it looks at the dataset, configuration file, and result paths that you've registered, and doesn't care if they are in an S3 bucket or local. Therefore, you can run the following commmands on the compute instance to test your analysis script with data that exists on that instance:   
 
+.. code-block::
+
+    % neurocaas-contrib workflow initialize-job -p "/some/local/path" 
+
+    % neurocaas-contrib workflow register-dataset -l "/path/to/your/local/data"
+    % neurocaas-contrib workflow register-config -l "/path/to/your/local/config"
+    % neurocaas-contrib workflow register-resultpath -l "/path/to/your/results/folder" 
+
+    % neurocaas-contrib workflow log-command-local -c "bash $path/to/your/analysis_script" 
+
+Running these commands from the command line is exactly analogous to what the main script does when triggered remotely. The only difference is that what happens here is totally local: these commands will register certain files within your compute instances as the dataset and configuration file to use for testing, instead of files in an S3 bucket. Results will be written to a local folder, instead of S3 as well. Finally, it will run any command, and write the output to the console in the same fashion that a user would see them. 
+
+If your analysis results look good, we can check one final thing. When run remotely, NeuroCAAS runs analyses as a separate user, :code:`ssm_user`, instead of :code:`ubuntu`, or :code:`ec2-user`, as you normally use. This is normally not an issue, but we can mimic the performance of :code:`ssm_user` by running the following commands: 
+
+.. code-block::
+
+   % sudo -i 
+   % cd /home/{your original username}
+   % source activate {your environment name}
+   % neurocaas-contrib workflow log-command-local -c "bash $path/to/your/analysis_script"
+
+We are re-running the final command above, but now as a different user. If you find that this causes issues, we will deal with this in the blueprint, in the section :code:`Deploying your blueprint and Testing` below. 
+   
 Saving your machine image
 -------------------------
 
@@ -326,6 +356,11 @@ Deploying your blueprint and Testing
 Once you have a working image, it is useful to deploy it as a NeuroCAAS
 analysis to perform further testing using the access configuration a
 user would have (see “Testing a machine image”).
+
+.. note:: 
+
+   If you were unable to run your analysis as a separate user, we will amend the blueprint as follows. For the field :code:`Lambda.LambdaConfig.COMMAND`, please prepend `sudo -u {your username}` to your call to :code:`run_main.sh`. For example, if the current value is :code:`neurocaas_contrib/run_main.sh`, and you log in to your compute instance as :code:`ubuntu`, the command should become :code:`sudo -u ubuntu neurocaas_contrib/run_main.sh`. 
+
 Deployment is managed centrally by the NeuroCAAS Team. 
 Once you are ready to deploy your blueprint, and see how your analysis performs, 
 push your blueprint to an active pull request in the NeuroCAAS repo, or create a new one and notify your NeuroCAAS admin. 
@@ -334,11 +369,14 @@ A NeuroCAAS admin will then review your blueprint and associated code changes, a
 Testing a machine image
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-IMPORTANT NOTE: this step can only be done AFTER initially deploying a
-blueprint (Step 6). Our Python development API has the capacity to
-*mock* the job managers that parse user input. In order to test your
-machine image including the inputs and outputs that a user would see,
-follow these steps: 
+We can now run tests that interact with your analysis exactly as a user would. 
+
+.. note::
+    This step can only be done AFTER initially deploying a
+    blueprint (Step 6). Our Python development API has the capacity to
+    *mock* the job managers that parse user input. In order to test your
+    machine image including the inputs and outputs that a user would see,
+    follow these steps: 
 
 1. Upload data and configuration files to the deployed s3 bucket, just as a user would.
 
