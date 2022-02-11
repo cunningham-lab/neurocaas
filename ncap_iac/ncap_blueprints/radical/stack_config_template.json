@@ -8,13 +8,15 @@
         "Launch": true,
         "LambdaConfig": {
             "AMI": "ami-00ebbd99060f0219c",
-            "INSTANCE_TYPE": "p3.8xlarge",
+            "INSTANCE_TYPE": "p2.8xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "testsgstack-SecurityGroupDev-1NQJIDBJG16KK",
             "IAM_ROLE": "SSMRole",
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
             "WORKING_DIRECTORY": "~/bin",
-            "COMMAND": "cd /home/ubuntu; models/radical/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . neurocaas_contrib/ncap_utils/workflow.sh; cleanup"
+            "COMMAND": "cd /home/ubuntu; sudo -u ubuntu models/radical/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . neurocaas_contrib/ncap_utils/workflow.sh; cleanup",
+            "EXECUTION_TIMEOUT": 900,
+            "SSM_TIMEOUT": 172000
         }
     },
     "UXData": {
