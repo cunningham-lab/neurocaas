@@ -1,5 +1,5 @@
 {
-    "PipelineName": "caiman-ncap-web",
+    "PipelineName": "caiman-ncap-web-clone",
     "REGION": "us-east-1",
     "STAGE": "websubstack",
     "Lambda": {
