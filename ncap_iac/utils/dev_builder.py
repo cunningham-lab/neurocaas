@@ -398,7 +398,7 @@ class NeuroCaaSTemplate(object):
                 Description = 'Postprocessing Lambda Function for Serverless',
                 MemorySize = 128,
                 Timeout = self.config["Lambda"]['LambdaConfig']["EXECUTION_TIMEOUT"],
-                Role = 'arn:aws:iam::739988523141:role/lambda_dataflow', ## TODO: Create this in template
+                Role = 'arn:aws:iam::{accid}:role/{role}'.format(accid = boto3.client('sts').get_caller_identity().get('Account'),role = gpdict['lambdarolename']),
                 Events= all_events,
                 Environment = Environment(Variables=lambdaconfig)
                 )         
