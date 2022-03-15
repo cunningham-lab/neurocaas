@@ -103,6 +103,11 @@ You should also install the CLI tool on the remote instance as well.
 If you remember the Quickstart example, our goal here is to develop any source code 
 into that example. 
 
+.. warning::
+
+    Before we get into specifics, please consider the following best practice guidelines: 
+    - Don't hardcode private secrets into the immutable analysis environment. AWS credentials will automatically be passed to the instance when you log in, so you will not have to configure it as you did your local machine. Although users won't be able to interactively access the IAE, removing private secrets can also make your analysis more portable and usable in non-NeuroCAAS settings should you wish to do so in the future.    
+
 Main script
 ~~~~~~~~~~~
 
