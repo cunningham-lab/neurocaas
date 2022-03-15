@@ -105,8 +105,12 @@ into that example.
 
 .. warning::
 
-    Before we get into specifics, please consider the following best practice guidelines: 
-    - Don't hardcode private secrets into the immutable analysis environment. AWS credentials will automatically be passed to the instance when you log in, so you will not have to configure it as you did your local machine. Although users won't be able to interactively access the IAE, removing private secrets can also make your analysis more portable and usable in non-NeuroCAAS settings should you wish to do so in the future.    
+    Before we get into specifics, please consider the following best practice guidelines. These criteria will be evaluated when your stack is reviewed: 
+    - 1. Secrets: Don't hardcode private secrets into the immutable analysis environment. AWS credentials will automatically be passed to the instance when you log in, so you will not have to configure it as you did your local machine. Although users won't be able to interactively access the IAE, removing private secrets can also make your analysis more portable and usable in non-NeuroCAAS settings should you wish to do so in the future.    
+    - 2. Updating your codebase: Avoid steps that could mutate the state of your IAE within your workflow script (e.g. git pulling from your repository to get the latest version). Although convenient, this step can interfere with the reproducibility that NeuroCAAS provides. The recommended workflow is to update your IAE through pull requests when you want to update your analysis itself, ensuring that changes to expected behavior are documented. In the future we plan to create workflows through Github to automate this process.       
+    - 3. Randomization: If your analysis relies upon randomized computations (random initial state, sampling), whenever possible we recommend including random seeds as a configuration parameter. This step can extend the reproducibility benefits provided by NeuroCAAS.   
+    - 4. Logs: Be as clear as possible about reporting compute back to the user. If you follow the steps outlined here, all outputs printed to stdout and stderr by your workflow script will be reported back to the user (including outputs from child processes of the script, like calls to python scripts). See the :code:`Analysis script` section below for an example. Configuration files will also be returned to the user by default.    
+    - 5. Input parsing: A useful feature for IAE based analyses is the ability to parse inputs at the beginning of analyses to ensure that they are formatted as expected- in fact, in the absence of common infrastructure issues this is the most common issue on NeuroCAAS. Including input parsing can save compute time and provide clearer error messages to users. Input parsing can be implemented in several ways: 1) As the first step of your Analysis script. This option is most appropriate if input parsing requires the compute resources provided by your blueprint, but it means that analyses will have to be started before users are informed of a potential formatting error. 2) As an independent script distributed to users. When you make your analysis available on NeuroCAAS, you can provide additional resources for users, including scripts that they can run themselves. 3) As a customized job manager. When analysis jobs are first requested, we can program custom behavior from the NeuroCAAS job manager. See the section :code:`Customizing the job manager` later in this section for details.  
 
 Main script
 ~~~~~~~~~~~
@@ -453,3 +457,7 @@ Adding users
 Once your blueprint has successfully been deployed, you can authorize
 some users to access it. Additionally, if it is ready you can publish your analysis to the neurocaas website, and have it accessible by default to interested users. 
 This process is managed through pull requests as well. Let your NeuroCAAS admin know that you are ready to add users in a pull request thread, and they will authorize you for further steps. 
+
+Adding users
+~~~~~~~~~~~~
+
