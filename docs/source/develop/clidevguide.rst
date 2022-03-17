@@ -454,13 +454,65 @@ The results themselves will be returned to AWS
 S3 upon job completion.
 
 
-Adding users
-~~~~~~~~~~~~
+Adding users and managing access
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once your blueprint has successfully been deployed, you can authorize
 some users to access it. Additionally, if it is ready you can publish your analysis to the neurocaas website, and have it accessible by default to interested users. 
+
+As a developer, you can manage access to your analysis through the :code:`STAGE` parameter of your blueprint. Access works as follows: 
+- If :code:`STAGE=webdev`, you authorize users to access your analysis on a case-by-case basis through blueprint updates. Nobody who you do not explicitly name in your blueprint can run analysis jobs. 
+- If :code:`STAGE=websubstack`, you are opening your analysis for general use. Anyone with a NeuroCAAS account can opt in to use your analysis. 
+
+Generally, we recommend you keep analyses in the :code:`webdev` mode until you have run a few end-to-end tests with interested users. In order to add users to your analysis, ask them for their AWS username, and contact NeuroCAAS admins for their group name (we're working on making this easier.) 
+
+With this information, add the following bracketed block to the "Affiliates" section of your blueprint: 
+
+.. code-block:: 
+   "UXData": {
+    "Affiliates": [
+        ...
+        {
+            "AffiliateName": {name of group},
+            "UserNames": [
+               {AWS username WITHOUT REGION} 
+            ],
+            "UserInput": true,
+            "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
+        }
+        ... 
+    ]
+
+Importantly, you should add the AWS username without the region suffix (e.g. "us-east-1"). 
+
+
 This process is managed through pull requests as well. Let your NeuroCAAS admin know that you are ready to add users in a pull request thread, and they will authorize you for further steps. 
 
-Adding users
-~~~~~~~~~~~~
+Customizing Job Managers
+------------------------
+
+For most analyses, it is sufficient to develop your analysis entirely within a single IAE as described above.This is the case for all computing steps that can be done assuming that your dataset and configuration files already exist in some file system. If this is the case for you, you can ignore this section.  
+However, some parts of analysis may be useful to implement as soon as NeuroCAAS jobs are triggered- i.e. before transferring data and configuration files into an IAE. Examples of such steps include parsing inputs, coordination of multiple IAEs on multiple hardware instances, or multi-step analyses that work across different IAEs sequentially. Examples of these latter two workflows are presented in the NeuroCAAS paper. This level of customization can be implemented on an analysis-by-analysis basis by customizing NeuroCAAS job manager behavior through protocols.
+
+Default Protocol 
+~~~~~~~~~~~~~~~~
+Note the following fields of the blueprints: :code:`Lambda.CodeUri` and :code:`Lambda.Handler`. By default, you should expect to see the following fields and values in the blueprint:
+
+.. code-block::
+    "Lambda": {
+        "CodeUri": "../../protocols",
+        "Handler": "submit_start.handler_develop",
+
+These fields point to code located in the directory :code:`ncap_iac/protocols`.
+In particular, the module :code:`submit_start.py` contains a function :code:`handler_develop` that is triggered every time a NeuroCAAS submission file is uploaded. This code is run in a *serverless* environment using AWS Lambda.  
+
+Building Custom Protocols
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The logic for parsing submissions is contained in the class :code:`Submission_dev`, contained in the same file. The recommended workflow for customizing job managers is to *inherit* from :code:`Submission_dev`, as is done in :code:`Submission_ensemble`, and overwrite or extend existing methods. For example, one could implement input parsing by extending the method :code:`check_existence`, which performs a basic check to ensure that the data and configuration file referenced in job submission really exists. 
+
+Some notes regarding customizing job managers: 
+
+- Customizing job managers is more advanced than the standard NeuroCAAS workflow, as it requires developers to be more aware of the way in which user input triggers computation on the cloud. We therefore recommend that first time developers leave Job Managers in their default configuration if possible, and that they consult with NeuroCAAS admins before making changes if required.  
+- It is critical to correctly handle errors and exceptions in the Job Manager- because Job Managers have the important role of determining when to start and stop compute instances, mismanagement can have implications on the cost of your analysis. These features will be tested extensively by NeuroCAAS admins if you choose to customize your Job Manager.   
 

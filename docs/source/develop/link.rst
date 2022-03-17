@@ -91,36 +91,8 @@ Add a comment to your pull request that specifies what your analysis does, and w
 
 Note that if you develop more blueprints later, you will still submit pull requests, but you can use the same credentials. 
 
-Alternative Account
-~~~~~~~~~~~~~~~~~~~
-**Skip to Configuring Credentials if you submitted a pull request**
-Alternatively, you can also set up development on a separately managed AWS account. NOTE: AWS charges in real time for resource use. Make sure that you know what you are doing (cost monitoring, instance management, privacy settings) before going this route!
-To proceed with your own AWS account, you will need admin permissions.
-To initialize NeuroCAAS on a separate AWS account, first follow the installation instructions for
-the binxio secret provider stack:
-<https://github.com/binxio/cfn-secret-provider>. Navigate within the
-repository to: `neurocaas/ncap_iac/ncap_blueprints/utils_stack`.
-    
-
-Now run the following command:
-
-.. code-block:: bash
-
-    % bash initialize_neurocaas.sh
-
-This will create the cloud resources necessary to deploy your resources
-regularly and handle the permissions necessary to manage and deploy
-cloud jobs, and ssh keys to access resources on the cloud. The results
-of initialization can be seen in the file
-`global_params_initialized.json`, with the names of resources listed. If
-you encounter an error, consult the contents of the file
-`neurocaas/ncap_iac/ncap_blueprints/utils_stack/init_log.txt`, and post
-it to the neurocaas issues page.
-
-To continue, you will need to create an IAM user with programmatic access, and at minimum the IAM policies listed in :code:`neurocaas/ncap_iac/permissions/dev_policy.json`. Save the AWS key pair that is generated when you create an IAM user in a safe place outside of version control. 
-
-Configuring Credentials
-~~~~~~~~~~~~~~~~~~~~~~~
+Configuring Credentials with the main NeuroCAAS account
+-------------------------------------------------------
 **Important: this section deals with security credentials. Please proceed carefully.**
 
 From the previous step, you should now have an AWS Key Pair (Key and Secret Key),
@@ -169,5 +141,117 @@ later. Finally, change the permissions on this file with:
     % chmod 400 securefilelocation/securefilename.pem
 
 
-    
 With these credentials in place, you are now ready to choose the hardware and computing environment for your analysis.     
+
+Cloning NeuroCAAS to an alternative AWS Account
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Skip to Configuring Credentials if you are developing within the main NeuroCAAS account**
+Alternatively, you can also set up development and use of a NeuroCAAS platform clone on a separately managed AWS account. NOTE: AWS charges in real time for resource use. Although we provide the exact same cloud resource management tools to clone NeuroCAAS platforms through IaC, make sure that you know what you are doing with regard to cost monitoring and EC2 instance management before going with this route.
+To proceed with your own AWS account, you will need programmatic access (an AWS key pair) with admin permissions on this account. Using this key pair, follow the steps in :code:`Configuring Credentials` below, and :code:`Cloning the platform` afterwards. 
+
+Configuring Credentials with an alternative AWS Account
+-------------------------------------------------------
+
+**Important: this section deals with security credentials. Please proceed carefully.**
+
+From the previous step, you should now have an AWS Key Pair (Key and Secret Key),
+either from a pull request, or from an independent account. 
+These credentials will allow your to launch cloud compute instances, 
+and as such are extremely valuable. 
+**IMPORTANT: You MUST keep this file
+in separate, secure directory not under version control. If this key is
+exposed, it poses financial risks and privacy risks to the entire account.** 
+
+First verify your aws cli installation by running:
+
+.. code-block:: bash
+
+    % aws configure
+
+When prompted, enter the access key and secret access key associated
+with your admin account, as well as the AWS region you are closest
+to. Set the default output type to be :code:`json`.
+
+With these credentials in place, you are now ready to clone NeuroCAAS to your account. 
+
+Cloning the platform
+~~~~~~~~~~~~~~~~~~~~
+To initialize NeuroCAAS on a separate AWS account, first follow the :code:`Installation` instructions for
+the binxio secret provider stack. Doing so will let you manage sensitive information like SSH keys through IaC. 
+<https://github.com/binxio/cfn-secret-provider>. 
+
+.. warning:: 
+
+    When following instructions here, make sure that you confirm you are in the region you want to do most of your work in. In particular, if using the console, the default region is :code:`eu-central-1`: make sure to change this in the dropdown menu to the region closest to you. 
+ 
+Navigate within the
+neurocaas repository to: `neurocaas/ncap_iac/ncap_blueprints/utils_stack`.
+
+Now run the following command:
+
+.. code-block:: bash
+
+    % bash initialize_neurocaas.sh
+
+This will create the cloud resources necessary to deploy your resources
+regularly and handle the permissions necessary to manage and deploy
+cloud jobs, and ssh keys to access resources on the cloud. The results
+of initialization can be seen in the file
+`global_params_initialized.json`, with the names of resources listed. If
+you encounter an error, consult the contents of the file
+`neurocaas/ncap_iac/ncap_blueprints/utils_stack/init_log.txt`, and post
+it to the neurocaas issues page.
+
+Once you have done this step, you have a working instance of the NeuroCAAS platform set up in a different infrastructure stack. 
+
+Setting up developer tools for your cloned platform
+---------------------------------------------------
+
+Now that you have a clone of NeuroCAAS, you can configure it to use the same testing resources that we use locally. 
+
+First, create a test user. Run the following command from the AWS CLI: 
+
+.. code-block::     
+
+    aws iam create-user --user-name test-user{your_region_name} 
+
+Where you substitute in your region name for the bracketed area. You will refer to this test user when creating blueprints.     
+
+Next, we'll set up the forked NeuroCAAS repository with your credentials so that you can deploy blueprints through Github. 
+We will add four secrets to your fork of the NeuroCAAS repo as described `here <https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository>`_.
+Take your AWS key pair, and passthe key and secret key respectively under the fields `DEPLOY_AWS_ACCESS_KEY_ID` and `DEPLOY_AWS_SECRET_ACCESS_KEY`. 
+
+Furthermore, you'll want to create a docker token as described `here: <https://docs.docker.com/docker-hub/access-tokens/>`_, and pass additionally your access token as `DOCKER_HUB_ACCESS_TOKEN` and your docker username as `DOCKER_HUB_USERNAME`. These credentials are required because we use Docker to deploy analyses to NeuroCAAS via IaC.  
+
+
+Finally, in order to retrieve your ssh key, navigate
+within the source repository to:
+
+:code:`/path/to/neurocaas/ncap_iac/ncap_blueprints/utils_stack`. Type the following
+command:
+
+.. code-block:: bash
+
+    % bash print_privatekey.sh > securefilelocation/securefilename.pem
+
+Where :code:`securefilelocation/securefilename.pem` is a file NOT under
+version control. **IMPORTANT: We strongly recommend you keep this file
+in separate, secure directory not under version control. If this key is
+exposed, it will expose the development instances of everyone on your
+account**. You will reference this key when developing a machine image
+later. Finally, change the permissions on this file with:
+
+.. code-block:: bash
+
+    % chmod 400 securefilelocation/securefilename.pem
+
+Cloning an existing analysis from the main repo to a cloned repo     
+---------------------------------------------------------------- 
+
+You can clone an analysis from the main NeuroCAAS analysis by modifying the blueprint for the analysis as follows: 
+
+1. Change the given :code:`PipelineName` parameter: these are unique across all of AWS. 
+2. Delete the security group given, and let it be autofilled by your NeuroCAAS account clone. 
+3. Request that the AMI underlying the analysis be shared from the main account via a github issue.    
+4. Open a pull request with the changed blueprint into your own repository, and comment on the pull request with the command: :code:`#deploy:{foldername}`, where foldername is replaced by the name of the folder where your blueprint is stored in `ncap_blueprints`.  Doing so will trigger an automatic deployment of this analysis on your account. 
+
