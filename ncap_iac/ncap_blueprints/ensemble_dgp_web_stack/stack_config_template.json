@@ -9,10 +9,9 @@
         "PostHandler": "postprocess.postprocess_prediction",
         "Launch": true,
         "LambdaConfig": {
-            "AMI": "ami-048d86f71fa3f50d0",
+            "AMI": "ami-0ae7e7adeb098f69e",
             "INSTANCE_TYPE": "p3.2xlarge",
             "REGION": "us-east-1",
-            "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
             "IAM_ROLE": "SSMRole",
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
             "WORKING_DIRECTORY": "~/bin",
