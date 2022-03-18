@@ -92,7 +92,7 @@ Add a comment to your pull request that specifies what your analysis does, and w
 Note that if you develop more blueprints later, you will still submit pull requests, but you can use the same credentials. 
 
 Configuring Credentials with the main NeuroCAAS account
--------------------------------------------------------
+*******************************************************
 **Important: this section deals with security credentials. Please proceed carefully.**
 
 From the previous step, you should now have an AWS Key Pair (Key and Secret Key),
@@ -145,12 +145,13 @@ With these credentials in place, you are now ready to choose the hardware and co
 
 Cloning NeuroCAAS to an alternative AWS Account
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-**Skip to Configuring Credentials if you are developing within the main NeuroCAAS account**
+**Skip to Developing On the Command Line if you are developing within the main NeuroCAAS account**.
+
 Alternatively, you can also set up development and use of a NeuroCAAS platform clone on a separately managed AWS account. NOTE: AWS charges in real time for resource use. Although we provide the exact same cloud resource management tools to clone NeuroCAAS platforms through IaC, make sure that you know what you are doing with regard to cost monitoring and EC2 instance management before going with this route.
 To proceed with your own AWS account, you will need programmatic access (an AWS key pair) with admin permissions on this account. Using this key pair, follow the steps in :code:`Configuring Credentials` below, and :code:`Cloning the platform` afterwards. 
 
 Configuring Credentials with an alternative AWS Account
--------------------------------------------------------
+*******************************************************
 
 **Important: this section deals with security credentials. Please proceed carefully.**
 
@@ -205,7 +206,7 @@ it to the neurocaas issues page.
 Once you have done this step, you have a working instance of the NeuroCAAS platform set up in a different infrastructure stack. 
 
 Setting up developer tools for your cloned platform
----------------------------------------------------
+***************************************************
 
 Now that you have a clone of NeuroCAAS, you can configure it to use the same testing resources that we use locally. 
 
@@ -246,7 +247,7 @@ later. Finally, change the permissions on this file with:
     % chmod 400 securefilelocation/securefilename.pem
 
 Cloning an existing analysis from the main repo to a cloned repo     
----------------------------------------------------------------- 
+*****************************************************************
 
 You can clone an analysis from the main NeuroCAAS analysis by modifying the blueprint for the analysis as follows: 
 
