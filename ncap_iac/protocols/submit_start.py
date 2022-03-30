@@ -392,7 +392,13 @@ class Submission_dev():
             raise AssertionError("[JOB TERMINATE REASON] Instance requests greater than pipeline bandwidth (base AWS capacity). Too many simultaneously deployed analyses")
 
         self.instances = instances
+        self.logger.append("        [Internal (acquire_instances)] Waiting for instances to be in state `running`.")
+        self.logger.printlatest()
+        self.logger.write()
         [instance.wait_until_running() for instance in instances]
+        self.logger.append("        [Internal (acquire_instances)] Instances now `running`.")
+        self.logger.printlatest()
+        self.logger.write()
 
         return instances
 
