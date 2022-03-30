@@ -92,7 +92,7 @@ def start_instances_if_stopped(instances, logger):
         else:
             logger.append("        [Utils] Instance already running.")
             logger.write()
-    logger.append("        [Utils] Initializing instances. This could take a minute...")
+    logger.append("        [Utils] Initializing instances. This could take a few minutes...")
     logger.write()
     logger.printlatest()
     wait_system_ok(instances,logger)
