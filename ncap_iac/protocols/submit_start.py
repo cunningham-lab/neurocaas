@@ -107,7 +107,7 @@ class Submission_dev():
             self.logger.append(msg)
             self.logger.printlatest()
             self.logger.write()
-            msg = "ANALYSIS VERSION ID: {}".format(os.environ['versionid'].split("\n")[1])
+            msg = "ANALYSIS VERSION ID: {}".format(os.environ['versionid'])
             self.logger.append(msg)
             self.logger.printlatest()
             self.logger.write()
