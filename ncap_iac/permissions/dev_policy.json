@@ -42,6 +42,7 @@
         },
         {
             "Sid": "VisualEditor2",
+
             "Effect": "Allow",
             "Action": "ec2:CreateTags",
             "Resource": [
