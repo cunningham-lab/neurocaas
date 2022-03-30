@@ -83,6 +83,16 @@ def create_ami():
     yield ami["ImageId"]
 
 @pytest.fixture
+def create_securitygroup():
+    testgroup = "test_security_localstack_group"
+    ec2_client = localstack_client.session.client("ec2")
+    ec2_resource = localstack_client.session.resource("ec2")
+    ec2_client.create_security_group(Description='test security group',
+    GroupName=testgroup)
+    yield testgroup
+    ec2_client.delete_security_group(GroupName = testgroup)
+
+@pytest.fixture
 def setup_lambda_env(monkeypatch,autouse = True):
     """Our lambda functions require a certain number of environment variables to be set in order to function properly. 
 
@@ -490,10 +500,12 @@ class Test_Submission_dev():
         sd.parse_config()
         assert sd.get_costmonitoring() == response
 
-    def test_Submission_dev_prices_active_instances_ami(self,create_ami,setup_lambda_env,setup_testing_bucket,loggerfactory,check_instances,monkeypatch,set_ssm_budget_other,set_price,patch_boto3_ec2,kill_instances):    
+    def test_Submission_dev_prices_active_instances_ami(self,create_securitygroup,create_ami,setup_lambda_env,setup_testing_bucket,loggerfactory,check_instances,monkeypatch,set_ssm_budget_other,set_price,patch_boto3_ec2,kill_instances):    
         instance_type = "p3.2xlarge"
         ami = create_ami
         monkeypatch.setenv("AMI",ami)
+        sg = create_securitygroup
+        monkeypatch.setenv("SECURITY_GROUPS",sg)
 
         logger = loggerfactory 
         number = 20
@@ -514,10 +526,12 @@ class Test_Submission_dev():
         price = sd.prices_active_instances_ami(ami)
         assert price == number*duration/60 
 
-    def test_Submission_dev_get_costmonitoring__many_active(self,create_ami,setup_lambda_env,setup_testing_bucket,loggerfactory,check_instances,monkeypatch,set_ssm_budget_other,set_price,patch_boto3_ec2,kill_instances):    
+    def test_Submission_dev_get_costmonitoring__many_active(self,create_securitygroup,create_ami,setup_lambda_env,setup_testing_bucket,loggerfactory,check_instances,monkeypatch,set_ssm_budget_other,set_price,patch_boto3_ec2,kill_instances):    
         instance_type = "p3.2xlarge"
         ami = create_ami
         monkeypatch.setenv("AMI",ami)
+        sg = create_securitygroup
+        monkeypatch.setenv("SECURITY_GROUPS",sg)
 
         logger = loggerfactory 
         number = 10
@@ -528,7 +542,7 @@ class Test_Submission_dev():
         job = "job1"
 
         message = patch_boto3_ec2
-        response1 = ec2.launch_new_instances_with_tags_additional(instance_type,ami,logger,number,add_size,duration,group,analysis,job)
+        response1 = ec2.launch_new_instances_with_tags_additional(instance_type,ami,logger,number,add_size,duration,group,analysis,job,)
 
         bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
         submit_dir = os.path.dirname(submit_path)
@@ -555,15 +569,17 @@ class Test_Submission_dev():
         assert sd.jobduration == 360
         assert sd.jobsize == 20
 
-    def test_Submission_dev_acquire_instances(self,monkeypatch,setup_lambda_env,setup_testing_bucket,create_ami,kill_instances):
+    def test_Submission_dev_acquire_instances(self,create_securitygroup,monkeypatch,setup_lambda_env,setup_testing_bucket,create_ami,kill_instances):
         """For this test, we generate fake instances. We need to monkeypatch into ec2 in order to do so.  
 
         """
         bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
         ami = create_ami
+        sg = create_securitygroup
 
         session = localstack_client.session.Session()
         monkeypatch.setattr(ec2,"ec2_client",session.client("ec2"))
+        monkeypatch.setenv("SECURITY_GROUPS",sg)
         monkeypatch.setattr(ec2,"ec2_resource",session.resource("ec2"))
 
         sd = submit_start.Submission_dev(bucket_name,submit_path,"111111111")
@@ -616,13 +632,15 @@ class Test_Submission_ensemble():
             assert "jobnb" in data.keys()
             s3.s3_resource.Object(bucket_name,cfig).delete()
         
-    def test_Submission_ensemble_process_inputs(self,monkeypatch,setup_lambda_env,setup_testing_bucket,create_ami,kill_instances):
+    def test_Submission_ensemble_process_inputs(self,create_securitygroup,monkeypatch,setup_lambda_env,setup_testing_bucket,create_ami,kill_instances):
         """This test is expected to leave something running. Kill afterwards. 
 
         """
         ami = create_ami
+        sg = create_securitygroup
         session = localstack_client.session.Session()
         monkeypatch.setattr(ec2,"ec2_client",session.client("ec2"))
+        monkeypatch.setenv("SECURITY_GROUPS",sg)
         monkeypatch.setattr(ec2,"ec2_resource",session.resource("ec2"))
         monkeypatch.setattr(ssm,"ssm_client",session.client("ssm"))
         
