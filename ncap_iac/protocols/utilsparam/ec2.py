@@ -5,12 +5,37 @@ from math import ceil
 import boto3
 import botocore
 
+import socket
+
 #from .config import IAM_ROLE, KEY_NAME, SECURITY_GROUPS, SHUTDOWN_BEHAVIOR
 
 # Boto3 Resources & Clients
 ec2_resource = boto3.resource('ec2')
 ec2_client = boto3.client('ec2')
 volume_available_waiter = ec2_client.get_waiter('volume_available')
+
+def wait_system_ok(instances,logger):
+    waiter = ec2_client.get_waiter("system_status_ok")
+    waiter.wait(InstanceIds = [instance.id for instance in instances])
+    logger.append("        [Utils] Instance systems are set up.")
+
+def wait_port_22(instance,logger):
+    retries = 100
+    retry_delay= 10
+    retry_count = 0
+    while retry_count <= retries:
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            result = sock.connect_ex((instance.public_ip_address,22))
+        except TypeError:    
+            result = 1 ## no public ip address yet. 
+        if result == 0:
+            logger.append("        [Utils] Instance is UP & accessible on port 22")
+            break
+        else:
+            logger.append("        [Utils] Instance is still setting up. Retrying to connect.")
+            time.sleep(retry_delay)
+            retry_count+=1
 
 def get_instance(instanceid,logger):
     """ Gets the instance given an instance id.  """
@@ -67,9 +92,10 @@ def start_instances_if_stopped(instances, logger):
         else:
             logger.append("        [Utils] Instance already running.")
             logger.write()
-    logger.append("        [Utils] Initializing instances. This could take a moment...")
+    logger.append("        [Utils] Initializing instances. This could take a minute...")
     logger.write()
-    time.sleep(60)
+    logger.printlatest()
+    wait_system_ok(instances,logger)
     logger.append("        [Utils] All Instances Initialized.")
     logger.write()
 
