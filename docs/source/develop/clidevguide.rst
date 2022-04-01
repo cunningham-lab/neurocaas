@@ -129,7 +129,6 @@ In your config file, these parameters might look like this:
 
 .. code-block:: yaml
 
-
     # Analysis Parameters:
     # ++++++++++++++++++++
     ## a boolean parameter
@@ -138,6 +137,8 @@ In your config file, these parameters might look like this:
     parameter_list: [1,2,3,4]
     ## a float parameter
     float_parameter: 0.5
+    ## a path parameter: points to another resource the user has access to 
+    additional_data: /path/to/file/in/s3.data
 
 
     # NeuroCAAS Parameters:
@@ -147,13 +148,13 @@ In your config file, these parameters might look like this:
     # This will cost around half of a standard job, and the instance will terminate once the given time limit is reached, whether or not analysis is complete.
     # Units: Minutes
     # Type: INTEGER.
-    "__duration__": 200
+    __duration__: 200
 
     # DATASET SIZE: You can specify the dataset_size parameter if your dataset is large, and you know you will need extra storage space in the immutable analysis environment.
     # This space will be added onto the existing size of the instance.
     # Units: GB
     # Type: INTEGER
-    "__dataset_size__": 300
+    __dataset_size__: 300
 
 
 
