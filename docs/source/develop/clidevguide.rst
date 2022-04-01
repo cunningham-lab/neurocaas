@@ -111,6 +111,52 @@ into that kind of example, where all functionality is handled from a call to a s
    
    Feel free to contact a NeuroCAAS Admin for more help with specific instances of this workflow. 
 
+In what follows we will first cover the structure of inputs to IAEs, followed by the recommended structure of processing scripts.
+
+
+Input: Data and Configuration Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+All NeuroCAAS analyses take as input a single data file, and a single configuration file. The data file can be in any format (numpy array, hdf5 file, tiff image stack, zip archive, etc.), but it must be a single file. If you have additional data files that are important for analysis, the recommended workflow is to indicate them as additional parameters in your configuration file.  
+
+The configuration file is a :code:`.yaml` (or optionally :code:`.json`) file. We prefer :code:`.yaml` because it allows developers to easily write comments around their parameters, which is easier for users to understand. For python analyses, YAML files can be parsed like dictionaries- we provide command line tools to parse YAML files through the :code:`neurocaas-contrib` cli as well. 
+
+One important point is that all NeuroCAAS config files take two general purpose NeuroCAAS parameters:    
+    - __duration__: This parameter specifies the **maximum** expected duration for a given NeuroCAAS job, in minutes. **Once this duration is reached, the job can be stopped at any time**. If not given, this duration is set at 60 minutes for all analyses- you may want to set a much higher default value depending on your analysis. At the same time, note that this parameter allows us to predict and monitor costs, and users will not be able to run jobs whose expected costs exceed their budgets, so don't set it to something ludicrously large.  
+    - __dataset_size__: This parameter specifies storage space in GB that you would like to add to your immutable analysis environment. This is most important if you are running very large datasets.  
+
+In your config file, these parameters might look like this:     
+
+.. code-block:: yaml
+
+    # Analysis Parameters:
+    # ++++++++++++++++++++
+    ## a boolean parameter
+    parameter_1: True 
+    ## a list parameter
+    parameter_list: [1,2,3,4]
+    ## a float parameter
+    float_parameter: 0.5
+    ## a path parameter: points to another resource the user has access to 
+    additional_data: /path/to/file/in/s3.data
+
+
+    # NeuroCAAS Parameters:
+    # ++++++++++++++++++++
+
+    # DURATION: You can specify the duration parameter if you know how long the job will last to trigger a NeuroCAAS Save job.
+    # This will cost around half of a standard job, and the instance will terminate once the given time limit is reached, whether or not analysis is complete.
+    # Units: Minutes
+    # Type: INTEGER.
+    __duration__: 200
+
+    # DATASET SIZE: You can specify the dataset_size parameter if your dataset is large, and you know you will need extra storage space in the immutable analysis environment.
+    # This space will be added onto the existing size of the instance.
+    # Units: GB
+    # Type: INTEGER
+    __dataset_size__: 300
+
+
 
 Main script
 ~~~~~~~~~~~
