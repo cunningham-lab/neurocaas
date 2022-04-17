@@ -9,7 +9,7 @@
         "PostHandler": "postprocess.epipostprocess",
         "Launch": true,
         "LambdaConfig": {
-            "AMI": "ami-029cccdfcf6dc869e",
+            "AMI": "ami-0074e3f0521cad2ef",
             "INSTANCE_TYPE": "m5.16xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
