@@ -7,12 +7,12 @@ Babel==2.8.0
 backcall==0.1.0
 boto3==1.17.41
 certifi==2020.4.5.1
-cffi==1.12.3
+cffi
 cfn-flip==1.2.1
 chardet==3.0.4
 Click==7.0
 colorama==0.3.9
-cryptography==3.3.2
+cryptography
 cycler==0.10.0
 decorator==4.4.0
 docker==4.2.1
