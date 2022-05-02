@@ -9,7 +9,7 @@
         "PostHandler": "postprocess.epipostprocess",
         "Launch": true,
         "LambdaConfig": {
-            "AMI": "ami-045bdb48658041dbd",
+            "AMI": "ami-048a58403daf0ae23",
             "INSTANCE_TYPE": "m5.16xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
@@ -24,7 +24,7 @@
             "SSM_TIMEOUT": 172000,
             "LAUNCH": true,
             "LOGFILE": "lambda_log.txt",
-            "DEPLOY_LIMIT": 10,
+            "DEPLOY_LIMIT": 100,
             "MAXCOST": 300,
             "MONITOR": true,
             "LOGDIR": "logs",

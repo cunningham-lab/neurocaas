@@ -28,7 +28,7 @@ The first time that you request a remote machine, you will probably waht to call
 
    neurocaas-contrib remote launch-devinstance  --timeout 60 --volumesize <size GB> --amiid <ami-id>
 
-This command will launch a remote instance of the type specified in your blueprint's parameter, :code:`Lambda.LambdaConfig.INSTANCE\_TYPE`.    
+This command will launch a remote instance of the type specified in your blueprint's parameter, :code:`Lambda.LambdaConfig.INSTANCE_TYPE`.    
 Furthermore, it will be kept on for :code:`--timeout` minutes (default 60), be equipped with a storage volume of size :code:`--volumesize` gigabytes, and 
 start with a virtual machine of type :code:`--amiid`, where the ID is specified by AWS AMI IDs. If you do not specify an id, it will be read in from the blueprint's :code:`Lambda.LambdaConfig.AMI` parameter.  
 
@@ -101,12 +101,67 @@ After connecting to your remote instance via ssh, you can download your
 code repositories and dependencies to it, and test basic functionality.
 You should also install the CLI tool on the remote instance as well. 
 If you remember the Quickstart example, our goal here is to develop any source code 
-into that example. 
+into that kind of example, where all functionality is handled from a call to a single workflow script. 
+
+.. note:: 
+   Although our platform largely hosts analysis code written in python, we are not tied to a particular programming language, and you are free to run programs written in the language of your choice, as long as it can be incorporated into a bash script call. One important qualification is the use of licensed languages, like MATLAB. For Matlab, we recommend the following workflow: 
+
+   1. Use the [MATLAB Compiler](https://www.mathworks.com/help/compiler/getting-started-with-matlab-compiler.html) to compile your code into a program that can be run from your command line. You should run the MATLAB compiler from a Linux Operating System so that compiled code will run on our pre-configured IAE templates. 
+   2. Install the compiled code onto the IAE, and proceed as described below.       
+   
+   Feel free to contact a NeuroCAAS Admin for more help with specific instances of this workflow. 
+
+In what follows we will first cover the structure of inputs to IAEs, followed by the recommended structure of processing scripts.
+
+
+Input: Data and Configuration Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+All NeuroCAAS analyses take as input a single data file, and a single configuration file. The data file can be in any format (numpy array, hdf5 file, tiff image stack, zip archive, etc.), but it must be a single file. If you have additional data files that are important for analysis, the recommended workflow is to indicate them as additional parameters in your configuration file.  
+
+The configuration file is a :code:`.yaml` (or optionally :code:`.json`) file. We prefer :code:`.yaml` because it allows developers to easily write comments around their parameters, which is easier for users to understand. For python analyses, YAML files can be parsed like dictionaries- we provide command line tools to parse YAML files through the :code:`neurocaas-contrib` cli as well. 
+
+One important point is that all NeuroCAAS config files take two general purpose NeuroCAAS parameters:    
+    - __duration__: This parameter specifies the **maximum** expected duration for a given NeuroCAAS job, in minutes. **Once this duration is reached, the job can be stopped at any time**. If not given, this duration is set at 60 minutes for all analyses- you may want to set a much higher default value depending on your analysis. At the same time, note that this parameter allows us to predict and monitor costs, and users will not be able to run jobs whose expected costs exceed their budgets, so don't set it to something ludicrously large.  
+    - __dataset_size__: This parameter specifies storage space in GB that you would like to add to your immutable analysis environment. This is most important if you are running very large datasets.  
+
+In your config file, these parameters might look like this:     
+
+.. code-block:: yaml
+
+    # Analysis Parameters:
+    # ++++++++++++++++++++
+    ## a boolean parameter
+    parameter_1: True 
+    ## a list parameter
+    parameter_list: [1,2,3,4]
+    ## a float parameter
+    float_parameter: 0.5
+    ## a path parameter: points to another resource the user has access to 
+    additional_data: /path/to/file/in/s3.data
+
+
+    # NeuroCAAS Parameters:
+    # ++++++++++++++++++++
+
+    # DURATION: You can specify the duration parameter if you know how long the job will last to trigger a NeuroCAAS Save job.
+    # This will cost around half of a standard job, and the instance will terminate once the given time limit is reached, whether or not analysis is complete.
+    # Units: Minutes
+    # Type: INTEGER.
+    __duration__: 200
+
+    # DATASET SIZE: You can specify the dataset_size parameter if your dataset is large, and you know you will need extra storage space in the immutable analysis environment.
+    # This space will be added onto the existing size of the instance.
+    # Units: GB
+    # Type: INTEGER
+    __dataset_size__: 300
+
+
 
 Main script
 ~~~~~~~~~~~
 
-All NeuroCAAS analyses should be triggered by running a central bash script called :code:`run\_main_cli.sh` (it can be found in the top level directory of :code:`neurocaas-contrib`).
+All NeuroCAAS analyses should be triggered by running a central bash script called :code:`run_main_cli.sh` (it can be found in the top level directory of :code:`neurocaas-contrib`).
 
 This script ensures that all jobs run on NeuroCAAS are managed and logged correctly. 
 This script takes 5 arguments, as follows:   
@@ -118,18 +173,18 @@ This script takes 5 arguments, as follows:
 The first four parameters refer to locations in Amazon S3 where the inputs and results of this analysis will be stored. 
 These parameters correspond to the directory structure given in the "End Goals" section as follows: 
 
-- :code:`$bucketname: {analysis\_name}`
-- :code:`$path\_to\_input`: {group\_name}/inputs/name\_of\_dataset`
-- :code:`$path\_to\_result\_dir`: results/job\_{timestamp}`
-- :code:`$path\_to\_config\_file`: {group\_name}/configs/name\_of\_config\_file`
+- :code:`$bucketname: {analysis_name}`
+- :code:`$path_to_input`: {group_name}/inputs/name_of_dataset`
+- :code:`$path_to_result_dir`: results/job_{timestamp}`
+- :code:`$path_to_config_file`: {group_name}/configs/name_of_config_file`
 
 These will be automatically filled in by NeuroCAAS when users request jobs, 
 but can be manually filled in for certain test cases. For more info see the sections "Testing your script (locally)" and "Testing a machine image".
 
-The fifth parameter, :code:`$path\_to\_analysis\_script`, is a analysis-specific bash script, that will be run inside the :code:`run\_main.sh` script. It will call all of the analysis source code
+The fifth parameter, :code:`$path_to_analysis_script`, is a analysis-specific bash script, that will be run inside the :code:`run_main.sh` script. It will call all of the analysis source code
 , transfer data in to the instance, etc. This will be the subject of the next subsection, Analysis script. 
 
-If we look at the contents of :code:`run\_main\_cli.sh`, they are as follows: 
+If we look at the contents of :code:`run_main_cli.sh`, they are as follows: 
 
 .. code-block:: bash
 
@@ -193,6 +248,29 @@ TL;DR from the previous section:
 There are more features that you can dig into to parse multiple input files, or multiple result files. 
 See the CLI --help command for in depth info on each of these CLI commands, or the API docs `here <https://neurocaas-contrib.readthedocs.io/en/latest/>`_.
  
+As a general guideline for writing analysis scripts, you can treat immutable analysis environments like a persistent server when installing your analysis software- the state of your file system will be preserved when you save your IAE. A good rule of thumb is as follows: Imagine you log in to a remote server, install your code, and then log out and back in again. What steps would you have to take to make your analysis run? A typical (python) example might include:   
+   
+1. Activating a conda virtual environment
+2. Navigating to the directory where your scripts are stored      
+3. Locating your data and configuration files, and passing them to your analysis script      
+4. Locating analysis results, and passing them back to the user.       
+
+We have introduced tools to make scripting many of these steps easier, as documented above. 
+
+
+.. note::
+
+    Please consider the follow best practice guidelines to maximize the benefits of NeuroCAAS for your analysis. These criteria will be evaluated when your stack is reviewed by NeuroCAAS admins: 
+
+    1. Secrets: Don't hardcode private secrets into the immutable analysis environment. AWS credentials will automatically be passed to the instance when you log in, so you will not have to configure it as you did your local machine. Although users won't be able to interactively access the IAE, removing private secrets can also make your analysis more portable and usable in non-NeuroCAAS settings should you wish to do so in the future.    
+    2. Updating your codebase: Avoid steps that could mutate the state of your IAE within your workflow script (e.g. git pulling from your repository to get the latest version). Although convenient, this step can interfere with the reproducibility that NeuroCAAS provides. The recommended workflow is to update your IAE through pull requests when you want to update your analysis itself, ensuring that changes to expected behavior are documented. In the future we plan to create workflows through Github to automate this process.       
+    3. Randomization: If your analysis relies upon randomized computations (random initial state, sampling), whenever possible we recommend including random seeds as a configuration parameter. This step can extend the reproducibility benefits provided by NeuroCAAS.   
+    4. Logs: Be as clear as possible about reporting compute back to the user. If you follow the steps outlined here, all outputs printed to stdout and stderr by your workflow script will be reported back to the user (including outputs from child processes of the script, like calls to python scripts). See the :code:`Analysis script` section below for an example. Configuration files will also be returned to the user by default.    
+    5. Input parsing: A useful feature for IAE based analyses is the ability to parse inputs at the beginning of analyses to ensure that they are formatted as expected- in fact, in the absence of common infrastructure issues this is the most common issue on NeuroCAAS. Including input parsing can save compute time and provide clearer error messages to users. Input parsing can be implemented in several ways: 1) As the first step of your Analysis script. This option is most appropriate if input parsing requires the compute resources provided by your blueprint, but it means that analyses will have to be started before users are informed of a potential formatting error. 2) As an independent script distributed to users. When you make your analysis available on NeuroCAAS, you can provide additional resources for users, including scripts that they can run themselves. 3) As a customized job manager. When analysis jobs are first requested, we can program custom behavior from the NeuroCAAS job manager. See the section :code:`Customizing the job manager` later in this section for details.  
+           
+If you have questions about these criteria and their implementation for your particular use case, please pose a question via an issue or pull request on our Github repo.     
+
+
 As a worked example, we can look at the processing script for the analysis DeepGraphPose. This analysis uses all of the commands above, and conditionally performs training or prediction based on the value of a configuration file parameter: 
 
 .. code-block:: bash 
@@ -357,9 +435,6 @@ Once you have a working image, it is useful to deploy it as a NeuroCAAS
 analysis to perform further testing using the access configuration a
 user would have (see “Testing a machine image”).
 
-.. note:: 
-
-   If you were unable to run your analysis as a separate user, we will amend the blueprint as follows. For the field :code:`Lambda.LambdaConfig.COMMAND`, please prepend `sudo -u {your username}` to your call to :code:`run_main.sh`. For example, if the current value is :code:`neurocaas_contrib/run_main.sh`, and you log in to your compute instance as :code:`ubuntu`, the command should become :code:`sudo -u ubuntu neurocaas_contrib/run_main.sh`. 
 
 Deployment is managed centrally by the NeuroCAAS Team. 
 Once you are ready to deploy your blueprint, and see how your analysis performs, 
@@ -413,7 +488,7 @@ You should upload all configuration files to the :code:`configs` directory, and 
     }
 
 Where the dataname and configname values point to the data that you
-upload to an S3 bucket, and {group\_name} corresponds to the group name 
+upload to an S3 bucket, and {group_name} corresponds to the group name 
 depicted in the user-side data organization diagram. If you followed 
 the instructions regarding blueprint configuration, this will most likely 
 be "debuggers".
@@ -441,10 +516,71 @@ status and output of this job as it proceeds locally from python with:
 The results themselves will be returned to AWS
 S3 upon job completion.
 
+.. note:: 
 
-Adding users
-~~~~~~~~~~~~
+   You may run into permissions related issues at this stage- if certain software was installed with permissions that only allows it to be run by a specific user, automatically running your IAE may fail. A common example of this is in activating conda environments. To resolve these issues, we can amend the blueprint as follows. For the field :code:`Lambda.LambdaConfig.COMMAND`, please prepend `sudo -u {your username}` to your call to :code:`run_main.sh`. For example, if the current value is :code:`neurocaas_contrib/run_main.sh`, and you log in to your compute instance as :code:`ubuntu`, the command should become :code:`sudo -u ubuntu neurocaas_contrib/run_main.sh`. This will ensure behavior that is identical to running your main script from inside the instance. 
+
+Adding users and managing access
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once your blueprint has successfully been deployed, you can authorize
 some users to access it. Additionally, if it is ready you can publish your analysis to the neurocaas website, and have it accessible by default to interested users. 
+
+As a developer, you can manage access to your analysis through the :code:`STAGE` parameter of your blueprint. Access works as follows: 
+
+- If :code:`STAGE=webdev`, you authorize users to access your analysis on a case-by-case basis through blueprint updates. Nobody who you do not explicitly name in your blueprint can run analysis jobs. 
+- If :code:`STAGE=websubstack`, you are opening your analysis for general use. Anyone with a NeuroCAAS account can opt in to use your analysis. 
+
+Generally, we recommend you keep analyses in the :code:`webdev` mode until you have run a few end-to-end tests with interested users. In order to add users to your analysis, ask them for their AWS username, and contact NeuroCAAS admins for their group name (we're working on making this easier.) 
+
+With this information, add the following bracketed block to the "Affiliates" section of your blueprint: 
+
+.. code-block:: json 
+
+   "UXData": {
+    "Affiliates": [
+        ...
+        {
+            "AffiliateName": {name of group},
+            "UserNames": [
+               {AWS username WITHOUT REGION} 
+            ],
+            "UserInput": true,
+            "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
+        }
+        ... 
+    ]
+
+Importantly, you should add the AWS username without the region suffix (e.g. "us-east-1"). 
+
+
 This process is managed through pull requests as well. Let your NeuroCAAS admin know that you are ready to add users in a pull request thread, and they will authorize you for further steps. 
+
+Customizing Job Managers
+------------------------
+
+For most analyses, it is sufficient to develop your analysis entirely within a single IAE as described above.This is the case for all computing steps that can be done assuming that your dataset and configuration files already exist in some file system. If this is the case for you, you can ignore this section.  
+However, some parts of analysis may be useful to implement as soon as NeuroCAAS jobs are triggered- i.e. before transferring data and configuration files into an IAE. Examples of such steps include parsing inputs, coordination of multiple IAEs on multiple hardware instances, or multi-step analyses that work across different IAEs sequentially. Examples of these latter two workflows are presented in the NeuroCAAS paper. This level of customization can be implemented on an analysis-by-analysis basis by customizing NeuroCAAS job manager behavior through protocols.
+
+Default Protocol 
+~~~~~~~~~~~~~~~~
+Note the following fields of the blueprints: :code:`Lambda.CodeUri` and :code:`Lambda.Handler`. By default, you should expect to see the following fields and values in the blueprint:
+
+.. code-block::
+    "Lambda": {
+        "CodeUri": "../../protocols",
+        "Handler": "submit_start.handler_develop",
+
+These fields point to code located in the directory :code:`ncap_iac/protocols`.
+In particular, the module :code:`submit_start.py` contains a function :code:`handler_develop` that is triggered every time a NeuroCAAS submission file is uploaded. This code is run in a *serverless* environment using AWS Lambda.  
+
+Building Custom Protocols
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The logic for parsing submissions is contained in the class :code:`Submission_dev`, contained in the same file. The recommended workflow for customizing job managers is to *inherit* from :code:`Submission_dev`, as is done in :code:`Submission_ensemble`, and overwrite or extend existing methods. For example, one could implement input parsing by extending the method :code:`check_existence`, which performs a basic check to ensure that the data and configuration file referenced in job submission really exists. 
+
+Some notes regarding customizing job managers: 
+
+- Customizing job managers is more advanced than the standard NeuroCAAS workflow, as it requires developers to be more aware of the way in which user input triggers computation on the cloud. We therefore recommend that first time developers leave Job Managers in their default configuration if possible, and that they consult with NeuroCAAS admins before making changes if required.  
+- It is critical to correctly handle errors and exceptions in the Job Manager- because Job Managers have the important role of determining when to start and stop compute instances, mismanagement can have implications on the cost of your analysis. These features will be tested extensively by NeuroCAAS admins if you choose to customize your Job Manager.   
+
