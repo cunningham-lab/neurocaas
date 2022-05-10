@@ -1,0 +1,32 @@
+{
+    "PipelineName": "circuitmap",
+    "REGION": "us-east-1",
+    "STAGE": "webdev",
+    "Lambda": {
+        "CodeUri": "../../protocols",
+        "Handler": "submit_start.handler_develop",
+        "Launch": true,
+        "LambdaConfig": {
+            "AMI": "dlami18",
+            "INSTANCE_TYPE": "p2.xlarge",
+            "REGION": "us-east-1",
+            "IAM_ROLE": "SSMRole",
+            "KEY_NAME": "testkeystack-custom-dev-key-pair",
+            "WORKING_DIRECTORY": "~/bin",
+            "COMMAND": "cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup"
+        }
+    },
+    "UXData": {
+        "Affiliates": [
+            {
+                "AffiliateName": "traviscipermagroup",
+                "UserNames": [
+			"mat2245colum1652123255us-east-1"
+                ],
+                "UserInput": true,
+                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
+		"debuggers": "mat2245colum1652123255"
+            }
+        ]
+    }
+}
