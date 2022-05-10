@@ -19,13 +19,11 @@
     "UXData": {
         "Affiliates": [
             {
-                "AffiliateName": "traviscipermagroup",
+                "AffiliateName": "debuggers",
                 "UserNames": [
-			"mat2245colum1652123255us-east-1"
+                    "mat2245"
                 ],
-                "UserInput": true,
-                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
-		"debuggers": "mat2245colum1652123255"
+                "ContactEmail": "mat2245@columbia.edu"
             }
         ]
     }
