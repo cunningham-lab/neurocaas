@@ -5,14 +5,14 @@ attrs==19.3.0
 awscli==1.19.41
 Babel==2.8.0
 backcall==0.1.0
-boto3
+boto3==1.17.41
 certifi==2020.4.5.1
-cffi==1.12.3
+cffi
 cfn-flip==1.2.1
 chardet==3.0.4
 Click==7.0
 colorama==0.3.9
-cryptography==3.3.2
+cryptography
 cycler==0.10.0
 decorator==4.4.0
 docker==4.2.1
@@ -29,6 +29,7 @@ kiwisolver==1.1.0
 livereload==2.6.1
 localstack==0.12.3
 localstack-client==1.10
+localstack-ext==0.12.15.7
 Markdown==3.1.1
 MarkupSafe==1.1.1
 matplotlib>=3.1.0
@@ -57,6 +58,7 @@ PyYAML==5.4
 requests==2.23.0
 rsa>=4.1
 s3transfer>=0.2.0
+setuptools<58
 six==1.12.0
 snowballstemmer==2.0.0
 Sphinx==3.0.3
@@ -69,6 +71,6 @@ sphinxcontrib-serializinghtml==1.1.4
 git+https://github.com/sphinx-contrib/video.git
 tornado==6.0.3
 traitlets==4.3.2
-troposphere==2.5.0
+troposphere>=2.5.0
 wcwidth==0.1.7
 zipp==3.1.0

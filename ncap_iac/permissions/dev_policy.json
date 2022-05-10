@@ -2,21 +2,6 @@
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Effect": "Allow",
-            "Action": [
-                "ssm:GetParameter",
-                "ssm:GetParameters"
-            ],
-            "Resource": "arn:aws:ssm:us-east-1:739988523141:parameter/testkeystack/neurocaas/*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ssm:DescribeParameters"
-            ],
-            "Resource": "*"
-        },
-        {
             "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": [
@@ -37,13 +22,13 @@
             }
         },
         {
-            "Sid": "statemanage",
+            "Sid": "VisualEditor1",
             "Effect": "Allow",
             "Action": [
-                "ec2:StartInstances",
-                "ec2:StopInstances",
                 "ec2:RebootInstances",
-                "ec2:TerminateInstances"
+                "ec2:TerminateInstances",
+                "ec2:StartInstances",
+                "ec2:StopInstances"
             ],
             "Resource": [
                 "arn:aws:ec2:*:*:instance/*",
@@ -56,7 +41,22 @@
             }
         },
         {
-            "Sid": "VisualEditor1",
+            "Sid": "VisualEditor2",
+
+            "Effect": "Allow",
+            "Action": "ec2:CreateTags",
+            "Resource": [
+                "arn:aws:ec2:*:*:instance/*",
+                "arn:aws:ec2:*:*:volume/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "ec2:CreateAction": "StartInstances"
+                }
+            }
+        },
+        {
+            "Sid": "VisualEditor3",
             "Effect": "Allow",
             "Action": "ec2:CreateTags",
             "Resource": [
@@ -70,31 +70,67 @@
             }
         },
         {
-            "Sid": "VisualEditor2",
+            "Sid": "VisualEditor4",
             "Effect": "Allow",
-            "Action": "ec2:Describe*",
-            "Resource": "*"
-        },
-        {
-            "Sid": "VisualEditor3",
-            "Effect": "Allow",
-            "Action": [
-                "iam:PassRole",
-                "ec2:RunInstances",
-                "ec2:StartInstances",
-                "ec2:StopInstances",
-                "ec2:RebootInstances",
-                "ec2:TerminateInstances"
-            ],
+            "Action": "ec2:RunInstances",
             "Resource": [
-                "arn:aws:iam::739988523141:role/testutilsstack-SSMRole-1GG0BKY7GL634",
                 "arn:aws:ec2:*:*:subnet/*",
+                "arn:aws:iam::739988523141:role/testutilsstack-SSMRole-1GG0BKY7GL634",
                 "arn:aws:ec2:*:*:key-pair/*",
                 "arn:aws:ec2:*::snapshot/*",
                 "arn:aws:ec2:*:*:security-group/*",
                 "arn:aws:ec2:*:*:network-interface/*",
                 "arn:aws:ec2:*::image/*"
             ]
+        },
+        {
+            "Sid": "VisualEditor5",
+            "Effect": "Allow",
+            "Action": [
+                "iam:PassRole",
+                "ssm:GetParameters",
+                "ssm:GetParameter"
+            ],
+            "Resource": [
+                "arn:aws:ssm:us-east-1:739988523141:parameter/testkeystack/neurocaas/*",
+                "arn:aws:iam::739988523141:role/testutilsstack-SSMRole-1GG0BKY7GL634"
+            ]
+        },
+        {
+            "Sid": "VisualEditor6",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:Describe*",
+                "ssm:DescribeParameters",
+                "ec2:CreateImage"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "VisualEditor7",
+            "Effect": "Allow",
+            "Action": "ssm:SendCommand",
+            "Resource": "arn:aws:ssm:*:*:document/*"
+        },
+        {
+            "Sid": "VisualEditor8",
+            "Effect": "Allow",
+            "Action": "ssm:SendCommand",
+            "Resource": [
+                "arn:aws:ec2:*:*:instance/*",
+                "arn:aws:ssm:*:*:document/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "ssm:resourceTag/PriceTracking": "On"
+                }
+            }
+        },
+        {
+            "Sid": "VisualEditor9",
+            "Effect": "Allow",
+            "Action": "ssm:GetCommandInvocation",
+            "Resource": "*"
         }
     ]
 }

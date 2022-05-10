@@ -6,9 +6,10 @@
 Welcome to NeuroCAAS's documentation!
 =====================================
 
+Developer Guide 
+---------------
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    develop/installation
    develop/quickstart
@@ -18,6 +19,18 @@ Welcome to NeuroCAAS's documentation!
    develop/devguide
    develop/users
    develop/publish
+
+User Guide 
+-----------
+.. toctree::
+   :maxdepth: 2
+
+   user/cli
+
+Reference
+---------
+.. toctree::
+   :maxdepth: 2
 
    reference/protocols
    reference/blueprints
