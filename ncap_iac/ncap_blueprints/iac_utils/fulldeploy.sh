@@ -36,7 +36,7 @@ echo $stagestr
 python dev_builder.py $PIPEDIR/stack_config_template.json "$stagestr"
 cd $PIPEDIR
 
-sam build -t compiled_template.json -m "$ncaprootdir"/protocols/requirements_lambdapost.txt --use-container --debug 
+sam build -t compiled_template.json -m "$ncaprootdir"/protocols/requirements.txt --use-container --debug 
 
 sam package --s3-bucket $storagebucketname --output-template-file compiled_packaged.yaml
 
