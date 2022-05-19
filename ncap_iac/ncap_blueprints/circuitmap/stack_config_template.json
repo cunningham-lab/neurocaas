@@ -7,8 +7,8 @@
         "Handler": "submit_start.handler_develop",
         "Launch": true,
         "LambdaConfig": {
-            "AMI": "dlami18",
-            "INSTANCE_TYPE": "p2.xlarge",
+            "AMI": "ami-077f4dcd20ed5ed5d",
+            "INSTANCE_TYPE": "p3.2xlarge",
             "REGION": "us-east-1",
             "IAM_ROLE": "SSMRole",
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
