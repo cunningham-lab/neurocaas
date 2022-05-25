@@ -45,9 +45,6 @@ def test_WebSubstackTemplate(postprocess,field,file):
         config = "stack_config_template.json"
     template = dev_builder.WebSubstackTemplate(os.path.join(test_mats,config))
     tdict = template.template.to_dict()
-<<<<<<< HEAD
-    assert tdict["Resources"]["SearchLambda"]["Properties"]["Events"]["BucketEventAnalysisEnd"]["Properties"]["Filter"]["S3Key"]["Rules"][0]["Value"] == file
-=======
     assert tdict["Resources"]["SearchLambda"]["Properties"]["Events"]["BucketEventnewgroupAnalysisEnd"]["Properties"]["Filter"]["S3Key"]["Rules"][1]["Value"] == file
 
 def test_Dev_Template_Trunc():
@@ -92,4 +89,16 @@ def test_WebSubstack_Template_Trunc():
         orig["Lambda"]["LambdaConfig"].pop(key)
         new["Lambda"]["LambdaConfig"].pop(key)
     assert template.config == template_trunc.config
->>>>>>> 9e631943ac68770a40b00088d9520fdbaefe4cd9
+
+
+def test_WebSubstack_Template_Trunc_SecGroup():
+    config = "stack_config_template.json"
+    config_trunc = "stack_config_template_trunc_secgroup.json"
+    template = dev_builder.WebSubstackTemplate(os.path.join(test_mats,config))
+    template_trunc = dev_builder.WebSubstackTemplate(os.path.join(test_mats,config_trunc))
+    orig = template.config
+    new = template_trunc.config
+    for key in ["cwrolearn","figlambarn","figlambid"]:
+        orig["Lambda"]["LambdaConfig"].pop(key)
+        new["Lambda"]["LambdaConfig"].pop(key)
+    assert template.config != template_trunc.config

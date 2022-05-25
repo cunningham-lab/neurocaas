@@ -100,23 +100,28 @@ class NeuroCaaSTemplate(object):
                 'OUTDIR',
                 'LOGDIR',
                 "CONFIGDIR",
-                "SUBMITDIR",
-                "SECURITY_GROUPS"]
+                "SUBMITDIR"
+               ]
         vals = [gpdict["input_directory"],
                 gpdict["output_directory"],
                 gpdict["log_directory"],
                 gpdict["config_directory"],
                 gpdict["submission_directory"],
-                gpdict["securitygroupdeployname"]]
+                ]
 
         appenddict = {k:v for k,v in zip(keys,vals)}
         obj['Lambda']['LambdaConfig'].update(appenddict)
         ## Now append the other fields: 
         default_fixed = ["WORKING_DIRECTORY","CONFIG","MISSING_CONFIG_ERROR","SHUTDOWN_BEHAVIOR","EXECUTION_TIMEOUT","SSM_TIMEOUT","LAUNCH","LOGFILE","DEPLOY_LIMIT","MAXCOST","MONITOR"]
+        ## Fill in defaults if not given:
         for field in default_fixed:
             if not obj["Lambda"]["LambdaConfig"].get(field,False):
                 obj["Lambda"]["LambdaConfig"][field] = gpdict[field]
                 print("Using default value for field {}: {}".format(field,gpdict[field]))
+        ## Fill in default security group if not given too: 
+        if not obj["Lambda"]["LambdaConfig"].get("SECURITY_GROUPS",False):        
+            obj["Lambda"]["LambdaConfig"]["SECURITY_GROUPS"] = gpdict["securitygroupdeployname"]
+            print("Using default value for security group: {}".format(gpdict["securitygroupdeployname"]))
 
         return obj
 
