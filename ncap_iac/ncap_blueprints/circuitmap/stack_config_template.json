@@ -13,7 +13,7 @@
             "IAM_ROLE": "SSMRole",
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
             "WORKING_DIRECTORY": "~/bin",
-            "COMMAND": "cd /home/ubuntu; sudo -u ubuntu ~/circuitmap/scripts/run_circuitmap_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
+            "COMMAND": "cd /home/ubuntu; sudo -u ubuntu neurocaas_contrib/run_main_cli.sh \"{}\" \"{}\" \"{}\" \"{}\" /home/ubuntu/circuitmap/scripts/run_circuitmap_main.sh; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
             "SHUTDOWN_BEHAVIOR": "terminate",
             "CONFIG": "config.yaml",
             "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
