@@ -98,7 +98,7 @@ class Submission_dev():
         self.jobpath = jobpath
         try:
             ## And create a corresponding directory in the submit area. 
-            create_jobdir  = utilsparams3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
+            create_jobdir  = utilsparams3.mkdir(self.bucket_name, os.path.dirname(self.jobpath),os.path.basename(self.jobpath))
 
             ## Create a logging object and write to it. 
             ## a logger for the submit area.  

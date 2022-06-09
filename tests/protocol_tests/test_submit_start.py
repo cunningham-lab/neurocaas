@@ -171,6 +171,12 @@ def setup_testing_bucket(monkeypatch):
                 "dataname":[os.path.join(user_name,"inputs","data1.json") for d in range(10)],
                 "configname":os.path.join(user_name,"configs","durationnoneconfig.json"),
                 "timestamp":"testtimestamp"},
+            ## new: bucket skip. 
+            "submissions/bucketskipsubmit.json":{
+                "dataname":[os.path.join("s3://{}".format(bucket_name),user_name,"inputs","data1.json") for d in range(10)],
+                "configname":os.path.join("s3://{}".format(bucket_name),user_name,"configs","durationnoneconfig.json"),
+                "timestamp":"testtimestamp",
+                "resultpath":"s3://{}/path/to/here".format(bucket_name)}
             }
 
     session = localstack_client.session.Session()
@@ -391,6 +397,10 @@ class Test_Submission_dev():
         with pytest.raises(ValueError):
             sd = submit_start.Submission_dev(bucket_name,notimestampkey_name,"111111111")
 
+    def test_Submission_dev_skip(self,setup_lambda_env,setup_testing_bucket,check_instances):
+        ## set up the os environment correctly. 
+        bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
+        sd = submit_start.Submission_dev(bucket_name,os.path.join(os.path.join(os.path.dirname(submit_path),"bucketskipsubmit.json"),"111111111"))
 
 ### Testing check_existence. 
     @pytest.mark.parametrize("submitname,path",[("submit.json",[os.path.join("test_user/inputs/",d) for d in ["data1.json","data2.json"]]),("singlesubmit.json",[os.path.join("test_user/inputs/","data1.json")])])
