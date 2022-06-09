@@ -555,7 +555,7 @@ class Submission_dev():
         if self.bypass_data["output"]["bucket"] is not None:
             output_bucket = self.bypass_data["output"]["bucket"]
             result_check_paths = self.bypass_data["output"]["resultpath"]
-            outpath_full = "s3://{}/{}".format(output_bucket,result_check_paths)
+            outpath_full = "s3://{}/{}".format(output_bucket,os.path.join(result_check_paths,self.jobname))
         else:    
             outpath_full = os.path.join(os.environ['OUTDIR'],self.jobname)
 

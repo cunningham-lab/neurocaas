@@ -671,7 +671,7 @@ class Test_Submission_dev():
         sd.acquire_instances()
         #sd.start_instance()
         commands = sd.process_inputs(dryrun=True)
-        assert commands[0] == os.environ["COMMAND"].format(sep_bucket,"sep_inputs/datasep.json","s3://independent/sep_results","sep_configs/configsep.json")
+        assert commands[0] == os.environ["COMMAND"].format(sep_bucket,"sep_inputs/datasep.json","s3://independent/sep_results/job__test-submitlambda-analysis_testtimestamp","sep_configs/configsep.json")
         info= ec2_client.describe_instances(InstanceIds = [i.id for i in sd.instances])
         #for instanceinfo in info["Reservations"][0]["Instances"]:
         #    tags = instanceinfo["Tags"]
