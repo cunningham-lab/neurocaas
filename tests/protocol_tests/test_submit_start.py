@@ -9,6 +9,7 @@ import ncap_iac.utils.environment_check as env_check
 from ncap_iac.protocols import submit_start, submit_start_legacy_wfield_preprocess
 from ncap_iac.protocols.utilsparam import s3,ssm,ec2,events,pricing
 import pytest
+import re
 import os
 
 ec2_resource = localstack_client.session.resource("ec2")
@@ -434,6 +435,10 @@ class Test_Submission_dev():
         bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
         sd = submit_start.Submission_dev(bucket_name,submit_path,"111111111")
         sd.data_name = dataname
+        if type(dataname)!= list:
+            sd.data_name_list = [dataname]
+        elif type(dataname) == list:    
+            sd.data_name_list = dataname
         with pytest.raises(error):
             sd.check_existence()
 
@@ -641,37 +646,40 @@ class Test_Submission_dev():
         monkeypatch.setattr(ec2,"ec2_client",session.client("ec2"))
         monkeypatch.setenv("SECURITY_GROUPS",sg)
         monkeypatch.setattr(ec2,"ec2_resource",session.resource("ec2"))
+        skipsubmit = os.path.join(os.path.dirname(submit_path),"bucketskipsubmit.json")
 
-        sd = submit_start.Submission_dev(bucket_name,os.path.join(os.path.dirname(submit_path),"bucketskipsubmit.json"),"111111111")
+        sd = submit_start.Submission_dev(bucket_name,skipsubmit,"111111111")
         assert sd.bypass_data["input"]["bucket"] == sep_bucket
         assert sd.bypass_data["output"]["bucket"] == sep_bucket
-        assert sd.bypass_data["input"]["datapath"] == "sep_inputs/datasep.json"
+        assert sd.bypass_data["input"]["datapath"] == ["sep_inputs/datasep.json"]
         assert sd.bypass_data["input"]["configpath"] =="sep_configs/configsep.json" 
         assert sd.bypass_data["output"]["resultpath"] =="sep_results" 
         monkeypatch.setenv("AMI",ami)
         ## get submit file
-        submit= s3.load_json(bucket_name,submit_path)
-
+        submit= s3.load_json(bucket_name,skipsubmit)
 
         ## Check that data and config exist at non-traditional location given full path: 
         sd.check_existence()
         ## Check that output directory exists: 
-        assert len(s3.ls(submit["resultpath"])) > 0
+        assert len(s3.ls_name(sep_bucket,os.path.join("sep_results","job__test-submitlambda-analysis_testtimestamp","logs"))) > 0
 
         ## Check bucket name and path are not altered for all other processing:  
         assert sd.bucket_name == bucket_name
-        assert sd.path == submit_path
+        assert sd.path == re.findall('.+?(?=/'+os.environ["SUBMITDIR"]+')',skipsubmit)[0]
         sd.parse_config()
         sd.compute_volumesize()
         sd.acquire_instances()
+        #sd.start_instance()
+        commands = sd.process_inputs(dryrun=True)
+        assert commands[0] == os.environ["COMMAND"].format(sep_bucket,"sep_inputs/datasep.json","s3://independent/sep_results","sep_configs/configsep.json")
         info= ec2_client.describe_instances(InstanceIds = [i.id for i in sd.instances])
-        for instanceinfo in info["Reservations"][0]["Instances"]:
-            tags = instanceinfo["Tags"]
-            assert {"Key":"PriceTracking","Value":"On"} in tags
-            assert {"Key":"Timeout","Value":"360"} in tags
-            assert {"Key":"group","Value":sd.path} in tags
-            assert {"Key":"job","Value":sd.jobname} in tags
-            assert {"Key":"analysis","Value":sd.bucket_name} in tags
+        #for instanceinfo in info["Reservations"][0]["Instances"]:
+        #    tags = instanceinfo["Tags"]
+        #    assert {"Key":"PriceTracking","Value":"On"} in tags
+        #    assert {"Key":"Timeout","Value":"360"} in tags
+        #    assert {"Key":"group","Value":sd.path} in tags
+        #    assert {"Key":"job","Value":sd.jobname} in tags
+        #    assert {"Key":"analysis","Value":sd.bucket_name} in tags
 
 class Test_Submission_ensemble():
     def test_Submission_ensemble(self,setup_lambda_env,setup_testing_bucket):
