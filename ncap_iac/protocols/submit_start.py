@@ -143,6 +143,10 @@ class Submission_dev():
         submit_errmsg = "        [Internal (init)] INPUT ERROR: Submit file does not contain field {}, needed to analyze data."
         try: 
             self.data_name = submit_file['dataname'] # TODO validate extensions 
+            if type(self.data_name) == str:
+                self.data_name_list = [self.data_name]
+            else:    
+                self.data_name_list = self.data_name 
         except KeyError as ke:
 
             ## Write to logger
@@ -167,6 +171,49 @@ class Submission_dev():
         self.logger.append(msg)
         self.logger.printlatest()
         self.logger.write()
+        self.bypass_data = self.check_bypass(submit_file)
+
+    def check_bypass(self,submit_file):
+        """Checks if we should perform any "bucket bypass" operations. 
+        :param submit_file: the dictionary containing submit info. 
+        :returns: dictionary with form {"input":{"bucket":None,"datapath":None,"configpath":None},"output":{"bucket":None,"resultpath":None}}, where fields are filled in based on existence of bypass options. 
+        """
+        ## Bucket bypass: if 1) full s3 path is given for both data and config, and 2) if they are both the same, overwrite bucket and path. 
+        # check if both start with s3://:
+        bypass_data = {"input":{"bucket":None,"datapath":None,"configpath":None},"output":{"bucket":None,"resultpath":None}}
+        if self.data_name_list[0].startswith("s3://") and self.config_name.startswith("s3://"):
+            dataname_split = self.data_name_list[0].replace("s3://","").split("/")
+            configname_split = self.config_name.replace("s3://","").split("/")
+
+            dataname_bucket = dataname_split[0]
+            dataname_path = ("/").join(dataname_split[1:])
+            configname_bucket = configname_split[0]
+            configname_path = ("/").join(configname_split[1:])
+
+            assert dataname_bucket == configname_bucket, "If bypassing storage for input, data and config must be from same bucket."
+            bypass_data["input"]["bucket"] = dataname_bucket
+            bypass_data["input"]["datapath"] = dataname_path
+            bypass_data["input"]["configpath"] = configname_path
+            msg = "        [Internal (init)] Storage Bypass initiated from bucket: s3://{}".format(dataname_bucket)
+            self.logger.append(msg)
+            self.logger.printlatest()
+            self.logger.write()
+
+        resultpath = submit_file.get("resultpath",False)
+        if resultpath:
+            assert resultpath.startswith("s3://"), "If bypassing storage for output, s3:// format path required"
+            resultname_split = resultpath.replace("s3://","").split("/")
+            resultname_bucket = resultname_split[0]
+            resultname_path = ("/").join(resultname_split[1:])
+            bypass_data["output"]["bucket"] = resultname_bucket
+            bypass_data["output"]["resultpath"] = resultname_path
+
+            msg = "        [Internal (init)] Storage Bypass initiated to bucket: s3://{}".format(resultname_bucket)
+            self.logger.append(msg)
+            self.logger.printlatest()
+            self.logger.write()
+        return bypass_data    
+
 
     def check_existence(self):
         """
