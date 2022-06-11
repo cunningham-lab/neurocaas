@@ -176,10 +176,11 @@ def teardown_all():
 
 def main():
     # Arguments:
-    # python federation.py bucket_prefix group_prefix
+    # python federation.py command bucket_prefix group_prefix
+    # commands are build, build_url, teardown_all
     iam_resource = boto3.resource('iam')
-    role = setup(iam_resource)
     sts_client = boto3.client('sts')
-    return generate_credentials(role.arn, 'AssumeRoleDemoSession', sts_client, sys.argv[2], sys.argv[1]) 
+    role = setup(iam_resource)
+    return generate_credentials(role.arn, 'AssumeRoleDemoSession', sts_client, sys.argv[3], sys.argv[2]) 
 if __name__=="__main__":
     main()
