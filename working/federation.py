@@ -36,7 +36,7 @@ from datetime import timedelta
     and https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/python/example_code/sts/sts_temporary_credentials#code-examples for STS federation examples.
 """
 
-def time_millis():
+def time_millis(): # More precise than something like time.time()*1000, which may or may not be needed
     return int((datetime.datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds() * 1000)
 def progress_bar(seconds):
     """Shows a simple progress bar in the command window."""
@@ -46,22 +46,22 @@ def progress_bar(seconds):
         sys.stdout.flush()
     print()
 
-
 def unique_name(base_name):
     return f'sts-{base_name}-{time_millis()}'
 
-def setup(iam_resource):
+def setup(iam_resource, duration=43200):
     """
     Creates a role that can be assumed by the current user.
     Attaches a policy that allows only Amazon S3 read-only access.
 
     :param iam_resource: A Boto3 AWS Identity and Access Management (IAM) instance
                          that has the permission to create a role.
+    :param duration: Credential lifetime (s). Defaults to 43200 (12 hours)
     :return: The newly created role.
     """
     role = iam_resource.create_role(
         RoleName=unique_name('role'), MaxSessionDuration=43200,
-        AssumeRolePolicyDocument=json.dumps({
+        AssumeRolePolicyDocument=json.dumps({ #: Embedded policy to allow a new user to assume a role and tag
             'Version': '2012-10-17',
             'Statement': [
                 {
@@ -72,8 +72,7 @@ def setup(iam_resource):
             ]
         })
     )
-    #role.attach_policy(PolicyArn='arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess')
-    role.attach_policy(PolicyArn='arn:aws:iam::739988523141:policy/access-same-project-team')
+    role.attach_policy(PolicyArn='arn:aws:iam::739988523141:policy/access-same-project-team') #: This should be the policy ARN 
     print(f"Created role {role.name}.")
 
     print("Give AWS time to propagate these new resources and connections.", end='')
