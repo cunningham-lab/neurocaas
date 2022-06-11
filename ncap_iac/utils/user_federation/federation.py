@@ -56,24 +56,22 @@ def progress_bar(seconds):
 def unique_name():
     return f'sts-role-{time_millis()}'
 
-def setup(iam_resource, duration=43200):
+def setup(duration=43200):
     """
     Creates a role that can be assumed by the current user.
     Attaches a policy that allows only Amazon S3 read-only access.
 
-    :param iam_resource: A Boto3 AWS Identity and Access Management (IAM) instance
-                         that has the permission to create a role.
     :param duration: Credential lifetime (s). Defaults to 43200 (12 hours)
     :return: The newly created role.
     """
-    role = iam_resource.create_role(
+    role = boto3.resource('iam').create_role(
         RoleName=unique_name(), MaxSessionDuration=duration,
         AssumeRolePolicyDocument=json.dumps({ #: Embedded policy to allow a new user to assume a role and tag
             'Version': '2012-10-17',
             'Statement': [
                 {
                     'Effect': 'Allow',
-                    'Principal': {'AWS': iam_resource.CurrentUser().arn},
+                    'Principal': {'AWS': boto3.resource('iam').CurrentUser().arn},
                     'Action': ['sts:AssumeRole', 'sts:TagSession']
                 }
             ]
@@ -88,7 +86,7 @@ def setup(iam_resource, duration=43200):
     return role
 
 
-def generate_credentials(assume_role_arn, session_name, sts_client, group_name, bucket_name, duration=43200):
+def generate_credentials(assume_role_arn, session_name, bucket_prefix, group_prefix, duration=43200):
     """
     Acquires temporary credentials from AWS Security Token Service (AWS STS) that
        can be used to assume a role with limited permissions.
@@ -97,20 +95,16 @@ def generate_credentials(assume_role_arn, session_name, sts_client, group_name, 
                             The current user must have permission to assume the role.
     :param session_name: The name for the STS session.
     :param issuer: The organization that issues the URL.
-    :param sts_client: A Boto3 STS instance that can assume the role.
-    :param group_name: group name
-    :param bucket_name: bucket name
+    :param group_prefix: group prefix
+    :param bucket_prefix: bucket name
     :return: Credentials. 
     """
-    response = sts_client.assume_role(
+    response = boto3.client('sts').assume_role(
         RoleArn=assume_role_arn, RoleSessionName=session_name, DurationSeconds=duration, 
-        Tags=[{"Key": "access-bucket","Value": bucket_name},{"Key": "access-group","Value": group_name}]) #: Tags for bucket and group prefix
+        Tags=[{"Key": "access-bucket","Value": bucket_prefix},{"Key": "access-group","Value": group_prefix}]) #: Tags for bucket and group prefix
     return response['Credentials']
-
-
-#utils
-
-def construct_federated_url(credentials, issuer, bucket, group_prefix):
+    
+def construct_federated_url(credentials, issuer, bucket_prefix, group_prefix):
     """
     Constructs a URL that gives federated users direct access to the AWS Management
     Console.
@@ -118,15 +112,12 @@ def construct_federated_url(credentials, issuer, bucket, group_prefix):
        endpoint, includes the sign-in token for authentication, and redirects to
        the AWS Management Console with permissions defined by the role that was
        specified in step 1.
-
-    :param issuer: The organization that issues the URL.
-    :return: The federated URL.
     """
 
     session_data = {
-        'sessionId': credentials['AccessKeyId'].aws_access_key,
-        'sessionKey': credentials['SecretAccessKey'].aws_secret_access_key,
-        'sessionToken': credentials['SessionToken'].aws_session_token
+        'sessionId': credentials['AccessKeyId'],
+        'sessionKey': credentials['SecretAccessKey'],
+        'sessionToken': credentials['SessionToken']
     }
     aws_federated_signin_endpoint = 'https://signin.aws.amazon.com/federation'
 
@@ -147,7 +138,7 @@ def construct_federated_url(credentials, issuer, bucket, group_prefix):
     query_string = urllib.parse.urlencode({
         'Action': 'login',
         'Issuer': issuer,
-        'Destination': 'https://s3.console.aws.amazon.com/s3/buckets/'+bucket+'?region=us-east-1&prefix='+group_prefix+'/inputs/&showversions=false',
+        'Destination': 'https://s3.console.aws.amazon.com/s3/buckets/'+bucket_prefix+'?region=us-east-1&prefix='+group_prefix+'/inputs/&showversions=false',
         'SigninToken': signin_token['SigninToken']
     })
     federated_url = f'{aws_federated_signin_endpoint}?{query_string}'
@@ -174,13 +165,26 @@ def teardown_all():
     for role in filter(_deletion_filter,boto3.resource('iam').roles.all()):
         teardown(role)
 
+
 def main():
     # Arguments:
     # python federation.py command bucket_prefix group_prefix
-    # commands are build, build_url, teardown_all
-    iam_resource = boto3.resource('iam')
-    sts_client = boto3.client('sts')
-    role = setup(iam_resource)
-    return generate_credentials(role.arn, 'AssumeRoleDemoSession', sts_client, sys.argv[3], sys.argv[2]) 
+    # commands are build (make a user and get credentials and a federated access link) 
+    # and teardown_all (remove all existing sts roles with the given prefix)
+    if len(sys.argv) == 4:
+        if sys.argv[1] == 'build':
+            role = setup()
+            creds = generate_credentials(role.arn, 'AssumeRoleDemoSession', sys.argv[2], sys.argv[3]) 
+            construct_federated_url(creds,'neurocaas@gmail.com', sys.argv[2], sys.argv[3])
+            print("Federated Credentials: ")
+            print(f"Session Token: {creds['SessionToken']}")
+            print(f"Access Key: {creds['AccessKeyId']}")
+            print(f"Secret Access Key: {creds['SecretAccessKey']}")
+        elif sys.argv[1] == 'teardown_all':
+            teardown_all()
+        else:
+            print("Not a command, options are 'build' or 'teardown_all'")
+    else:
+        print("Incorrect parameters")
 if __name__=="__main__":
     main()
