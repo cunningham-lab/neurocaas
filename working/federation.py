@@ -49,10 +49,8 @@ def progress_bar(seconds):
 
 def unique_name(base_name):
     return f'sts-{base_name}-{time_millis()}'
-def unique_testing_name(base_name):
-    return f'sts-testing-{base_name}-{time_millis()}'
 
-def setup(iam_resource,name_function):
+def setup(iam_resource):
     """
     Creates a role that can be assumed by the current user.
     Attaches a policy that allows only Amazon S3 read-only access.
@@ -62,7 +60,7 @@ def setup(iam_resource,name_function):
     :return: The newly created role.
     """
     role = iam_resource.create_role(
-        RoleName=name_function('role'), MaxSessionDuration=43200,
+        RoleName=unique_name('role'), MaxSessionDuration=43200,
         AssumeRolePolicyDocument=json.dumps({
             'Version': '2012-10-17',
             'Statement': [
@@ -126,12 +124,11 @@ def teardown(role):
 
 #utils
 
-def build_credentials(group, analysis,testing=False):
+def build_credentials(group, analysis):
     #: Returns object with temporary credentials
 
     iam_resource = boto3.resource('iam')
-    name_function = unique_testing_name if testing else unique_name
-    role = setup(iam_resource,name_function)
+    role = setup(iam_resource)
     sts_client = boto3.client('sts')
     return generate_credentials(role.arn, 'AssumeRoleDemoSession', sts_client, group.name, analysis.bucket_name) 
 
