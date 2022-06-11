@@ -1,0 +1,32 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowListingOfBucket",
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::${aws:PrincipalTag/access-bucket}"
+            ],
+            "Condition": {
+                "StringLike": {
+                    "s3:prefix": [
+                        "${aws:PrincipalTag/access-group}/*"
+                    ]
+                }
+            }
+        },
+        {
+            "Sid": "AllowAllS3ActionsInBucket",
+            "Effect": "Allow",
+            "Action": [
+                "s3:*"
+            ],
+            "Resource": [
+                "arn:aws:s3:::${aws:PrincipalTag/access-bucket}/${aws:PrincipalTag/access-group}/*"
+            ]
+        }
+    ]
+}
