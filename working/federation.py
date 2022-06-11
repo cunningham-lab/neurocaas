@@ -60,7 +60,7 @@ def setup(iam_resource, duration=43200):
     :return: The newly created role.
     """
     role = iam_resource.create_role(
-        RoleName=unique_name('role'), MaxSessionDuration=43200,
+        RoleName=unique_name('role'), MaxSessionDuration=duration,
         AssumeRolePolicyDocument=json.dumps({ #: Embedded policy to allow a new user to assume a role and tag
             'Version': '2012-10-17',
             'Statement': [
@@ -81,19 +81,10 @@ def setup(iam_resource, duration=43200):
     return role
 
 
-def generate_credentials(assume_role_arn, session_name, sts_client, group_name, bucket_name):
+def generate_credentials(assume_role_arn, session_name, sts_client, group_name, bucket_name, duration=43200):
     """
-    Constructs a URL that gives federated users direct access to the AWS Management
-    Console.
-
-    1. Acquires temporary credentials from AWS Security Token Service (AWS STS) that
+    Acquires temporary credentials from AWS Security Token Service (AWS STS) that
        can be used to assume a role with limited permissions.
-    2. Uses the temporary credentials to request a sign-in token from the
-       AWS federation endpoint.
-    3. Builds a URL that can be used in a browser to navigate to the AWS federation
-       endpoint, includes the sign-in token for authentication, and redirects to
-       the AWS Management Console with permissions defined by the role that was
-       specified in step 1.
 
     :param assume_role_arn: The role that specifies the permissions that are granted.
                             The current user must have permission to assume the role.
@@ -102,16 +93,17 @@ def generate_credentials(assume_role_arn, session_name, sts_client, group_name, 
     :param sts_client: A Boto3 STS instance that can assume the role.
     :param group_name: group name
     :param bucket_name: bucket name
-    :return: The federated URL. 
+    :return: Credentials. 
     """
     response = sts_client.assume_role(
-        RoleArn=assume_role_arn, RoleSessionName=session_name, DurationSeconds=43200, Tags=[{"Key": "access-bucket","Value": bucket_name},{"Key": "access-group","Value": group_name}])
+        RoleArn=assume_role_arn, RoleSessionName=session_name, DurationSeconds=duration, 
+        Tags=[{"Key": "access-bucket","Value": bucket_name},{"Key": "access-group","Value": group_name}]) #: Tags for bucket and group prefix
     return response['Credentials']
 
 
 def teardown(role):
     """
-    Removes all resources created during setup.
+    Removes all resources for a certain role.
 
     :param role: The demo role.
     """
