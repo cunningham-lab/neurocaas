@@ -53,6 +53,7 @@ from datetime import timedelta
 
 def time_millis(): # More precise than something like time.time()*1000, which may or may not be needed
     return int((datetime.datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds() * 1000)
+    
 def progress_bar(seconds):
     """Shows a simple progress bar in the command window."""
     for _ in range(seconds):
@@ -113,11 +114,9 @@ def generate_credentials(assume_role_arn, session_name, bucket_prefix, group_pre
 
 def construct_federated_url(credentials, issuer, bucket_prefix, group_prefix):
     """
-    Constructs a URL that gives federated users direct access to the AWS Management
-    Console.
        Builds a URL that can be used in a browser to navigate to the AWS federation
        endpoint, includes the sign-in token for authentication, and redirects to
-       the AWS Management Console with permissions defined by the role that was
+       the S3 bucket with permissions defined by the role that was
        specified in step 1.
     """
 
@@ -151,13 +150,9 @@ def construct_federated_url(credentials, issuer, bucket_prefix, group_prefix):
     federated_url = f'{aws_federated_signin_endpoint}?{query_string}'
     return federated_url
 
-#: Teardown -----
 def teardown(role):
-    """
-    Removes all resources for a certain role.
+    #: Removes all resources for a certain role.
 
-    :param role: The demo role.
-    """
     for attached in role.attached_policies.all():
         role.detach_policy(PolicyArn=attached.arn)
         print(f"Detached {attached.policy_name}.")
