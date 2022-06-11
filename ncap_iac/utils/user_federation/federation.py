@@ -110,14 +110,6 @@ def generate_credentials(assume_role_arn, session_name, sts_client, group_name, 
 
 #utils
 
-def build_credentials(group, analysis):
-    #: Returns object with temporary credentials
-
-    iam_resource = boto3.resource('iam')
-    role = setup(iam_resource)
-    sts_client = boto3.client('sts')
-    return generate_credentials(role.arn, 'AssumeRoleDemoSession', sts_client, group.name, analysis.bucket_name) 
-
 def construct_federated_url(credentials, issuer, bucket, group_prefix):
     """
     Constructs a URL that gives federated users direct access to the AWS Management
@@ -181,3 +173,13 @@ def _deletion_filter(role):
 def teardown_all():
     for role in filter(_deletion_filter,boto3.resource('iam').roles.all()):
         teardown(role)
+
+def main():
+    # Arguments:
+    # python federation.py bucket_prefix group_prefix
+    iam_resource = boto3.resource('iam')
+    role = setup(iam_resource)
+    sts_client = boto3.client('sts')
+    return generate_credentials(role.arn, 'AssumeRoleDemoSession', sts_client, sys.argv[2], sys.argv[1]) 
+if __name__=="__main__":
+    main()
