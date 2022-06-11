@@ -46,8 +46,8 @@ def progress_bar(seconds):
         sys.stdout.flush()
     print()
 
-def unique_name(base_name):
-    return f'sts-{base_name}-{time_millis()}'
+def unique_name():
+    return f'sts-role-{time_millis()}'
 
 def setup(iam_resource, duration=43200):
     """
@@ -60,7 +60,7 @@ def setup(iam_resource, duration=43200):
     :return: The newly created role.
     """
     role = iam_resource.create_role(
-        RoleName=unique_name('role'), MaxSessionDuration=duration,
+        RoleName=unique_name(), MaxSessionDuration=duration,
         AssumeRolePolicyDocument=json.dumps({ #: Embedded policy to allow a new user to assume a role and tag
             'Version': '2012-10-17',
             'Statement': [
@@ -100,18 +100,6 @@ def generate_credentials(assume_role_arn, session_name, sts_client, group_name, 
         Tags=[{"Key": "access-bucket","Value": bucket_name},{"Key": "access-group","Value": group_name}]) #: Tags for bucket and group prefix
     return response['Credentials']
 
-
-def teardown(role):
-    """
-    Removes all resources for a certain role.
-
-    :param role: The demo role.
-    """
-    for attached in role.attached_policies.all():
-        role.detach_policy(PolicyArn=attached.arn)
-        print(f"Detached {attached.policy_name}.")
-    role.delete()
-    print(f"Deleted {role.name}.")
 
 #utils
 
@@ -171,10 +159,24 @@ def construct_federated_url(iam, issuer, bucket):
     })
     federated_url = f'{aws_federated_signin_endpoint}?{query_string}'
     return federated_url
+
+#: Teardown -----
+def teardown(role):
+    """
+    Removes all resources for a certain role.
+
+    :param role: The demo role.
+    """
+    for attached in role.attached_policies.all():
+        role.detach_policy(PolicyArn=attached.arn)
+        print(f"Detached {attached.policy_name}.")
+    role.delete()
+    print(f"Deleted {role.name}.")
+
 def _deletion_filter(role):
     return role.role_name.startswith("sts-role-") and pytz.utc.localize(datetime.datetime.now()) > (role.create_date+timedelta(seconds=role.max_session_duration)).astimezone(pytz.utc)
-def _deletion_filter_testing(role):
-    return role.role_name.startswith("sts-testing-role-")
-def sts_teardown_all(testing=False):
-    for role in filter(_deletion_filter_testing if testing else _deletion_filter,boto3.resource('iam').roles.all()):
+    
+#: Tears down all expired sts roles with the given prefix
+def teardown_all():
+    for role in filter(_deletion_filter,boto3.resource('iam').roles.all()):
         teardown(role)
