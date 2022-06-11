@@ -22,6 +22,14 @@ from datetime import timedelta
     However, this may be useful to users with elevated permissions looking to grant temporary access to other users, 
     or users with their own, seperately hosted neurocaas system.
 
+
+    To build a user and get credentials and a federated access link:
+        python federation.py build bucket_prefix group_prefix
+
+    To Remove all existing sts roles with the stored prefix:
+        python federation.py teardown_all bucket_prefix group_prefix
+
+
     Explanation:
     This program creates a user role defined by the accompanying 'aws_federation_policy.json' document, 
     which should be created on your AWS instance. On the official neurocaas.org cloud, this policy is named 'access-same-project-team'.
@@ -103,7 +111,7 @@ def generate_credentials(assume_role_arn, session_name, bucket_prefix, group_pre
         RoleArn=assume_role_arn, RoleSessionName=session_name, DurationSeconds=duration, 
         Tags=[{"Key": "access-bucket","Value": bucket_prefix},{"Key": "access-group","Value": group_prefix}]) #: Tags for bucket and group prefix
     return response['Credentials']
-    
+
 def construct_federated_url(credentials, issuer, bucket_prefix, group_prefix):
     """
     Constructs a URL that gives federated users direct access to the AWS Management
@@ -138,7 +146,7 @@ def construct_federated_url(credentials, issuer, bucket_prefix, group_prefix):
     query_string = urllib.parse.urlencode({
         'Action': 'login',
         'Issuer': issuer,
-        'Destination': 'https://s3.console.aws.amazon.com/s3/buckets/'+bucket_prefix+'?region=us-east-1&prefix='+group_prefix+'/inputs/&showversions=false',
+        'Destination': 'https://s3.console.aws.amazon.com/s3/buckets/'+bucket_prefix+'?region=us-east-1&prefix='+group_prefix +'/inputs/&showversions=false',
         'SigninToken': signin_token['SigninToken']
     })
     federated_url = f'{aws_federated_signin_endpoint}?{query_string}'
@@ -167,24 +175,23 @@ def teardown_all():
 
 
 def main():
-    # Arguments:
-    # python federation.py command bucket_prefix group_prefix
-    # commands are build (make a user and get credentials and a federated access link) 
-    # and teardown_all (remove all existing sts roles with the given prefix)
     if len(sys.argv) == 4:
         if sys.argv[1] == 'build':
             role = setup()
             creds = generate_credentials(role.arn, 'AssumeRoleDemoSession', sys.argv[2], sys.argv[3]) 
-            construct_federated_url(creds,'neurocaas@gmail.com', sys.argv[2], sys.argv[3])
-            print("Federated Credentials: ")
+            print(f"S3 Federated URL:\n{construct_federated_url(creds,'neurocaas@gmail.com', sys.argv[2], sys.argv[3])}")
+            print("\n\nFederated Credentials: ")
             print(f"Session Token: {creds['SessionToken']}")
             print(f"Access Key: {creds['AccessKeyId']}")
             print(f"Secret Access Key: {creds['SecretAccessKey']}")
+            print("\nClick the above link to automatically sign-in and reach your desired bucket. Otherwise, the generated credentials can be used with the AWS CLI, or as needed")
+            print("\nNote that if your group_prefix does not yet exist, you will have to create the subfolders manually at this time (inputs, results, configs, submissions)")
+            print("\nIf your bucket does not exist, you will recieve access errors upon logging in.")
         elif sys.argv[1] == 'teardown_all':
             teardown_all()
         else:
             print("Not a command, options are 'build' or 'teardown_all'")
     else:
-        print("Incorrect parameters")
+        print("Incorrect arguments")
 if __name__=="__main__":
     main()
