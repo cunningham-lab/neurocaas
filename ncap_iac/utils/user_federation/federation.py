@@ -16,6 +16,13 @@ from datetime import timedelta
     The purpose of the file is to serve STS federated users (these are users with temporary IAM credentials, 
     which expire after a short, defined time (<= 12 hrs)), which are granted automatic S3 resource access based on an ABAC-like policy.
 
+    Use Case:
+    If you are an IAM user with limited permissions using the neurocaas cloud, this is likely is not relevant (due to permission needs outlined below).
+    
+    However, this may be useful to users with elevated permissions looking to grant temporary access to other users, 
+    or users with their own, seperately hosted neurocaas system.
+
+    Explanation:
     This program creates a user role defined by the accompanying 'aws_federation_policy.json' document, 
     which should be created on your AWS instance. On the official neurocaas.org cloud, this policy is named 'access-same-project-team'.
 
@@ -26,7 +33,7 @@ from datetime import timedelta
 
     S3 resource access is established through a hybrid tag and prefix system. 
     Upon creation, the federated user is tagged with relevant group and bucket prefixes (one of each), 
-    which is the only resource this user will have access too.
+    which is the only resource this user will have access too. However, this system can be modified as needed by adapting the policy (for example allowing access to all buckets).
 
     The aformentioned policy uses the prefixes contained in access tags to determine the allowed bucket and folder, so ensure these are correct.
     If proper access is established, the user should have read-write access to configs/submissions, 
@@ -175,7 +182,7 @@ def teardown(role):
 
 def _deletion_filter(role):
     return role.role_name.startswith("sts-role-") and pytz.utc.localize(datetime.datetime.now()) > (role.create_date+timedelta(seconds=role.max_session_duration)).astimezone(pytz.utc)
-    
+
 #: Tears down all expired sts roles with the given prefix
 def teardown_all():
     for role in filter(_deletion_filter,boto3.resource('iam').roles.all()):
