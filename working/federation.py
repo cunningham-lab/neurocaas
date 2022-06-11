@@ -14,7 +14,7 @@ from datetime import timedelta
 
 """
     The purpose of the file is to serve STS federated users (these are users with temporary IAM credentials, which expire after a short, defined time (<= 12 hrs)), which are granted automatic S3 resource access based on an ABAC-like policy.
-    This program creates a user role defined by the accompanying 'federation_policy.json' document, which should be created on your AWS instance. On the official neurocaas.org cloud, this policy is named 'access-same-project-team'.
+    This program creates a user role defined by the accompanying 'aws_federation_policy.json' document, which should be created on your AWS instance. On the official neurocaas.org cloud, this policy is named 'access-same-project-team'.
 
     Furthermore a non-federated IAM must exist to federate new users, with access to all of the relevant buckets and files. 
     This user must have access to certain permission delegation functions which can be seen in this file, including assume_role, attach_policy, detach_policy, etc. See https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-service.html for relevant policy information.
