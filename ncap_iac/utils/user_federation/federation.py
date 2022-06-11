@@ -93,7 +93,6 @@ def setup(duration=43200):
 
     return role
 
-
 def generate_credentials(assume_role_arn, session_name, bucket_prefix, group_prefix, duration=43200):
     """
     Acquires temporary credentials from AWS Security Token Service (AWS STS) that
@@ -172,7 +171,6 @@ def _deletion_filter(role):
 def teardown_all():
     for role in filter(_deletion_filter,boto3.resource('iam').roles.all()):
         teardown(role)
-
 
 def main():
     if len(sys.argv) == 4:
