@@ -1,15 +1,6 @@
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Some code contained here is sourced from https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/python/example_code/sts/sts_temporary_credentials#code-examples,
+# which is copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
-#
-# Modified by John Briggs
-# See https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/python/example_code/sts/sts_temporary_credentials#code-examples
-# for original code and unit tests
-"""
-Purpose
-
-Shows how to construct a URL that gives federated users direct access to the
-AWS Management Console.
-"""
 
 import datetime
 import json
@@ -20,6 +11,12 @@ import boto3
 import requests
 import pytz
 from datetime import timedelta 
+
+"""
+    The purpose of the file is to serve sts federated users (these are users with temporary IAM credentials, which expire after a short, defined time (<= 12 hrs)), which are granted automatic S3 resource access based on an ABAC-like policy.
+    This program creates a user role defined by the accompanying 'federation_policy.json' document, which should be created on your AWS instance
+    
+"""
 
 def time_millis():
     return int((datetime.datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds() * 1000)
