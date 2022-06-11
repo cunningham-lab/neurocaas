@@ -118,13 +118,7 @@ def build_credentials(group, analysis):
     sts_client = boto3.client('sts')
     return generate_credentials(role.arn, 'AssumeRoleDemoSession', sts_client, group.name, analysis.bucket_name) 
 
-def reassign_iam(iam, temp_credentials):
-    iam.aws_access_key = temp_credentials['AccessKeyId']
-    iam.aws_secret_access_key = temp_credentials['SecretAccessKey']
-    iam.aws_session_token = temp_credentials['SessionToken']
-    iam.save()
-
-def construct_federated_url(iam, issuer, bucket):
+def construct_federated_url(credentials, issuer, bucket, group_prefix):
     """
     Constructs a URL that gives federated users direct access to the AWS Management
     Console.
@@ -138,9 +132,9 @@ def construct_federated_url(iam, issuer, bucket):
     """
 
     session_data = {
-        'sessionId': iam.aws_access_key,
-        'sessionKey': iam.aws_secret_access_key,
-        'sessionToken': iam.aws_session_token
+        'sessionId': credentials['AccessKeyId'].aws_access_key,
+        'sessionKey': credentials['SecretAccessKey'].aws_secret_access_key,
+        'sessionToken': credentials['SessionToken'].aws_session_token
     }
     aws_federated_signin_endpoint = 'https://signin.aws.amazon.com/federation'
 
@@ -161,7 +155,7 @@ def construct_federated_url(iam, issuer, bucket):
     query_string = urllib.parse.urlencode({
         'Action': 'login',
         'Issuer': issuer,
-        'Destination': 'https://s3.console.aws.amazon.com/s3/buckets/'+bucket+'?region=us-east-1&prefix='+iam.group.name+'/inputs/&showversions=false',
+        'Destination': 'https://s3.console.aws.amazon.com/s3/buckets/'+bucket+'?region=us-east-1&prefix='+group_prefix+'/inputs/&showversions=false',
         'SigninToken': signin_token['SigninToken']
     })
     federated_url = f'{aws_federated_signin_endpoint}?{query_string}'
