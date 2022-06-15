@@ -7,7 +7,7 @@
         "Handler": "submit_start.handler_develop",
         "Launch": true,
         "LambdaConfig": {
-            "AMI": "ami-071284babb4e3b733",
+            "AMI": "ami-0dc9dddf37099ac56",
             "INSTANCE_TYPE": "p3.2xlarge",
             "REGION": "us-east-1",
             "IAM_ROLE": "SSMRole",
