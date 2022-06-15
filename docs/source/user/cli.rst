@@ -78,6 +78,8 @@ You can start a job by saving your submit file as any file suffixed as :code:`su
 
 Note that this file is generated automatically when you click the "submit" button on the NeuroCAAS website.
 
+
+
 Monitoring Jobs
 ~~~~~~~~~~~~~~~
 
@@ -94,5 +96,27 @@ Downloading Results
 Finally, all results that your analysis generates will be sent to the folder :code:`s3://caiman-ncap-web/user1/results/job__caiman-ncap-web_{unique_timestamp}/process_results`. You can download them all at once with the command :code:`aws s3 sync s3://caiman-ncap-web/user1/results/job__caiman-ncap-web_{unique_timestamp}/process_results/ /path/to/local/location/`. Note that when processing finishes, it will upload a file called :code:`end.txt` to the :code:`process_results` folder, which you can monitor for to detect if the analysis is done.   
 
 
+Advanced Usage
+--------------
 
+Storage Bypass (June 9th, 2022)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+If you have especially large datasets or analysis outputs, it may be prohibitively slow to first transfer them to NeuroCAAS, analyze them, and remove the analysis outputs, especially as we do not allow users to use NeuroCAAS itself to analyze data. For these cases, we can offer a "Storage Bypass" option: if you have access to your data in a publically accessible S3 bucket, you can read and write directly to that bucket. Timestamped outputs and logs will be delivered back to the storage location of your choice. In order to make use of this feature, modify your submit files as follows: 
+
+.. code-block:: json
+
+    {
+        dataname: [s3://inputbucket/sep_inputs/file.ext],
+        configname: [s3://inputbucket/sep_configs/configsep.json],
+        timestamp: timestamp
+        [resultpath: s3://outputbucket/sep_results], 
+    }
+
+Modifications to the original submit file format are presented in brackets. Note that here we assume the following: 
+
+- data and configuration files come from a public bucket, and can be accessed by anyone.
+- data and config must come from the same input bucket, but no longer require an explicit group
+- results will be written to a subfolder of the optionally different output bucket.
+
+Finally, older analyses last deployed before this feature will need to be updated in order to work correctly with it. We are actively updating analyses at this time to standardize interfaces across analyses, but if you encounter any issues please contact neurocaas@gmail.com and we can expedite updates. 
