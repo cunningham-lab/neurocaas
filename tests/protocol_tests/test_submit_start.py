@@ -9,6 +9,7 @@ import ncap_iac.utils.environment_check as env_check
 from ncap_iac.protocols import submit_start, submit_start_legacy_wfield_preprocess
 from ncap_iac.protocols.utilsparam import s3,ssm,ec2,events,pricing
 import pytest
+import re
 import os
 
 ec2_resource = localstack_client.session.resource("ec2")
@@ -20,6 +21,7 @@ blueprint_path = os.path.join(loc,"test_mats","stack_config_template.json")
 with open(os.path.join(loc,"../../ncap_iac/global_params_initialized.json")) as f:
     gpdict = json.load(f)
 bucket_name = "test-submitlambda-analysis"
+sep_bucket = "independent"
 bucket_name_legacy = "test-submitlambda-analysis-legacy"
 key_name = "test_user/submissions/submit.json"
 fakedatakey_name = "test_user/submissions/fakedatasubmit.json"
@@ -124,6 +126,15 @@ def setup_testing_bucket(monkeypatch):
         |-joblog1
         |-joblog2
         ...
+    
+    Additionally sets up a separate bucket, "{sep_bucket}", with the following structure:
+    /
+    |-sep_inputs     %% these for "bucket bypass"
+        |-data.json
+    |-sep_configs
+        |-config.json
+    |-sep_results
+        |-
 
     """
     subkeys = {
@@ -171,6 +182,12 @@ def setup_testing_bucket(monkeypatch):
                 "dataname":[os.path.join(user_name,"inputs","data1.json") for d in range(10)],
                 "configname":os.path.join(user_name,"configs","durationnoneconfig.json"),
                 "timestamp":"testtimestamp"},
+            ## new: bucket skip. 
+            "submissions/bucketskipsubmit.json":{
+                "dataname":os.path.join("s3://{}".format(sep_bucket),"sep_inputs","datasep.json"),
+                "configname":os.path.join("s3://{}".format(sep_bucket),"sep_configs","configsep.json"),
+                "timestamp":"testtimestamp",
+                "resultpath":"s3://{}/sep_results".format(sep_bucket)}
             }
 
     session = localstack_client.session.Session()
@@ -190,6 +207,16 @@ def setup_testing_bucket(monkeypatch):
             writeobj = s3_resource.Object(bucket_name,key)
             content = bytes(json.dumps(subkeys[sk]).encode("UTF-8"))
             writeobj.put(Body = content)
+        ## Test storage bypass with additional subkeys     
+        s3_client.create_bucket(Bucket = sep_bucket)
+        ind_data = {
+            "sep_inputs/datasep.json":{"data":"value"},
+            "sep_configs/configsep.json":{"param":"p1"}}
+        for d in ind_data:
+            writeobj = s3_resource.Object(sep_bucket,d)
+            content = bytes(json.dumps(ind_data[d]).encode("UTF-8"))
+            writeobj.put(Body=content)
+
         ## Write logs    
         log_paths = get_paths(test_log_mats) 
         try:
@@ -408,6 +435,10 @@ class Test_Submission_dev():
         bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
         sd = submit_start.Submission_dev(bucket_name,submit_path,"111111111")
         sd.data_name = dataname
+        if type(dataname)!= list:
+            sd.data_name_list = [dataname]
+        elif type(dataname) == list:    
+            sd.data_name_list = dataname
         with pytest.raises(error):
             sd.check_existence()
 
@@ -597,6 +628,58 @@ class Test_Submission_dev():
             assert {"Key":"group","Value":sd.path} in tags
             assert {"Key":"job","Value":sd.jobname} in tags
             assert {"Key":"analysis","Value":sd.bucket_name} in tags
+
+    def test_Submission_dev_skip(self,create_securitygroup,monkeypatch,setup_lambda_env,setup_testing_bucket,create_ami,kill_instances):
+        """Like the test directly above, but assuming we run in "storage skip" mode. 
+
+        """
+
+        ## set up the os environment correctly. 
+        bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
+        ami = create_ami
+        sg = create_securitygroup
+
+        ## we need the s3 and ec2 relevant modules patched:  
+        session = localstack_client.session.Session()
+        monkeypatch.setattr(s3,"s3_client",session.client("s3"))
+        monkeypatch.setattr(s3,"s3_resource",session.resource("s3"))
+        monkeypatch.setattr(ec2,"ec2_client",session.client("ec2"))
+        monkeypatch.setenv("SECURITY_GROUPS",sg)
+        monkeypatch.setattr(ec2,"ec2_resource",session.resource("ec2"))
+        skipsubmit = os.path.join(os.path.dirname(submit_path),"bucketskipsubmit.json")
+
+        sd = submit_start.Submission_dev(bucket_name,skipsubmit,"111111111")
+        assert sd.bypass_data["input"]["bucket"] == sep_bucket
+        assert sd.bypass_data["output"]["bucket"] == sep_bucket
+        assert sd.bypass_data["input"]["datapath"] == ["sep_inputs/datasep.json"]
+        assert sd.bypass_data["input"]["configpath"] =="sep_configs/configsep.json" 
+        assert sd.bypass_data["output"]["resultpath"] =="sep_results" 
+        monkeypatch.setenv("AMI",ami)
+        ## get submit file
+        submit= s3.load_json(bucket_name,skipsubmit)
+
+        ## Check that data and config exist at non-traditional location given full path: 
+        sd.check_existence()
+        ## Check that output directory exists: 
+        assert len(s3.ls_name(sep_bucket,os.path.join("sep_results","job__test-submitlambda-analysis_testtimestamp","logs"))) > 0
+
+        ## Check bucket name and path are not altered for all other processing:  
+        assert sd.bucket_name == bucket_name
+        assert sd.path == re.findall('.+?(?=/'+os.environ["SUBMITDIR"]+')',skipsubmit)[0]
+        sd.parse_config()
+        sd.compute_volumesize()
+        sd.acquire_instances()
+        #sd.start_instance()
+        commands = sd.process_inputs(dryrun=True)
+        assert commands[0] == os.environ["COMMAND"].format(sep_bucket,"sep_inputs/datasep.json","s3://independent/sep_results/job__test-submitlambda-analysis_testtimestamp","sep_configs/configsep.json")
+        info= ec2_client.describe_instances(InstanceIds = [i.id for i in sd.instances])
+        #for instanceinfo in info["Reservations"][0]["Instances"]:
+        #    tags = instanceinfo["Tags"]
+        #    assert {"Key":"PriceTracking","Value":"On"} in tags
+        #    assert {"Key":"Timeout","Value":"360"} in tags
+        #    assert {"Key":"group","Value":sd.path} in tags
+        #    assert {"Key":"job","Value":sd.jobname} in tags
+        #    assert {"Key":"analysis","Value":sd.bucket_name} in tags
 
 class Test_Submission_ensemble():
     def test_Submission_ensemble(self,setup_lambda_env,setup_testing_bucket):

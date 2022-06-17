@@ -100,23 +100,28 @@ class NeuroCaaSTemplate(object):
                 'OUTDIR',
                 'LOGDIR',
                 "CONFIGDIR",
-                "SUBMITDIR",
-                "SECURITY_GROUPS"]
+                "SUBMITDIR"
+               ]
         vals = [gpdict["input_directory"],
                 gpdict["output_directory"],
                 gpdict["log_directory"],
                 gpdict["config_directory"],
                 gpdict["submission_directory"],
-                gpdict["securitygroupdeployname"]]
+                ]
 
         appenddict = {k:v for k,v in zip(keys,vals)}
         obj['Lambda']['LambdaConfig'].update(appenddict)
         ## Now append the other fields: 
         default_fixed = ["WORKING_DIRECTORY","CONFIG","MISSING_CONFIG_ERROR","SHUTDOWN_BEHAVIOR","EXECUTION_TIMEOUT","SSM_TIMEOUT","LAUNCH","LOGFILE","DEPLOY_LIMIT","MAXCOST","MONITOR"]
+        ## Fill in defaults if not given:
         for field in default_fixed:
             if not obj["Lambda"]["LambdaConfig"].get(field,False):
                 obj["Lambda"]["LambdaConfig"][field] = gpdict[field]
                 print("Using default value for field {}: {}".format(field,gpdict[field]))
+        ## Fill in default security group if not given too: 
+        if not obj["Lambda"]["LambdaConfig"].get("SECURITY_GROUPS",False):        
+            obj["Lambda"]["LambdaConfig"]["SECURITY_GROUPS"] = gpdict["securitygroupdeployname"]
+            print("Using default value for security group: {}".format(gpdict["securitygroupdeployname"]))
 
         return obj
 
@@ -429,7 +434,11 @@ class DevTemplate(NeuroCaaSTemplate):
         self.figurelamb = self.add_figure_lambda()
         self.add_submit_lambda()
         if self.config["Lambda"].get("PostCodeUri",False) and self.config["Lambda"].get("PostHandler",False):
-            self.add_search_lambda()
+            post_trigger_file = self.config["Lambda"].get("PostTrigger",False)
+            if post_trigger_file:
+                self.add_search_lambda(post_trigger_file)
+            else:
+                self.add_search_lambda()
 
     def initialize_template(self):
         """
@@ -658,7 +667,11 @@ class WebDevTemplate(NeuroCaaSTemplate):
         self.figurelamb = self.add_figure_lambda()
         self.add_submit_lambda()
         if self.config["Lambda"].get("PostCodeUri",False) and self.config["Lambda"].get("PostHandler",False):
-            self.add_search_lambda()
+            post_trigger_file = self.config["Lambda"].get("PostTrigger",False)
+            if post_trigger_file:
+                self.add_search_lambda(post_trigger_file)
+            else:
+                self.add_search_lambda()
 
     def generate_usergroup(self,affiliatedict):
         identifier = "{}".format(self.config["PipelineName"].replace("-",""))
@@ -902,7 +915,11 @@ class WebSubstackTemplate(NeuroCaaSTemplate):
         self.figurelamb = self.add_figure_lambda()
         self.add_submit_lambda()
         if self.config["Lambda"].get("PostCodeUri",False) and self.config["Lambda"].get("PostHandler",False):
-            self.add_search_lambda()
+            post_trigger_file = self.config["Lambda"].get("PostTrigger",False)
+            if post_trigger_file:
+                self.add_search_lambda(post_trigger_file)
+            else:
+                self.add_search_lambda()
 
     def initialize_template(self):
         """
@@ -1047,6 +1064,63 @@ class WebSubstackTemplate(NeuroCaaSTemplate):
                 MemorySize = 128,
                 Timeout = self.config["Lambda"]['LambdaConfig']["EXECUTION_TIMEOUT"],
                 Role = 'arn:aws:iam::{accid}:role/{role}'.format(accid = boto3.client('sts').get_caller_identity().get('Account'),role = gpdict['lambdarolename']),
+                Events= all_events,
+                Environment = Environment(Variables=lambdaconfig)
+                )         
+        self.template.add_resource(function)
+
+    def add_search_lambda(self,output_file = "end.txt"):
+        """
+        Add in a lambda function to do postprocessing and return output to the user.  
+        Pasted in directly from ./postprocess_lambda.py. 
+        :param output_file: the name of the file to trigger further lambda on. by default it is end.txt. 
+
+        """
+        ## We will make event triggers for all affiliates. 
+        all_affiliates = self.config["UXData"]["Affiliates"]
+        ## Make Rule sets for each affiliate: 
+        all_events = {}
+
+        ## If user input, reads directly from input directory. If other function output, reads from output directory.
+        readdir = self.config['Lambda']['LambdaConfig']['OUTDIR'] 
+
+        aff_filter = Filter('Filtersearch',
+                S3Key = S3Key('S3Keysearch',
+                    Rules= [Rules('SuffixRulesearch',Name = 'suffix',Value =output_file)]))
+                             
+        event_name = 'BucketEventAnalysisEnd'
+        all_events[event_name] = {'Type':'S3',
+                                  'Properties':{
+                                      'Bucket':Ref('PipelineMainBucket'),
+                                      'Events':['s3:ObjectCreated:*'],
+                                      'Filter':aff_filter}}
+        #for affiliate in all_affiliates: 
+        #    ## Get necessary properties: 
+        #    affiliatename = affiliate["AffiliateName"]
+        #    ## If user input, reads directly from input directory. If other function output, reads from output directory.
+        #    readdir = self.config['Lambda']['LambdaConfig']['OUTDIR'] 
+
+        #    aff_filter = Filter('Filter'+affiliatename,
+        #            S3Key = S3Key('S3Key'+affiliatename,
+        #                Rules= [Rules('PrefixRule'+affiliatename,Name = 'prefix',Value = affiliatename+'/'+readdir),
+        #                        Rules('SuffixRule'+affiliatename,Name = 'suffix',Value =output_file)])) 
+        #    event_name = 'BucketEvent'+affiliatename+"AnalysisEnd"
+        #    all_events[event_name] = {'Type':'S3',
+        #                              'Properties':{
+        #                                  'Bucket':Ref('PipelineMainBucket'),
+        #                                  'Events':['s3:ObjectCreated:*'],
+        #                                  'Filter':aff_filter}}
+        ## We're going to add in all of the lambda configuration items to the runtime environment.
+        lambdaconfig = self.config['Lambda']['LambdaConfig']
+        ## Now add to a lambda function: 
+        function = Function('SearchLambda',
+                CodeUri = self.config['Lambda']["PostCodeUri"],
+                Runtime = 'python3.6',
+                Handler = self.config['Lambda']["PostHandler"],
+                Description = 'Postprocessing Lambda Function for Serverless',
+                MemorySize = 128,
+                Timeout = self.config["Lambda"]['LambdaConfig']["EXECUTION_TIMEOUT"],
+                Role = 'arn:aws:iam::739988523141:role/lambda_dataflow', ## TODO: Create this in template
                 Events= all_events,
                 Environment = Environment(Variables=lambdaconfig)
                 )         
