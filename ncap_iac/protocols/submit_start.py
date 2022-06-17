@@ -107,7 +107,7 @@ class Submission_dev():
             self.logger.append(msg)
             self.logger.printlatest()
             self.logger.write()
-            msg = "ANALYSIS VERSION ID: {}".format(os.environ['versionid'].split("\n")[1])
+            msg = "ANALYSIS VERSION ID: {}".format(os.environ['versionid'])
             self.logger.append(msg)
             self.logger.printlatest()
             self.logger.write()
@@ -491,7 +491,6 @@ class Submission_dev():
             raise AssertionError("[JOB TERMINATE REASON] Instance requests greater than pipeline bandwidth (base AWS capacity). Too many simultaneously deployed analyses")
 
         self.instances = instances
-        [instance.wait_until_running() for instance in instances]
 
         return instances
 
@@ -861,7 +860,13 @@ def process_upload_dev(bucket_name, key,time):
                 continue
     except Exception:
         e = traceback.format_exc()
-        [inst.terminate() for inst in instances]
+        try:
+            [inst.terminate() for inst in instances]
+        except UnboundLocalError:     
+            submission.logger.append("No instances to terminate")
+            submission.logger.printlatest()
+            submission.logger.write()
+
         submission.logger.append(internalerrormessage.format(s = step,e = e))
         submission.logger.printlatest()
         submission.logger.write()
