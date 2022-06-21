@@ -36,6 +36,7 @@ Reference
    reference/blueprints
    reference/userprofiles
    reference/devtools
+   reference/monitoring_security.rst
 
 
 Indices and tables
