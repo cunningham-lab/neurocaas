@@ -15,7 +15,7 @@
             "IAM_ROLE": "SSMRole",
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
             "WORKING_DIRECTORY": "~/bin",
-            "COMMAND": "ls; cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\" \"neurocaas_remote/caiman/run_caiman.sh\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
+            "COMMAND": "ls; cd /home/ubuntu; neurocaas_remote/run_main_cli.sh \"{}\" \"{}\" \"{}\" \"{}\" \"neurocaas_remote/caiman/run_caiman_cli.sh\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
             "SHUTDOWN_BEHAVIOR": "terminate",
             "CONFIG": "config.yaml",
             "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
