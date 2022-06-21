@@ -9,7 +9,7 @@
         "PostHandler": "postprocess.epipostprocess",
         "Launch": true,
         "LambdaConfig": {
-            "AMI": "ami-0074e3f0521cad2ef",
+            "AMI": "ami-0849b3d20fe3258e3",
             "INSTANCE_TYPE": "m5.16xlarge",
             "REGION": "us-east-1",
             "IAM_ROLE": "SSMRole",
