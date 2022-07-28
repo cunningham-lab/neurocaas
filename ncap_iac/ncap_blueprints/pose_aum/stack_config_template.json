@@ -1,5 +1,5 @@
 {
-    "PipelineName": "dgp-refactor",
+    "PipelineName": "templatestack",
     "REGION": "us-east-1",
     "STAGE": "websubstack",
     "Lambda": {
@@ -7,18 +7,18 @@
         "Handler": "submit_start.handler_develop",
         "Launch": true,
         "LambdaConfig": {
-            "AMI": "ami-07829a772419a2569",
+            "AMI": "ami-071c5a2597ec1041e",
             "INSTANCE_TYPE": "p3.2xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
             "IAM_ROLE": "SSMRole",
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
             "WORKING_DIRECTORY": "~/bin",
-            "COMMAND": "cd /home/ubuntu; neurocaas_contrib/run_main_cli.sh \"{}\" \"{}\" \"{}\" \"{}\" /home/ubuntu/neurocaas_contrib/dgp/run_dgp_cli.sh; . neurocaas_contrib/ncap_utils/workflow.sh; cleanup",
+            "COMMAND": "cd /home/ubuntu; neurocaas_remote/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
             "SHUTDOWN_BEHAVIOR": "terminate",
             "CONFIG": "config.yaml",
             "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
-            "EXECUTION_TIMEOUT": 900,
+            "EXECUTION_TIMEOUT": 180,
             "SSM_TIMEOUT": 172000,
             "LAUNCH": true,
             "LOGFILE": "lambda_log.txt",
@@ -34,30 +34,6 @@
                 "UserNames": [
                     "cipermauser1",
                     "cipermauser2"
-                ],
-                "UserInput": true,
-                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
-            },
-            {
-                "AffiliateName": "forouzanvfarahanigmailcom1610594776",
-                "UserNames": [
-                    "forouzan"
-                ],
-                "UserInput": true,
-                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
-            },
-            {
-                "AffiliateName": "reviewers",
-                "UserNames": [
-                    "reviewersnn"
-                ],
-                "UserInput": true,
-                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
-            },
-            {
-                "AffiliateName": "samuelminkowicz2022unorthwesternedu1617031775",
-                "UserNames": [
-                    "samuelminkowicz2022u"
                 ],
                 "UserInput": true,
                 "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"

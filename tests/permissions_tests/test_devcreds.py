@@ -18,7 +18,7 @@ permissions_path = pkg_resources.resource_filename("ncap_iac","permissions/dev_p
         (right_tags_wrong_val,"UnauthorizedOperation"),
         ])
 def test_user_policy(tags,responsecodes):
-    session = boto3.Session(profile_name = "testdev")
+    session = boto3.Session(profile_name = "neurocaasdev")
     ec2_client = session.client("ec2")
     ec2_resource = session.resource("ec2")
     try:
@@ -32,4 +32,4 @@ def test_user_policy(tags,responsecodes):
     except ClientError as e:
         assert e.response["Error"]["Code"] == responsecodes
 
-
+# TODO we need test to run commands as well. 
