@@ -7,6 +7,7 @@ import collections
 import os
 
 #call this once per job created
+
 def lambda_handler(event, context):
     s3 = boto3.client('s3')
     #copies frame jpegs from labeling job input folder
@@ -137,4 +138,5 @@ def lambda_handler(event, context):
 # #event = {"label_job_input": "reachingvideo1/", "video_bucket": "sagemakerneurocaastest", "video_path": "username/inputs/reachingvideo1.avi",  "data_bucket" : "nickneurocaastest2", "label_bucket" : "nickneurocaastest2", "label_output_key": "output/GeneralTestAWS14/annotations/consolidated-annotation/output/0/SeqLabelMod.json", "dgp_input": "dgp-input-test"}
 # context = {}
 #lambda_handler(test_event, context)
+
 
