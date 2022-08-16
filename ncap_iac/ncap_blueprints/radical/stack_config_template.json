@@ -1,0 +1,43 @@
+{
+    "PipelineName": "radical-snel",
+    "REGION": "us-east-1",
+    "STAGE": "webdev",
+    "Lambda": {
+        "CodeUri": "../../protocols",
+        "Handler": "submit_start.handler_develop",
+        "Launch": true,
+        "LambdaConfig": {
+            "AMI": "ami-004e79c466e249e92",
+            "INSTANCE_TYPE": "p2.8xlarge",
+            "REGION": "us-east-1",
+            "SECURITY_GROUPS": "testsgstack-SecurityGroupDev-1NQJIDBJG16KK",
+            "IAM_ROLE": "SSMRole",
+            "KEY_NAME": "testkeystack-custom-dev-key-pair",
+            "WORKING_DIRECTORY": "~/bin",
+            "COMMAND": "cd /home/ubuntu; sudo -u ubuntu models/radical/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\"; . neurocaas_contrib/ncap_utils/workflow.sh; cleanup",
+            "EXECUTION_TIMEOUT": 900,
+            "SSM_TIMEOUT": 172000
+        }
+    },
+    "UXData": {
+        "Affiliates": [
+            {
+                "AffiliateName": "traviscipermagroup",
+                "UserNames": [
+                    "cipermauser1",
+                    "cipermauser2"
+                ],
+                "UserInput": true,
+                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
+            },
+            {
+                "AffiliateName": "neurocaascos1635349576",
+                "UserNames": [
+                    "neurocaascos1635349576"
+                ],
+                "UserInput": true,
+                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
+            }
+        ]
+    }
+}

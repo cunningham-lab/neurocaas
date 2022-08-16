@@ -1,20 +1,23 @@
 {
     "PipelineName": "label-job-create-web",
     "REGION": "us-east-1",
-    "STAGE": "webdev",
+
+    "STAGE": "websubstack",
     "Lambda": {
         "CodeUri": "../../protocols",
         "Handler": "submit_start.handler_develop",
         "PostCodeUri": "../../protocols",
         "PostHandler": "data_format_lambda.lambda_handler",
+        "PostTrigger": "SeqLabel.json",
+        "Requirements": "requirements_label.txt",
         "Launch": true,
         "LambdaConfig": {
-            "AMI": "ami-0c8543c49e556debe",
-            "INSTANCE_TYPE": "m5.large",
+            "AMI": "ami-06114bcbb4854b467",
+            "INSTANCE_TYPE": "m5.4xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
             "IAM_ROLE": "SagemakerRole",
-            "KEY_NAME": "testkeystack-custom-dev-key-pair",
+            "KEY_NAME": "labeljobcreate",
             "WORKING_DIRECTORY": "~/bin",
             "COMMAND": "ls; cd /home/ubuntu/; source .bashrc; neurocaas_contrib/run_main.sh \"{}\" \"{}\" \"{}\" \"{}\" AWSLabeljobCreation/run_label_job_creation.sh",
             "SHUTDOWN_BEHAVIOR": "terminate",
@@ -35,6 +38,14 @@
                 "AffiliateName": "debuggers",
                 "UserNames": [
                     "dummyuser"
+                ],
+                "UserInput": true,
+                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
+            },
+            {
+                "AffiliateName": "newgroup",
+                "UserNames": [
+                    "nrg2148columbia"
                 ],
                 "UserInput": true,
                 "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"

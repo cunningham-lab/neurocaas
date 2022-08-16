@@ -11,6 +11,16 @@ from ncap_iac.protocols.utilsparam import ec2,ssm
 import pytest
 import os
 
+@pytest.fixture
+def kill_instances():
+    """Kill if unattended instances have been left running."""
+    yield "kill uncleaned instances"
+    session = localstack_client.session.Session()
+    ec2_resource = session.resource("ec2")
+    instances = ec2_resource.instances.filter(Filters = [{"Name":"instance-state-name","Values":["running"]}]) 
+    for instance in instances:
+        instance.terminate()
+
 def get_dict_file():
     homedir = os.environ["HOME"]
     if homedir == "/Users/taigaabe":
@@ -101,10 +111,10 @@ def setup_testing_bucket(monkeypatch):
       |-results
         |-job_testsearchlambda-analysis_timestamp1
           |-process_results
-            |-1
+            |-ensemble-model1-2030-01-01
               |-videos
                 |-vid.mp4
-            |-2
+            |-ensemble-model2-2030-01-02
               |-videos
                 |-vid.mp4
           |-logs
@@ -231,6 +241,7 @@ class Test_PostProcess():
         pp_pre.submit(submit)
         statuobject = s3_resource.Object(bucket_name,os.path.join(pp_pre.groupdir,"submissions","postprocess_submit.json"))
         statuobject.load()
+
 class Test_PostProcess_EnsembleDGPPredict():       
     def test_PostProcess_EnsembleDGPPredict(self,setup_testing_bucket):
         bucket_name,endfilepre,endfilepost = setup_testing_bucket
@@ -282,10 +293,10 @@ class Test_PostProcess_EnsembleDGPPredict():
     def test_get_videos(self,setup_testing_bucket):
         bucket_name,endfilepre,endfilepost = setup_testing_bucket
         pp_pre = postprocess.PostProcess_EnsembleDGPPredict(bucket_name,endfilepre,bucket_name,"postprocess")
-        assert pp_pre.get_videos() == [os.path.join(pp_pre.jobdir,"process_results","1","videos","TempTrial2ROI_0PART_0Interval_[54078, 54107].mp4")]
+        assert pp_pre.get_videos() == [os.path.join(pp_pre.jobdir,"process_results","ensemble-model1-2030-01-01","videos","TempTrial2ROI_0PART_0Interval_[54078, 54107].mp4")]
          
 
-def test_postprocess_prediction_run(setup_testing_bucket):
+def test_postprocess_prediction_run(setup_testing_bucket,kill_instances):
     bucket_name,endfilepre,endfilepost = setup_testing_bucket
     pp = postprocess.postprocess_prediction_run(bucket_name,endfilepre)
     ## check that everything you looked into still holds true 

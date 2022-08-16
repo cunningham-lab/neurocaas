@@ -33,7 +33,7 @@ Now create and configure a conda environment as follows:
     % conda activate neurocaas # activate environment
     % python -m pip install --upgrade pip # upgrade package manager
     % pip install -r requirements.txt # install dependencies
-    % pip install ./src # install neurocaas_contrib python package 
+    % pip install -e ./src # install neurocaas_contrib python package 
 
 Once you've done this, you should have the :code:`neurocaas-contrib` CLI. You can check if installation when smoothly by running the help command, :code:`neurocaas-contrib --help`, which should display help text giving usage and available subcommands: 
 
@@ -46,7 +46,8 @@ Now that you've got the contrib repo set up, let's move on to the source repo. U
 
     % conda activate neurocaas
     % cd path/to/your/neurocaas 
-    % pip install . # install neurocaas python package 
+
+    % pip install -e . # install neurocaas python package 
 
 Now, at the end of this process, you should have both the source and contrib repos on your local machine, with their python packages installed, like so: 
 

@@ -6,6 +6,8 @@ from botocore.exceptions import ClientError
 import re
 from datetime import datetime
 
+defaultduration = 60 ## this should be picked up and set as a global parameter later. 
+
 try:
     ## Works when running in lambda:
     from utilsparam import s3 as utilsparams3
@@ -41,12 +43,25 @@ def respond(err, res=None):
 class Submission_dev():
     """
     Specific lambda for purposes of development.  
+    
+    :param bucket_name: name of the S3 bucket that this is a submission for (corresponds to an analysis). 
+    :param key: key of submit file within this bucket. 
+    :param time: some unique identifier that distinguishes this job from all others. 
+    :ivar bucket_name: initial_value: bucket_name
+    :ivar path: name of the group responsible for this job.  
+    :ivar time: initial value: time  ## TODO Remove this field. 
+    :ivar jobname: "job_{}_{}_{}".format(submit_name,bucket_name,self.timestamp)
+    :ivar jobpath: os.path.join(path,"outputs",jobname)
+    :ivar logger: s3.Logger object
+    :ivar instance_type: either given in submit file, or default option of analysis. 
+    :ivar data_name: submit file's dataname field. 
+    :ivar config_name: submit file's configname field. 
     """
     def __init__(self,bucket_name,key,time):
         ## Initialize as before:
         # Get Upload Location Information
         self.bucket_name = bucket_name
-        ## Get directory above the input directory. 
+        ## Get directory above the input directory: self.path is the groupname. 
         try:
             self.path = re.findall('.+?(?=/'+os.environ["SUBMITDIR"]+')',key)[0] 
         except IndexError:    
@@ -83,7 +98,7 @@ class Submission_dev():
         self.jobpath = jobpath
         try:
             ## And create a corresponding directory in the submit area. 
-            create_jobdir  = utilsparams3.mkdir(self.bucket_name, os.path.join(self.path,os.environ['OUTDIR']),self.jobname)
+            create_jobdir  = utilsparams3.mkdir(self.bucket_name, os.path.dirname(self.jobpath),os.path.basename(self.jobpath))
 
             ## Create a logging object and write to it. 
             ## a logger for the submit area.  
@@ -92,7 +107,7 @@ class Submission_dev():
             self.logger.append(msg)
             self.logger.printlatest()
             self.logger.write()
-            msg = "ANALYSIS VERSION ID: {}".format(os.environ['versionid'].split("\n")[1])
+            msg = "ANALYSIS VERSION ID: {}".format(os.environ['versionid'])
             self.logger.append(msg)
             self.logger.printlatest()
             self.logger.write()
@@ -128,6 +143,10 @@ class Submission_dev():
         submit_errmsg = "        [Internal (init)] INPUT ERROR: Submit file does not contain field {}, needed to analyze data."
         try: 
             self.data_name = submit_file['dataname'] # TODO validate extensions 
+            if type(self.data_name) == str:
+                self.data_name_list = [self.data_name]
+            else:    
+                self.data_name_list = self.data_name 
         except KeyError as ke:
 
             ## Write to logger
@@ -152,27 +171,118 @@ class Submission_dev():
         self.logger.append(msg)
         self.logger.printlatest()
         self.logger.write()
+        self.bypass_data = self.check_bypass(submit_file)
+
+        ## overwrite logger if necessary:
+        self.overwrite_jobpath_logger(submit_name,bucket_name)
+
+    def overwrite_jobpath_logger(self,submit_name,bucket_name):     
+        """Checks bypass data and overwrites the jobpath and logger if we need to. Keep the same jobname for ID purposes. 
+
+        :param submit_name: name of original submit file
+        :param bucket_name: name of bucket we associate with this analysis. 
+        ivar: jobpath updated to be the new write location. 
+        ivar: logger
+
+        """
+        #save current logger data: 
+        old_logs  = self.logger._logs 
+        old_config = self.logger._config
+        if self.bypass_data["output"]["bucket"] is not None:
+            ## Initialize s3 directory for this job.
+            jobpath = os.path.join(self.bypass_data["output"]["resultpath"],self.jobname)
+            self.jobpath = jobpath
+            try:
+                ## And create a corresponding directory in the submit area.
+                create_jobdir  = utilsparams3.mkdir(self.bypass_data["output"]["bucket"],os.path.dirname(self.jobpath),os.path.basename(self.jobpath))
+
+                ## Create a logging object and write to it.
+                ## a logger for the submit area.
+                self.logger = utilsparams3.JobLogger_demo(self.bypass_data["output"]["bucket"], self.jobpath)
+                self.logger._logs = old_logs
+                self.logger._config = old_config
+                self.logger.write()
+                print(self.logger.path)
+            except ClientError as e:
+                print("error with logging for bypass:", e.response["Error"])
+
+
+    def check_bypass(self,submit_file):
+        """Checks if we should perform any "bucket bypass" operations. 
+        :param submit_file: the dictionary containing submit info. 
+        :returns: dictionary with form {"input":{"bucket":None,"datapath":None,"configpath":None},"output":{"bucket":None,"resultpath":None}}, where fields are filled in based on existence of bypass options. 
+        """
+        ## Bucket bypass: if 1) full s3 path is given for both data and config, and 2) if they are both the same, overwrite bucket and path. 
+        # check if both start with s3://:
+        bypass_data = {"input":{"bucket":None,"datapath":None,"configpath":None},"output":{"bucket":None,"resultpath":None}}
+        if self.data_name_list[0].startswith("s3://") and self.config_name.startswith("s3://"):
+            dataname_split = self.data_name_list[0].replace("s3://","").split("/")
+            configname_split = self.config_name.replace("s3://","").split("/")
+
+            dataname_bucket = dataname_split[0]
+            dataname_path = [("/").join(ds_split.replace("s3://","").split("/")[1:]) for ds_split in self.data_name_list]
+            configname_bucket = configname_split[0]
+            configname_path = ("/").join(configname_split[1:])
+
+            assert dataname_bucket == configname_bucket, "If bypassing storage for input, data and config must be from same bucket."
+            bypass_data["input"]["bucket"] = dataname_bucket
+            bypass_data["input"]["datapath"] = dataname_path
+            bypass_data["input"]["configpath"] = configname_path
+            msg = "        [Internal (init)] Storage Bypass initiated from bucket: s3://{}".format(dataname_bucket)
+            self.logger.append(msg)
+            self.logger.printlatest()
+            self.logger.write()
+
+        resultpath = submit_file.get("resultpath",False)
+        if resultpath:
+            assert resultpath.startswith("s3://"), "If bypassing storage for output, s3:// format path required"
+            resultname_split = resultpath.replace("s3://","").split("/")
+            resultname_bucket = resultname_split[0]
+            resultname_path = ("/").join(resultname_split[1:])
+            bypass_data["output"]["bucket"] = resultname_bucket
+            bypass_data["output"]["resultpath"] = resultname_path
+
+            msg = "        [Internal (init)] Storage Bypass initiated to bucket: s3://{}".format(resultname_bucket)
+            self.logger.append(msg)
+            self.logger.printlatest()
+            self.logger.write()
+
+        msg = "        [Internal (init)] Full bypass info: {}".format(bypass_data)
+        self.logger.append(msg)
+        self.logger.printlatest()
+        self.logger.write()
+        return bypass_data    
+
 
     def check_existence(self):
         """
         Check for the existence of the corresponding data and config in s3. 
         """
+        if self.bypass_data["input"]["bucket"] is not None:
+            check_bucket = self.bypass_data["input"]["bucket"]
+            data_check_paths = self.bypass_data["input"]["datapath"]
+            config_check_path = self.bypass_data["input"]["configpath"]
+        else:    
+            check_bucket = self.bucket_name
+            data_check_paths = self.data_name_list
+            config_check_path = self.config_name
+
+            
         exists_errmsg = "        [Internal (check_existence)] INPUT ERROR: S3 Bucket does not contain {}"
-        if type(self.data_name) is str:
-            check_data_exists = utilsparams3.exists(self.bucket_name,self.data_name)
-        elif type(self.data_name) is list:
-            check_data_exists = all([utilsparams3.exists(self.bucket_name,name) for name in self.data_name])
-        else:
+
+        print(check_bucket,data_check_paths,config_check_path,self.bypass_data,self.data_name,self.data_name_list)
+        if not all([type(i) == str for i in data_check_paths]):
             raise TypeError("[JOB TERMINATE REASON] 'dataname' field is not the right type. Should be string or list.")
+        check_data_exists = all([utilsparams3.exists(check_bucket,name) for name in data_check_paths])
 
         if not check_data_exists: 
-            msg = exists_errmsg.format(self.data_name)
+            msg = exists_errmsg.format(data_check_paths)
             self.logger.append(msg)
             self.logger.printlatest()
             self.logger.write()
             raise ValueError("[JOB TERMINATE REASON] 'dataname' field refers to data that cannot be found. Be sure this is a full path to the data, without the bucket name.")
-        elif not utilsparams3.exists(self.bucket_name,self.config_name): 
-            msg = exists_errmsg.format(self.config_name)
+        elif not utilsparams3.exists(check_bucket,config_check_path): 
+            msg = exists_errmsg.format(config_check_path)
             self.logger.append(msg)
             self.logger.printlatest()
             self.logger.write()
@@ -180,11 +290,19 @@ class Submission_dev():
         ###########################
 
         ## Now get the actual paths to relevant data from the foldername: 
-        if type(self.data_name) is str:
-            self.filenames = utilsparams3.extract_files(self.bucket_name,self.data_name,ext = None) 
-        elif type(self.data_name) is list:
-            self.filenames = self.data_name
+        self.filenames = data_check_paths
         assert len(self.filenames) > 0, "[JOB TERMINATE REASON] The folder indicated is empty, or does not contain analyzable data."
+
+    def prices_active_instances_ami(self,ami):
+        """Calculate the price of each instance directly. 
+
+        :param ami: (str) the id giving the number of instances with that ami. 
+        :returns: float giving number of instances*minutes*price that they will be active.  
+        """
+        instances = utilsparamec2.get_active_instances_ami(ami)
+        prices = [(int(tag["Value"])/60)*utilsparampricing.get_price(utilsparampricing.get_region_name(utilsparampricing.region_id),instance.instance_type,os = "Linux") for instance in instances for tag in instance.tags if tag["Key"] == "Timeout"]
+
+        return sum(prices)
 
     def get_costmonitoring(self):
         """
@@ -217,9 +335,46 @@ class Submission_dev():
                 instcost = price*duration/3600.
             except TypeError:
                 ## In rare cases it seems one or the other of these things don't actually have entries. This is a problem. for now, charge for the hour: 
+                message = "        [Internal (get_costmonitoring)] Duration of past jobs not found. Pricing for an hour"
+                self.logger.append(message)
+                self.logger.printlatest()
                 instcost = price
             cost+= instcost
         
+        ## Now compare against the cost of the job you're currently running: 
+        ## need duration from config (self.parse_config), self.instance_type, and self.nb_instances
+        ## By assuming they're all standard instances we upper bound the cost. 
+        try:
+            price = utilsparampricing.get_price(utilsparampricing.get_region_name(utilsparampricing.region_id),self.instance_type,os = "Linux")
+            nb_instances = len(self.filenames)
+            if self.jobduration is None:
+                duration = defaultduration/60 ## in hours. 
+            else:    
+                duration = self.jobduration/60
+            jobpricebound = duration*price*nb_instances    
+            cost += jobpricebound
+        except Exception as e:     
+            print(e)
+            raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to estimate cost of current job.")
+
+        ## Now compare agains the expected cost of instances with the current ami: 
+        try:
+            ami = os.environ["AMI"]
+            total_activeprice = self.prices_active_instances_ami(ami)
+
+        except Exception as e:    
+            print(e)
+            try:
+                activeprice = utilsparampricing.get_price(utilsparampricing.get_region_name(utilsparampricing.region_id),self.instance_type,os = "Linux")
+                number = len([i for i in utilsparamec2.get_active_instances_ami(ami)])
+                activeduration = defaultduration*number/60 ## default to the default duration instead if not given. 
+                total_activeprice = activeprice*activeduration
+            except Exception as e:    
+                print(e)
+                raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to estimate cost of active jobs.")
+
+        cost += total_activeprice   
+
         ## Now compare with budget:
         try:
             budget = float(utilsparamssm.get_budget_parameter(self.path,self.bucket_name))
@@ -234,16 +389,15 @@ class Submission_dev():
                 raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to get budget.")
         except Exception:    
             raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to get budget.")
-            
 
         if cost < budget:
-            message = "        [Internal (get_costmonitoring)] Incurred cost so far: ${}. Remaining budget: ${}".format(cost,budget-cost)
+            message = "        [Internal (get_costmonitoring)] Projected total costs: ${}. Remaining budget: ${}".format(cost,budget-cost)
             self.logger.append(message)
             self.logger.printlatest()
             self.logger.write()
             validjob = True
         elif cost >= budget:
-            message = "        [Internal (get_costmonitoring)] Incurred cost so far: ${}. Over budget (${}), cancelling job. Contact administrator.".format(cost,budget)
+            message = "        [Internal (get_costmonitoring)] Projected total costs: ${}. Over budget (${}), cancelling job. Contact administrator.".format(cost,budget)
             self.logger.append(message)
             self.logger.printlatest()
             self.logger.write()
@@ -255,11 +409,18 @@ class Submission_dev():
         Parse the config file given for specific neurocaas parameters. In particular, the *duration* of the job, and the *dataset size* 
         TODO: check for type in these configuration files. 
         """
-        extension = os.path.splitext(self.config_name)[-1]
+        if self.bypass_data["input"]["bucket"] is not None:
+            check_bucket = self.bypass_data["input"]["bucket"]
+            config_check_path = self.bypass_data["input"]["configpath"]
+        else:    
+            check_bucket = self.bucket_name
+            config_check_path = self.config_name
+
+        extension = os.path.splitext(config_check_path)[-1]
         if extension == ".json":
-            passed_config = utilsparams3.load_json(self.bucket_name,self.config_name)
+            passed_config = utilsparams3.load_json(check_bucket,config_check_path)
         elif extension == ".yaml":
-            passed_config = utilsparams3.load_yaml(self.bucket_name,self.config_name)
+            passed_config = utilsparams3.load_yaml(check_bucket,config_check_path)
 
         try:
             self.jobduration = passed_config["__duration__"]
@@ -300,14 +461,25 @@ class Submission_dev():
             self.logger.write()
             raise ValueError("[JOB TERMINATE REASON] Instance requests greater than pipeline bandwidth. Too many simultaneously deployed analyses.")
         
-        instances = utilsparamec2.launch_new_instances_with_tags(
+        instances = utilsparamec2.launch_new_instances_with_tags_additional(
         instance_type=self.instance_type, 
         ami=os.environ['AMI'],
         logger=  self.logger,
         number = nb_instances,
         add_size = self.full_volumesize,
-        duration = self.jobduration
+        duration = self.jobduration,
+        group = self.path,
+        analysis = self.bucket_name,
+        job = self.jobname
         )
+        #instances = utilsparamec2.launch_new_instances_with_tags(
+        #instance_type=self.instance_type, 
+        #ami=os.environ['AMI'],
+        #logger=  self.logger,
+        #number = nb_instances,
+        #add_size = self.full_volumesize,
+        #duration = self.jobduration
+        #)
 
         ## Even though we have a check in place, also check how many were launched:
         try:
@@ -319,6 +491,7 @@ class Submission_dev():
             raise AssertionError("[JOB TERMINATE REASON] Instance requests greater than pipeline bandwidth (base AWS capacity). Too many simultaneously deployed analyses")
 
         self.instances = instances
+
         return instances
 
     def log_jobs(self):
@@ -357,7 +530,7 @@ class Submission_dev():
         self.logger.printlatest()
         self.logger.write()
 
-    def process_inputs(self):
+    def process_inputs(self,dryrun=False):
         """ Initiates Processing On Previously Acquired EC2 Instance. This version requires that you include a config (fourth) argument """
         try: 
             os.environ['COMMAND'].format("a","b","c","d")
@@ -368,28 +541,54 @@ class Submission_dev():
             self.logger.write()
             raise ValueError("[JOB TERMINATE REASON] Not the correct format for arguments. Protocols for job manager are misformatted.")
      
+        ## input bucket: 
+        if self.bypass_data["input"]["bucket"] is not None:
+            input_bucket = self.bypass_data["input"]["bucket"]
+            data_check_paths = self.bypass_data["input"]["datapath"]
+            config_check_path = self.bypass_data["input"]["configpath"]
+        else:    
+            input_bucket = self.bucket_name
+            data_check_paths = self.data_name_list
+            config_check_path = self.config_name
+
+        if self.bypass_data["output"]["bucket"] is not None:
+            output_bucket = self.bypass_data["output"]["bucket"]
+            result_check_paths = self.bypass_data["output"]["resultpath"]
+            outpath_full = "s3://{}/{}".format(output_bucket,os.path.join(result_check_paths,self.jobname))
+        else:    
+            outpath_full = os.path.join(os.environ['OUTDIR'],self.jobname)
+
+
+        ## Bypass: 
+        #self.bucket_name -> input_bucket
+        #self.filenames -> data_check_paths
+        #outpath_full -> resultpath(FULL)
+        #self.config_name -> config_check_path
 
         ## Should we vectorize the log here? 
-        outpath_full = os.path.join(os.environ['OUTDIR'],self.jobname)
+        #outpath_full = os.path.join(os.environ['OUTDIR'],self.jobname)
+        commands = [os.environ['COMMAND'].format(
+              input_bucket, filename, outpath_full, config_check_path
+              ) for filename in data_check_paths]
 
-        print([os.environ['COMMAND'].format(
-              self.bucket_name, filename, outpath_full, self.config_name
-              ) for filename in self.filenames],"command send")
-        for f,filename in enumerate(self.filenames):
-            response = utilsparamssm.execute_commands_on_linux_instances(
-                commands=[os.environ['COMMAND'].format(
-                    self.bucket_name, filename, outpath_full, self.config_name
-                    )], # TODO: variable outdir as option
-                instance_ids=[self.instances[f].instance_id],
-                working_dirs=[os.environ['WORKING_DIRECTORY']],
-                log_bucket_name=self.bucket_name,
-                log_path=os.path.join(self.jobpath,'internal_ec2_logs')
-                )
-            self.logger.initialize_datasets_dev(filename,self.instances[f].instance_id,response["Command"]["CommandId"])
-            self.logger.append("        [Internal (process_inputs)] Starting analysis {} with parameter set {}".format(f+1,os.path.basename(filename)))
-            self.logger.printlatest()
-            self.logger.write()
-        self.logger.append("        [Internal (process_inputs)] All jobs submitted. Processing...")
+        print(commands,"command to send")
+        if not dryrun:
+            for f,filename in enumerate(data_check_paths):
+                response = utilsparamssm.execute_commands_on_linux_instances(
+                    commands=[os.environ['COMMAND'].format(
+                        input_bucket, filename, outpath_full, config_check_path
+                        )], # TODO: variable outdir as option
+                    instance_ids=[self.instances[f].instance_id],
+                    working_dirs=[os.environ['WORKING_DIRECTORY']],
+                    log_bucket_name=input_bucket,
+                    log_path=os.path.join(self.jobpath,'internal_ec2_logs')
+                    )
+                self.logger.initialize_datasets_dev(filename,self.instances[f].instance_id,response["Command"]["CommandId"])
+                self.logger.append("        [Internal (process_inputs)] Starting analysis {} with parameter set {}".format(f+1,os.path.basename(filename)))
+                self.logger.printlatest()
+                self.logger.write()
+            self.logger.append("        [Internal (process_inputs)] All jobs submitted. Processing...")
+        return commands
 
 
     ## Declare rules to monitor the states of these instances.  
@@ -547,6 +746,7 @@ def process_upload_dev(bucket_name, key,time):
     step = "STEP 2/4 (Validation)"
     try:
         submission.check_existence()
+        submission.parse_config()
         valid = submission.get_costmonitoring()
         assert valid
         submission.logger.append(donemessage.format(s = step))
@@ -575,7 +775,6 @@ def process_upload_dev(bucket_name, key,time):
     # Step 3: Setup: Getting the volumesize, hardware specs of immutable analysis environments. 
     step = "STEP 3/4 (Environment Setup)"
     try:
-        submission.parse_config()
         submission.compute_volumesize()
         submission.logger.append(donemessage.format(s = step))
         submission.logger.printlatest()
@@ -661,7 +860,13 @@ def process_upload_dev(bucket_name, key,time):
                 continue
     except Exception:
         e = traceback.format_exc()
-        [inst.terminate() for inst in instances]
+        try:
+            [inst.terminate() for inst in instances]
+        except UnboundLocalError:     
+            submission.logger.append("No instances to terminate")
+            submission.logger.printlatest()
+            submission.logger.write()
+
         submission.logger.append(internalerrormessage.format(s = step,e = e))
         submission.logger.printlatest()
         submission.logger.write()
@@ -712,6 +917,7 @@ def process_upload_ensemble(bucket_name, key,time):
     step = "STEP 2/4 (Validation)"
     try:
         submission.check_existence()
+        submission.parse_config()
         valid = submission.get_costmonitoring()
         assert valid
         submission.logger.append(donemessage.format(s = step))
@@ -740,7 +946,6 @@ def process_upload_ensemble(bucket_name, key,time):
     # Step 3: Setup: Getting the volumesize, hardware specs of immutable analysis environments. 
     step = "STEP 3/4 (Environment Setup)"
     try:
-        submission.parse_config()
         submission.compute_volumesize()
         submission.logger.append(donemessage.format(s = step))
         submission.logger.printlatest()

@@ -771,7 +771,7 @@ class ReferenceUserCreationTemplate():
         obj["Statement"].append({
             'Sid': 'Inputfolderwrite',
             'Effect': 'Allow',
-            'Action': ['s3:PutObject','s3:DeleteObject'],
+            'Action': ['s3:PutObject','s3:PutObjectTagging','s3:DeleteObject'],
             'Resource': subfolder_arn_input_list
              })
         
@@ -785,7 +785,7 @@ class ReferenceUserCreationTemplate():
         obj["Statement"].append({
            'Sid': 'Outputfolderwrite',
             'Effect': 'Allow',
-            'Action': ['s3:GetObject','s3:DeleteObject'],
+            'Action': ['s3:GetObject','s3:GetObjectTagging','s3:DeleteObject'],
             'Resource': subfolder_arn_output_list 
              })
         return obj
