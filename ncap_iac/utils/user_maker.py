@@ -122,7 +122,7 @@ class UserTemplate(NCAPTemplate):
                               Handler="helper.handler_mkdir",
                               Environment = Environment(Variables=lambdaconfig),
                               Role=GetAtt(mkdirrole_attached,"Arn"),
-                              Runtime="python3.6",
+                              Runtime="python3.7",
                               Timeout=30)
         mkfunction_attached = template.add_resource(mkfunction)
         delfunction = Function("S3DelObjectFunction",
@@ -131,7 +131,7 @@ class UserTemplate(NCAPTemplate):
                               Handler="helper.handler_deldir",
                               Environment = Environment(Variables=lambdaconfig),
                               Role=GetAtt(mkdirrole_attached,"Arn"),
-                              Runtime="python3.6",
+                              Runtime="python3.7",
                               Timeout=30)
         delfunction_attached = template.add_resource(delfunction)
         ## Custom resource to delete for each: . 
@@ -424,7 +424,7 @@ class ReferenceUserCreationTemplate():
                               Handler="helper.handler_mkdir",
                               Environment = Environment(Variables=lambdaconfig),
                               Role=GetAtt(mkdirrole_attached,"Arn"),
-                              Runtime="python3.6",
+                              Runtime="python3.7",
                               Timeout=30)
         mkfunction_attached = self.template.add_resource(mkfunction)
         delfunction = Function("S3DelObjectFunction",
@@ -433,7 +433,7 @@ class ReferenceUserCreationTemplate():
                                Handler="helper.handler_deldir",
                                Environment = Environment(Variables=lambdaconfig),
                                Role=GetAtt(mkdirrole_attached,"Arn"),
-                               Runtime="python3.6",
+                               Runtime="python3.7",
                                Timeout=30)
         delfunction_attached = self.template.add_resource(delfunction)
 
