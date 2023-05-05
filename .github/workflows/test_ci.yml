@@ -35,7 +35,7 @@ jobs:
       - name: Setup
         uses: actions/setup-python@v2
         with:
-          python-version: 3.6
+          python-version: 3.8
 
       # Log in to docker hub. 
       - name: Login to Docker Hub
