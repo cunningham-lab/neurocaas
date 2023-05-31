@@ -304,7 +304,7 @@ class NeuroCaaSTemplate(object):
         ## Now add to a lambda function: 
         function = Function('MainLambda',
                 CodeUri = self.config['Lambda']["CodeUri"],##'../lambda_repo',
-                Runtime = 'python3.6',
+                Runtime = 'python3.7',
                 Handler = self.config['Lambda']["Handler"],##'submit_start.handler',
                 Description = 'Main Lambda Function for Serverless',
                 MemorySize = 128,
@@ -323,7 +323,7 @@ class NeuroCaaSTemplate(object):
         ## Now add to a lambda function: 
         function = Function('FigLambda',
                 CodeUri = self.config['Lambda']['CodeUri'],
-                Runtime = 'python3.6',
+                Runtime = 'python3.7',
                 Handler = 'log.monitor_updater',
                 Description = 'Lambda Function logging start/stop for NCAP',
                 MemorySize = 128,
@@ -398,7 +398,7 @@ class NeuroCaaSTemplate(object):
         ## Now add to a lambda function: 
         function = Function('SearchLambda',
                 CodeUri = self.config['Lambda']["PostCodeUri"],
-                Runtime = 'python3.6',
+                Runtime = 'python3.7',
                 Handler = self.config['Lambda']["PostHandler"],
                 Description = 'Postprocessing Lambda Function for Serverless',
                 MemorySize = 128,
@@ -474,7 +474,7 @@ class DevTemplate(NeuroCaaSTemplate):
                               Handler="helper.handler_mkdir",
                               Environment = Environment(Variables=lambdaconfig),
                               Role=GetAtt(mkdirrole_attached,"Arn"),
-                              Runtime="python3.6",
+                              Runtime="python3.7",
                               Timeout=30)
         mkfunction_attached = template.add_resource(mkfunction)
         delfunction = Function("S3DelObjectFunction",
@@ -483,7 +483,7 @@ class DevTemplate(NeuroCaaSTemplate):
                                Handler="helper.handler_delbucket",
                                Environment = Environment(Variables=lambdaconfig),
                                Role=GetAtt(mkdirrole_attached,"Arn"),
-                               Runtime="python3.6",
+                               Runtime="python3.7",
                                Timeout=30)
         delfunction_attached = template.add_resource(delfunction)
         ## Custom resource to delete. 
@@ -715,7 +715,7 @@ class WebDevTemplate(NeuroCaaSTemplate):
                               Handler="helper.handler_mkdir",
                               Environment = Environment(Variables=lambdaconfig),
                               Role=GetAtt(mkdirrole_attached,"Arn"),
-                              Runtime="python3.6",
+                              Runtime="python3.7",
                               Timeout=30)
         mkfunction_attached = template.add_resource(mkfunction)
         delfunction = Function("S3DelObjectFunction",
@@ -724,7 +724,7 @@ class WebDevTemplate(NeuroCaaSTemplate):
                                Handler="helper.handler_delbucket",
                                Environment = Environment(Variables=lambdaconfig),
                                Role=GetAtt(mkdirrole_attached,"Arn"),
-                               Runtime="python3.6",
+                               Runtime="python3.7",
                                Timeout=30)
         delfunction_attached = template.add_resource(delfunction)
         ## Custom resource to delete. 
@@ -1001,7 +1001,7 @@ class WebSubstackTemplate(NeuroCaaSTemplate):
                               Handler="helper.handler_mkdir",
                               Environment = Environment(Variables=lambdaconfig),
                               Role=GetAtt(mkdirrole_attached,"Arn"),
-                              Runtime="python3.6",
+                              Runtime="python3.7",
                               Timeout=30)
         mkfunction_attached = self.template.add_resource(mkfunction)
         delfunction_logical_id = "S3DelObjectFunction"
@@ -1011,7 +1011,7 @@ class WebSubstackTemplate(NeuroCaaSTemplate):
                                Handler="helper.handler_delbucket",
                                Environment = Environment(Variables=lambdaconfig),
                                Role=GetAtt(mkdirrole_attached,"Arn"),
-                               Runtime="python3.6",
+                               Runtime="python3.7",
                                Timeout=30)
         delfunction_attached = self.template.add_resource(delfunction)
         ## Custom resource to delete. 
@@ -1058,7 +1058,7 @@ class WebSubstackTemplate(NeuroCaaSTemplate):
         ## Now add to a lambda function: 
         function = Function('MainLambda',
                 CodeUri = self.config['Lambda']["CodeUri"],##'../lambda_repo',
-                Runtime = 'python3.6',
+                Runtime = 'python3.7',
                 Handler = self.config['Lambda']["Handler"],##'submit_start.handler',
                 Description = 'Main Lambda Function for Serverless',
                 MemorySize = 128,
@@ -1115,7 +1115,7 @@ class WebSubstackTemplate(NeuroCaaSTemplate):
         ## Now add to a lambda function: 
         function = Function('SearchLambda',
                 CodeUri = self.config['Lambda']["PostCodeUri"],
-                Runtime = 'python3.6',
+                Runtime = 'python3.7',
                 Handler = self.config['Lambda']["PostHandler"],
                 Description = 'Postprocessing Lambda Function for Serverless',
                 MemorySize = 128,

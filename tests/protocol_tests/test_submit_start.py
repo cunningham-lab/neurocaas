@@ -85,6 +85,21 @@ def create_ami():
     yield ami["ImageId"]
 
 @pytest.fixture
+def create_instance_profile():
+    profilename = "SSMRole"
+    iam_resource = localstack_client.session.resource('iam')
+    iam_client = localstack_client.session.client('iam')
+    instance_profile = iam_resource.create_instance_profile(
+    InstanceProfileName=profilename,
+    Path='string'
+    )
+    yield instance_profile
+    iam_client.delete_instance_profile(
+    InstanceProfileName=profilename,
+    )
+
+
+@pytest.fixture
 def create_securitygroup():
     testgroup = "test_security_localstack_group"
     ec2_client = localstack_client.session.client("ec2")
@@ -531,7 +546,7 @@ class Test_Submission_dev():
         sd.parse_config()
         assert sd.get_costmonitoring() == response
 
-    def test_Submission_dev_prices_active_instances_ami(self,create_securitygroup,create_ami,setup_lambda_env,setup_testing_bucket,loggerfactory,check_instances,monkeypatch,set_ssm_budget_other,set_price,patch_boto3_ec2,kill_instances):    
+    def test_Submission_dev_prices_active_instances_ami(self,create_securitygroup,create_ami,create_instance_profile,setup_lambda_env,setup_testing_bucket,loggerfactory,check_instances,monkeypatch,set_ssm_budget_other,set_price,patch_boto3_ec2,kill_instances):    
         instance_type = "p3.2xlarge"
         ami = create_ami
         monkeypatch.setenv("AMI",ami)
@@ -557,7 +572,7 @@ class Test_Submission_dev():
         price = sd.prices_active_instances_ami(ami)
         assert price == number*duration/60 
 
-    def test_Submission_dev_get_costmonitoring__many_active(self,create_securitygroup,create_ami,setup_lambda_env,setup_testing_bucket,loggerfactory,check_instances,monkeypatch,set_ssm_budget_other,set_price,patch_boto3_ec2,kill_instances):    
+    def test_Submission_dev_get_costmonitoring__many_active(self,create_securitygroup,create_ami,create_instance_profile,setup_lambda_env,setup_testing_bucket,loggerfactory,check_instances,monkeypatch,set_ssm_budget_other,set_price,patch_boto3_ec2,kill_instances):    
         instance_type = "p3.2xlarge"
         ami = create_ami
         monkeypatch.setenv("AMI",ami)
@@ -600,7 +615,7 @@ class Test_Submission_dev():
         assert sd.jobduration == 360
         assert sd.jobsize == 20
 
-    def test_Submission_dev_acquire_instances(self,create_securitygroup,monkeypatch,setup_lambda_env,setup_testing_bucket,create_ami,kill_instances):
+    def test_Submission_dev_acquire_instances(self,create_securitygroup,create_instance_profile,monkeypatch,setup_lambda_env,setup_testing_bucket,create_ami,kill_instances):
         """For this test, we generate fake instances. We need to monkeypatch into ec2 in order to do so.  
 
         """
@@ -629,7 +644,7 @@ class Test_Submission_dev():
             assert {"Key":"job","Value":sd.jobname} in tags
             assert {"Key":"analysis","Value":sd.bucket_name} in tags
 
-    def test_Submission_dev_skip(self,create_securitygroup,monkeypatch,setup_lambda_env,setup_testing_bucket,create_ami,kill_instances):
+    def test_Submission_dev_skip(self,create_securitygroup,monkeypatch,create_instance_profile,setup_lambda_env,setup_testing_bucket,create_ami,kill_instances):
         """Like the test directly above, but assuming we run in "storage skip" mode. 
 
         """
@@ -715,7 +730,7 @@ class Test_Submission_ensemble():
             assert "jobnb" in data.keys()
             s3.s3_resource.Object(bucket_name,cfig).delete()
         
-    def test_Submission_ensemble_process_inputs(self,create_securitygroup,monkeypatch,setup_lambda_env,setup_testing_bucket,create_ami,kill_instances):
+    def test_Submission_ensemble_process_inputs(self,create_securitygroup,create_instance_profile,monkeypatch,setup_lambda_env,setup_testing_bucket,create_ami,kill_instances):
         """This test is expected to leave something running. Kill afterwards. 
 
         """
