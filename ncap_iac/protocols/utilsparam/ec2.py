@@ -497,8 +497,9 @@ def launch_new_instances_with_tags_additional(instance_type, ami, logger, number
         "Tags": tags}
         ]
     
+    spot_duration = None ## edit: spot no longer available. Default to always using standard instances. 
     if spot_duration is None:
-        logger.append("        [Utils] save not available (duration not given or greater than 6 hours). Launching standard instance.")
+        logger.append("        [Utils] save not available. Launching standard instance.")
         logger.write()
         response = ec2_client.describe_images(ImageIds = [os.environ["AMI"]])
         root = response["Images"][0]["RootDeviceName"]
