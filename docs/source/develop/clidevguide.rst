@@ -181,8 +181,10 @@ These parameters correspond to the directory structure given in the "End Goals" 
 These will be automatically filled in by NeuroCAAS when users request jobs, 
 but can be manually filled in for certain test cases. For more info see the sections "Testing your script (locally)" and "Testing a machine image".
 
-The fifth parameter, :code:`$path_to_analysis_script`, is a analysis-specific bash script, that will be run inside the :code:`run_main.sh` script. It will call all of the analysis source code
-, transfer data in to the instance, etc. This will be the subject of the next subsection, Analysis script. 
+The fifth parameter, :code:`$path_to_analysis_script`, is a analysis-specific bash script, that will be run inside the :code:`run_main.sh` script. It will call all of the analysis source code,
+transfer data in to the instance, and perform all of the functions we think of as analysis workflow.
+This script is analogous to the script :code:`run_pca.sh` in the Quickstart example. 
+Importantly, we assume that there will be a single analysis script that will be shared by all users of an analysis. 
 
 If we look at the contents of :code:`run_main_cli.sh`, they are as follows: 
 
@@ -204,7 +206,7 @@ If we look at the contents of :code:`run_main_cli.sh`, they are as follows:
 
     neurocaas-contrib workflow cleanup
 
-These are basically the same commands that you ran manually in the Quickstart example- in this case we are just running those same steps, based off of automatically given parameters. 
+If we substitute in :code:`run_pca.sh` for all instances of :code:`$5`, these are basically the same commands that you ran manually in the Quickstart example. In this case we are just running those same steps, based off of parameters that are specified by the user requesting the analysis. 
 
 This script-in-a-script organization ensures two things:
 
@@ -214,6 +216,21 @@ in a single main script helps to ensure that developers will not have to worry a
 - Correct error handling. In the event that analysis scripting runs into an error, we want to be able to detect and catch these errors. We can do so much more easily if all relevant code is executed in a separate script, ensuring that the relevant steps necessary to report the error to the user, and run appropriate cleanup on the instance are carried out.
 
 See the CLI --help command for in depth info on each of these CLI commands, or the API docs `here <https://neurocaas-contrib.readthedocs.io/en/latest/>`_
+
+.. note:: 
+    Before we move on, let's discuss how the main script interacts with the analysis blueprint. This is one of the more complex parts of NeuroCAAS's function, which is worth discussing in detail. 
+   
+    Let's assume that we are developing the PCA based analysis from the Quickstart example into a full NeuroCAAS blueprint. We already have an analysis specific bash script, located at :code:`./run_pca.sh`. In this case, we should format the main script as follows:
+   
+    :code:`% bash run_main_cli.sh $bucketname $path_to_input $path_to_result_dir $path_to_config_file ./run_pca.sh`
+   
+    The remaining variables in this command specify where to pull input data and configuration parameters from, and where to deposit the results. Therefore, they must be specified each time an analysis is called.   
+
+    The blueprint for this hypothetical analysis would have a COMMAND field as follows:
+
+    :code:`ls; cd /home/ubuntu; neurocaas_contrib/run_main_cli.sh \"{}\" \"{}\" \"{}\" \"{}\" \"./run_pca.sh\"; . neurocaas_contrib/ncap_utils/workflow.sh; cleanup`.
+   
+    Beyond navigating to the correct directory (:code:`ls; cd /home/ubuntu`) and shutting down the instance (:code:`./ neurocaas_contrib/ncap_utils/workflow.sh; cleanup`), the COMMAND field is nearly identical to the bash command specified above. The brackets given are filled in by the job manager with the appropriate information before being run.   
 
 Analysis script
 ~~~~~~~~~~~~~~~
@@ -364,8 +381,8 @@ If your analysis results look good, we can check one final thing. When run remot
 
 We are re-running the final command above, but now as a different user. If you find that this causes issues, we will deal with this in the blueprint, in the section :code:`Deploying your blueprint and Testing` below. 
    
-Saving your machine image
--------------------------
+Saving your progress 
+--------------------
 
 After you have written a script and tested it locally (as in the Quickstart example), you should save
 your progress in a machine image. Even if you are not confident that your image is ready, saving a machine image will freeze the state of the file system 
@@ -379,6 +396,8 @@ In order to save your machine image, return to a terminal window in your local m
 
 where the name is an identifier you will provide to your newly created
 image. 
+
+Additionally, if you have newly created/renamed your analysis script, make sure to update the :code:`COMMAND` field of your blueprint appropriately. 
 
 Then, you can update your blueprint with this new image by running:
 
