@@ -861,6 +861,7 @@ class WebDevTemplate(NeuroCaaSTemplate):
             'Resource': ['arn:aws:s3:::'+bucketname+'/'+affiliatename+'/'+indir+'/*',
                          'arn:aws:s3:::'+bucketname+'/'+affiliatename+'/'+condir+'/*',
                          'arn:aws:s3:::'+bucketname+'/'+affiliatename+'/'+subdir+'/*'
+                         'arn:aws:s3:::'+bucketname+'/'+affiliatename+'/'+outdir+'/*', ## Need to write to the output directory within the output  
                          ]
              })
         
