@@ -52,7 +52,7 @@ The parameters that you will probably change are:
 Important parameters to keep in mind for later: 
 - :code:`Lambda.LambdaConfig.AMI`: :code:`AMI` specifies the Amazon Machine Image where your software and dependencies are installed, and contains most of the analysis-specific configuration details that you must specify. As you develop, you will save your progress into different AMIs so they can be linked to the blueprint through this parameter. 
 
-- :code:`Lambda.LambdaConfig.COMMAND`: :code:`COMMAND` specifies a bash command that will be run on your remote instance [with parameters specified in the main script section] to generate data analysis. You will most likely not have to change this command, but it is the principal way in which we will be starting analyses on a remote instance. 
+- :code:`Lambda.LambdaConfig.COMMAND`: :code:`COMMAND` specifies a shell command that will be run on your remote instance [with parameters specified in the main script section] to generate data analysis. This command can technically take the form of any shell command, but will most likely take the form :code:`cd /home/ubuntu; neurocaas_contrib/run_main_cli.sh {} {} {} {} path_to_analysis_script; . neurocaas_contrib/ncap_utils/workflow.sh; cleanup`. For most use cases, the only thing that you will have to change about the command given here is the :code:`path_to_analysis_script`. More specifics of this command will be specified later.    
 
 - :code:`Affiliates`: This field describes users of the analysis. It is largely used for testing, as when it is deployed later, all users will be able to access this analysis by default. For now, remove all :code:`Affiliates` from the :code:`UXData` area except for “debuggers”; we will return to this later in this section.
  
