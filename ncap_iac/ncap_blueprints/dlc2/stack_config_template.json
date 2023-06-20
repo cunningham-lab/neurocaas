@@ -7,7 +7,7 @@
         "Handler": "submit_start.handler_develop",
         "Launch": true,
         "LambdaConfig": {
-            "AMI": "ami-005294c99d15fb827",
+            "AMI": "ami-0701294339d3042ae",
             "INSTANCE_TYPE": "p3.2xlarge",
             "REGION": "us-east-1",
             "SECURITY_GROUPS": "testsgstack-SecurityGroupDeploy-C2Q3PGSF77Y3",
