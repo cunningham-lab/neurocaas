@@ -8,11 +8,16 @@ we include legacy documentation for developing using the IPython Console (next s
    As of July 2023, we have updated the neurocaas contrib interface to no longer require "sessions" from developers.  
    If you would like to continue developing with "sessions", you can check out the `sessions` branch of `neurocaas-contrib`.
 
-Working with remote machines
-----------------------------
+Working with remote instances
+-----------------------------
 
-Most of the work that you do to get an analysis on NeuroCAAS will happen on a remote machine. 
-You can either request a new remote machine from NeuroCAAS, or "assign" a pre-existing one.  
+Most of the work that you do to get an analysis on NeuroCAAS will happen on a remote instance: 
+a computer located in the cloud which you can log into via SSH, and interact with via the command line. 
+A key feature of remote instances is that you can save the state of their file system (in addition to OS,
+other configuration details), and relaunch a new remote instance from this specification. We will use
+this feature to develop a NeuroCAAS immutable analysis environment. 
+
+You can either request a new remote instance from NeuroCAAS, or "assign" a pre-existing one.  
 The first time that you request a remote machine, you will probably call it as follows: 
 
 .. code-block::
@@ -71,7 +76,7 @@ If you ever restart the instance, or forget, you can get the ip address of a run
 
    neurocaas-contrib remote get-ip
 
-Note that if you restart your development instance, the requested timeout will be reset (default is 1 hour again).
+Note that if you restart your instance, the requested timeout will be reset (default is 1 hour again).
 If you ever need to check how much time you have left, you can call: 
 
 .. code-block:: 
@@ -92,12 +97,12 @@ Alternatively, if you have an AWS instance already that you would like to work w
    
    neurocaas-contrib remote assign-instance -i <instance-id> -n <name> -d <description>
 
-Here, the instance-id identifies the AWS instance you would like to work with, while name and description are once again identifies that will make your
+Here, the instance-id identifies the AWS EC2 instance you would like to work with, while name and description are once again identifies that will make your
 instance easier to work with. All of the commands above can be used on an instance that has been assigned to the CLI, instead of created from it.    
 
 Working with multiple instances/analyses
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Although the NeuroCAAS CLI only allows you to interact with one development instance at a time, 
+Although the NeuroCAAS CLI only allows you to interact with one remote instance at a time, 
 there can be several different instances associated with the CLI, which you can switch between. 
 This can be helpful (for example) if you want to develop new features on one instance,
 and testing them on another.
@@ -126,7 +131,7 @@ Where you can provide either the name or ID of the instance when selecting it.
 We track development instances separately for each NeuroCAAS analysis you work with. 
 
 
-Developing a machine image into an immutable analysis environment
+Developing a remote instance into an immutable analysis environment
 -----------------------------------------------------------------
 
 After connecting to your remote instance via ssh, you can download your
@@ -238,7 +243,7 @@ If we look at the contents of :code:`run_main_cli.sh`, they are as follows:
 
     neurocaas-contrib workflow cleanup
 
-If we substitute in :code:`run_pca.sh` for all instances of :code:`$5`, these are basically the same commands that you ran manually in the Quickstart example. In this case we are just running those same steps, based off of parameters that are specified by the user requesting the analysis. 
+If we substitute in :code:`run_pca.sh` for all instances of :code:`$5`, these are basically the same commands that you ran manually in the Quickstart example. In this case we are just running those same steps, based off of parameters that are specified by the user requesting the analysis. Note that the folder :code:`/home/ubuntu/contribdata` is assumed to exist already on your remote instance. 
 
 This script-in-a-script organization ensures two things:
 
