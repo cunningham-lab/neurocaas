@@ -1,0 +1,42 @@
+{
+    "PipelineName": "autolfads-torch",
+    "REGION": "us-east-1",
+    "STAGE": "websubstack",
+    "Lambda": {
+        "CodeUri": "../../protocols",
+        "Handler": "submit_start.handler_develop",
+        "Launch": true,
+        "LambdaConfig": {
+            "AMI": "ami-041502e9058a15223",
+            "INSTANCE_TYPE": "p2.8xlarge",
+            "REGION": "us-east-1",
+            "IAM_ROLE": "SSMRole",
+            "KEY_NAME": "testkeystack-custom-dev-key-pair",
+            "WORKING_DIRECTORY": "~/bin",
+            "COMMAND": "cd /home/ubuntu; sudo -u ubuntu neurocaas_contrib/run_main_cli.sh \"{}\" \"{}\" \"{}\" \"{}\" \"lfads-torch/run_main.sh\"; . neurocaas_contrib/ncap_utils/workflow.sh;",
+            "EXECUTION_TIMEOUT": 900,
+            "SSM_TIMEOUT": 172000
+        }
+    },
+    "UXData": {
+        "Affiliates": [
+            {
+                "AffiliateName": "traviscipermagroup",
+                "UserNames": [
+                    "cipermauser1",
+                    "cipermauser2"
+                ],
+                "UserInput": true,
+                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
+            },
+            {
+                "AffiliateName": "systemsneura1639759179",
+                "UserNames": [
+                    "systemsneura1639759178"
+                ],
+                "UserInput": true,
+                "ContactEmail": "NOTE: KEEP THIS AFFILIATE TO ENABLE EASY TESTING"
+            }
+        ]
+    }
+}
