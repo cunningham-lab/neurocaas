@@ -4,31 +4,23 @@ Developing On the Command Line (Recommended)
 The recommended method of developing a blueprint is now through the neurocaas-contrib CLI (here). However, 
 we include legacy documentation for developing using the IPython Console (next section).
 
-Starting a development session
-------------------------------
+.. note::
+   As of July 2023, we have updated the neurocaas contrib interface to no longer require "sessions" from developers.  
+   If you would like to continue developing with "sessions", you can check out the `sessions` branch of `neurocaas-contrib`.
 
-Every time you want to start a remote development session, you should run the following command: 
+Working with remote machines
+----------------------------
 
-.. code-block:: 
-
-   neurocaas-contrib remote start-session
-
-This lets the CLI tool know that you would like to start working on a blueprint remotely, and initializes the relevant parameters.    
-
-Note- this is a change as of 8/19/21. If your neurocaas-contrib version was built from source before this, you should update it. The `start-session` command deprecates `develop-remote`. 
-
-
-Launching a machine 
--------------------
-
-Once you have started a development session, you can request a remote machine. 
-The first time that you request a remote machine, you will probably waht to call it as follows: 
+Most of the work that you do to get an analysis on NeuroCAAS will happen on a remote machine. 
+You can either request a new remote machine from NeuroCAAS, or "assign" a pre-existing one.  
+The first time that you request a remote machine, you will probably call it as follows: 
 
 .. code-block::
 
-   neurocaas-contrib remote launch-devinstance  --timeout 60 --volumesize <size GB> --amiid <ami-id>
+   neurocaas-contrib remote launch-devinstance --name <instance name> --description <description> --timeout 60 --volumesize <size GB> --amiid <ami-id>
 
 This command will launch a remote instance of the type specified in your blueprint's parameter, :code:`Lambda.LambdaConfig.INSTANCE_TYPE`.    
+We encourage you to provide a name and description for this instance, to make it easier to identify later on. 
 Furthermore, it will be kept on for :code:`--timeout` minutes (default 60), be equipped with a storage volume of size :code:`--volumesize` gigabytes, and 
 start with a virtual machine of type :code:`--amiid`, where the ID is specified by AWS AMI IDs. If you do not specify an id, it will be read in from the blueprint's :code:`Lambda.LambdaConfig.AMI` parameter.  
 
@@ -93,6 +85,46 @@ To extend the lifetime of your instance, you can also call
    neurocaas-contrib remote extend-timeout -m <minutes>
 
 To extend the lifetime of your instance. Note that each developer does have a budget of instance lifetime, up to the NeuroCAAS Account's discretion.   
+
+Alternatively, if you have an AWS instance already that you would like to work with, you can run the command 
+
+.. code-block::
+   
+   neurocaas-contrib remote assign-instance -i <instance-id> -n <name> -d <description>
+
+Here, the instance-id identifies the AWS instance you would like to work with, while name and description are once again identifies that will make your
+instance easier to work with. All of the commands above can be used on an instance that has been assigned to the CLI, instead of created from it.    
+
+Working with multiple instances/analyses
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Although the NeuroCAAS CLI only allows you to interact with one development instance at a time, 
+there can be several different instances associated with the CLI, which you can switch between. 
+This can be helpful (for example) if you want to develop new features on one instance,
+and testing them on another.
+ 
+For each of your analyses, you can have up to 4 instances associated with the CLI at a given time.  
+At any time you can run the command: 
+
+.. code-block:: 
+
+   neurocaas-contrib remote list-instances 
+
+to see the list of instances that are currently available for a given analysis. 
+
+.. image:: ../images/list_instances.png
+   :width: 600
+
+You will see an asterisk next to the currently selected instance. You can select a different 
+instance from this list at any time with the command 
+
+.. code-block::
+   
+   neurocaas-contrib remote select-instance -n <instance name>/-i <instance id>
+
+Where you can provide either the name or ID of the instance when selecting it. 
+
+We track development instances separately for each NeuroCAAS analysis you work with. 
+
 
 Developing a machine image into an immutable analysis environment
 -----------------------------------------------------------------
@@ -353,6 +385,12 @@ As a worked example, we can look at the processing script for the analysis DeepG
     echo "----UPLOADING RESULTS----"
     neurocaas-contrib workflow put-result -r "/home/ubuntu/results_$taskname.zip"
 
+Finally, update the permissions on your analysis script to ensure they can be run by NeuroCAAS automatically:     
+
+.. code-block::
+
+   % chmod 777 /path/to/analysis/script
+
 Testing your script (locally)
 -----------------------------
 
@@ -413,15 +451,7 @@ with this pair of git commits for readability.
 Cleaning up
 -----------
 
-To clean up after finishing a session, you can delete your instance and reset your cli state by running: 
-
-.. code-block:: bash
-
-   neurocaas-contrib remote end-session 
-
-Note- this is a change as of 8/19/21. If your neurocaas-contrib version was built from source before this, you should update it. 
-
-Alternatively, after you have saved your machine image and updated your blueprint, you
+After you have saved your machine image and updated your blueprint, you
 can terminate it by running:
 
 .. code-block:: bash
@@ -436,7 +466,7 @@ while, you can run:
 
    neurocaas-contrib remote stop-devinstance
 
-And conversely,
+And conversely, to start again,
 
 .. code-block:: bash
 
@@ -445,7 +475,6 @@ And conversely,
 You can also use this command to start instances that have exceeded the provided timeout and been stopped externally
 .    
 Note that stopped instances will be deleted after two weeks of idleness.    
-Furthermore, you can only launch one instance at a time. 
 
 Deploying your blueprint and Testing 
 ------------------------------------
@@ -550,7 +579,7 @@ As a developer, you can manage access to your analysis through the :code:`STAGE`
 - If :code:`STAGE=webdev`, you authorize users to access your analysis on a case-by-case basis through blueprint updates. Nobody who you do not explicitly name in your blueprint can run analysis jobs. 
 - If :code:`STAGE=websubstack`, you are opening your analysis for general use. Anyone with a NeuroCAAS account can opt in to use your analysis. 
 
-Generally, we recommend you keep analyses in the :code:`webdev` mode until you have run a few end-to-end tests with interested users. In order to add users to your analysis, ask them for their AWS username, and contact NeuroCAAS admins for their group name (we're working on making this easier.) 
+Generally, we recommend you keep analyses in the :code:`webdev` mode until you have run a few end-to-end tests yourself (i.e. uploading data to an S3 bucket, and ensuring that results are written back to the bucket), and upgrade to :code:`websubstack` once you would like to recruit test users. In order to add users to your analysis, ask them for their AWS username, and contact NeuroCAAS admins for their group name (we're working on making this easier.) 
 
 With this information, add the following bracketed block to the "Affiliates" section of your blueprint: 
 
