@@ -1,4 +1,5 @@
 [codespell]
-skip = .git,*.pdf,*.svg
-#
-# ignore-words-list =
+# TODO: do get through protocol_tests
+skip = .git,*.pdf,*.svg,*.ai,*.mat,*.png,protocol_tests
+# datea - variables
+ignore-words-list = datea
