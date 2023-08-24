@@ -42,7 +42,7 @@ def make_mock_bucket(mock_obj_specs,filter_path = None):
 def make_mock_object(specdict):
     """make_mock_object.
 
-    :param keyname: the name of the key you wnat to associate with this object. 
+    :param keyname: the name of the key you want to associate with this object. 
     """
     mockobject = MagicMock(**specdict)
     #mockobject.delete = MagicMock(return_value = None)

@@ -145,7 +145,7 @@ class NeuroCaaSAMI(object):
             dlami18: ubuntu 18.06 version 27 (ami-0dbb717f493016a1a)
             dlami16: ubuntu 16.04 version 27 (ami-0a79b70001264b442)
         :param volume_size (int): (Optional) the size of the volume to attach to this devinstance.      
-        timeout (int): (Optional) the amount of time for which you are requesting this instance, in minutes. default is 1 hour. INTANCE WILL BE STOPPED AFTER THIS TIMEOUT COMPLETES.
+        timeout (int): (Optional) the amount of time for which you are requesting this instance, in minutes. default is 1 hour. INSTANCE WILL BE STOPPED AFTER THIS TIMEOUT COMPLETES.
         :param DryRun (bool): for debugging. if dryrun will not launch an instance.
         """
         ## Get ami id

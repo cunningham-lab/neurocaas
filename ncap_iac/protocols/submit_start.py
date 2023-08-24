@@ -357,7 +357,7 @@ class Submission_dev():
             print(e)
             raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to estimate cost of current job.")
 
-        ## Now compare agains the expected cost of instances with the current ami: 
+        ## Now compare against the expected cost of instances with the current ami: 
         try:
             ami = os.environ["AMI"]
             total_activeprice = self.prices_active_instances_ami(ami)
