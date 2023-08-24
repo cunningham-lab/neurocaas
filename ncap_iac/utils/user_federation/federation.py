@@ -20,7 +20,7 @@ from datetime import timedelta
     If you are an IAM user with limited permissions using the neurocaas cloud, this is likely is not relevant (due to permission needs outlined below).
     
     However, this may be useful to users with elevated permissions looking to grant temporary access to other users, 
-    or users with their own, seperately hosted neurocaas system.
+    or users with their own, separately hosted neurocaas system.
 
 
     To build a user and get credentials and a federated access link:
@@ -43,7 +43,7 @@ from datetime import timedelta
     Upon creation, the federated user is tagged with relevant group and bucket prefixes (one of each), 
     which is the only resource this user will have access too. However, this system can be modified as needed by adapting the policy (for example allowing access to all buckets).
 
-    The aformentioned policy uses the prefixes contained in access tags to determine the allowed bucket and folder, so ensure these are correct.
+    The aforementioned policy uses the prefixes contained in access tags to determine the allowed bucket and folder, so ensure these are correct.
     If proper access is established, the user should have read-write access to configs/submissions, 
     write access to inputs, and read access to results. Modify the policy document for different access functionality.
     
@@ -179,7 +179,7 @@ def main():
             print(f"Secret Access Key: {creds['SecretAccessKey']}")
             print("\nClick the above link to automatically sign-in and reach your desired bucket. Otherwise, the generated credentials can be used with the AWS CLI, or as needed")
             print("\nNote that if your group_prefix does not yet exist, you will have to create the subfolders manually at this time (inputs, results, configs, submissions)")
-            print("\nIf your bucket does not exist, you will recieve access errors upon logging in.")
+            print("\nIf your bucket does not exist, you will receive access errors upon logging in.")
         elif sys.argv[1] == 'teardown_all':
             teardown_all()
         else:

@@ -148,7 +148,7 @@ class PostProcess_EnsembleDGPPredict(PostProcess):
 
         :returns: a dictionary that can be dumped to a config file. 
         """
-        ## initalize from inst1config:
+        ## initialize from inst1config:
         configdict = self.load_config()
         ensemblesize = max(configdict["ensemble_size"],9)
         configdict["mode"] = "predict"

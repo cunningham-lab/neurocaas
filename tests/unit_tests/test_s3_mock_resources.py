@@ -21,7 +21,7 @@ def make_mock_bucket(mock_obj_specs,filter_path = None):
         raise(KeyError("object does not have necessary parameter 'key'"))
    
     filter_specs = [m for m in mock_obj_specs if m["key"].startswith(filter_path)]
-    ## Now initialize a set of MagicMock objects: (later we might change this to be S3 object mocks created indepedently in a separate function)
+    ## Now initialize a set of MagicMock objects: (later we might change this to be S3 object mocks created independently in a separate function)
     mock_stored_obj_list = [make_mock_object(m) for m in mock_obj_specs]
     filter_stored_obj_list = [make_mock_object(m) for m in filter_specs]
 

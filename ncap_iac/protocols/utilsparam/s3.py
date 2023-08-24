@@ -102,7 +102,7 @@ def ls(bucket, path):
     ]
     
 def ls_name(bucket_name, path):
-    """ Get the names of all objects in bucket under a given prefix path as strings. Takes the name of the bucket as input, not hte bucket itself for usage outside of the utils module.  
+    """ Get the names of all objects in bucket under a given prefix path as strings. Takes the name of the bucket as input, not the bucket itself for usage outside of the utils module.  
     
     :param bucket_name: name of s3 bucket to list. 
     :type bucket_name: str
@@ -389,7 +389,7 @@ class JobLogger(Logger):
         Inputs:
         dataset: the path to the data *file* analyzed by the instance. 
         instanceid (str): the string specifying what instance we will run analysis on. 
-        commandid (str): the string specifying what the command id corresonding to this instance is. 
+        commandid (str): the string specifying what the command id corresponding to this instance is. 
         """
         template_dict = {"status":"INITIALIZING","reason":"NONE","stdout":"not given yet","stderr":"not given yet","input":dataset,"instance":instanceid,"command":commandid}
         ##TODO: check that these instances and commands exist. 
@@ -405,7 +405,7 @@ class JobLogger(Logger):
         Inputs:
         dataset: the path to the data *file* analyzed by the instance. 
         instanceid (str): the string specifying what instance we will run analysis on. 
-        commandid (str): the string specifying what the command id corresonding to this instance is. 
+        commandid (str): the string specifying what the command id corresponding to this instance is. 
         """
         template_dict = {"status":"INITIALIZING","reason":"NONE","stdout":"not given yet","stderr":"not given yet","instance":instanceid,"command":commandid}
         ##TODO: check that these instances and commands exist. 
@@ -468,7 +468,7 @@ class JobLogger_demo(Logger):
         Inputs:
         dataset: the path to the data *file* analyzed by the instance. 
         instanceid (str): the string specifying what instance we will run analysis on. 
-        commandid (str): the string specifying what the command id corresonding to this instance is. 
+        commandid (str): the string specifying what the command id corresponding to this instance is. 
         """
         template_dict = {"status":"INITIALIZING","reason":"NONE","stdout":"not given yet","stderr":"not given yet","input":dataset,"instance":instanceid,"command":commandid}
         ##TODO: check that these instances and commands exist. 
@@ -484,7 +484,7 @@ class JobLogger_demo(Logger):
         Inputs:
         dataset: the path to the data *file* analyzed by the instance. 
         instanceid (str): the string specifying what instance we will run analysis on. 
-        commandid (str): the string specifying what the command id corresonding to this instance is. 
+        commandid (str): the string specifying what the command id corresponding to this instance is. 
         """
         template_dict = {"status":"INITIALIZING","reason":"NONE","stdout":"not given yet","stderr":"not given yet","instance":instanceid,"command":commandid}
         ##TODO: check that these instances and commands exist. 

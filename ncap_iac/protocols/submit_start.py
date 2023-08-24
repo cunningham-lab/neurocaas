@@ -39,7 +39,7 @@ def respond(err, res=None):
         "headers": {"Content-Type": "application/json"},
     }
 
-## Lambda code for developmemt. 
+## Lambda code for development. 
 class Submission_dev():
     """
     Specific lambda for purposes of development.  
@@ -445,7 +445,7 @@ class Submission_dev():
 
     def acquire_instances(self):
         """
-        Streamlines acquisition, setting up of multiple instances. Better exception handling when instances cannot be launched, and spot instances with defined duration when avaialble.   
+        Streamlines acquisition, setting up of multiple instances. Better exception handling when instances cannot be launched, and spot instances with defined duration when available.   
 
         """
         nb_instances = len(self.filenames)
@@ -521,7 +521,7 @@ class Submission_dev():
         return all_logs
 
     def start_instance(self):
-        """ Starts new instances if stopped. We write a special loop for this one because we only need a single 60 second pause for all the intances, not one for each in serial. Specialized certificate messages. """
+        """ Starts new instances if stopped. We write a special loop for this one because we only need a single 60 second pause for all the instances, not one for each in serial. Specialized certificate messages. """
         utilsparamec2.start_instances_if_stopped(
             instances=self.instances,
             logger=self.logger
@@ -834,7 +834,7 @@ def process_upload_dev(bucket_name, key,time):
             [utilsparams3.delete_active_monitorlog(submission.bucket_name,"{}.json".format(inst.id)) for inst in instances]
         except Exception:
             se = traceback.format_exc()
-            message = "While cleaning up from AWS Error, another error occured: {}".format(se)
+            message = "While cleaning up from AWS Error, another error occurred: {}".format(se)
             submission.logger.append(internalerrormessage.format(s = step,e = message))
             submission.logger.printlatest()
             submission.logger.write()
@@ -843,7 +843,7 @@ def process_upload_dev(bucket_name, key,time):
             utilsparamevents.full_delete_rule(submission.rulename)
         except Exception:
             se = traceback.format_exc()
-            message = "While cleaning up from AWS Error, another error occured: {}".format(se)
+            message = "While cleaning up from AWS Error, another error occurred: {}".format(se)
             submission.logger.append(internalerrormessage.format(s = step,e = message))
             submission.logger.printlatest()
             submission.logger.write()
@@ -853,7 +853,7 @@ def process_upload_dev(bucket_name, key,time):
                 inst.terminate()
             except Exception:
                 se = traceback.format_exc()
-                message = "While cleaning up from AWS Error, another error occured: {}".format(se)
+                message = "While cleaning up from AWS Error, another error occurred: {}".format(se)
                 submission.logger.append(internalerrormessage.format(s = step,e = message))
                 submission.logger.printlatest()
                 submission.logger.write()
@@ -1005,7 +1005,7 @@ def process_upload_ensemble(bucket_name, key,time):
             [utilsparams3.delete_active_monitorlog(submission.bucket_name,"{}.json".format(inst.id)) for inst in instances]
         except Exception:
             se = traceback.format_exc()
-            message = "While cleaning up from AWS Error, another error occured: {}".format(se)
+            message = "While cleaning up from AWS Error, another error occurred: {}".format(se)
             submission.logger.append(internalerrormessage.format(s = step,e = message))
             submission.logger.printlatest()
             submission.logger.write()
@@ -1014,7 +1014,7 @@ def process_upload_ensemble(bucket_name, key,time):
             utilsparamevents.full_delete_rule(submission.rulename)
         except Exception:
             se = traceback.format_exc()
-            message = "While cleaning up from AWS Error, another error occured: {}".format(se)
+            message = "While cleaning up from AWS Error, another error occurred: {}".format(se)
             submission.logger.append(internalerrormessage.format(s = step,e = message))
             submission.logger.printlatest()
             submission.logger.write()
@@ -1024,7 +1024,7 @@ def process_upload_ensemble(bucket_name, key,time):
                 inst.terminate()
             except Exception:
                 se = traceback.format_exc()
-                message = "While cleaning up from AWS Error, another error occured: {}".format(se)
+                message = "While cleaning up from AWS Error, another error occurred: {}".format(se)
                 submission.logger.append(internalerrormessage.format(s = step,e = message))
                 submission.logger.printlatest()
                 submission.logger.write()

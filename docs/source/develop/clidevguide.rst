@@ -399,7 +399,7 @@ Finally, update the permissions on your analysis script to ensure they can be ru
 Testing your script (locally)
 -----------------------------
 
-At this point, it's a good idea to run a few more tests to ensure that your script is behaving as intended. A nice feature of the analysis script is that it is input independent- it looks at the dataset, configuration file, and result paths that you've registered, and doesn't care if they are in an S3 bucket or local. Therefore, you can run the following commmands on the compute instance to test your analysis script with data that exists on that instance:   
+At this point, it's a good idea to run a few more tests to ensure that your script is behaving as intended. A nice feature of the analysis script is that it is input independent- it looks at the dataset, configuration file, and result paths that you've registered, and doesn't care if they are in an S3 bucket or local. Therefore, you can run the following commands on the compute instance to test your analysis script with data that exists on that instance:   
 
 .. code-block::
 

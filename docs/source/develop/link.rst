@@ -16,7 +16,7 @@ Navigate to the
    neurocaas-contrib init --location /path/to/neurocaas/ncap_iac/ncap_blueprints
 
 This will let your CLI tool know that this location is the place it should store analysis blueprints that you develop. 
-Upon running this comand, you will be prompted for the name of the analysis you want to develop, and asked to create one if it does not exist already:
+Upon running this command, you will be prompted for the name of the analysis you want to develop, and asked to create one if it does not exist already:
 
 .. image:: ../images/init_write.png
    :width: 600
@@ -83,7 +83,7 @@ First, go ahead and push your new blueprint to your version of the neurocaas rep
 .. code-block:: bash
 
     git add /path/to/neurocaas/ncap_iac/ncap_blueprints/<analysis_name>/
-    git commit -m "intialized blueprint for <analysis_name>" # or something like that
+    git commit -m "initialized blueprint for <analysis_name>" # or something like that
     git push 
 
 Then, you can go ahead and open a pull request on the original neurocaas Github page (see step 7 `here <https://jarv.is/notes/how-to-pull-request-fork-github/>`_).  
@@ -116,7 +116,7 @@ IMPORTANT: If using the NeuroCAAS account to develop, please set your
 AWS region to be **us-east-1**.  
 
 Once you have the aws cli configured with your credentials, you  
-have full developer priviledges. You can now additionally retrieve 
+have full developer privileges. You can now additionally retrieve 
 an ssh key to let you log in to remote instances and develop on them interactively.
 
 In order to retrieve your ssh key, navigate

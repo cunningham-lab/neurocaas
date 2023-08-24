@@ -12,7 +12,7 @@ The downsides of using a CLI interface is that it can be less user friendly- in 
 Interoperability
 ----------------
 
-The website interface to NeuroCAAS and the CLI (as well as any other cloud storage browser) are interoperable- you can start a job with the web inteface, and download result via the CLI, or upload data via the CLI and run jobs with the browser. 
+The website interface to NeuroCAAS and the CLI (as well as any other cloud storage browser) are interoperable- you can start a job with the web interface, and download result via the CLI, or upload data via the CLI and run jobs with the browser. 
 
 Installation
 ------------
@@ -102,7 +102,7 @@ Advanced Usage
 Storage Bypass (June 9th, 2022)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you have especially large datasets or analysis outputs, it may be prohibitively slow to first transfer them to NeuroCAAS, analyze them, and remove the analysis outputs, especially as we do not allow users to use NeuroCAAS itself to analyze data. For these cases, we can offer a "Storage Bypass" option: if you have access to your data in a publically accessible S3 bucket, you can read and write directly to that bucket. Timestamped outputs and logs will be delivered back to the storage location of your choice. In order to make use of this feature, modify your submit files as follows: 
+If you have especially large datasets or analysis outputs, it may be prohibitively slow to first transfer them to NeuroCAAS, analyze them, and remove the analysis outputs, especially as we do not allow users to use NeuroCAAS itself to analyze data. For these cases, we can offer a "Storage Bypass" option: if you have access to your data in a publicly accessible S3 bucket, you can read and write directly to that bucket. Timestamped outputs and logs will be delivered back to the storage location of your choice. In order to make use of this feature, modify your submit files as follows: 
 
 .. code-block:: json
 

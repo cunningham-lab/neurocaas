@@ -33,7 +33,7 @@ y2 = 624
 #########################################################################################
 
 # These variables should be changed so that the right networks is loaded for analysis
-# (Typicaly just copy them over from myconfig.py)
+# (Typically just copy them over from myconfig.py)
 scorer = 'Mackenzie'
 Task = 'reaching'
 date = 'Jan30'

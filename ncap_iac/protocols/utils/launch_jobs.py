@@ -50,9 +50,9 @@ def execute_commands_on_linux_instances(commands,
     instance_ids (list): a list of instance_id strings, of the instances on which to execute the commands list.
     working_dirs (list): a list of working directories (strings) where commands are executed on each instance.
     log_bucket_name (str): the name of the s3 bucket to which you would like to send stdout and stderr output from this command.
-    log_path (str): the file structure inside "log_bucket_name" to which you would liek to store stdout and stderr output.
+    log_path (str): the file structure inside "log_bucket_name" to which you would like to store stdout and stderr output.
     Outputs:
-    ssm output command dictionary. Can be used to query commad state (via ssm.Client.list_commands)).
+    ssm output command dictionary. Can be used to query command state (via ssm.Client.list_commands)).
     """
     if log_bucket_name is None or log_path is None:
         output = ssm_client.send_command(

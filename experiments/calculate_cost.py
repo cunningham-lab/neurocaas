@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 ## First get difference between two times, given as a list of lists. 
 
 def secdiff(a,b):
-    ## Assumbe both are lists representing a time. 
+    ## Assume both are lists representing a time. 
     day = datetime.datetime(1,1,1,0,0,0)
     timea = datetime.time(*a)
     timeb = datetime.time(*b)
@@ -20,9 +20,9 @@ def secdiff(a,b):
     return diff
 
 def to_sec(a):
-    ## converts a lenght of time to seconds (minutes, ) 
-    delt = a[0]*60+a[1]+a[2]/1000.#datetime.timedelta(minutes = a[0],seconds = a[1],milliseconds = a[2])
-    return delt
+    ## converts a length of time to seconds (minutes, ) 
+    dealt = a[0]*60+a[1]+a[2]/1000.#datetime.timedelta(minutes = a[0],seconds = a[1],milliseconds = a[2])
+    return dealt
 
 def total_time(upload,start,stop):
     ## First convert start,stop to a duration in seconds: 
@@ -569,7 +569,7 @@ def plot_LCC(pipeline,pricing = "PowerMatch",compute = True):
         xlabels = ['20.1 x 1','20.1 x 3', '20.1 x 5']
         compute = False
         if pricing == "Orig":
-            upport = [433,465,499,539+26,585+59]
+            support = [433,465,499,539+26,585+59]
             maxval = 4
         if pricing == "PowerMatch":
             maxval = 6

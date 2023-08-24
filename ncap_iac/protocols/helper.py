@@ -1,4 +1,4 @@
-## Module contianing all custom resources. 
+## Module containing all custom resources. 
 try:
     import os 
     import json 

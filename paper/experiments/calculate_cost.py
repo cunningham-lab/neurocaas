@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 ## First get difference between two times, given as a list of lists. 
 
 def secdiff(a,b):
-    ## Assumbe both are lists representing a time. 
+    ## Assume both are lists representing a time. 
     day = datetime.datetime(1,1,1,0,0,0)
     timea = datetime.time(*a)
     timeb = datetime.time(*b)
@@ -19,7 +19,7 @@ def secdiff(a,b):
     return diff
 
 def to_sec(a):
-    ## converts a lenght of time to seconds (minutes, ) 
+    ## converts a length of time to seconds (minutes, ) 
     return a[0]*60+a[1]+a[2]/1000.#datetime.timedelta(minutes = a[0],seconds = a[1],milliseconds = a[2])
 
 def total_time(upload,start,stop):
@@ -365,7 +365,7 @@ def plot_costbar_baseline(filepaths,xlabels,title):
     plt.show()
 
 
-## Define a function that takes in a dataset generation rate, an NCAP dataset cost rate, a machine tco and storage rate and caluclates crossovers. 
+## Define a function that takes in a dataset generation rate, an NCAP dataset cost rate, a machine tco and storage rate and calculates crossovers. 
 def plot_TCO_xover_multiple_spotduration(filepaths,hardware,spot1,spot6,title,labels,xaxis = [None,None,None]):
     fig,ax = plt.subplots(figsize = (12,14))
     #labels = ['8 GB','36 GB','79 GB']
