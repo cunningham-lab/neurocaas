@@ -164,7 +164,6 @@ ncap_iac/user_profiles/*/compiled_users.yaml
 !docs/images/
 !docs/NeuroCAAS_Developer_Guide.pdf
 cost_investigation/*
-paper/
 tests/protocol_tests/test_mats/
 tests/unit_tests/fixture_dir/
 website_resources/
