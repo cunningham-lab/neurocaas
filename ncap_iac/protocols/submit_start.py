@@ -613,6 +613,237 @@ class Submission_dev():
         else: 
             self.full_volumesize = default_size
 
+
+class Submission_multisession(Submission_dev):
+    """
+    Specific lambda for purposes of development.  
+    
+    :param bucket_name: name of the S3 bucket that this is a submission for (corresponds to an analysis). 
+    :param key: key of submit file within this bucket. 
+    :param time: some unique identifier that distinguishes this job from all others. 
+    :ivar bucket_name: initial_value: bucket_name
+    :ivar path: name of the group responsible for this job.  
+    :ivar time: initial value: time  ## TODO Remove this field. 
+    :ivar jobname: "job_{}_{}_{}".format(submit_name,bucket_name,self.timestamp)
+    :ivar jobpath: os.path.join(path,"outputs",jobname)
+    :ivar logger: s3.Logger object
+    :ivar instance_type: either given in submit file, or default option of analysis. 
+    :ivar data_name: submit file's dataname field. 
+    :ivar config_name: submit file's configname field. 
+    """
+    def __init__(self,bucket_name,key,time):
+        super().__init__(bucket_name,key,time)
+
+    def get_costmonitoring(self):
+        """
+        Gets the cost incurred by a given group so far by looking at the logs bucket of the appropriate s3 folder.  
+         
+        """
+        ## first get the path to the log folder we should be looking at. 
+        group_name = self.path
+        assert len(group_name) > 0; "[JOB TERMINATE REASON] Can't locate the group that triggered analysis, making it impossible to determine incurred cost."
+        logfolder_path = "logs/{}/".format(group_name) 
+        full_reportpath = os.path.join(logfolder_path,"i-")
+        ## now get all of the computereport filenames: 
+        all_files = utilsparams3.ls_name(self.bucket_name,full_reportpath)
+
+        ## for each, we extract the contents: 
+        jobdata = {}
+        cost = 0
+        ## now calculate the cost:
+        for jobfile in all_files:
+            instanceid = jobfile.split(full_reportpath)[1].split(".json")[0]
+            jobdata = utilsparams3.load_json(self.bucket_name,jobfile)
+            price = jobdata["price"]
+            start = jobdata["start"]
+            end = jobdata["end"]
+            try:
+                starttime = datetime.strptime(start, "%Y-%m-%dT%H:%M:%SZ")
+                endtime = datetime.strptime(end, "%Y-%m-%dT%H:%M:%SZ")
+                diff = endtime-starttime
+                duration = abs(diff.seconds)
+                instcost = price*duration/3600.
+            except TypeError:
+                ## In rare cases it seems one or the other of these things don't actually have entries. This is a problem. for now, charge for the hour: 
+                message = "        [Internal (get_costmonitoring)] Duration of past jobs not found. Pricing for an hour"
+                self.logger.append(message)
+                self.logger.printlatest()
+                instcost = price
+            cost+= instcost
+        
+        ## Now compare against the cost of the job you're currently running: 
+        ## need duration from config (self.parse_config) and self.instance_type
+        ## By assuming they're all standard instances we upper bound the cost. 
+        try:
+            price = utilsparampricing.get_price(utilsparampricing.get_region_name(utilsparampricing.region_id),self.instance_type,os = "Linux")
+            if self.jobduration is None:
+                duration = defaultduration/60 ## in hours. 
+            else:    
+                duration = self.jobduration/60
+            jobpricebound = duration*price  
+            cost += jobpricebound
+        except Exception as e:     
+            print(e)
+            raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to estimate cost of current job.")
+
+        ## Now compare agains the expected cost of instances with the current ami: 
+        try:
+            ami = os.environ["AMI"]
+            total_activeprice = self.prices_active_instances_ami(ami)
+
+        except Exception as e:    
+            print(e)
+            try:
+                activeprice = utilsparampricing.get_price(utilsparampricing.get_region_name(utilsparampricing.region_id),self.instance_type,os = "Linux")
+                number = len([i for i in utilsparamec2.get_active_instances_ami(ami)])
+                activeduration = defaultduration*number/60 ## default to the default duration instead if not given. 
+                total_activeprice = activeprice*activeduration
+            except Exception as e:    
+                print(e)
+                raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to estimate cost of active jobs.")
+
+        cost += total_activeprice   
+
+        ## Now compare with budget:
+        try:
+            budget = float(utilsparamssm.get_budget_parameter(self.path,self.bucket_name))
+        except ClientError as e:    
+            try:
+                assert e.response["Error"]["Code"] == "ParameterNotFound"
+                budget = float(os.environ["MAXCOST"])
+                message = "        [Internal (get_costmonitoring)] Customized budget not found. Using default budget value of {}".format(budget)
+                self.logger.append(message)
+                self.logger.printlatest()
+            except:    
+                raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to get budget.")
+        except Exception:    
+            raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to get budget.")
+
+        if cost < budget:
+            message = "        [Internal (get_costmonitoring)] Projected total costs: ${}. Remaining budget: ${}".format(cost,budget-cost)
+            self.logger.append(message)
+            self.logger.printlatest()
+            self.logger.write()
+            validjob = True
+        elif cost >= budget:
+            message = "        [Internal (get_costmonitoring)] Projected total costs: ${}. Over budget (${}), cancelling job. Contact administrator.".format(cost,budget)
+            self.logger.append(message)
+            self.logger.printlatest()
+            self.logger.write()
+            validjob = False
+        return validjob
+
+    def acquire_instances(self):
+        """
+        Streamlines acquisition, setting up of multiple instances. Better exception handling when instances cannot be launched, and spot instances with defined duration when avaialble.   
+
+        """
+        nb_instances = 1 #all datafiles will be used to train a single core model
+
+        ## Check how many instances are running. 
+        active = utilsparamec2.count_active_instances(self.instance_type)
+        ## Ensure that we have enough bandwidth to support this request:
+        if active +nb_instances < int(os.environ['DEPLOY_LIMIT']):
+            pass
+        else:
+            self.logger.append("        [Internal (acquire_instances)] RESOURCE ERROR: Instance requests greater than pipeline bandwidth. Please contact NeuroCAAS admin.")
+            self.logger.printlatest()
+            self.logger.write()
+            raise ValueError("[JOB TERMINATE REASON] Instance requests greater than pipeline bandwidth. Too many simultaneously deployed analyses.")
+        
+        instances = utilsparamec2.launch_new_instances_with_tags_additional(
+        instance_type=self.instance_type, 
+        ami=os.environ['AMI'],
+        logger=  self.logger,
+        number = nb_instances,
+        add_size = self.full_volumesize,
+        duration = self.jobduration,
+        group = self.path,
+        analysis = self.bucket_name,
+        job = self.jobname
+        )
+        #instances = utilsparamec2.launch_new_instances_with_tags(
+        #instance_type=self.instance_type, 
+        #ami=os.environ['AMI'],
+        #logger=  self.logger,
+        #number = nb_instances,
+        #add_size = self.full_volumesize,
+        #duration = self.jobduration
+        #)
+
+        ## Even though we have a check in place, also check how many were launched:
+        try:
+            assert len(instances) > 0
+        except AssertionError:
+            self.logger.append("        [Internal (acquire_instances)] RESOURCE ERROR: Instances not launched. AWS capacity reached. Please contact NeuroCAAS admin.")
+            self.logger.printlatest()
+            self.logger.write()
+            raise AssertionError("[JOB TERMINATE REASON] Instance requests greater than pipeline bandwidth (base AWS capacity). Too many simultaneously deployed analyses")
+
+        self.instances = instances
+
+        return instances
+
+    def process_inputs(self,dryrun=False):
+        """ Initiates Processing On Previously Acquired EC2 Instance. This version requires that you include a config (fourth) argument """
+        try: 
+            os.environ['COMMAND'].format("a","b","c","d")
+        except IndexError as ie:
+            msg = "        [Internal (process_inputs)] INPUT ERROR: not enough arguments in the COMMAND argument."
+            self.logger.append(msg)
+            self.logger.printlatest()
+            self.logger.write()
+            raise ValueError("[JOB TERMINATE REASON] Not the correct format for arguments. Protocols for job manager are misformatted.")
+     
+        ## input bucket: 
+        if self.bypass_data["input"]["bucket"] is not None:
+            input_bucket = self.bypass_data["input"]["bucket"]
+            data_check_path = os.path.dirname(self.bypass_data["input"]["datapath"][0]) #use the path to the directory instead of the file paths
+            config_check_path = self.bypass_data["input"]["configpath"]
+        else:    
+            input_bucket = self.bucket_name
+            data_check_paths = os.path.dirname(self.data_name_list[0]) #use the path to the directory instead of the file paths
+            config_check_path = self.config_name
+
+        if self.bypass_data["output"]["bucket"] is not None:
+            output_bucket = self.bypass_data["output"]["bucket"]
+            result_check_paths = self.bypass_data["output"]["resultpath"]
+            outpath_full = "s3://{}/{}".format(output_bucket,os.path.join(result_check_paths,self.jobname))
+        else:    
+            outpath_full = os.path.join(os.environ['OUTDIR'],self.jobname)
+
+
+        ## Bypass: 
+        #self.bucket_name -> input_bucket
+        #self.filenames -> data_check_paths
+        #outpath_full -> resultpath(FULL)
+        #self.config_name -> config_check_path
+
+        ## Should we vectorize the log here? 
+        #outpath_full = os.path.join(os.environ['OUTDIR'],self.jobname)
+        commands = [os.environ['COMMAND'].format(
+              input_bucket, filename, outpath_full, config_check_path
+              ) for filename in data_check_paths]
+
+        print(commands,"command to send")
+        if not dryrun:
+            for f,dirname in enumerate(data_check_paths): #there will only be one
+                response = utilsparamssm.execute_commands_on_linux_instances(
+                    commands=[os.environ['COMMAND'].format(
+                        input_bucket, dirname, outpath_full, config_check_path
+                        )], # TODO: variable outdir as option
+                    instance_ids=[self.instances[f].instance_id],
+                    working_dirs=[os.environ['WORKING_DIRECTORY']],
+                    log_bucket_name=input_bucket,
+                    log_path=os.path.join(self.jobpath,'internal_ec2_logs')
+                    )
+                self.logger.initialize_datasets_dev(dirname,self.instances[f].instance_id,response["Command"]["CommandId"])
+                self.logger.append("        [Internal (process_inputs)] Starting analysis {} with parameter set {}".format(f+1,os.path.basename(dirname)))
+                self.logger.printlatest()
+                self.logger.write()
+            self.logger.append("        [Internal (process_inputs)] All jobs submitted. Processing...")
+        return commands
+
 ## We are no longer using this function. It depends upon automation documents that can be found in the cfn utils_stack template. Consider using this as a reference when switching to automation documents instead of pure runcommand. 
     def add_volumes(self):
         """
@@ -699,8 +930,6 @@ class Submission_ensemble(Submission_dev):
             self.logger.write()
         self.logger.append("        [Internal (process_inputs)] All jobs submitted. Processing...")
         pass
-        
-
 
 def process_upload_dev(bucket_name, key,time):
     """ 
@@ -1079,6 +1308,167 @@ def process_upload_deploy(bucket_name, key,time):
     submission.inputlogger.write()
     submission.submitlogger.write()
     
+def process_upload_multisession(bucket_name,key,time):
+    exitcode = 99
+
+    donemessage = "[Job Manager] {s}: DONE" 
+    awserrormessage = "[Job Manager] {s}: AWS ERROR. {e}\n[Job Manager] Shutting down job."
+    internalerrormessage = "[Job Manager] {s}: INTERNAL ERROR. {e}\n[Job Manager] Shutting down job."
+
+    
+    ## Step 1: Initialization. Most basic checking for submit file. If this fails, will not generate a certificate. 
+    step = "STEP 1/4 (Initialization)"
+    try:
+        if os.environ['LAUNCH'] == 'true':
+            ## Make submission object
+            print("creating submission object")
+            submission = Submission_multisession(bucket_name, key, time)
+            print("created submission object")
+        elif os.environ["LAUNCH"] == 'false':
+            raise NotImplementedError("This option not available for configs. ")
+        submission.logger.append(donemessage.format(s = step))
+        submission.logger.printlatest()
+        submission.logger.write()
+    except ClientError as ce:
+        e = ce.response["Error"]
+        print(awserrormessage.format(s= step,e = e))
+        return exitcode
+    except Exception: 
+        e = traceback.format_exc()
+        print(internalerrormessage.format(s= step,e = e))
+        return exitcode
+
+    ## Step 2: Validation. If we the data does not exist, or we are over cost limit, this will fail.
+    step = "STEP 2/4 (Validation)"
+    try:
+        submission.check_existence()
+        submission.parse_config()
+        valid = submission.get_costmonitoring()
+        assert valid
+        submission.logger.append(donemessage.format(s = step))
+        submission.logger.printlatest()
+        submission.logger.write()
+    except AssertionError as e:
+        print(e)
+        e = "Error: Job is not covered by budget. Contact NeuroCAAS administrator."
+        submission.logger.append(internalerrormessage.format(s= step,e = e))
+        submission.logger.printlatest()
+        submission.logger.write()
+        return exitcode
+    except ClientError as ce:
+        e = ce.response["Error"]
+        submission.logger.append(awserrormessage.format(s = step,e = e))
+        submission.logger.printlatest()
+        submission.logger.write()
+        return exitcode
+    except Exception: 
+        e = traceback.format_exc()
+        submission.logger.append(internalerrormessage.format(s = step,e = e))
+        submission.logger.printlatest()
+        submission.logger.write()
+        return exitcode
+
+    # Step 3: Setup: Getting the volumesize, hardware specs of immutable analysis environments. 
+    step = "STEP 3/4 (Environment Setup)"
+    try:
+        submission.compute_volumesize()
+        submission.logger.append(donemessage.format(s = step))
+        submission.logger.printlatest()
+        submission.logger.write()
+    except ClientError as ce:
+        e = ce.response["Error"]
+        submission.logger.append(awserrormessage.format(s = step,e = e))
+        submission.logger.printlatest()
+        submission.logger.write()
+        utilsparams3.write_endfile(submission.bucket_name,submission.jobpath)
+        return exitcode
+    except Exception: 
+        e = traceback.format_exc()
+        submission.logger.append(internalerrormessage.format(s = step,e = e))
+        submission.logger.printlatest()
+        submission.logger.write()
+        utilsparams3.write_endfile(submission.bucket_name,submission.jobpath)
+        return exitcode
+    
+    # Step 4: Processing: Creating the immutable analysis environments, sending the commands to them. 
+    step = "STEP 4/4 (Initialize Processing)"
+    try:
+        ## From here on out, if something goes wrong we will terminate all created instances.
+        instances=submission.acquire_instances()
+        submission.logger.printlatest()
+        submission.logger.write()
+        jobs = submission.log_jobs()
+        submission.logger.printlatest()
+        submission.logger.write()
+        ## NOTE: IN LAMBDA,  JSON BOOLEANS ARE CONVERTED TO STRING
+        if os.environ["MONITOR"] == "true":
+            submission.put_instance_monitor_rule()
+        elif os.environ["MONITOR"] == "false":
+            submission.logger.append("        [Internal (monitoring)] Skipping monitor.")
+        submission.logger.write()
+        submission.start_instance()
+        submission.logger.write()
+        submission.process_inputs()
+        submission.logger.append(donemessage.format(s = step))
+        submission.logger.printlatest()
+        submission.logger.write()
+        submission.logger.append("JOB MONITOR LOG COMPLETE. SEE TOP FOR LIVE PER-DATASET MONITORING")
+        submission.logger.initialize_monitor()
+        ## should be a success at this point. 
+        exitcode = 0
+    except ClientError as ce:
+        e = ce.response["Error"]
+        ## We occasianally get "Invalid Instance Id calls due to AWS side errors."
+        if e["Code"] == "InvalidInstanceId":
+            e = "Transient AWS Communication Error. Please Try Again"
+        submission.logger.append(awserrormessage.format(s = step,e = e))
+        submission.logger.printlatest()
+        submission.logger.write()
+        ## We need to separately attempt all of the relevant cleanup steps. 
+        try:
+            ## In this case we need to delete the monitor log: 
+            [utilsparams3.delete_active_monitorlog(submission.bucket_name,"{}.json".format(inst.id)) for inst in instances]
+        except Exception:
+            se = traceback.format_exc()
+            message = "While cleaning up from AWS Error, another error occured: {}".format(se)
+            submission.logger.append(internalerrormessage.format(s = step,e = message))
+            submission.logger.printlatest()
+            submission.logger.write()
+        try:
+            ## We also need to delete the monitor rule:
+            utilsparamevents.full_delete_rule(submission.rulename)
+        except Exception:
+            se = traceback.format_exc()
+            message = "While cleaning up from AWS Error, another error occured: {}".format(se)
+            submission.logger.append(internalerrormessage.format(s = step,e = message))
+            submission.logger.printlatest()
+            submission.logger.write()
+        ## We finally need to terminate the relevant instances:  
+        for inst in instances: 
+            try:
+                inst.terminate()
+            except Exception:
+                se = traceback.format_exc()
+                message = "While cleaning up from AWS Error, another error occured: {}".format(se)
+                submission.logger.append(internalerrormessage.format(s = step,e = message))
+                submission.logger.printlatest()
+                submission.logger.write()
+                continue
+    except Exception:
+        e = traceback.format_exc()
+        try:
+            [inst.terminate() for inst in instances]
+        except UnboundLocalError:     
+            submission.logger.append("No instances to terminate")
+            submission.logger.printlatest()
+            submission.logger.write()
+
+        submission.logger.append(internalerrormessage.format(s = step,e = e))
+        submission.logger.printlatest()
+        submission.logger.write()
+
+    return exitcode
+
 ## Actual lambda handlers. 
 def handler_develop(event,context):
     """
@@ -1124,3 +1514,29 @@ def handler_ensemble(event,context):
             print("processing returned exit code {}".format(exitcode))
     return exitcode 
 
+def handler_multisession(event,context):
+    """
+    Handler for multisession modeling. 
+    """
+    for record in event['Records']:
+        time = record['eventTime']
+        bucket_name = record['s3']['bucket']['name']
+        key = record['s3']['object']['key']
+        submit_file = utilsparams3.load_json(bucket_name, key)
+        configpath = submit_file["configname"]
+        try:
+            configfile = utilsparams3.load_yaml(bucket_name, configpath)
+        except Exception:
+            raise Exception("Config must be a valid YAML file.")
+        try:
+            if configfile["multisession"] == "True":
+                print("Creating a single machine image for multisession modeling.")
+                exitcode = process_upload_multisession(bucket_name, key, time)
+                print("process returned exit code {}".format(exitcode))
+            else: 
+                exitcode = process_upload_dev(bucket_name, key, time)
+                print("process returned with exit code {}".format(exitcode))
+        except KeyError:
+            raise Exception("Config file does not specify \"multisession\" param.")
+
+    return exitcode
