@@ -21,8 +21,7 @@ def secdiff(a,b):
 
 def to_sec(a):
     ## converts a length of time to seconds (minutes, ) 
-    dealt = a[0]*60+a[1]+a[2]/1000.#datetime.timedelta(minutes = a[0],seconds = a[1],milliseconds = a[2])
-    return dealt
+    return a[0]*60+a[1]+a[2]/1000.#datetime.timedelta(minutes = a[0],seconds = a[1],milliseconds = a[2])
 
 def total_time(upload,start,stop):
     ## First convert start,stop to a duration in seconds: 
