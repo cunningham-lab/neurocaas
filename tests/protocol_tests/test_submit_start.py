@@ -696,6 +696,8 @@ class Test_Submission_dev():
         #    assert {"Key":"job","Value":sd.jobname} in tags
         #    assert {"Key":"analysis","Value":sd.bucket_name} in tags
 
+
+
 class Test_Submission_ensemble():
     def test_Submission_ensemble(self,setup_lambda_env,setup_testing_bucket):
         """check existence of data in s3."""
