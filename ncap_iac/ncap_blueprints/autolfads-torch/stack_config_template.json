@@ -4,7 +4,7 @@
     "STAGE": "websubstack",
     "Lambda": {
         "CodeUri": "../../protocols",
-        "Handler": "submit_start.handler_multisession",
+        "Handler": "submit_start.handler_develop",
         "Launch": true,
         "LambdaConfig": {
             "AMI": "ami-08f59b6fdb19d0344",

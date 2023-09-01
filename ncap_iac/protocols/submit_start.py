@@ -385,7 +385,7 @@ class Submission_dev():
                 message = "        [Internal (get_costmonitoring)] Customized budget not found. Using default budget value of {}".format(budget)
                 self.logger.append(message)
                 self.logger.printlatest()
-            except:    
+            except: 
                 raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to get budget.")
         except Exception:    
             raise Exception("        [Internal (get_costmonitoring)] Unexpected Error: Unable to get budget.")
@@ -616,7 +616,7 @@ class Submission_dev():
 
 class Submission_multisession(Submission_dev):
     """
-    Specific lambda for purposes of development.  
+    Lambda for launching multisession runs.
     
     :param bucket_name: name of the S3 bucket that this is a submission for (corresponds to an analysis). 
     :param key: key of submit file within this bucket. 
@@ -738,7 +738,7 @@ class Submission_multisession(Submission_dev):
         Streamlines acquisition, setting up of multiple instances. Better exception handling when instances cannot be launched, and spot instances with defined duration when avaialble.   
 
         """
-        nb_instances = 1 #all datafiles will be used to train a single core model
+        nb_instances = 1 #all data files will be used to train a single core model
 
         ## Check how many instances are running. 
         active = utilsparamec2.count_active_instances(self.instance_type)
@@ -798,11 +798,11 @@ class Submission_multisession(Submission_dev):
         ## input bucket: 
         if self.bypass_data["input"]["bucket"] is not None:
             input_bucket = self.bypass_data["input"]["bucket"]
-            data_check_path = os.path.dirname(self.bypass_data["input"]["datapath"][0]) #use the path to the directory instead of the file paths
+            data_check_paths = self.bypass_data["input"]["datapath"] #use the path to the directory instead of the file paths
             config_check_path = self.bypass_data["input"]["configpath"]
         else:    
             input_bucket = self.bucket_name
-            data_check_paths = os.path.dirname(self.data_name_list[0]) #use the path to the directory instead of the file paths
+            data_check_paths = self.data_name_list #use the path to the directory instead of the file paths.
             config_check_path = self.config_name
 
         if self.bypass_data["output"]["bucket"] is not None:
