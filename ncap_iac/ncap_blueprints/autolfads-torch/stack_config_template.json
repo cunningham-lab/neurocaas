@@ -7,7 +7,7 @@
         "Handler": "submit_start.handler_multisession",
         "Launch": true,
         "LambdaConfig": {
-            "AMI": "ami-08f59b6fdb19d0344",
+            "AMI": "ami-05ddab33dd696e7d0",
             "INSTANCE_TYPE": "p2.8xlarge",
             "REGION": "us-east-1",
             "IAM_ROLE": "SSMRole",
