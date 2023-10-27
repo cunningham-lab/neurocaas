@@ -62,7 +62,7 @@ jobs:
           owner: cunningham-lab
           repo: neurocaas
           repository: ${{ github.repository }}
-          ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.ref }}
+          ref: master
           environment: dev
           auto_merge: false
         env:
