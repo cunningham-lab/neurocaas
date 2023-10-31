@@ -1529,7 +1529,7 @@ def handler_multisession(event,context):
         except Exception:
             raise Exception("Config must be a valid YAML file.")
         try:
-            if configfile["multisession"] == "True":
+            if "multisession" in configfile and configfile["multisession"] == "True":
                 print("Creating a single machine image for multisession modeling.")
                 exitcode = process_upload_multisession(bucket_name, key, time)
                 print("process returned exit code {}".format(exitcode))
