@@ -53,7 +53,7 @@ def get_paths(rootpath):
                 paths.append(localfile)
     return paths            
 
-#@pytest.fixture(scope = "module") doesnt seem to work. 
+#@pytest.fixture(scope = "module") doesn't seem to work. 
 #def start_localstack():
 #    infra.start_infra(asynchronous =True)
 #    yield "running tests"

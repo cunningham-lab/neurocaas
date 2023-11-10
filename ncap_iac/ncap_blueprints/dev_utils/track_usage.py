@@ -39,7 +39,7 @@ def get_users(dict_files):
 
 def sort_activity_by_users(dict_files,userlist):
     """
-    When given the raw resposne output + list of usernames, returns a dictionary of files organized by that username. 
+    When given the raw response output + list of usernames, returns a dictionary of files organized by that username. 
     """
     activity = [li["Key"] for li in dict_files["Contents"] if li["Key"].endswith(".json")]
     userdict = {name:[] for name in userlist}

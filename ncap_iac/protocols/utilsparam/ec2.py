@@ -566,7 +566,7 @@ def launch_new_instances_with_tags_additional(instance_type, ami, logger, number
 
 def count_active_instances(instance_type):
     """
-    Counts how many active [including transition in and out] isntances there are of a certain type. 
+    Counts how many active [including transition in and out] instances there are of a certain type. 
     :param instance_type: (str): string specifying instance type
     :returns: int integer giving number of instances currently active. 
     """
@@ -596,7 +596,7 @@ def duration_active_instances_ami(ami):
 
 def prepare_volumes(instances_info):
     """
-    For each instance id that you pass to this function, the function will create and attach volumes to the instance to accomodate data sizes.  
+    For each instance id that you pass to this function, the function will create and attach volumes to the instance to accommodate data sizes.  
     Inputs: 
     instances_info (dict): a dictionary with instance ids as keys and required dataset sizes as values (integers).  
     Outputs:

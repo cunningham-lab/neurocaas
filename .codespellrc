@@ -1,0 +1,5 @@
+[codespell]
+# testmainlambda seems to include vendored code
+skip = .git,*.pdf,*.svg,*.ai,*.mat,*.png,*.dist-info,*.pem,*.orig,testmainlambda
+# datea - variables
+ignore-words-list = datea

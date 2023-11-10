@@ -304,7 +304,7 @@ class Submission_Launch_folder(Submission_Launch_Monitor):
 
 
     def start_instance(self):
-        """ Starts new instances if stopped. We write a special loop for this one because we only need a single 60 second pause for all the intances, not one for each in serial"""
+        """ Starts new instances if stopped. We write a special loop for this one because we only need a single 60 second pause for all the instances, not one for each in serial"""
         utilsparam.ec2.start_instances_if_stopped(
             instances=self.instances,
             logger=self.logger

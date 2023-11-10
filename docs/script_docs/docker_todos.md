@@ -31,7 +31,7 @@ We want to design a way for analysis developers to easily build their analyses i
         + logs
 
 
-This image will contain the latest version of the neurocaas_contrib repository and a special input-output directory. We wil link this input-output directory to a docker volume on setup to faciliatate easy testing later, and stipulate that developers design their scripts so that incoming data starts in the io-directory and outgoing results end up there as well. Logs will be written to the logs subdirectory so that they can be inspected and modified by developers too.
+This image will contain the latest version of the neurocaas_contrib repository and a special input-output directory. We will link this input-output directory to a docker volume on setup to faciliatate easy testing later, and stipulate that developers design their scripts so that incoming data starts in the io-directory and outgoing results end up there as well. Logs will be written to the logs subdirectory so that they can be inspected and modified by developers too.
 
 Once this image is set up, we can run a container from this image and set up a bash shell into the container. From this point forwards, we can create an API that is very similar to the NeuroCAASAMI API, except with everything happening locally in a docker container instead of on a remote instance. At the end of the development process, we would expect a container that looks like this:
 + root
@@ -67,7 +67,7 @@ We have now completed an api to run a container, and give users instructions to 
     - When running docker exec, it is very useful to run the bash shell with the -c flag. This will let you parse the string that succeeds this flag as commands to the shell. The correct way to do this is to use single quotes (literals) around the whole command, and standard double quotes nested inside the command.
 
 
-Now, we need to figure out some diagnostics around running docker containers. Can we time how long the process takes? Can we get the logs more easily than we are doing now? How do we handle failure cases? More pragmatically, it would be good to setup a docker volume in the background so we can work with the process outputs independently. This is probably where your autoscripting wil come in handy.
+Now, we need to figure out some diagnostics around running docker containers. Can we time how long the process takes? Can we get the logs more easily than we are doing now? How do we handle failure cases? More pragmatically, it would be good to setup a docker volume in the background so we can work with the process outputs independently. This is probably where your autoscripting will come in handy.
 
 UPDATE: it looks like it is patently easy to do diagnostics on our instance.  
 We can run `docker logs [containername]` to get the output from stdout and stderr at any time. This can be improved further with the `--timestamps` flag to prepend each command with a timestamp, and the --details command to add declared environment variables. We should run all containers in detached mode and read the logs from here.   

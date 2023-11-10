@@ -13,7 +13,7 @@ import secrets
 import os
 
 ## Function that takes in a bash script and a config file (for data processing, not for infrastructure). 
-## Setup for pipeliens will all the the same components: 
+## Setup for pipelines will all the the same components: 
 ## 1. A CodeCommit repo that contains the scripts used to forward the pipeline.
 ## 2. A Lambda function that will auto-update AMIs according to activity in the CodeCommit repo and the config file that you provide. 
 ## 3. A 

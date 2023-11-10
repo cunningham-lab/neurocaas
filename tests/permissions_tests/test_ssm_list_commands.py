@@ -26,7 +26,7 @@ timeout = 100
 
 @pytest.fixture
 def get_uncommanded_instance():
-    """Get an instance not comanded by ssm. 
+    """Get an instance not commanded by ssm. 
 
     """
     instances = ec2_resource.create_instances(ImageId="ami-0bd85124dbe51618d",

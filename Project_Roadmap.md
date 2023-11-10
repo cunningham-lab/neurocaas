@@ -44,7 +44,7 @@
 
 ## Website Development
 
-> Development of the primary interface for this project. Follows many of the backend improvements specified in first section. Will be hosted through subsidary repo jjhbriggs/neurocaas_frontend.
+> Development of the primary interface for this project. Follows many of the backend improvements specified in first section. Will be hosted through subsidiary repo jjhbriggs/neurocaas_frontend.
 
 * Eliminate configuration parameter errors before jobs begin with website based linting (Q3 2020).
 * Add support for “hub” and “member” users [see backend improvements] (Q4 2020)

@@ -4,7 +4,7 @@
 # Arg 1: path to source folder for resources. 
 # Arg 2: Target local folder containing stack config file for pipeline of interest. Test resources will be distributed to all 
 # Arg 3: path that test resources will be distributed from/to (should be inputs or configs) (if configs, path will e changed appropriately). 
-# Arg 4: affiliate group name. Can be "all" if distributing to all memebers.  
+# Arg 4: affiliate group name. Can be "all" if distributing to all members.  
 
 #Get the group names from the target folder. 
 #echo $(jq -r ".UXData.Affiliates" $2/stack_config_template.json)

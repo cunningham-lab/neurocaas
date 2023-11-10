@@ -3,7 +3,7 @@
 Quickstart
 ==========
 
-We'll start with a quick demo to show how one can migrate an existing analysis onto NeuroCAAS. This demo should take about 15 minutes, and at the end you will have a NeuroCAAS-style implementation of PCA that runs entirely on your local machine, as well as a working understanding of the pros and cons involved in puting an analysis on NeuroCAAS. Make sure you have downloaded and installed the :code:`neurocaas_contrib` repo before starting this demo, and that you have activated the neurocaas conda environment with :code:`source/conda activate neurocaas`.  
+We'll start with a quick demo to show how one can migrate an existing analysis onto NeuroCAAS. This demo should take about 15 minutes, and at the end you will have a NeuroCAAS-style implementation of PCA that runs entirely on your local machine, as well as a working understanding of the pros and cons involved in putting an analysis on NeuroCAAS. Make sure you have downloaded and installed the :code:`neurocaas_contrib` repo before starting this demo, and that you have activated the neurocaas conda environment with :code:`source/conda activate neurocaas`.  
 
 Inputs and Scripts
 ------------------
