@@ -1,0 +1,41 @@
+{
+    "PipelineName": "circuitmap",
+    "REGION": "us-east-1",
+    "STAGE": "webdev",
+    "Lambda": {
+        "CodeUri": "../../protocols",
+        "Handler": "submit_start.handler_develop",
+        "Launch": true,
+        "LambdaConfig": {
+            "AMI": "ami-0dc9dddf37099ac56",
+            "INSTANCE_TYPE": "p3.2xlarge",
+            "REGION": "us-east-1",
+            "IAM_ROLE": "SSMRole",
+            "KEY_NAME": "testkeystack-custom-dev-key-pair",
+            "WORKING_DIRECTORY": "~/bin",
+            "COMMAND": "cd /home/ubuntu; sudo -u ubuntu neurocaas_contrib/run_main_cli.sh \"{}\" \"{}\" \"{}\" \"{}\" /home/ubuntu/circuitmap/scripts/run_circuitmap_main.sh; . neurocaas_remote/ncap_utils/workflow.sh; cleanup",
+            "SHUTDOWN_BEHAVIOR": "terminate",
+            "CONFIG": "config.yaml",
+            "MISSING_CONFIG_ERROR": "We need a config file to analyze data.",
+            "EXECUTION_TIMEOUT": 900,
+            "SSM_TIMEOUT": 172000,
+            "LAUNCH": true,
+            "LOGFILE": "lambda_log.txt",
+            "DEPLOY_LIMIT": 100,
+            "MAXCOST": "300",
+            "MONITOR": true
+        }
+    },
+    "UXData": {
+        "Affiliates": [
+            {
+                "AffiliateName": "debuggers",
+                "UserNames": [
+                    "mat2245colum1652123255"
+                ],
+                "UserInput": true,
+                "ContactEmail": "mat2245@columbia.edu"
+            }
+        ]
+    }
+}
