@@ -13,7 +13,7 @@
             "IAM_ROLE": "SSMRole",
             "KEY_NAME": "testkeystack-custom-dev-key-pair",
             "WORKING_DIRECTORY": "~/bin",
-            "COMMAND": "cd /home/ubuntu; sudo -u ubuntu neurocaas_contrib/run_main_cli.sh \"{}\" \"{}\" \"{}\" \"{}\" \"lfads-torch/run_main.py\"; . neurocaas_contrib/ncap_utils/workflow.sh;",
+            "COMMAND": "cd /home/ubuntu; sudo -u ubuntu neurocaas_contrib/run_main_cli.sh \"{}\" \"{}\" \"{}\" \"{}\" \"lfads-torch/run_main.sh\"; . neurocaas_contrib/ncap_utils/workflow.sh;",
             "EXECUTION_TIMEOUT": 900,
             "SSM_TIMEOUT": 172000
         }
