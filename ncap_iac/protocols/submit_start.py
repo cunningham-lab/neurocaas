@@ -168,6 +168,18 @@ class Submission_dev():
             raise ValueError("[JOB TERMINATE REASON] 'configname' field not given in submit.json file")
 
         msg = "        [Internal (init)] Analysis request with dataset(s): {}, config file {}".format(self.data_name,self.config_name)
+        
+        # Edit self.data_name_list to directory name in case of multisession run via website
+        configpath = submit_file["configname"]
+        try:
+            configfile = utilsparams3.load_yaml(bucket_name, configpath)
+        except Exception:
+            raise Exception("Config must be a valid YAML file.")
+        if "multisession" in configfile and configfile["multisession"] == "True":
+            # Assumes upload from website => list of data paths. Result is [path/to/dataDirPrefix]
+            self.data_name_list = ["/".join(self.data_name_list[0].split("/")[:-1])]
+
+        
         self.logger.append(msg)
         self.logger.printlatest()
         self.logger.write()
@@ -1530,7 +1542,7 @@ def handler_multisession(event,context):
             raise Exception("Config must be a valid YAML file.")
         try:
             if "multisession" in configfile and configfile["multisession"] == "True":
-                print("Creating a single machine image for multisession modeling.")
+                print("Creating a single instance for multisession modeling.")
                 exitcode = process_upload_multisession(bucket_name, key, time)
                 print("process returned exit code {}".format(exitcode))
             else: 
