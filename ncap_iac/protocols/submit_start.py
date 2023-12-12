@@ -169,17 +169,6 @@ class Submission_dev():
 
         msg = "        [Internal (init)] Analysis request with dataset(s): {}, config file {}".format(self.data_name,self.config_name)
         
-        # Edit self.data_name_list to directory name in case of multisession run via website
-        configpath = submit_file["configname"]
-        try:
-            configfile = utilsparams3.load_yaml(bucket_name, configpath)
-        except Exception:
-            raise Exception("Config must be a valid YAML file.")
-        if "multisession" in configfile and configfile["multisession"] == "True":
-            # Assumes upload from website => list of data paths. Result is [path/to/dataDirPrefix]
-            self.data_name_list = ["/".join(self.data_name_list[0].split("/")[:-1])]
-
-        
         self.logger.append(msg)
         self.logger.printlatest()
         self.logger.write()
@@ -645,6 +634,21 @@ class Submission_multisession(Submission_dev):
     """
     def __init__(self,bucket_name,key,time):
         super().__init__(bucket_name,key,time)
+
+        # Edit self.data_name_list to directory name in case of multisession run via website
+        try:
+            configfile = utilsparams3.load_yaml(bucket_name, self.config_name)
+        except Exception:
+            raise Exception("Config must be a valid YAML file.")
+        if "multisession" in configfile and configfile["multisession"] == "True" and self.bucket_name == "autolfads-torch":
+            # Assumes upload from website => list of data paths. Result is [path/to/dataDirPrefix]
+            self.data_name_list = ["/".join(self.data_name_list[0].split("/")[:-1])]
+            self.data_name = self.data_name_list[0]
+        
+        msg = "        [Internal (init)] UPDATED: Multisession mode. Analysis request with dataset(s): {}, config file {}".format(self.data_name,self.config_name)
+        self.logger.append(msg)
+        self.logger.printlatest()
+        self.logger.write()
 
     def get_costmonitoring(self):
         """
