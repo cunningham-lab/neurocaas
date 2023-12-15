@@ -647,7 +647,7 @@ class Submission_multisession(Submission_dev):
         self.logger.printlatest()
         self.logger.write()
 
-        if "multisession" in configfile and configfile["multisession"] == "True" and self.bucket_name == "autolfads-torch":
+        if "multisession" in configfile and configfile["multisession"] == True and self.bucket_name == "autolfads-torch":
             # Assumes upload from website => list of data paths. Result is [path/to/dataDirPrefix]
             self.data_name_list = ["/".join(self.data_name_list[0].split("/")[:-1])]
             self.data_name = self.data_name_list[0]
