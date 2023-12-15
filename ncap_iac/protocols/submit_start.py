@@ -1547,11 +1547,11 @@ def handler_multisession(event,context):
         key = record['s3']['object']['key']
         submit_file = utilsparams3.load_json(bucket_name, key)
         configpath = submit_file["configname"]
-        print(f"#########\nDEBUGGING MULTISESSION:\nmultisession in config file: {'multisession' in configfile}\nconfig[\"multisession\"]: {configfile['multisession']}")
         try:
             configfile = utilsparams3.load_yaml(bucket_name, configpath)
         except Exception:
             raise Exception("Config must be a valid YAML file.")
+        print(f"#########\nDEBUGGING MULTISESSION:\nmultisession in config file: {'multisession' in configfile}\nconfig[\"multisession\"]: {configfile['multisession']}")
         try:
             if "multisession" in configfile and configfile["multisession"] == "True":
                 print("Creating a single instance for multisession modeling.")
