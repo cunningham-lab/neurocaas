@@ -1553,7 +1553,7 @@ def handler_multisession(event,context):
             raise Exception("Config must be a valid YAML file.")
         print(f"#########\nDEBUGGING MULTISESSION:\nmultisession in config file: {'multisession' in configfile}\nconfig[\"multisession\"]: {configfile['multisession']}")
         try:
-            if "multisession" in configfile and configfile["multisession"] == "True":
+            if "multisession" in configfile and configfile["multisession"] == True:
                 print("Creating a single instance for multisession modeling.")
                 exitcode = process_upload_multisession(bucket_name, key, time)
                 print("process returned exit code {}".format(exitcode))
