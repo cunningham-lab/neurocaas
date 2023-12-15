@@ -1,0 +1,1 @@
+{"configpath": "s3://bucketname/groupname/configs/config.json", "datapath": "s3://bucketname/groupname/inputs/data.txt"}

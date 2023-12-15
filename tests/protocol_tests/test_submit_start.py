@@ -21,9 +21,12 @@ blueprint_path = os.path.join(loc,"test_mats","stack_config_template.json")
 with open(os.path.join(loc,"../../ncap_iac/global_params_initialized.json")) as f:
     gpdict = json.load(f)
 bucket_name = "test-submitlambda-analysis"
+bucket_name_multi = "test-submitlambda-analysis-multi"
 sep_bucket = "independent"
+sep_bucket_multi = "independent-multi"
 bucket_name_legacy = "test-submitlambda-analysis-legacy"
 key_name = "test_user/submissions/submit.json"
+key_name_single = "test_user/submissions/singlesubmit.json"
 fakedatakey_name = "test_user/submissions/fakedatasubmit.json"
 fakeconfigkey_name = "test_user/submissions/fakeconfigsubmit.json"
 notimestampkey_name = "test_user/submissions/notimestampconfigsubmit.json" 
@@ -241,6 +244,109 @@ def setup_testing_bucket(monkeypatch):
             logging.error(e)
             raise
     yield bucket_name,os.path.join(user_name,"submissions/submit.json")        
+
+@pytest.fixture
+def setup_testing_bucket_multisession(monkeypatch):
+    """Sets up a localstack bucket called test-submitlambda-analysis with the following directory structure:
+    /
+    |-test_user
+      |-inputs
+        |-data.json
+      |-configs
+        |-config.json
+      |-submissions
+        |-submit.json
+    |-logs
+      |-test_user
+        |-joblog1
+        |-joblog2
+        ...
+    
+    Additionally sets up a separate bucket, "{sep_bucket}", with the following structure:
+    /
+    |-sep_inputs     %% these for "bucket bypass"
+        |-data.json
+    |-sep_configs
+        |-config.json
+    |-sep_results
+        |-
+
+    """
+    
+    subkeys = {
+            "inputs/data1.json":{"data":"value"},
+            "inputs/data2.json":{"data":"value"},
+            "configs/config.json":{"param":"p1"},
+            "configs/fullconfig.json":{"param":"p1","__duration__":360,"__dataset_size__":20,"ensemble_size":5},
+            "configs/duration10config.json":{"param":"p1","__duration__":10,"__dataset_size__":20},
+            "configs/duration600config.json":{"param":"p1","__duration__":600,"__dataset_size__":20},
+            "configs/durationnoneconfig.json":{"param":"p1","__dataset_size__":20},
+            "submissions/submit.json":{
+                "dataname":os.path.join(user_name,"inputs"),
+                "configname":os.path.join(user_name,"configs","config.json"),
+                "timestamp":"testtimestamp"},
+            "submissions/{}".format(os.path.basename(fakedatakey_name)):{
+                "dataname":os.path.join(user_name,"inputs"),
+                "configname":os.path.join(user_name,"configs","config.json"),
+                "timestamp":"testtimestamp"},
+            "submissions/{}".format(os.path.basename(fakeconfigkey_name)):{
+                "dataname":os.path.join(user_name,"inputs"),
+                "configname":os.path.join(user_name,"configs","config22.json"),
+                "timestamp":"testtimestamp"},
+            "submissions/{}".format(os.path.basename(nodatakey_name)):{
+                "configname":os.path.join(user_name,"configs","config22.json"),
+                "timestamp":"testtimestamp"},
+            "submissions/{}".format(os.path.basename(noconfigkey_name)):{
+                "dataname":os.path.join(user_name,"inputs"),
+                "timestamp":"testtimestamp"},
+            "submissions/{}".format(os.path.basename(notimestampkey_name)):{
+                "dataname":os.path.join(user_name,"inputs"),
+                "configname":os.path.join(user_name,"configs","config22.json")},
+            ## new: bucket skip. 
+            "submissions/bucketskipsubmit.json":{
+                "dataname":os.path.join("s3://{}".format(sep_bucket_multi),"sep_inputs"),
+                "configname":os.path.join("s3://{}".format(sep_bucket_multi),"sep_configs","configsep.json"),
+                "timestamp":"testtimestamp",
+                "resultpath":"s3://{}/sep_results".format(sep_bucket_multi)}
+            }
+
+    session = localstack_client.session.Session()
+    s3_client = session.client("s3")
+    s3_resource = session.resource("s3")
+    monkeypatch.setattr(s3, "s3_client", session.client("s3")) ## TODO I don't think these are scoped correctly w/o a context manager.
+    monkeypatch.setattr(s3, "s3_resource", session.resource("s3"))
+    try:
+        for sk in subkeys:
+            obj = s3_client.get_object(Bucket = bucket_name_multi,Key = os.path.join(user_name,sk))
+        s3_client.get_object(Bucket = bucket_name_multi,Key="logs/test_user/i-0ff308d5c9b5786f4.json")    
+    except ClientError:    
+        ## Write data files
+        s3_client.create_bucket(Bucket = bucket_name_multi)
+        for sk in subkeys:
+            key = os.path.join(user_name,sk)
+            writeobj = s3_resource.Object(bucket_name_multi,key)
+            content = bytes(json.dumps(subkeys[sk]).encode("UTF-8"))
+            writeobj.put(Body = content)
+        ## Test storage bypass with additional subkeys     
+        s3_client.create_bucket(Bucket = sep_bucket_multi)
+        ind_data = {
+            "sep_inputs/datasep1.json":{"data":"value"},
+            "sep_inputs/datasep2.json":{"data2":"value2"},
+            "sep_configs/configsep.json":{"param":"p1"}}
+        for d in ind_data:
+            writeobj = s3_resource.Object(sep_bucket_multi,d)
+            content = bytes(json.dumps(ind_data[d]).encode("UTF-8"))
+            writeobj.put(Body=content)
+
+        ## Write logs    
+        log_paths = get_paths(test_log_mats) 
+        try:
+            for f in log_paths:
+                s3_client.upload_file(os.path.join(test_log_mats,f),bucket_name_multi,Key = f)
+        except ClientError as e:        
+            logging.error(e)
+            raise
+    yield bucket_name_multi,os.path.join(user_name,"submissions/submit.json")  
     
 @pytest.fixture
 def setup_testing_bucket_legacy(monkeypatch):
@@ -340,6 +446,37 @@ def check_instances():
     instances = ec2_resource.instances.filter(Filters = [{"Name":"instance-state-name","Values":["running"]}]) 
     for instance in instances:
         pytest.fail("Uncleaned instances!")
+
+
+@pytest.fixture
+def set_ssm_budget_under_multi(monkeypatch):
+    """Use SSM to set budget lower than the tolerable value.
+
+    """
+    session = localstack_client.session.Session()
+    ssm_client = session.client("ssm")
+    monkeypatch.setattr(ssm, "ssm_client", session.client("ssm")) ## TODO I don't think these are scoped correctly w/o a context manager.
+    ssm_client.put_parameter(Name = ssm.budgetname.format(g =user_name,a=bucket_name_multi),
+            Overwrite = False,
+            Value = "0",
+            Type = "String")
+    yield
+    ssm_client.delete_parameter(Name = ssm.budgetname.format(g=user_name,a = bucket_name_multi))
+
+@pytest.fixture
+def set_ssm_budget_over_multi(monkeypatch):    
+    """Use SSM to set budget higher than the tolerable value.
+
+    """
+    session = localstack_client.session.Session()
+    ssm_client = session.client("ssm")
+    monkeypatch.setattr(ssm, "ssm_client", session.client("ssm")) ## TODO I don't think these are scoped correctly w/o a context manager.
+    ssm_client.put_parameter(Name = ssm.budgetname.format(g=user_name,a=bucket_name_multi),
+            Overwrite = False,
+            Value = "1300",
+            Type = "String")
+    yield
+    ssm_client.delete_parameter(Name = ssm.budgetname.format(g=user_name,a=bucket_name_multi))
 
 @pytest.fixture
 def set_ssm_budget_under(monkeypatch):
@@ -503,12 +640,12 @@ class Test_Submission_dev():
         assert not sd.get_costmonitoring()
 
     def test_Submission_dev_get_costmonitoring_ssm_fail(self,setup_lambda_env,setup_testing_bucket,check_instances,monkeypatch,set_ssm_budget_under,set_price,patch_boto3_ec2):
-        bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
-        sd = submit_start.Submission_dev(bucket_name,key_name,"111111111")
-        monkeypatch.setenv("MAXCOST",str(1300))
-        sd.check_existence()
-        sd.parse_config()
-        assert not sd.get_costmonitoring()
+            bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
+            sd = submit_start.Submission_dev(bucket_name,key_name,"111111111")
+            monkeypatch.setenv("MAXCOST",str(1300))
+            sd.check_existence()
+            sd.parse_config()
+            assert not sd.get_costmonitoring()
 
     def test_Submission_dev_get_costmonitoring_ssm(self,setup_lambda_env,setup_testing_bucket,check_instances,monkeypatch,set_ssm_budget_over,set_price,patch_boto3_ec2):
         bucket_name,submit_path = setup_testing_bucket[0],setup_testing_bucket[1]
@@ -786,3 +923,246 @@ class Test_Submission_Launch_Monitor():
         sd.acquire_instance()
         sd.log_jobs()
 
+
+
+class Test_Submission_multisession():
+    def test_Submission_multisession(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances):
+        ## set up the os environment correctly. 
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        sd = submit_start.Submission_multisession(bucket_name,submit_path,"111111111")
+    
+    def test_Submission_multisession_nobucket(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances):
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        with pytest.raises(FileNotFoundError):
+            sd = submit_start.Submission_multisession("fakebucket",submit_path,"111111111")
+
+    def test_Submission_multisession_nofile(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances):
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        with pytest.raises(FileNotFoundError):
+            sd = submit_start.Submission_multisession(bucket_name,os.path.join(os.path.dirname(submit_path),"fakefilesubmit.json"),"111111111")
+
+    def test_Submission_multisession_file_misconfig(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances):
+        """If unable to find a group name:"""
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        with pytest.raises(FileNotFoundError):
+            sd = submit_start.Submission_multisession(bucket_name,"fakefilesubmit.json","111111111")
+
+    def test_Submission_multisession_no_datakey(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances):
+        """If unable to find a group name:"""
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        with pytest.raises(ValueError):
+            sd = submit_start.Submission_multisession(bucket_name,nodatakey_name,"111111111")
+
+    def test_Submission_multisession_no_configkey(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances):
+        """If unable to find a group name:"""
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        with pytest.raises(ValueError):
+            sd = submit_start.Submission_multisession(bucket_name,noconfigkey_name,"111111111")
+
+    def test_Submission_multisession_no_timestamp(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances):
+        """If no timestamp provided:"""
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        with pytest.raises(ValueError):
+            sd = submit_start.Submission_multisession(bucket_name,notimestampkey_name,"111111111")
+
+
+### Testing check_existence. 
+    def test_Submission_multisession_check_existence(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances):        
+        """check existence of data in s3."""
+        submitname="submit.json"
+        path=["test_user/inputs"]
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        submit_path = os.path.join(user_name,"submissions",submitname)
+        sd = submit_start.Submission_multisession(bucket_name,submit_path,"111111111")
+        sd.check_existence()
+        assert sd.filenames == path 
+
+    @pytest.mark.parametrize("dataname,error",[(1,TypeError),("fake",ValueError),(["fake","fake"],ValueError)])
+    def test_Submission_multisession_check_existence_wrongdata(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances,dataname,error):        
+        """check existence of data in s3."""
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        sd = submit_start.Submission_multisession(bucket_name,submit_path,"111111111")
+        sd.data_name = dataname
+        if type(dataname)!= list:
+            sd.data_name_list = [dataname]
+        elif type(dataname) == list:    
+            sd.data_name_list = dataname
+        with pytest.raises(error):
+            sd.check_existence() 
+
+    def test_Submission_multisession_check_existence_wrongconfig(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances):        
+        """check existence of data in s3."""
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        sd = submit_start.Submission_multisession(bucket_name,submit_path,"111111111")
+        sd.config_name = "trash.yaml"
+        with pytest.raises(ValueError):
+            sd.check_existence()
+
+## Testing function get_costmonitoring
+    def test_Submission_multisession_get_costmonitoring(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances,monkeypatch,set_price,patch_boto3_ec2):
+        session = localstack_client.session.Session()
+        ssm_client = session.client("ssm")
+        monkeypatch.setattr(ssm, "ssm_client", session.client("ssm")) 
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        sd = submit_start.Submission_multisession(bucket_name,key_name,"111111111")
+        monkeypatch.setenv("MAXCOST",str(1300))
+        sd.check_existence() ## check existence of dataset files. Necessary bc we project costs of this job. 
+        sd.parse_config()
+        assert sd.get_costmonitoring()
+
+    def test_Submission_multisession_get_costmonitoring_fail(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances,monkeypatch,set_price,patch_boto3_ec2):
+        session = localstack_client.session.Session()
+        ssm_client = session.client("ssm")
+        monkeypatch.setattr(ssm, "ssm_client", session.client("ssm")) 
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        sd = submit_start.Submission_multisession(bucket_name,key_name,"111111111")
+        monkeypatch.setenv("MAXCOST",str(1200))
+        sd.check_existence()
+        sd.parse_config()
+        assert not sd.get_costmonitoring()
+
+    def test_Submission_multisession_get_costmonitoring_fail_active(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances,monkeypatch,set_price,patch_boto3_ec2):
+        session = localstack_client.session.Session()
+        ssm_client = session.client("ssm")
+        monkeypatch.setattr(ssm, "ssm_client", session.client("ssm")) 
+        #def raiser(ami,other):
+        #    raise Exception
+        #monkeypatch.setattr(submit_start.Submission_dev,"prices_active_instances_ami",raiser)
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        sd = submit_start.Submission_multisession(bucket_name,key_name,"111111111")
+        monkeypatch.setenv("MAXCOST",str(1200))
+        sd.check_existence()
+        sd.parse_config()
+        assert not sd.get_costmonitoring()
+
+    def test_Submission_multisession_get_costmonitoring_ssm_fail(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances,monkeypatch,set_ssm_budget_under_multi,set_price,patch_boto3_ec2):
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        sd = submit_start.Submission_multisession(bucket_name,key_name,"111111111")
+        monkeypatch.setenv("MAXCOST",str(1300))
+        sd.check_existence()
+        sd.parse_config()
+        assert not sd.get_costmonitoring()
+
+    def test_Submission_multisession_get_costmonitoring_ssm(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances,monkeypatch,set_ssm_budget_over_multi,set_price,patch_boto3_ec2):
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        sd = submit_start.Submission_multisession(bucket_name,key_name,"111111111")
+        monkeypatch.setenv("MAXCOST",str(1200))
+        sd.check_existence()
+        sd.parse_config()
+        assert sd.get_costmonitoring()
+    
+
+    def test_Submission_multisession_get_costmonitoring_ssm_default_fail(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances,monkeypatch,set_ssm_budget_other,set_price,patch_boto3_ec2):
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        sd = submit_start.Submission_multisession(bucket_name,key_name,"111111111")
+        monkeypatch.setenv("MAXCOST",str(1200))
+        sd.check_existence()
+        sd.parse_config()
+        assert not sd.get_costmonitoring()
+
+    def test_Submission_multisession_get_costmonitoring_ssm_default(self,setup_lambda_env,setup_testing_bucket_multisession,check_instances,monkeypatch,set_ssm_budget_other,set_price,patch_boto3_ec2):
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        sd = submit_start.Submission_multisession(bucket_name,key_name,"111111111")
+        monkeypatch.setenv("MAXCOST",str(1300))
+        sd.check_existence()
+        sd.parse_config()
+        assert sd.get_costmonitoring()
+
+
+    def test_Submission_multisession_parse_config(self,setup_lambda_env,setup_testing_bucket_multisession):
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        sd = submit_start.Submission_multisession(bucket_name,key_name,"111111111")
+        sd.parse_config()
+        assert sd.jobduration is None
+        assert sd.jobsize is None
+
+    def test_Submission_multisession_parse_config_full(self,setup_lambda_env,setup_testing_bucket_multisession):
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        sd = submit_start.Submission_multisession(bucket_name,key_name,"111111111")
+        sd.config_name = os.path.join(user_name,"configs","fullconfig.json")
+        sd.parse_config()
+        assert sd.jobduration == 360
+        assert sd.jobsize == 20
+
+    def test_Submission_multisession_acquire_instances(self,create_securitygroup,create_instance_profile,monkeypatch,setup_lambda_env,setup_testing_bucket_multisession,create_ami,kill_instances):
+        """For this test, we generate fake instances. We need to monkeypatch into ec2 in order to do so.  
+
+        """
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        ami = create_ami
+        sg = create_securitygroup
+
+        session = localstack_client.session.Session()
+        monkeypatch.setattr(ec2,"ec2_client",session.client("ec2"))
+        monkeypatch.setenv("SECURITY_GROUPS",sg)
+        monkeypatch.setattr(ec2,"ec2_resource",session.resource("ec2"))
+
+        sd = submit_start.Submission_multisession(bucket_name,submit_path,"111111111")
+        monkeypatch.setenv("AMI",ami)
+        sd.config_name = os.path.join(user_name,"configs","fullconfig.json")
+        sd.check_existence()
+        sd.parse_config()
+        sd.compute_volumesize()
+        sd.acquire_instances()
+        info= ec2_client.describe_instances(InstanceIds = [i.id for i in sd.instances])
+        for instanceinfo in info["Reservations"][0]["Instances"]:
+            tags = instanceinfo["Tags"]
+            assert {"Key":"PriceTracking","Value":"On"} in tags
+            assert {"Key":"Timeout","Value":"360"} in tags
+            assert {"Key":"group","Value":sd.path} in tags
+            assert {"Key":"job","Value":sd.jobname} in tags
+            assert {"Key":"analysis","Value":sd.bucket_name} in tags
+
+    def test_Submission_multisession_skip(self,create_securitygroup,monkeypatch,create_instance_profile,setup_lambda_env,setup_testing_bucket_multisession,create_ami,kill_instances):
+        """Like the test directly above, but assuming we run in "storage skip" mode. 
+
+        """
+
+        ## set up the os environment correctly. 
+        bucket_name,submit_path = setup_testing_bucket_multisession[0],setup_testing_bucket_multisession[1]
+        ami = create_ami
+        sg = create_securitygroup
+
+        ## we need the s3 and ec2 relevant modules patched:  
+        session = localstack_client.session.Session()
+        monkeypatch.setattr(s3,"s3_client",session.client("s3"))
+        monkeypatch.setattr(s3,"s3_resource",session.resource("s3"))
+        monkeypatch.setattr(ec2,"ec2_client",session.client("ec2"))
+        monkeypatch.setenv("SECURITY_GROUPS",sg)
+        monkeypatch.setattr(ec2,"ec2_resource",session.resource("ec2"))
+        skipsubmit = os.path.join(os.path.dirname(submit_path),"bucketskipsubmit.json")
+
+        sd = submit_start.Submission_multisession(bucket_name,skipsubmit,"111111111")
+        assert sd.bypass_data["input"]["bucket"] == sep_bucket_multi
+        assert sd.bypass_data["output"]["bucket"] == sep_bucket_multi
+        assert sd.bypass_data["input"]["datapath"] == ["sep_inputs"]
+        assert sd.bypass_data["input"]["configpath"] =="sep_configs/configsep.json" 
+        assert sd.bypass_data["output"]["resultpath"] =="sep_results" 
+        monkeypatch.setenv("AMI",ami)
+        ## get submit file
+        submit= s3.load_json(bucket_name,skipsubmit)
+
+        ## Check that data and config exist at non-traditional location given full path: 
+        sd.check_existence()
+        ## Check that output directory exists: 
+        assert len(s3.ls_name(sep_bucket_multi,os.path.join("sep_results","job__test-submitlambda-analysis-multi_testtimestamp","logs"))) > 0
+
+        ## Check bucket name and path are not altered for all other processing:  
+        assert sd.bucket_name == bucket_name
+        assert sd.path == re.findall('.+?(?=/'+os.environ["SUBMITDIR"]+')',skipsubmit)[0]
+        sd.parse_config()
+        sd.compute_volumesize()
+        sd.acquire_instances()
+        #sd.start_instance()
+        commands = sd.process_inputs(dryrun=True)
+        reference_command = os.environ["COMMAND"].format(sep_bucket_multi,"sep_inputs","s3://independent-multi/sep_results/job__test-submitlambda-analysis-multi_testtimestamp","sep_configs/configsep.json")
+        print(f"\n\n\n\n\n commands 0: {commands[0]} \n\n\n\n the command: {reference_command} \n\n\n\n\n")
+        assert commands[0] == reference_command
+        info= ec2_client.describe_instances(InstanceIds = [i.id for i in sd.instances])
+        #for instanceinfo in info["Reservations"][0]["Instances"]:
+        #    tags = instanceinfo["Tags"]
+        #    assert {"Key":"PriceTracking","Value":"On"} in tags
+        #    assert {"Key":"Timeout","Value":"360"} in tags
+        #    assert {"Key":"group","Value":sd.path} in tags
+        #    assert {"Key":"job","Value":sd.jobname} in tags
+        #    assert {"Key":"analysis","Value":sd.bucket_name} in tags
