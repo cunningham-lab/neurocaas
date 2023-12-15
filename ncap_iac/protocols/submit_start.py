@@ -640,6 +640,13 @@ class Submission_multisession(Submission_dev):
             configfile = utilsparams3.load_yaml(bucket_name, self.config_name)
         except Exception:
             raise Exception("Config must be a valid YAML file.")
+        
+        
+        msg = f"        [Internal (init)] Multisession in config file: {str('multisession' in configfile)}. Configfile \"multisession\" value: {str(configfile['multisession'])}. Bucket name: {str(self.bucket_name)}."
+        self.logger.append(msg)
+        self.logger.printlatest()
+        self.logger.write()
+
         if "multisession" in configfile and configfile["multisession"] == "True" and self.bucket_name == "autolfads-torch":
             # Assumes upload from website => list of data paths. Result is [path/to/dataDirPrefix]
             self.data_name_list = ["/".join(self.data_name_list[0].split("/")[:-1])]
